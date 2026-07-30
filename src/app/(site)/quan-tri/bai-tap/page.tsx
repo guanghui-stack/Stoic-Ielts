@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { Plus, Pencil, Eye, EyeOff, Trash2 } from "lucide-react";
+import { Plus, Pencil, Eye, EyeOff, Trash2, Lock, Globe } from "lucide-react";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/session";
 import {
   toggleExercisePublishedAction,
+  toggleExerciseAccessLevelAction,
   deleteExerciseAction,
 } from "@/lib/actions/admin";
 
@@ -50,6 +51,7 @@ export default async function AdminExercisesPage() {
               <th className="px-4 py-3 text-left font-semibold">Kỹ năng</th>
               <th className="px-4 py-3 text-center font-semibold">Thời gian</th>
               <th className="px-4 py-3 text-center font-semibold">Lượt làm</th>
+              <th className="px-4 py-3 text-center font-semibold">Truy cập</th>
               <th className="px-4 py-3 text-center font-semibold">Trạng thái</th>
               <th className="px-4 py-3 text-right font-semibold">Thao tác</th>
             </tr>
@@ -69,6 +71,35 @@ export default async function AdminExercisesPage() {
                 </td>
                 <td className="px-4 py-3 text-center tabular-nums text-ink-soft">
                   {ex._count.attempts}
+                </td>
+                <td className="px-4 py-3 text-center">
+                  <form action={toggleExerciseAccessLevelAction.bind(null, ex.id)}>
+                    <button
+                      type="submit"
+                      title={
+                        ex.accessLevel === "RESTRICTED"
+                          ? "Đang yêu cầu mở khóa — bấm để cho mọi học viên làm được"
+                          : "Mọi học viên đều làm được — bấm để yêu cầu quản trị viên mở khóa"
+                      }
+                      className={`inline-flex cursor-pointer items-center gap-1.5 border px-2.5 py-1 text-xs font-semibold transition-colors ${
+                        ex.accessLevel === "RESTRICTED"
+                          ? "border-gold bg-gold-pale text-gold hover:bg-cream-deep"
+                          : "border-line bg-cream text-ink-soft hover:border-gold hover:text-gold"
+                      }`}
+                    >
+                      {ex.accessLevel === "RESTRICTED" ? (
+                        <>
+                          <Lock className="h-3 w-3" aria-hidden="true" />
+                          Cần mở khóa
+                        </>
+                      ) : (
+                        <>
+                          <Globe className="h-3 w-3" aria-hidden="true" />
+                          Ai cũng làm
+                        </>
+                      )}
+                    </button>
+                  </form>
                 </td>
                 <td className="px-4 py-3 text-center">
                   {ex.published ? (

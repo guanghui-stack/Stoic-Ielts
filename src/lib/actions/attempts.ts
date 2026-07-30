@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
 import { gradeReading, type ReadingContent } from "@/lib/exercise-content";
+import { canAccessExercise } from "@/lib/exercise-access";
 
 /** Dung sai sau hạn chót (mạng chậm, tự nộp phía client trễ vài giây). */
 const GRACE_MS = 15_000;
@@ -15,6 +16,10 @@ export async function startAttemptAction(exerciseId: string) {
 
   const exercise = await db.exercise.findUnique({ where: { id: exerciseId } });
   if (!exercise || !exercise.published) redirect("/luyen-tap");
+
+  // Chặn ngay tại máy chủ: bài RESTRICTED chưa được mở khóa thì không vào được,
+  // kể cả khi học viên tự gọi thẳng đường dẫn.
+  if (!(await canAccessExercise(user, exercise))) redirect("/luyen-tap");
 
   // Nếu còn lượt đang làm dở và chưa quá hạn thì quay lại lượt đó
   const existing = await db.attempt.findFirst({

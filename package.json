@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test:admin": "node --experimental-strip-types scripts/test-admin-account.ts"
+    "test:admin": "node --experimental-strip-types scripts/test-admin-account.ts",
+    "test:access": "node --experimental-strip-types scripts/test-access-rules.ts",
+    "test": "npm run test:admin && npm run test:access"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",

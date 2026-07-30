@@ -1,8 +1,15 @@
 import Link from "next/link";
-import { CalendarClock, CheckCircle2, PlayCircle, RotateCcw } from "lucide-react";
+import {
+  CalendarClock,
+  CheckCircle2,
+  PlayCircle,
+  RotateCcw,
+  Lock,
+} from "lucide-react";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
 import { startAttemptAction } from "@/lib/actions/attempts";
+import { grantedExerciseIds, isAdminRole } from "@/lib/exercise-access";
 import { SubmitButton } from "@/components/ui";
 
 /** Danh sách bài luyện của một kỹ năng, kèm trạng thái bài làm của học viên. */
@@ -19,6 +26,12 @@ export async function ExerciseList({ skill }: { skill: "READING" | "WRITING" }) 
         orderBy: { startedAt: "desc" },
       })
     : [];
+
+  // Bài "Cần mở khóa" chỉ làm được khi quản trị viên đã cấp quyền
+  const granted = user ? await grantedExerciseIds(user.id) : new Set<string>();
+  const canDo = (ex: { id: string; accessLevel: string }) =>
+    ex.accessLevel !== "RESTRICTED" ||
+    (user ? isAdminRole(user.role) || granted.has(ex.id) : false);
 
   if (exercises.length === 0) {
     return (
@@ -50,6 +63,18 @@ export async function ExerciseList({ skill }: { skill: "READING" | "WRITING" }) 
                 <h3 className="font-display text-xl font-bold text-navy-deep">
                   {ex.title}
                 </h3>
+                {ex.accessLevel === "RESTRICTED" && (
+                  <span
+                    className={`inline-flex items-center gap-1.5 border px-2.5 py-0.5 font-ui text-[0.68rem] font-semibold uppercase tracking-[0.08em] ${
+                      canDo(ex)
+                        ? "border-success bg-success-pale text-success"
+                        : "border-line-strong bg-cream-deep text-ink-soft"
+                    }`}
+                  >
+                    <Lock className="h-3 w-3" aria-hidden="true" />
+                    {canDo(ex) ? "Đã mở khóa cho bạn" : "Cần mở khóa"}
+                  </span>
+                )}
               </div>
               <p className="mt-2 text-[0.92rem] leading-relaxed text-ink-soft">
                 {ex.description}
@@ -85,6 +110,16 @@ export async function ExerciseList({ skill }: { skill: "READING" | "WRITING" }) 
                   <PlayCircle className="h-4 w-4" aria-hidden="true" />
                   Đăng nhập để làm bài
                 </Link>
+              ) : !canDo(ex) ? (
+                <div className="text-right">
+                  <span className="inline-flex cursor-not-allowed items-center gap-2 border border-line-strong bg-cream-deep px-6 py-2.5 font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-muted">
+                    <Lock className="h-4 w-4" aria-hidden="true" />
+                    Chưa được mở khóa
+                  </span>
+                  <p className="mt-2 max-w-[15rem] font-ui text-xs leading-relaxed text-muted">
+                    Liên hệ trung tâm để được cấp quyền làm bài này.
+                  </p>
+                </div>
               ) : (
                 <form action={startAttemptAction.bind(null, ex.id)}>
                   <SubmitButton variant={inProgress ? "gold" : "primary"}>

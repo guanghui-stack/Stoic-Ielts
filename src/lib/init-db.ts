@@ -70,6 +70,19 @@ const DDL = [
     \`value\` TEXT NOT NULL,
     PRIMARY KEY (\`key\`)
   ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`ExerciseAccess\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`exerciseId\` VARCHAR(191) NOT NULL,
+    \`grantedAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`grantedById\` VARCHAR(191) NULL,
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`ExerciseAccess_userId_exerciseId_key\` (\`userId\`, \`exerciseId\`),
+    INDEX \`ExerciseAccess_exerciseId_idx\` (\`exerciseId\`),
+    CONSTRAINT \`ExerciseAccess_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`ExerciseAccess_exerciseId_fkey\` FOREIGN KEY (\`exerciseId\`) REFERENCES \`Exercise\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
 ];
 
 /**
@@ -83,6 +96,7 @@ const MIGRATIONS = [
   `ALTER TABLE \`User\` ADD COLUMN \`targetWriting\` DOUBLE NULL`,
   `ALTER TABLE \`User\` ADD COLUMN \`targetSpeaking\` DOUBLE NULL`,
   `ALTER TABLE \`User\` ADD COLUMN \`examDate\` DATETIME(3) NULL`,
+  `ALTER TABLE \`Exercise\` ADD COLUMN \`accessLevel\` VARCHAR(191) NOT NULL DEFAULT 'PUBLIC'`,
 ];
 
 export async function initDatabase() {
@@ -109,7 +123,7 @@ export async function initDatabase() {
     console.log(`[wobridges] ${msg}`);
   }
 
-  const exercises = [...seedData.exercises, readingGameTheory];
+  const exercises: SeedExercise[] = [...seedData.exercises, readingGameTheory];
   for (const ex of exercises) {
     const existing = await db.exercise.findFirst({ where: { title: ex.title } });
     if (!existing) {
@@ -121,11 +135,51 @@ export async function initDatabase() {
           description: ex.description,
           durationMinutes: ex.durationMinutes,
           content: JSON.stringify(ex.content),
+          accessLevel: ex.accessLevel ?? "PUBLIC",
         },
       });
       console.log(`[wobridges] Đã tạo bài tập: ${ex.title}`);
     }
   }
+
+  // Áp mức truy cập từ dữ liệu seed cho các bài ĐÃ TỒN TẠI — chỉ chạy MỘT LẦN
+  // (đánh dấu trong bảng Config) để không ghi đè thiết lập quản trị viên tự đổi.
+  await applyOnce("SEED_ACCESS_LEVEL_v1", async () => {
+    for (const ex of exercises) {
+      if (!ex.accessLevel) continue;
+      const res = await db.exercise.updateMany({
+        where: { title: ex.title, accessLevel: { not: ex.accessLevel } },
+        data: { accessLevel: ex.accessLevel },
+      });
+      if (res.count > 0) {
+        console.log(
+          `[wobridges] Đặt mức truy cập ${ex.accessLevel} cho: ${ex.title}`
+        );
+      }
+    }
+  });
+}
+
+type SeedExercise = {
+  skill: string;
+  taskType: string;
+  title: string;
+  description: string;
+  durationMinutes: number;
+  content: unknown;
+  accessLevel?: string;
+};
+
+/** Chạy một tác vụ đúng một lần trong đời database (đánh dấu ở bảng Config). */
+async function applyOnce(key: string, fn: () => Promise<void>) {
+  const done = await db.config.findUnique({ where: { key } });
+  if (done) return;
+  await fn();
+  await db.config.upsert({
+    where: { key },
+    update: { value: new Date().toISOString() },
+    create: { key, value: new Date().toISOString() },
+  });
 }
 
 /**

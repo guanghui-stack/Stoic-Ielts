@@ -30,7 +30,8 @@ model User {
   targetSpeaking  Float?
   examDate        DateTime?
 
-  attempts Attempt[]
+  attempts      Attempt[]
+  exerciseAccess ExerciseAccess[]
 }
 
 model Exercise {
@@ -42,9 +43,27 @@ model Exercise {
   durationMinutes Int       @default(60)
   content         String    @db.Text // JSON: đề bài, passage, câu hỏi, đáp án
   published       Boolean   @default(true)
+  /// PUBLIC = mọi học viên làm được · RESTRICTED = phải được quản trị viên mở khóa
+  accessLevel     String    @default("PUBLIC")
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   attempts        Attempt[]
+  access          ExerciseAccess[]
+}
+
+/// Quyền truy cập bài tập RESTRICTED được cấp cho từng học viên.
+model ExerciseAccess {
+  id          String   @id @default(cuid())
+  userId      String
+  exerciseId  String
+  grantedAt   DateTime @default(now())
+  grantedById String?
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, exerciseId])
+  @@index([exerciseId])
 }
 
 model Attempt {

@@ -22,6 +22,73 @@ export async function toggleUserActiveAction(userId: string) {
   revalidatePath("/quan-tri/hoc-vien");
 }
 
+/**
+ * XÓA VĨNH VIỄN một tài khoản học viên cùng toàn bộ bài làm.
+ * Không thể hoàn tác — vì vậy có nhiều lớp bảo vệ:
+ *  - phải gõ đúng email để xác nhận
+ *  - không cho tự xóa chính mình
+ *  - không cho xóa tài khoản quản trị khác
+ */
+export async function deleteUserAction(
+  _prev: AdminFormState,
+  formData: FormData
+): Promise<AdminFormState> {
+  const admin = await requireAdmin();
+  const userId = String(formData.get("userId") ?? "");
+  const confirmEmail = String(formData.get("confirmEmail") ?? "").trim().toLowerCase();
+
+  const user = await db.user.findUnique({ where: { id: userId } });
+  if (!user) return { error: "Không tìm thấy học viên." };
+  if (user.id === admin.id) return { error: "Không thể tự xóa tài khoản của chính bạn." };
+  if (user.role === "ADMIN") {
+    return { error: "Không thể xóa tài khoản quản trị. Hãy hạ quyền hoặc khóa tài khoản đó trước." };
+  }
+  if (confirmEmail !== user.email.toLowerCase()) {
+    return { error: `Email xác nhận không khớp. Hãy gõ chính xác: ${user.email}` };
+  }
+
+  // Bài làm và quyền truy cập bị xóa theo (onDelete: Cascade)
+  await db.user.delete({ where: { id: userId } });
+  revalidatePath("/quan-tri/hoc-vien");
+  return { success: `Đã xóa vĩnh viễn tài khoản ${user.email} cùng toàn bộ bài làm.` };
+}
+
+/**
+ * Mở khóa TOÀN BỘ bài tập cần cấp quyền cho một học viên
+ * (hoặc thu hồi nếu học viên đã có đủ quyền).
+ */
+export async function toggleAllExerciseAccessAction(userId: string) {
+  const admin = await requireAdmin();
+
+  const user = await db.user.findUnique({ where: { id: userId } });
+  if (!user) return;
+
+  const restricted = await db.exercise.findMany({
+    where: { accessLevel: "RESTRICTED" },
+    select: { id: true },
+  });
+  if (restricted.length === 0) return;
+
+  const granted = await db.exerciseAccess.count({ where: { userId } });
+
+  if (granted >= restricted.length) {
+    // Đã mở đủ → thu hồi toàn bộ
+    await db.exerciseAccess.deleteMany({ where: { userId } });
+  } else {
+    // Cấp quyền cho những bài còn thiếu (bỏ qua bản ghi đã có)
+    await db.exerciseAccess.createMany({
+      data: restricted.map((ex) => ({
+        userId,
+        exerciseId: ex.id,
+        grantedById: admin.id,
+      })),
+      skipDuplicates: true,
+    });
+  }
+  revalidatePath("/quan-tri/hoc-vien");
+  revalidatePath("/luyen-tap");
+}
+
 export async function resetUserPasswordAction(
   _prev: AdminFormState,
   formData: FormData
@@ -239,6 +306,22 @@ export async function updateExerciseAction(
   await db.exercise.update({ where: { id: exerciseId }, data: parsed.data! });
   revalidatePath("/quan-tri/bai-tap");
   redirect("/quan-tri/bai-tap");
+}
+
+/** Đổi mức truy cập của bài tập: ai cũng làm được ⇄ cần quản trị viên mở khóa. */
+export async function toggleExerciseAccessLevelAction(exerciseId: string) {
+  await requireAdmin();
+  const ex = await db.exercise.findUnique({ where: { id: exerciseId } });
+  if (!ex) return;
+  await db.exercise.update({
+    where: { id: exerciseId },
+    data: {
+      accessLevel: ex.accessLevel === "RESTRICTED" ? "PUBLIC" : "RESTRICTED",
+    },
+  });
+  revalidatePath("/quan-tri/bai-tap");
+  revalidatePath("/quan-tri/hoc-vien");
+  revalidatePath("/luyen-tap");
 }
 
 export async function toggleExercisePublishedAction(exerciseId: string) {

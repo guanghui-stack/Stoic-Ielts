@@ -86,25 +86,41 @@
           {
             "id": "q6",
             "prompt": "Game theory software may be unhelpful when dealing with political issues.",
-            "options": ["YES", "NO", "NOT GIVEN"],
+            "options": [
+              "YES",
+              "NO",
+              "NOT GIVEN"
+            ],
             "answer": "YES"
           },
           {
             "id": "q7",
             "prompt": "Dr Milgrom was confident about applying his software to an auction in 2006.",
-            "options": ["YES", "NO", "NOT GIVEN"],
+            "options": [
+              "YES",
+              "NO",
+              "NOT GIVEN"
+            ],
             "answer": "NO"
           },
           {
             "id": "q8",
             "prompt": "Dr Ponsati believes 'mediation machines' are an inappropriate method of negotiation in areas other than business.",
-            "options": ["YES", "NO", "NOT GIVEN"],
+            "options": [
+              "YES",
+              "NO",
+              "NOT GIVEN"
+            ],
             "answer": "NOT GIVEN"
           },
           {
             "id": "q9",
             "prompt": "Military organisations refuse to accept that software based on game theory could prevent wars.",
-            "options": ["YES", "NO", "NOT GIVEN"],
+            "options": [
+              "YES",
+              "NO",
+              "NOT GIVEN"
+            ],
             "answer": "NOT GIVEN"
           }
         ]
@@ -149,5 +165,6 @@
         ]
       }
     ]
-  }
+  },
+  "accessLevel": "RESTRICTED"
 }

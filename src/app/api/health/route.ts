@@ -6,7 +6,7 @@ import seedData from "../../../../prisma/seed-data.json";
  * Dấu mốc phiên bản mã nguồn — đổi mỗi khi có thay đổi cần xác nhận đã lên
  * production. Nhờ đó biết chắc máy chủ đang chạy bản nào.
  */
-const BUILD_MARKER = "2026-07-31-admin-email+origins";
+const BUILD_MARKER = "2026-07-31-exercise-access+admin-actions";
 
 /**
  * Trạm kiểm tra tình trạng hệ thống — dùng để chẩn đoán từ xa khi
@@ -62,6 +62,9 @@ export async function GET() {
     report.userCount = users;
     report.adminCount = admins;
     report.exerciseCount = exercises;
+    report.restrictedExerciseCount = await db.exercise.count({
+      where: { accessLevel: "RESTRICTED" },
+    });
     // Trả về trạng thái, không lộ email: đủ để biết việc đổi tài khoản
     // quản trị đã áp dụng thành công trên máy chủ này hay chưa.
     report.configuredAdmin = configuredAdmin
