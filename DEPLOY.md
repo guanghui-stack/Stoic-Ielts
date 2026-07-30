@@ -49,11 +49,22 @@ Chỉ cần push code lên nhánh `main` của GitHub — Hostinger tự triển
 - Database có thể xuất thủ công: hPanel → Cơ sở dữ liệu → phpMyAdmin →
   Export → định dạng SQL → lưu file về máy.
 
-## Tài khoản admin mặc định (chỉ tồn tại khi database mới)
+## Tài khoản quản trị
 
-`admin@wobridges.vn` / `Admin@Wobridges2026` — **đổi mật khẩu ngay** sau lần
-đăng nhập đầu (menu Quản trị → Đổi mật khẩu). Từ khi dùng MySQL, mật khẩu đã
-đổi sẽ được giữ vĩnh viễn qua mọi lần triển khai.
+Email đăng nhập: **dangquanghuy17012001@gmail.com**
+
+Mật khẩu **không nằm trong mã nguồn** (repo công khai). Có hai cách đặt:
+
+1. **Qua giao diện (khuyên dùng):** đăng nhập rồi vào **Quản trị → Đổi mật khẩu**.
+2. **Qua biến môi trường:** thêm biến `ADMIN_PASSWORD` trong hPanel → Biến môi
+   trường, rồi **Tái triển khai**. Mật khẩu chỉ được áp dụng **một lần** khi giá
+   trị biến thay đổi, nên mật khẩu bạn tự đổi trong giao diện về sau sẽ không bị
+   ghi đè. Muốn đặt lại lần nữa thì sửa giá trị biến rồi triển khai lại.
+
+Biến `ADMIN_EMAIL` (tùy chọn) dùng để đổi email đăng nhập mà không cần sửa mã.
+Khi email thay đổi, hệ thống **đổi tên tài khoản cũ** thay vì tạo mới — toàn bộ
+lịch sử chấm bài được giữ nguyên. Các tài khoản quản trị mặc định cũ sẽ tự động
+bị khóa.
 
 ## Thêm/sửa nội dung bài tập
 

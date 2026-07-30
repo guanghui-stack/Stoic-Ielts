@@ -3,8 +3,11 @@ import bcrypt from "bcryptjs";
 
 const db = new PrismaClient();
 
-const ADMIN_EMAIL = "admin@wobridges.vn";
-const ADMIN_PASSWORD = "Admin@Wobridges2026";
+// Chỉ dùng cho máy local. Mật khẩu KHÔNG nằm trong mã nguồn (repo công khai):
+// đặt qua biến môi trường, ví dụ  ADMIN_PASSWORD=... node prisma/seed.mjs
+const ADMIN_EMAIL =
+  process.env.ADMIN_EMAIL?.trim().toLowerCase() || "dangquanghuy17012001@gmail.com";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD?.trim() || "DevOnly@Local2026";
 
 const reading1 = {
   passage: {

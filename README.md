@@ -45,8 +45,11 @@ node prisma/seed.mjs      # tạo tài khoản admin + bài tập mẫu
 npm run dev               # http://localhost:3000
 ```
 
-**Tài khoản admin mặc định sau khi seed:** `admin@wobridges.vn` / `Admin@Wobridges2026`
-→ **Đổi mật khẩu này ngay khi đưa lên môi trường thật.**
+**Tài khoản quản trị:** email lấy từ `ADMIN_EMAIL` (mặc định theo
+`prisma/seed-data.json`), mật khẩu lấy từ `ADMIN_PASSWORD`. Mật khẩu **không bao
+giờ được lưu trong mã nguồn** vì repo công khai — xem [DEPLOY.md](./DEPLOY.md).
+Nếu chạy lần đầu mà không đặt `ADMIN_PASSWORD`, hệ thống sinh mật khẩu ngẫu
+nhiên và in ra nhật ký khởi động.
 
 ## Triển khai
 

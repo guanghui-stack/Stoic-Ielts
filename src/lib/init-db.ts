@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
-import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
+import { ensureAdminAccount, type AdminDb } from "@/lib/admin-account";
 import seedData from "../../prisma/seed-data.json";
 import readingGameTheory from "../../prisma/reading-game-theory.json";
 
@@ -98,21 +98,15 @@ export async function initDatabase() {
     }
   }
 
-  // Seed admin + bài tập mẫu từ JSON đóng gói kèm ứng dụng
-  // (bỏ qua phần đã tồn tại — chạy lại vô hại, không ghi đè dữ liệu).
-  const admin = await db.user.findUnique({
-    where: { email: seedData.admin.email },
+  // Tài khoản quản trị: email theo ADMIN_EMAIL (mặc định seed-data.json),
+  // mật khẩu CHỈ từ ADMIN_PASSWORD — không bao giờ nằm trong mã nguồn.
+  const adminResult = await ensureAdminAccount(db as unknown as AdminDb, {
+    email: process.env.ADMIN_EMAIL || seedData.admin.email,
+    name: seedData.admin.name,
+    envPassword: process.env.ADMIN_PASSWORD,
   });
-  if (!admin) {
-    await db.user.create({
-      data: {
-        email: seedData.admin.email,
-        name: seedData.admin.name,
-        passwordHash: await bcrypt.hash(seedData.admin.password, 10),
-        role: "ADMIN",
-      },
-    });
-    console.log(`[wobridges] Đã tạo tài khoản admin: ${seedData.admin.email}`);
+  for (const msg of adminResult.messages) {
+    console.log(`[wobridges] ${msg}`);
   }
 
   const exercises = [...seedData.exercises, readingGameTheory];
