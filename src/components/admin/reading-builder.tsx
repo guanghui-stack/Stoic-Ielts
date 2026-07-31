@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Plus, Trash2, ChevronUp, ChevronDown, Code2 } from "lucide-react";
 import {
   optionLabel,
@@ -176,20 +176,16 @@ export function ReadingBuilder({
   name: string; // tên hidden input gửi lên server action
   defaultJson?: string;
 }) {
-  const [advanced, setAdvanced] = useState(false);
-  const [rawJson, setRawJson] = useState("");
+  // Sửa đề cũ: không dựng ngược được form từ mọi JSON nên mở thẳng chế độ nâng
+  // cao. Tính ngay khi khởi tạo state (không cần effect + setState).
+  const editingExisting = Boolean(
+    defaultJson && defaultJson.trim() && defaultJson.trim() !== "{}"
+  );
+  const [advanced, setAdvanced] = useState(editingExisting);
+  const [rawJson, setRawJson] = useState(editingExisting ? defaultJson! : "");
   const [bparts, setBparts] = useState<BPart[]>([
     { title: "", paragraphsText: "", groups: [] },
   ]);
-
-  // Nếu đang sửa đề cũ: không thể dựng ngược form từ mọi JSON — mở chế độ nâng cao
-  useEffect(() => {
-    if (defaultJson && defaultJson.trim() && defaultJson.trim() !== "{}") {
-      setRawJson(defaultJson);
-      setAdvanced(true);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const json = useMemo(() => {
     if (advanced) return rawJson;

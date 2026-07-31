@@ -42,7 +42,11 @@ export function GoalsCard({
     undefined
   );
 
+  // Lưu thành công thì đóng form. Cố ý dùng effect: nếu suy ra trực tiếp từ
+  // `state.success` thì form sẽ không mở lại được ở lần sửa kế tiếp (state vẫn
+  // giữ kết quả cũ), còn khi lưu LỖI thì form phải ở nguyên để hiện thông báo.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (state?.success) setEditing(false);
   }, [state]);
 

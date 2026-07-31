@@ -14,13 +14,13 @@ datasource db {
 //   Attempt.status:   IN_PROGRESS | SUBMITTED | GRADED
 
 model User {
-  id           String    @id @default(cuid())
-  email        String    @unique
+  id           String   @id @default(cuid())
+  email        String   @unique
   passwordHash String
   name         String
-  role         String    @default("STUDENT")
-  active       Boolean   @default(true)
-  createdAt    DateTime  @default(now())
+  role         String   @default("STUDENT")
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
 
   // Mục tiêu band điểm và lịch thi do học viên tự đặt
   targetOverall   Float?
@@ -30,23 +30,24 @@ model User {
   targetSpeaking  Float?
   examDate        DateTime?
 
-  attempts      Attempt[]
+  attempts       Attempt[]
   exerciseAccess ExerciseAccess[]
+  feynmanReviews FeynmanReview[]
 }
 
 model Exercise {
-  id              String    @id @default(cuid())
+  id              String           @id @default(cuid())
   skill           String
   taskType        String
   title           String
-  description     String    @db.Text
-  durationMinutes Int       @default(60)
-  content         String    @db.Text // JSON: đề bài, passage, câu hỏi, đáp án
-  published       Boolean   @default(true)
+  description     String           @db.Text
+  durationMinutes Int              @default(60)
+  content         String           @db.Text // JSON: đề bài, passage, câu hỏi, đáp án
+  published       Boolean          @default(true)
   /// PUBLIC = mọi học viên làm được · RESTRICTED = phải được quản trị viên mở khóa
-  accessLevel     String    @default("PUBLIC")
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  accessLevel     String           @default("PUBLIC")
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
   attempts        Attempt[]
   access          ExerciseAccess[]
 }
@@ -83,11 +84,75 @@ model Attempt {
   gradedAt      DateTime?
   gradedById    String?
 
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercise      Exercise       @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  feynmanReview FeynmanReview?
 
   @@index([userId, status])
   @@index([exerciseId, status])
+}
+
+/// Một phiên chữa bài theo phương pháp Feynman, gắn 1-1 với một lượt làm bài.
+model FeynmanReview {
+  id               String    @id @default(cuid())
+  userId           String
+  attemptId        String    @unique
+  mode             String // QUICK | DEEP
+  status           String    @default("DRAFT") // DRAFT | REVEALED | COMPLETED
+  passageSummary   String?   @db.Text
+  paragraphMap     String?   @db.Text
+  confusingPoint   String?   @db.Text
+  finalTeachBack   String?   @db.Text
+  finalRule        String?   @db.Text
+  confidenceBefore Int?
+  confidenceAfter  Int?
+  revealedAt       DateTime?
+  completedAt      DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  attempt  Attempt          @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  mistakes FeynmanMistake[]
+
+  @@index([userId, status])
+  @@index([userId, completedAt])
+}
+
+/// Ảnh chụp một câu cần chữa sâu + phần tự giải thích của học viên.
+/// Lưu snapshot để lịch sử không đổi khi giáo viên sửa đề về sau.
+model FeynmanMistake {
+  id                     String    @id @default(cuid())
+  reviewId               String
+  questionId             String
+  numberLabel            String
+  questionType           String
+  partNumber             Int
+  sortOrder              Int
+  prompt                 String    @db.Text
+  userAnswer             String    @db.Text
+  correctAnswer          String    @db.Text
+  errorType              String?
+  evidenceParagraph      String?
+  evidenceText           String?   @db.Text
+  firstExplanation       String?   @db.Text
+  modelEvidenceParagraph String?
+  modelEvidence          String?   @db.Text
+  modelExplanation       String?   @db.Text
+  modelTrap              String?   @db.Text
+  modelParaphrasesJson   String?   @db.Text
+  revisedExplanation     String?   @db.Text
+  lessonRule             String?   @db.Text
+  revealedAt             DateTime?
+  completedAt            DateTime?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  review FeynmanReview @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@unique([reviewId, questionId])
+  @@index([reviewId])
+  @@index([errorType])
 }
 
 // Cấu hình hệ thống bền vững (ví dụ SESSION_SECRET) — sống qua các lần deploy

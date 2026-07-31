@@ -18,11 +18,15 @@ export default function CbtPreviewPage() {
     seedData.exercises.find((e) => e.taskType === "READING_FULL");
   if (!fullTest) notFound();
 
+  // Server Component (chỉ chạy ở dev): đồng hồ giả lập 60 phút cho trang xem thử.
+  // eslint-disable-next-line react-hooks/purity
+  const demoDeadline = new Date(Date.now() + 60 * 60_000).toISOString();
+
   return (
     <ReadingCbtExam
       attemptId="demo-preview"
       title={fullTest.title}
-      deadlineIso={new Date(Date.now() + 60 * 60_000).toISOString()}
+      deadlineIso={demoDeadline}
       initialAnswers="{}"
       parts={sanitizeReadingParts(fullTest.content as ReadingContent)}
     />

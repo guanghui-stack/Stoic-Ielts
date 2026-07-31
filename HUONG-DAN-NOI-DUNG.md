@@ -191,6 +191,44 @@ chỉ chính xác dòng bị lỗi.
 
 ---
 
+## Lời giải mẫu cho phần chữa bài Feynman
+
+Sau khi nộp bài Reading, học viên **không thấy ngay đáp án đúng của câu sai**.
+Các em phải tự giảng lại bài đọc và tự chẩn đoán lỗi trước; xong bước đó hệ
+thống mới mở lời giải. Muốn phần "mở lời giải" có nội dung của giáo viên thay vì
+chỉ hiện đáp án trơ, hãy thêm khối `learning` vào từng câu hỏi ở **Chế độ nâng
+cao (JSON)**:
+
+```json
+{
+  "id": "q7",
+  "prompt": "Dr Milgrom was confident about applying his software in 2006.",
+  "options": ["YES", "NO", "NOT GIVEN"],
+  "answer": "NO",
+  "learning": {
+    "evidenceParagraph": "D",
+    "evidenceText": "“He was apprehensive at first, but the result was a triumph.”",
+    "explanation": "“Apprehensive” nghĩa là lo lắng — trái ngược trực tiếp với “confident”, nên mệnh đề bị phủ định.",
+    "trap": "Vế sau nói kết quả thành công dễ khiến học viên chọn YES.",
+    "paraphrases": [{ "question": "was confident", "passage": "was apprehensive at first" }],
+    "skillTag": "YNNG_CONTRADICTION"
+  }
+}
+```
+
+| Trường | Nên có? | Tiêu chuẩn |
+|---|---|---|
+| `evidenceParagraph` | Nên | Vị trí ngắn: `C`, `Part 2 — B` |
+| `evidenceText` | Nên | 1–2 câu, trích ngắn hoặc diễn giải — **đừng chép cả đoạn** |
+| `explanation` | Nên | Vì sao đáp án đúng VÀ vì sao phương án khác không đủ căn cứ |
+| `trap` | Nên | Một bẫy chuyển giao được sang bài khác |
+| `paraphrases` | Tùy câu | 1–3 cặp quan trọng |
+| `skillTag` | Tùy chọn | Nhãn để thống kê sau này |
+
+> Đề chưa có `learning` vẫn chạy bình thường — học viên sẽ thấy đáp án đúng kèm
+> hướng dẫn chung. Đề **Reading Practice 03 — Game Theory** đã có đủ lời giải
+> mẫu cho cả 14 câu, dùng làm mẫu tham khảo.
+
 ## Quy trình kiểm tra trước khi giao cho học viên
 
 1. Khi tạo bài, **bỏ tick** "Mở cho học viên làm ngay" → bài ở trạng thái Ẩn.

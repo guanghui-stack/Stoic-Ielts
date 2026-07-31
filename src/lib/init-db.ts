@@ -71,6 +71,64 @@ const DDL = [
     PRIMARY KEY (\`key\`)
   ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
 
+  `CREATE TABLE IF NOT EXISTS \`FeynmanReview\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`attemptId\` VARCHAR(191) NOT NULL,
+    \`mode\` VARCHAR(191) NOT NULL,
+    \`status\` VARCHAR(191) NOT NULL DEFAULT 'DRAFT',
+    \`passageSummary\` TEXT NULL,
+    \`paragraphMap\` TEXT NULL,
+    \`confusingPoint\` TEXT NULL,
+    \`finalTeachBack\` TEXT NULL,
+    \`finalRule\` TEXT NULL,
+    \`confidenceBefore\` INTEGER NULL,
+    \`confidenceAfter\` INTEGER NULL,
+    \`revealedAt\` DATETIME(3) NULL,
+    \`completedAt\` DATETIME(3) NULL,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`updatedAt\` DATETIME(3) NOT NULL,
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`FeynmanReview_attemptId_key\` (\`attemptId\`),
+    INDEX \`FeynmanReview_userId_status_idx\` (\`userId\`, \`status\`),
+    INDEX \`FeynmanReview_userId_completedAt_idx\` (\`userId\`, \`completedAt\`),
+    CONSTRAINT \`FeynmanReview_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`FeynmanReview_attemptId_fkey\` FOREIGN KEY (\`attemptId\`) REFERENCES \`Attempt\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`FeynmanMistake\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`reviewId\` VARCHAR(191) NOT NULL,
+    \`questionId\` VARCHAR(191) NOT NULL,
+    \`numberLabel\` VARCHAR(191) NOT NULL,
+    \`questionType\` VARCHAR(191) NOT NULL,
+    \`partNumber\` INTEGER NOT NULL,
+    \`sortOrder\` INTEGER NOT NULL,
+    \`prompt\` TEXT NOT NULL,
+    \`userAnswer\` TEXT NOT NULL,
+    \`correctAnswer\` TEXT NOT NULL,
+    \`errorType\` VARCHAR(191) NULL,
+    \`evidenceParagraph\` VARCHAR(191) NULL,
+    \`evidenceText\` TEXT NULL,
+    \`firstExplanation\` TEXT NULL,
+    \`modelEvidenceParagraph\` VARCHAR(191) NULL,
+    \`modelEvidence\` TEXT NULL,
+    \`modelExplanation\` TEXT NULL,
+    \`modelTrap\` TEXT NULL,
+    \`modelParaphrasesJson\` TEXT NULL,
+    \`revisedExplanation\` TEXT NULL,
+    \`lessonRule\` TEXT NULL,
+    \`revealedAt\` DATETIME(3) NULL,
+    \`completedAt\` DATETIME(3) NULL,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`updatedAt\` DATETIME(3) NOT NULL,
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`FeynmanMistake_reviewId_questionId_key\` (\`reviewId\`, \`questionId\`),
+    INDEX \`FeynmanMistake_reviewId_idx\` (\`reviewId\`),
+    INDEX \`FeynmanMistake_errorType_idx\` (\`errorType\`),
+    CONSTRAINT \`FeynmanMistake_reviewId_fkey\` FOREIGN KEY (\`reviewId\`) REFERENCES \`FeynmanReview\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
   `CREATE TABLE IF NOT EXISTS \`ExerciseAccess\` (
     \`id\` VARCHAR(191) NOT NULL,
     \`userId\` VARCHAR(191) NOT NULL,
@@ -141,6 +199,23 @@ export async function initDatabase() {
       console.log(`[wobridges] Đã tạo bài tập: ${ex.title}`);
     }
   }
+
+  // Bổ sung lời giải mẫu Feynman (question.learning) cho các bài đã tồn tại.
+  // Chỉ chạy một lần VÀ chỉ khi bản trên máy chủ chưa có lời giải nào —
+  // không bao giờ ghi đè nội dung giáo viên đã tự soạn.
+  await applyOnce("SEED_FEYNMAN_LEARNING_v1", async () => {
+    for (const ex of exercises) {
+      const seedContent = JSON.stringify(ex.content);
+      if (!seedContent.includes('"learning"')) continue;
+      const existing = await db.exercise.findFirst({ where: { title: ex.title } });
+      if (!existing || existing.content.includes('"learning"')) continue;
+      await db.exercise.update({
+        where: { id: existing.id },
+        data: { content: seedContent },
+      });
+      console.log(`[wobridges] Đã bổ sung lời giải mẫu Feynman cho: ${ex.title}`);
+    }
+  });
 
   // Áp mức truy cập từ dữ liệu seed cho các bài ĐÃ TỒN TẠI — chỉ chạy MỘT LẦN
   // (đánh dấu trong bảng Config) để không ghi đè thiết lập quản trị viên tự đổi.

@@ -53,6 +53,25 @@ export const WORD_LIMIT_RULES: Record<
   THREE_WORDS_NUMBER: { maxWords: 3, allowNumber: true },
 };
 
+/**
+ * Lời giải mẫu do giáo viên soạn, dùng cho bước "Reveal" của Feynman Review.
+ * CHỈ tồn tại phía máy chủ — xem ghi chú bảo mật ở sanitizeReadingParts().
+ */
+export type FeynmanLearningNote = {
+  /** Vị trí bằng chứng, ví dụ "C" hoặc "Part 2 — đoạn B". */
+  evidenceParagraph?: string;
+  /** Bằng chứng diễn giải ngắn 1–2 câu, không chép dài từ passage. */
+  evidenceText?: string;
+  /** Vì sao đáp án đúng và vì sao các phương án khác không đủ căn cứ. */
+  explanation?: string;
+  /** Bẫy IELTS chính của câu hỏi. */
+  trap?: string;
+  /** Cặp paraphrase giữa câu hỏi và passage. */
+  paraphrases?: Array<{ question: string; passage: string }>;
+  /** Nhãn kỹ năng mở, dùng cho thống kê sau này. */
+  skillTag?: string;
+};
+
 export type ReadingQuestion = {
   id: string;
   /** Nội dung câu hỏi/câu khẳng định. Với GAP có thể chứa ______ (ô điền inline). */
@@ -66,6 +85,8 @@ export type ReadingQuestion = {
   /** Đáp án: chuỗi (chữ cái/numeral/từ) hoặc mảng chữ cái với MC_MULTI. Chỉ tồn tại phía server. */
   answer?: string | string[];
   altAnswers?: string[];
+  /** Lời giải mẫu cho Feynman Review — CHỈ phía server, không gửi xuống phòng thi. */
+  learning?: FeynmanLearningNote;
 };
 
 export type ReadingQuestionGroup = {
@@ -142,7 +163,13 @@ export function normalizeReadingParts(content: ReadingContent): ReadingPart[] {
   return [];
 }
 
-/** Loại bỏ đáp án trước khi gửi đề sang trình duyệt học viên. */
+/**
+ * Loại bỏ đáp án trước khi gửi đề sang trình duyệt học viên.
+ *
+ * BẢO MẬT: hàm này dựng lại object theo DANH SÁCH CHO PHÉP (allow-list) chứ
+ * không xóa trường — nhờ vậy `answer`, `altAnswers` và `learning` (lời giải mẫu
+ * Feynman) mặc định ở lại máy chủ. TUYỆT ĐỐI không thêm hai trường đó vào đây.
+ */
 export function sanitizeReadingParts(content: ReadingContent): ReadingPart[] {
   return normalizeReadingParts(content).map((part) => ({
     passage: part.passage,

@@ -57,8 +57,11 @@ export default async function StudentDashboard() {
   });
 
   const finished = attempts.filter((a) => a.status !== "IN_PROGRESS");
+  // Server Component: dựng lại mỗi lần tải trang nên đọc giờ hiện tại là đúng ý đồ.
+  // eslint-disable-next-line react-hooks/purity
+  const nowMs = Date.now();
   const inProgress = attempts.filter(
-    (a) => a.status === "IN_PROGRESS" && a.deadlineAt.getTime() > Date.now()
+    (a) => a.status === "IN_PROGRESS" && a.deadlineAt.getTime() > nowMs
   );
   const readingDone = finished.filter((a) => a.exercise.skill === "READING");
   const writingDone = finished.filter((a) => a.exercise.skill === "WRITING");

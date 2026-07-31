@@ -6,6 +6,8 @@ import {
   Hourglass,
   ArrowLeft,
   TimerOff,
+  Brain,
+  Lock,
 } from "lucide-react";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
@@ -15,7 +17,8 @@ import {
   type ReadingContent,
   type WritingContent,
 } from "@/lib/exercise-content";
-import { NoteBox } from "@/components/ui";
+import { NoteBox, SubmitButton } from "@/components/ui";
+import { startFeynmanReviewAction } from "@/lib/actions/feynman";
 
 export const metadata = { title: "Kết quả bài làm" };
 
@@ -34,7 +37,10 @@ export default async function AttemptResultPage({
 
   const attempt = await db.attempt.findUnique({
     where: { id: attemptId },
-    include: { exercise: true },
+    include: {
+      exercise: true,
+      feynmanReview: { select: { id: true, status: true, mode: true } },
+    },
   });
   if (!attempt || (attempt.userId !== user.id && user.role !== "ADMIN")) {
     redirect("/hoc-vien");
@@ -42,6 +48,15 @@ export default async function AttemptResultPage({
   if (attempt.status === "IN_PROGRESS") redirect(`/lam-bai/${attempt.id}`);
 
   const isReading = attempt.exercise.skill === "READING";
+  const isOwner = attempt.userId === user.id;
+
+  /**
+   * KHÓA ĐÁP ÁN: đáp án đúng của câu sai chỉ được hiện khi người xem là quản
+   * trị viên, hoặc khi học viên đã hoàn thành phiên chữa bài Feynman. Đây là
+   * cơ chế buộc người học tự giải thích trước khi biết đáp án.
+   */
+  const answersUnlocked =
+    user.role === "ADMIN" || attempt.feynmanReview?.status === "COMPLETED";
 
   return (
     <section className="mx-auto max-w-4xl px-6 py-12 md:py-16">
@@ -75,8 +90,16 @@ export default async function AttemptResultPage({
         </dl>
       </div>
 
+      {isReading && isOwner && attempt.status === "GRADED" && (
+        <FeynmanCta
+          attemptId={attempt.id}
+          status={attempt.feynmanReview?.status ?? null}
+          mode={attempt.feynmanReview?.mode ?? null}
+        />
+      )}
+
       {isReading ? (
-        <ReadingResult attempt={attempt} />
+        <ReadingResult attempt={attempt} answersUnlocked={answersUnlocked} />
       ) : (
         <WritingResult attempt={attempt} />
       )}
@@ -84,9 +107,85 @@ export default async function AttemptResultPage({
   );
 }
 
+/** Lời mời / tiếp tục / xem lại phiên chữa bài Feynman. */
+function FeynmanCta({
+  attemptId,
+  status,
+  mode,
+}: {
+  attemptId: string;
+  status: string | null;
+  mode: string | null;
+}) {
+  const href = `/hoc-vien/bai-lam/${attemptId}/feynman`;
+
+  if (status === "COMPLETED") {
+    return (
+      <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-l-4 border-success bg-success-pale px-6 py-5">
+        <p className="flex items-center gap-2.5 font-ui text-sm text-success">
+          <CheckCircle2 className="h-5 w-5 shrink-0" aria-hidden="true" />
+          <span>
+            <strong>Đã chữa bài xong</strong> — toàn bộ đáp án bên dưới đã được mở.
+          </span>
+        </p>
+        <Link
+          href={href}
+          className="border border-success px-5 py-2.5 font-ui text-[0.75rem] font-semibold uppercase tracking-[0.1em] text-success transition-colors hover:bg-success hover:text-paper"
+        >
+          Xem lại bản chữa bài
+        </Link>
+      </div>
+    );
+  }
+
+  const started = status === "DRAFT" || status === "REVEALED";
+  return (
+    <div className="mt-8 border border-gold bg-gold-pale p-7">
+      <p className="label-caps flex items-center gap-2">
+        <Brain className="h-3.5 w-3.5" aria-hidden="true" />
+        Phương pháp Feynman
+      </p>
+      <h2 className="mt-2.5 font-display text-xl font-bold text-navy-deep md:text-2xl">
+        {started
+          ? "Bạn đang chữa bài dở dang"
+          : "Biến bài này thành kiến thức dùng được cho bài sau"}
+      </h2>
+      <p className="mt-3 max-w-2xl text-[0.95rem] leading-relaxed text-ink-soft">
+        {started
+          ? mode === "DEEP"
+            ? "Tiếp tục phiên chữa sâu để mở toàn bộ đáp án."
+            : "Tiếp tục phiên chữa nhanh để mở toàn bộ đáp án."
+          : "Đáp án đúng của những câu bạn làm sai đang được giữ kín. Hãy tự giảng lại bài đọc và tự chẩn đoán lỗi trước — cách học này giúp bạn nhớ lâu hơn nhiều so với việc đọc đáp án ngay."}
+      </p>
+      <div className="mt-5">
+        {started ? (
+          <Link
+            href={href}
+            className="inline-flex items-center gap-2 border border-gold bg-gold px-7 py-3 font-ui text-[0.8rem] font-semibold uppercase tracking-[0.12em] text-paper transition-colors hover:bg-[#9d7223]"
+          >
+            <Brain className="h-4 w-4" aria-hidden="true" />
+            Tiếp tục chữa bài
+          </Link>
+        ) : (
+          // Tạo phiên chữa bài rồi chuyển sang trang Feynman.
+          // Idempotent theo attemptId nên bấm nhiều lần cũng chỉ có một phiên.
+          <form action={startFeynmanReviewAction.bind(null, attemptId)}>
+            <SubmitButton variant="gold">
+              <Brain className="h-4 w-4" aria-hidden="true" />
+              Bắt đầu chữa bài
+            </SubmitButton>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function ReadingResult({
   attempt,
+  answersUnlocked,
 }: {
+  answersUnlocked: boolean;
   attempt: {
     answers: string;
     scoreRaw: number | null;
@@ -134,6 +233,15 @@ function ReadingResult({
       <h2 className="mt-12 font-display text-2xl font-bold text-navy-deep">
         Chi tiết từng câu
       </h2>
+      {!answersUnlocked && (
+        <p className="mt-4 flex items-start gap-2.5 border-l-4 border-gold bg-cream-deep px-5 py-4 font-ui text-sm leading-relaxed text-ink-soft">
+          <Lock className="mt-0.5 h-4 w-4 shrink-0 text-gold" aria-hidden="true" />
+          <span>
+            Đáp án đúng của các câu sai đang được giữ kín. Hoàn thành phần chữa
+            bài Feynman ở trên để mở toàn bộ đáp án.
+          </span>
+        </p>
+      )}
       <ol className="mt-6 divide-y divide-line border-y border-line">
         {detail.map((q) => (
           <li key={q.id} className="flex gap-4 py-4">
@@ -154,11 +262,17 @@ function ReadingResult({
                   Bạn trả lời: {q.userAnswer || "(bỏ trống)"}
                   {q.maxScore > 1 && ` — đúng ${q.score}/${q.maxScore}`}
                 </span>
-                {!q.correct && (
-                  <span className="ml-4 text-success">
-                    Đáp án đúng: {q.correctAnswer}
-                  </span>
-                )}
+                {!q.correct &&
+                  (answersUnlocked ? (
+                    <span className="ml-4 text-success">
+                      Đáp án đúng: {q.correctAnswer}
+                    </span>
+                  ) : (
+                    <span className="ml-4 inline-flex items-center gap-1 text-muted">
+                      <Lock className="h-3.5 w-3.5" aria-hidden="true" />
+                      Đáp án mở sau khi chữa bài
+                    </span>
+                  ))}
               </p>
             </div>
           </li>

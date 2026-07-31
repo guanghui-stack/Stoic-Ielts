@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Send, CloudUpload } from "lucide-react";
 import { Countdown } from "@/components/exam/countdown";
 import { useExamController } from "@/components/exam/use-exam-controller";
@@ -92,8 +92,13 @@ export function WritingExam({
       return "";
     }
   });
+  // Giữ bản mới nhất của bài viết cho autosave/nộp bài. Gán trong effect
+  // (không gán khi đang render) — effect luôn chạy xong trước khi người dùng
+  // kịp bấm nút hoặc trước nhịp autosave kế tiếp.
   const essayRef = useRef(essay);
-  essayRef.current = essay;
+  useEffect(() => {
+    essayRef.current = essay;
+  }, [essay]);
   const getAnswersJson = useCallback(
     () =>
       JSON.stringify({

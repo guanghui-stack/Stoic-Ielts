@@ -55,13 +55,6 @@ function rangesIntersect(a: Range, b: Range): boolean {
   );
 }
 
-const MATCH_TYPES = new Set([
-  "MATCH_HEADINGS",
-  "MATCH_INFO",
-  "MATCH_FEATURES",
-  "MATCH_ENDINGS",
-]);
-
 /** Nội dung hiển thị của một thẻ đáp án. */
 function chipText(type: string, options: string[], value: string): string {
   const idx = options.findIndex((_, i) => optionLabel(type as never, i) === value);

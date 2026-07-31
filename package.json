@@ -9,7 +9,8 @@
     "lint": "eslint",
     "test:admin": "node --experimental-strip-types scripts/test-admin-account.ts",
     "test:access": "node --experimental-strip-types scripts/test-access-rules.ts",
-    "test": "npm run test:admin && npm run test:access"
+    "test": "npm run test:admin && npm run test:access && npm run test:feynman",
+    "test:feynman": "node --experimental-strip-types scripts/test-feynman.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
