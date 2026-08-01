@@ -272,3 +272,77 @@ export function buildEventKey(input: {
       : "na";
   return `${type}:${subject}:${stamp}`;
 }
+
+/* ------------------------------------------------------------------ */
+/* 6. Kiểm tra phản hồi của API tra cứu đơn (dùng khi đối soát)         */
+/* ------------------------------------------------------------------ */
+
+/** Trạng thái khoản thanh toán được coi là đã thu tiền xong. */
+const SETTLED_TRANSACTION_STATUS = new Set(["APPROVED", "COMPLETED", "SUCCESS"]);
+
+/**
+ * Chọn mã giao dịch từ phản hồi tra cứu.
+ *
+ * Mảng `transactions` CÓ THỂ RỖNG ngay cả khi đơn đã CAPTURED — SePay ghi
+ * nhận khoản thanh toán trễ hơn trạng thái đơn. Khi đó lấy `order_id` (mã
+ * PAY... của SePay) làm khóa chống cấp quyền hai lần: nó cũng là chuỗi duy
+ * nhất phía SePay nên ràng buộc unique trên providerTransactionId vẫn đúng.
+ */
+function pickSettledTransactionId(root: Record<string, unknown>): string | null {
+  const list = Array.isArray(root.transactions) ? root.transactions : [];
+  for (const item of list) {
+    if (typeof item !== "object" || item === null) continue;
+    const t = item as Record<string, unknown>;
+    if (t.transaction_type !== undefined && t.transaction_type !== "PAYMENT") {
+      continue;
+    }
+    const status = String(t.transaction_status ?? "").toUpperCase();
+    if (status && !SETTLED_TRANSACTION_STATUS.has(status)) continue;
+    const id = String(t.transaction_id ?? t.id ?? "").trim();
+    if (id) return id;
+  }
+  const orderId = String(root.order_id ?? "").trim();
+  return orderId || null;
+}
+
+/**
+ * Xác minh phản hồi của `client.order.retrieve()` — CẤU TRÚC KHÁC IPN.
+ *
+ * IPN gửi tới dạng lồng nhau: { order: {...}, transaction: {...} }.
+ * API tra cứu trả về PHẲNG: các trường order_* nằm thẳng ở gốc, còn các khoản
+ * thanh toán nằm trong mảng `transactions`.
+ *
+ * Dùng nhầm `checkIpnPaidPayload` cho phản hồi này thì lần nào cũng ra
+ * MISSING_ORDER, nghĩa là đơn ĐÃ trả tiền vẫn kẹt ở "Đang chờ" và bấm Đối soát
+ * bao nhiêu lần cũng vô ích. Đó chính là lỗi hàm này sinh ra để chữa.
+ *
+ * Vẫn giữ nguyên nguyên tắc chặn khi nghi ngờ: số tiền và đơn vị tiền phải
+ * khớp tuyệt đối với đơn mình đã chốt.
+ */
+export function checkRetrievedOrderPaid(
+  payload: unknown,
+  order: { amount: number; currency: string }
+): IpnPaidCheck {
+  if (typeof payload !== "object" || payload === null) {
+    return { ok: false, reason: "PAYLOAD_NOT_OBJECT" };
+  }
+  const root = payload as Record<string, unknown>;
+
+  if (root.order_status !== "CAPTURED") {
+    return { ok: false, reason: `ORDER_STATUS:${String(root.order_status)}` };
+  }
+  if (root.order_currency !== order.currency) {
+    return { ok: false, reason: `ORDER_CURRENCY:${String(root.order_currency)}` };
+  }
+
+  // "9000.00" là dạng SePay hay trả về; parseVndAmount vẫn loại được số lẻ thật.
+  const orderAmount = parseVndAmount(root.order_amount);
+  if (orderAmount === null || orderAmount !== order.amount) {
+    return { ok: false, reason: `ORDER_AMOUNT:${String(root.order_amount)}` };
+  }
+
+  const transactionId = pickSettledTransactionId(root);
+  if (!transactionId) return { ok: false, reason: "MISSING_TRANSACTION_ID" };
+
+  return { ok: true, transactionId };
+}
