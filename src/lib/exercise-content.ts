@@ -119,6 +119,14 @@ export type ReadingContent = {
   parts?: ReadingPart[];
   passage?: ReadingPassage;
   questionGroups?: ReadingQuestionGroup[];
+  /**
+   * Thang quy đổi điểm thô sang band riêng cho đề này. Bỏ trống thì hệ thống
+   * dùng thang mặc định suy từ bảng IELTS Academic Reading (xem reading-band.ts).
+   */
+  scoring?: {
+    scaleVersion?: string;
+    bandMap?: Array<{ minRaw: number; band: number }>;
+  };
 };
 
 export type WritingContent = {

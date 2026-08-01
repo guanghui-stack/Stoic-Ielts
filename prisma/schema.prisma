@@ -48,6 +48,11 @@ model Exercise {
   published       Boolean          @default(true)
   /// PUBLIC = mọi học viên làm được · RESTRICTED = phải được quản trị viên mở khóa
   accessLevel     String           @default("PUBLIC")
+  /// Bài này có được tính vào điều kiện danh hiệu không. Mặc định TẮT: đề nháp
+  /// hoặc đề thử nghiệm không được phép làm sai lệch hành trình của học viên.
+  achievementEligible Boolean      @default(false)
+  /// Đề chỉ dùng cho Nguyệt Thí — không hiện ở khu luyện tập công khai.
+  competitionOnly     Boolean      @default(false)
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   attempts        Attempt[]
@@ -90,6 +95,20 @@ model Attempt {
   /// Thời điểm học viên bấm "Xem đáp án cơ bản" — đáp án Reading luôn miễn phí,
   /// Feynman chỉ khóa lớp chữa sâu (lời giải mẫu, bẫy, quy trình tự giảng lại).
   answersRevealedAt DateTime?
+
+  /// Lần thứ mấy học viên làm đúng bài này. Danh hiệu xét "lần hợp lệ ĐẦU TIÊN"
+  /// nên con số này phải cố định, không được đổi khi làm lại.
+  attemptNumber        Int      @default(1)
+  /// Số câu thực sự có trả lời — dùng để loại lượt nộp bừa.
+  answeredCount        Int?
+  /// Thời gian làm bài thật (giây), đo từ lúc bắt đầu tới lúc nộp.
+  elapsedSeconds       Int?
+  /// Thang quy đổi band đã dùng, để đổi thang không làm sai lệch lịch sử.
+  bandScaleVersion     String?
+  /// Kết quả của hàng rào chống cày, chốt ngay lúc chấm.
+  validForAchievements Boolean  @default(false)
+  /// CLEAR | REVIEW | FLAGGED — chỉ CLEAR mới được tính danh hiệu.
+  integrityStatus      String   @default("CLEAR")
 
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   exercise      Exercise       @relation(fields: [exerciseId], references: [id], onDelete: Cascade)

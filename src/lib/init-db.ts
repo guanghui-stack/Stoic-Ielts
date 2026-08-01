@@ -1,6 +1,10 @@
 import { randomBytes } from "node:crypto";
 import { db } from "@/lib/db";
 import { ensureAdminAccount, type AdminDb } from "@/lib/admin-account";
+import {
+  calculateReadingBand,
+  isValidAchievementAttempt,
+} from "@/lib/reading-band";
 import seedData from "../../prisma/seed-data.json";
 import readingGameTheory from "../../prisma/reading-game-theory.json";
 
@@ -237,6 +241,16 @@ const MIGRATIONS = [
   `ALTER TABLE \`User\` ADD COLUMN \`examDate\` DATETIME(3) NULL`,
   `ALTER TABLE \`Exercise\` ADD COLUMN \`accessLevel\` VARCHAR(191) NOT NULL DEFAULT 'PUBLIC'`,
   `ALTER TABLE \`Attempt\` ADD COLUMN \`answersRevealedAt\` DATETIME(3) NULL`,
+
+  // Danh hiệu: siêu dữ liệu lượt làm bài và cờ tính danh hiệu của đề
+  `ALTER TABLE \`Exercise\` ADD COLUMN \`achievementEligible\` BOOLEAN NOT NULL DEFAULT false`,
+  `ALTER TABLE \`Exercise\` ADD COLUMN \`competitionOnly\` BOOLEAN NOT NULL DEFAULT false`,
+  `ALTER TABLE \`Attempt\` ADD COLUMN \`attemptNumber\` INTEGER NOT NULL DEFAULT 1`,
+  `ALTER TABLE \`Attempt\` ADD COLUMN \`answeredCount\` INTEGER NULL`,
+  `ALTER TABLE \`Attempt\` ADD COLUMN \`elapsedSeconds\` INTEGER NULL`,
+  `ALTER TABLE \`Attempt\` ADD COLUMN \`bandScaleVersion\` VARCHAR(191) NULL`,
+  `ALTER TABLE \`Attempt\` ADD COLUMN \`validForAchievements\` BOOLEAN NOT NULL DEFAULT false`,
+  `ALTER TABLE \`Attempt\` ADD COLUMN \`integrityStatus\` VARCHAR(32) NOT NULL DEFAULT 'CLEAR'`,
 ];
 
 export async function initDatabase() {
@@ -351,6 +365,97 @@ export async function initDatabase() {
     );
   });
 
+  // Bật cờ tính danh hiệu cho các đề Reading đang công khai. Chỉ chạy MỘT LẦN
+  // để quản trị viên tắt/bật lại về sau không bị ghi đè.
+  await applyOnce("SEED_ACHIEVEMENT_ELIGIBLE_v1", async () => {
+    const res = await db.exercise.updateMany({
+      where: { skill: "READING", published: true, competitionOnly: false },
+      data: { achievementEligible: true },
+    });
+    console.log(`[wobridges] Bật tính danh hiệu cho ${res.count} đề Reading`);
+  });
+
+  // Đánh số thứ tự lượt làm và dựng lại siêu dữ liệu cho bài làm CŨ.
+  // Học viên đã bỏ công làm bài trước khi có hệ danh hiệu vẫn phải được ghi
+  // nhận — bắt họ làm lại từ đầu là phủ nhận công sức có thật.
+  await applyOnce("BACKFILL_ATTEMPT_METADATA_v1", async () => {
+    await db.$executeRawUnsafe(`
+      UPDATE \`Attempt\` a
+      JOIN (
+        SELECT \`id\`, ROW_NUMBER() OVER (
+          PARTITION BY \`userId\`, \`exerciseId\` ORDER BY \`startedAt\`, \`id\`
+        ) AS rn
+        FROM \`Attempt\`
+      ) r ON r.\`id\` = a.\`id\`
+      SET a.\`attemptNumber\` = r.rn
+    `);
+
+    const old = await db.attempt.findMany({
+      where: { status: "GRADED", exercise: { skill: "READING" } },
+      include: {
+        exercise: {
+          select: { content: true, durationMinutes: true, achievementEligible: true },
+        },
+      },
+    });
+
+    let updated = 0;
+    for (const attempt of old) {
+      const content = safeParse(attempt.exercise.content);
+      const answers = safeParse(attempt.answers) ?? {};
+      const answeredCount = Object.values(answers as Record<string, unknown>).filter(
+        (v) => v !== null && v !== undefined && String(v).trim() !== ""
+      ).length;
+      const elapsedSeconds = attempt.submittedAt
+        ? Math.max(
+            0,
+            Math.round(
+              (attempt.submittedAt.getTime() - attempt.startedAt.getTime()) / 1000
+            )
+          )
+        : null;
+      const bandResult = calculateReadingBand(
+        content as never,
+        attempt.scoreRaw ?? 0,
+        attempt.scoreTotal ?? 0
+      );
+
+      const valid = isValidAchievementAttempt({
+        status: attempt.status,
+        achievementEligible: attempt.exercise.achievementEligible,
+        band: bandResult?.band ?? null,
+        answeredCount,
+        scoreTotal: attempt.scoreTotal,
+        elapsedSeconds,
+        durationMinutes: attempt.exercise.durationMinutes,
+        integrityStatus: attempt.integrityStatus,
+      });
+
+      await db.attempt.update({
+        where: { id: attempt.id },
+        data: {
+          answeredCount,
+          elapsedSeconds,
+          band: bandResult?.band ?? null,
+          bandScaleVersion: bandResult?.scaleVersion ?? null,
+          validForAchievements: valid,
+        },
+      });
+      updated++;
+    }
+    console.log(`[wobridges] Đã dựng lại dữ liệu cho ${updated} bài làm cũ`);
+  });
+
+  // Ràng buộc chống trùng số thứ tự lượt làm. Đặt SAU khi đã đánh số lại;
+  // nằm trong danh sách migration nên lỗi (nếu còn trùng) không làm sập gì.
+  try {
+    await db.$executeRawUnsafe(
+      "ALTER TABLE `Attempt` ADD UNIQUE INDEX `Attempt_userId_exerciseId_attemptNumber_key` (`userId`, `exerciseId`, `attemptNumber`)"
+    );
+  } catch {
+    /* đã có, hoặc dữ liệu cũ còn trùng — không chặn khởi động */
+  }
+
   // Báo lỗi ở CUỐI, sau khi mọi việc độc lập đã chạy xong
   if (ddlErrors.length > 0) {
     throw new Error(`Lỗi tạo bảng — ${ddlErrors.join(" | ")}`);
@@ -366,6 +471,16 @@ type SeedExercise = {
   content: unknown;
   accessLevel?: string;
 };
+
+/** Đọc JSON không ném lỗi — dữ liệu cũ có thể hỏng, không được làm sập khởi động. */
+function safeParse(text: string | null | undefined): unknown {
+  if (!text) return null;
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+}
 
 /** Chạy một tác vụ đúng một lần trong đời database (đánh dấu ở bảng Config). */
 async function applyOnce(key: string, fn: () => Promise<void>) {

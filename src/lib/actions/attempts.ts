@@ -4,8 +4,16 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
-import { gradeReading, type ReadingContent } from "@/lib/exercise-content";
+import {
+  gradeReading,
+  type ReadingAnswers,
+  type ReadingContent,
+} from "@/lib/exercise-content";
 import { canAccessExercise } from "@/lib/exercise-access";
+import {
+  calculateReadingBand,
+  isValidAchievementAttempt,
+} from "@/lib/reading-band";
 
 /** Dung sai sau hạn chót (mạng chậm, tự nộp phía client trễ vài giây). */
 const GRACE_MS = 15_000;
@@ -34,11 +42,16 @@ export async function startAttemptAction(exerciseId: string) {
     await finalizeAttempt(existing.id, true);
   }
 
+  // Số thứ tự lượt làm phải cố định: danh hiệu xét "lần hợp lệ ĐẦU TIÊN",
+  // nên làm lại nhiều lần không được phép ghi đè kết quả lần đầu.
+  const previous = await db.attempt.count({ where: { userId: user.id, exerciseId } });
+
   const attempt = await db.attempt.create({
     data: {
       userId: user.id,
       exerciseId,
       answers: "{}",
+      attemptNumber: previous + 1,
       deadlineAt: new Date(Date.now() + exercise.durationMinutes * 60_000),
     },
   });
@@ -77,25 +90,66 @@ async function finalizeAttempt(attemptId: string, auto: boolean) {
   let scoreRaw: number | null = null;
   let scoreTotal: number | null = null;
   let status = "SUBMITTED";
+  let band: number | null = null;
+  let bandScaleVersion: string | null = null;
+  let answeredCount: number | null = null;
+  let validForAchievements = false;
+
+  const now = new Date();
+  // Thời gian làm bài THẬT, kẹp theo thời lượng đề để lượt bị treo qua đêm
+  // không biến thành một con số vô lý.
+  const elapsedSeconds = Math.max(
+    0,
+    Math.min(
+      Math.round((now.getTime() - attempt.startedAt.getTime()) / 1000),
+      attempt.exercise.durationMinutes * 60
+    )
+  );
 
   if (attempt.exercise.skill === "READING") {
     const content = JSON.parse(attempt.exercise.content) as ReadingContent;
-    const answers = JSON.parse(attempt.answers || "{}");
+    const answers = JSON.parse(attempt.answers || "{}") as ReadingAnswers;
     const graded = gradeReading(content, answers);
     scoreRaw = graded.scoreRaw;
     scoreTotal = graded.scoreTotal;
     status = "GRADED"; // Reading chấm máy, không cần giáo viên
+
+    answeredCount = Object.values(answers).filter(
+      (v) => v !== null && v !== undefined && String(v).trim() !== ""
+    ).length;
+
+    // Band phải được CHỐT ngay lúc chấm: nếu tính lại khi hiển thị, đổi thang
+    // quy đổi về sau sẽ âm thầm làm thay đổi kết quả cũ của học viên.
+    const bandResult = calculateReadingBand(content, scoreRaw, scoreTotal);
+    band = bandResult?.band ?? null;
+    bandScaleVersion = bandResult?.scaleVersion ?? null;
+
+    validForAchievements = isValidAchievementAttempt({
+      status,
+      achievementEligible: attempt.exercise.achievementEligible,
+      band,
+      answeredCount,
+      scoreTotal,
+      elapsedSeconds,
+      durationMinutes: attempt.exercise.durationMinutes,
+      integrityStatus: attempt.integrityStatus,
+    });
   }
 
   await db.attempt.update({
     where: { id: attemptId },
     data: {
       status,
-      submittedAt: new Date(),
+      submittedAt: now,
       autoSubmitted: auto,
       scoreRaw,
       scoreTotal,
-      gradedAt: status === "GRADED" ? new Date() : null,
+      band,
+      bandScaleVersion,
+      answeredCount,
+      elapsedSeconds,
+      validForAchievements,
+      gradedAt: status === "GRADED" ? now : null,
     },
   });
 }
