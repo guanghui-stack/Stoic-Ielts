@@ -10,6 +10,7 @@ import {
   buildEventKey,
   canTransitionToPaid,
   checkIpnPaidPayload,
+  checkRetrievedOrderPaid,
   computeGrantWindow,
   decideGrantAccess,
   introPromoTokenFor,
@@ -238,6 +239,60 @@ check("số thập phân bị loại", parseVndAmount(99_000.5), null);
 check("chuỗi rác bị loại", parseVndAmount("99k"), null);
 check("null bị loại", parseVndAmount(null), null);
 check("true KHÔNG được hiểu thành 1", parseVndAmount(true), null);
+
+/* ---------------------------------------------------------------- */
+console.log("\nĐỐI SOÁT — phản hồi API tra cứu có cấu trúc PHẰNG, khác IPN");
+const ORDER_9K = { amount: 9_000, currency: "VND" };
+
+// Chép nguyên văn phản hồi thật của SePay sandbox cho một đơn đã thu tiền:
+// các trường order_* nằm thẳng ở gốc, và `transactions` CÓ THỂ RỖNG.
+const retrieved = {
+  id: "31660e1b-8d84-11f1-b21a-a6006ab65aca",
+  customer_id: "cmsa43ntn00005a6lpde128xv",
+  order_id: "PAY84166A6DAFD995C35",
+  order_invoice_number: "WB-260801083712-6C811F",
+  order_status: "CAPTURED",
+  order_amount: "9000.00",
+  order_currency: "VND",
+  order_description: "Wobridges - Reading — mở một bài",
+  authentication_status: null,
+  transactions: [] as unknown[],
+};
+const withRetrieved = (patch: Record<string, unknown>) => ({ ...retrieved, ...patch });
+const txIdOf = (payload: unknown) =>
+  (checkRetrievedOrderPaid(payload, ORDER_9K) as { transactionId: string }).transactionId;
+
+check("phản hồi tra cứu thật được chấp nhận", checkRetrievedOrderPaid(retrieved, ORDER_9K).ok, true);
+check("transactions rỗng → rơi về order_id làm khóa chống lặp", txIdOf(retrieved), "PAY84166A6DAFD995C35");
+check(
+  "có khoản thanh toán thì ưu tiên mã giao dịch thật",
+  txIdOf(
+    withRetrieved({
+      transactions: [
+        { transaction_id: "6a6db0c8e3fb9", transaction_type: "PAYMENT", transaction_status: "APPROVED" },
+      ],
+    })
+  ),
+  "6a6db0c8e3fb9"
+);
+check(
+  "khoản hoàn tiền KHÔNG được coi là bằng chứng đã trả",
+  txIdOf(
+    withRetrieved({
+      transactions: [
+        { transaction_id: "RF-1", transaction_type: "REFUND", transaction_status: "APPROVED" },
+      ],
+    })
+  ),
+  "PAY84166A6DAFD995C35"
+);
+check("đơn chưa CAPTURED → chưa mở quyền", checkRetrievedOrderPaid(withRetrieved({ order_status: "PENDING" }), ORDER_9K).ok, false);
+check("trả thiếu tiền → từ chối", checkRetrievedOrderPaid(withRetrieved({ order_amount: "1000.00" }), ORDER_9K).ok, false);
+check("trả thừa tiền → cũng từ chối", checkRetrievedOrderPaid(withRetrieved({ order_amount: "99000.00" }), ORDER_9K).ok, false);
+check("sai đơn vị tiền → từ chối", checkRetrievedOrderPaid(withRetrieved({ order_currency: "USD" }), ORDER_9K).ok, false);
+check("số tiền có phần lẻ thật → từ chối", checkRetrievedOrderPaid(withRetrieved({ order_amount: "9000.50" }), ORDER_9K).ok, false);
+check("gói IPN đưa nhầm vào đây → từ chối", checkRetrievedOrderPaid(validPayload, ORDER_9K).ok, false);
+check("payload null → từ chối", checkRetrievedOrderPaid(null, ORDER_9K).ok, false);
 
 /* ---------------------------------------------------------------- */
 console.log("\nCHỐNG XỬ LÝ LẶP (A10)");
