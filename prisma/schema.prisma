@@ -262,8 +262,10 @@ model AccessGrant {
   exercise Exercise?     @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
   order    PaymentOrder? @relation(fields: [orderId], references: [id], onDelete: SetNull)
 
+  // Chỉ MỘT index tổng hợp: năm cột VARCHAR(191) utf8mb4 vượt giới hạn 3072
+  // byte của MySQL. Truy vấn luôn lọc theo userId + feature rồi lọc tiếp
+  // scope/exerciseId trong bộ nhớ (số grant mỗi học viên rất nhỏ).
   @@index([userId, feature, status, expiresAt])
-  @@index([userId, feature, scope, exerciseId, status])
 }
 
 // Cấu hình hệ thống bền vững (ví dụ SESSION_SECRET) — sống qua các lần deploy

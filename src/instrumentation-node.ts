@@ -56,20 +56,40 @@ export async function setupServer() {
 
   /* ===== 2 + 3. Khởi tạo database và SESSION_SECRET ===== */
   if (process.env.NODE_ENV === "production") {
+    const { initDatabase, getOrCreateSessionSecret } = await import(
+      "./lib/init-db"
+    );
+
+    let initError: unknown = null;
     try {
       console.log("[wobridges] Kiểm tra database + tài khoản admin…");
-      const { initDatabase, getOrCreateSessionSecret } = await import(
-        "./lib/init-db"
-      );
       await initDatabase();
-      if (!process.env.SESSION_SECRET) {
+    } catch (err) {
+      initError = err;
+      console.error("[wobridges] Khởi tạo database thất bại:", err);
+    }
+
+    /**
+     * Lấy SESSION_SECRET NGAY CẢ KHI bước trên hỏng.
+     *
+     * Bài học phải trả giá: một lệnh tạo bảng lỗi từng kéo theo việc bỏ qua
+     * bước này, khiến khóa phiên rơi về giá trị ngẫu nhiên tạm — và mọi học
+     * viên đang đăng nhập bị đá ra ngoài. Hai việc đó không liên quan gì đến
+     * nhau, nên không được để chúng chết chung.
+     */
+    if (!process.env.SESSION_SECRET) {
+      try {
         process.env.SESSION_SECRET = await getOrCreateSessionSecret();
+      } catch (err) {
+        console.error("[wobridges] Không lấy được SESSION_SECRET:", err);
       }
+    }
+
+    if (initError) {
+      g.__wobridgesInit = String(initError).slice(0, 500);
+    } else {
       g.__wobridgesInit = "ok";
       console.log("[wobridges] Khởi tạo hoàn tất — website sẵn sàng.");
-    } catch (err) {
-      g.__wobridgesInit = String(err).slice(0, 500);
-      console.error("[wobridges] Khởi tạo database thất bại:", err);
     }
   }
 

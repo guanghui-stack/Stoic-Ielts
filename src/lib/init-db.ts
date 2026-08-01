@@ -218,7 +218,6 @@ const DDL = [
     UNIQUE INDEX \`AccessGrant_orderId_key\` (\`orderId\`),
     UNIQUE INDEX \`AccessGrant_grantKey_key\` (\`grantKey\`),
     INDEX \`AccessGrant_userId_feature_status_expiresAt_idx\` (\`userId\`, \`feature\`, \`status\`, \`expiresAt\`),
-    INDEX \`AccessGrant_userId_feature_scope_exerciseId_status_idx\` (\`userId\`, \`feature\`, \`scope\`, \`exerciseId\`, \`status\`),
     CONSTRAINT \`AccessGrant_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT \`AccessGrant_exerciseId_fkey\` FOREIGN KEY (\`exerciseId\`) REFERENCES \`Exercise\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT \`AccessGrant_orderId_fkey\` FOREIGN KEY (\`orderId\`) REFERENCES \`PaymentOrder\` (\`id\`) ON DELETE SET NULL ON UPDATE CASCADE
@@ -241,8 +240,23 @@ const MIGRATIONS = [
 ];
 
 export async function initDatabase() {
+  /**
+   * Mỗi lệnh tạo bảng chạy độc lập.
+   *
+   * Bài học phải trả giá: một lệnh CREATE TABLE lỗi từng làm dừng cả vòng lặp,
+   * nên những bảng phía sau không được tạo VÀ các bước quan trọng khác (kiểm
+   * tra tài khoản quản trị, chuyển dữ liệu cũ) cũng không chạy. Lỗi vẫn được
+   * ném ra ở cuối để không ai tưởng mọi thứ vẫn ổn.
+   */
+  const ddlErrors: string[] = [];
   for (const stmt of DDL) {
-    await db.$executeRawUnsafe(stmt);
+    try {
+      await db.$executeRawUnsafe(stmt);
+    } catch (err) {
+      const name = stmt.match(/CREATE TABLE IF NOT EXISTS `(\w+)`/)?.[1] ?? "?";
+      ddlErrors.push(`${name}: ${String(err).slice(0, 300)}`);
+      console.error(`[wobridges] Không tạo được bảng ${name}:`, err);
+    }
   }
 
   for (const stmt of MIGRATIONS) {
@@ -336,6 +350,11 @@ export async function initDatabase() {
       `[wobridges] Đã chuyển ${moved} quyền truy cập cũ sang sổ cái AccessGrant`
     );
   });
+
+  // Báo lỗi ở CUỐI, sau khi mọi việc độc lập đã chạy xong
+  if (ddlErrors.length > 0) {
+    throw new Error(`Lỗi tạo bảng — ${ddlErrors.join(" | ")}`);
+  }
 }
 
 type SeedExercise = {
