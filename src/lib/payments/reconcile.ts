@@ -2,7 +2,7 @@ import "server-only";
 import { db } from "@/lib/db";
 import { getSePayClient } from "@/lib/payments/sepay";
 import { fulfillPaidOrder } from "@/lib/payments/fulfillment";
-import { checkIpnPaidPayload } from "@/lib/payments/payment-rules";
+import { checkRetrievedOrderPaid } from "@/lib/payments/payment-rules";
 
 /**
  * Đối soát một đơn với SePay — dùng chung cho nút bấm của quản trị viên và tác
@@ -38,7 +38,9 @@ export async function reconcileOneOrder(
     };
   }
 
-  // API có thể bọc trong { data: {...} } hoặc trả phẳng — chấp nhận cả hai
+  // API có thể bọc trong { data: {...} } hoặc trả phẳng — chấp nhận cả hai.
+  // Bên trong lớp bọc đó là ĐƠN HÀNG dạng phẳng (order_status, order_amount…),
+  // KHÔNG phải gói thông báo IPN dạng { order, transaction }.
   const wrapper = body as Record<string, unknown> | null;
   const payload =
     wrapper && typeof wrapper.data === "object" && wrapper.data !== null
@@ -46,7 +48,7 @@ export async function reconcileOneOrder(
       : wrapper;
 
   const snapshot = JSON.stringify(payload ?? {}).slice(0, 60_000);
-  const check = checkIpnPaidPayload(payload, {
+  const check = checkRetrievedOrderPaid(payload, {
     amount: order.amount,
     currency: order.currency,
   });
@@ -62,12 +64,15 @@ export async function reconcileOneOrder(
   }
 
   const record = payload as Record<string, unknown>;
-  const tx = record.transaction as Record<string, unknown> | undefined;
-  const ord = record.order as Record<string, unknown> | undefined;
+  const txList = Array.isArray(record.transactions) ? record.transactions : [];
+  const tx = txList.find(
+    (item): item is Record<string, unknown> =>
+      typeof item === "object" && item !== null
+  );
 
   const result = await fulfillPaidOrder({
     orderId: order.id,
-    providerOrderId: ord?.order_id ? String(ord.order_id) : null,
+    providerOrderId: record.order_id ? String(record.order_id) : null,
     providerTransactionId: check.transactionId,
     paymentMethod: tx?.payment_method ? String(tx.payment_method) : "BANK_TRANSFER",
     paidAt: new Date(),
