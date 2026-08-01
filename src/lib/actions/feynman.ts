@@ -8,6 +8,7 @@ import { gradeReading, type ReadingContent } from "@/lib/exercise-content";
 import { FEYNMAN_LIMITS, isFeynmanErrorType } from "@/lib/feynman-constants";
 import { chooseFeynmanMode, selectPriorityMistakes } from "@/lib/feynman-rules";
 import { buildFeynmanLearningLookup } from "@/lib/feynman";
+import { hasActiveAccess } from "@/lib/access-grants";
 
 export type FeynmanFormState = { error?: string } | undefined;
 
@@ -49,8 +50,22 @@ export async function startFeynmanReviewAction(attemptId: string) {
   if (attempt.exercise.skill !== "READING" || attempt.status !== "GRADED") {
     redirect(`/hoc-vien/bai-lam/${attemptId}`);
   }
+  // Phiên đã tạo thì luôn vào được — kể cả khi gói Feynman đã hết hạn. Việc
+  // học dở dang không được phép biến mất vì lý do thương mại.
   if (attempt.feynmanReview) {
     redirect(`/hoc-vien/bai-lam/${attemptId}/feynman`);
+  }
+
+  // Chỉ kiểm tra quyền ở đúng lúc TẠO phiên mới.
+  const canStart =
+    user.role === "ADMIN" ||
+    (await hasActiveAccess({
+      userId: user.id,
+      feature: "FEYNMAN",
+      exerciseId: attempt.exerciseId,
+    }));
+  if (!canStart) {
+    redirect(`/hoc-vien/bai-lam/${attemptId}?mua=feynman`);
   }
 
   const content = JSON.parse(attempt.exercise.content) as ReadingContent;

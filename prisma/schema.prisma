@@ -33,6 +33,8 @@ model User {
   attempts       Attempt[]
   exerciseAccess ExerciseAccess[]
   feynmanReviews FeynmanReview[]
+  paymentOrders  PaymentOrder[]
+  accessGrants   AccessGrant[]
 }
 
 model Exercise {
@@ -50,6 +52,8 @@ model Exercise {
   updatedAt       DateTime         @updatedAt
   attempts        Attempt[]
   access          ExerciseAccess[]
+  paymentOrders   PaymentOrder[]
+  accessGrants    AccessGrant[]
 }
 
 /// Quyền truy cập bài tập RESTRICTED được cấp cho từng học viên.
@@ -83,6 +87,9 @@ model Attempt {
   feedback      String?   @db.Text // Nhận xét của giáo viên
   gradedAt      DateTime?
   gradedById    String?
+  /// Thời điểm học viên bấm "Xem đáp án cơ bản" — đáp án Reading luôn miễn phí,
+  /// Feynman chỉ khóa lớp chữa sâu (lời giải mẫu, bẫy, quy trình tự giảng lại).
+  answersRevealedAt DateTime?
 
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   exercise      Exercise       @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
@@ -153,6 +160,110 @@ model FeynmanMistake {
   @@unique([reviewId, questionId])
   @@index([reviewId])
   @@index([errorType])
+}
+
+/// Một đơn hàng, chốt cứng giá và sản phẩm tại thời điểm tạo.
+/// Giá KHÔNG BAO GIỜ do trình duyệt gửi lên — luôn lấy từ catalog phía máy chủ,
+/// rồi chụp lại vào đây để sau này đối soát được với số tiền SePay báo về.
+model PaymentOrder {
+  id            String  @id @default(cuid())
+  invoiceNumber String  @unique
+  userId        String
+  exerciseId    String?
+  /// Đường dẫn quay về sau khi trả tiền — do máy chủ tự dựng, không nhận từ
+  /// biểu mẫu, để tránh lỗ hổng chuyển hướng tùy ý (open redirect).
+  returnPath    String  @db.Text
+  offerCode     String
+  feature       String // READING | FEYNMAN
+  scope         String // ALL | EXERCISE
+  amount        Int // đơn vị VND, luôn là số nguyên
+  currency      String  @default("VND")
+  priceVersion  String
+  priceRule     String // STANDARD | FIRST_FEYNMAN_9K
+  /// PENDING | PAID | CANCELLED | FAILED | EXPIRED | REQUIRES_REVIEW | VOIDED | REFUNDED
+  status        String  @default("PENDING")
+
+  provider              String  @default("SEPAY_PG")
+  providerEnvironment   String // sandbox | production
+  providerOrderId       String?
+  providerTransactionId String? @unique
+  paymentMethod         String?
+
+  /// Khóa duy nhất giữ chỗ ưu đãi "bài Feynman đầu tiên 9.000đ".
+  /// Chỉ tồn tại trên đơn PENDING hoặc PAID; đơn hủy/lỗi sẽ được nhả khóa để
+  /// học viên vẫn dùng được ưu đãi mà họ chưa thực sự tiêu.
+  introPromoToken String? @unique
+
+  expiresAt      DateTime
+  paidAt         DateTime?
+  cancelledAt    DateTime?
+  voidedAt       DateTime?
+  lastError      String?   @db.Text
+  rawLastPayload String?   @db.LongText
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercise Exercise?      @relation(fields: [exerciseId], references: [id], onDelete: SetNull)
+  events   PaymentEvent[]
+  grants   AccessGrant[]
+
+  @@index([userId, status, createdAt])
+  @@index([exerciseId, status])
+}
+
+/// Nhật ký mọi thông báo IPN đã nhận. `eventKey` duy nhất chính là cơ chế chống
+/// xử lý lặp: SePay gửi lại cùng một thông báo thì bản ghi thứ hai bị từ chối.
+model PaymentEvent {
+  id                    String    @id @default(cuid())
+  eventKey              String    @unique
+  orderId               String?
+  notificationType      String
+  providerTransactionId String?
+  /// RECEIVED | PROCESSED | FAILED | IGNORED
+  processingStatus      String    @default("RECEIVED")
+  payloadJson           String    @db.LongText
+  errorMessage          String?   @db.Text
+  receivedAt            DateTime  @default(now())
+  processedAt           DateTime?
+
+  order PaymentOrder? @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  @@index([orderId, receivedAt])
+  @@index([processingStatus, receivedAt])
+}
+
+/// Sổ cái quyền truy cập, dùng chung cho cả Reading lẫn Feynman.
+/// Thay cho ExerciseAccess vì bảng cũ không diễn tả được thời hạn 30 ngày,
+/// nguồn gốc quyền (mua hay admin cấp) và việc thu hồi khi hoàn tiền.
+model AccessGrant {
+  id         String  @id @default(cuid())
+  userId     String
+  exerciseId String?
+  orderId    String? @unique
+  /// Khóa định danh để cấp quyền là thao tác lặp lại vô hại (idempotent):
+  /// ORDER:<orderId> cho quyền đã mua, ADMIN:<feature>:<scope>:<userId> cho
+  /// quyền admin cấp tay, LEGACY:<id> cho dữ liệu chuyển từ ExerciseAccess.
+  grantKey   String  @unique
+  feature    String // READING | FEYNMAN
+  scope      String // ALL | EXERCISE
+  source     String // PURCHASE | ADMIN | LEGACY | REWARD
+  status     String  @default("ACTIVE") // ACTIVE | REVOKED
+
+  startsAt     DateTime
+  /// null = quyền vĩnh viễn (mua lẻ hoặc admin cấp)
+  expiresAt    DateTime?
+  revokedAt    DateTime?
+  revokeReason String?   @db.Text
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercise Exercise?     @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  order    PaymentOrder? @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  @@index([userId, feature, status, expiresAt])
+  @@index([userId, feature, scope, exerciseId, status])
 }
 
 // Cấu hình hệ thống bền vững (ví dụ SESSION_SECRET) — sống qua các lần deploy

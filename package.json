@@ -9,8 +9,9 @@
     "lint": "eslint",
     "test:admin": "node --experimental-strip-types scripts/test-admin-account.ts",
     "test:access": "node --experimental-strip-types scripts/test-access-rules.ts",
-    "test": "npm run test:admin && npm run test:access && npm run test:feynman",
-    "test:feynman": "node --experimental-strip-types scripts/test-feynman.ts"
+    "test": "npm run test:admin && npm run test:access && npm run test:feynman && npm run test:payments",
+    "test:feynman": "node --experimental-strip-types scripts/test-feynman.ts",
+    "test:payments": "node --experimental-strip-types scripts/test-payments.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
@@ -21,6 +22,7 @@
     "prisma": "^6.19.3",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "sepay-pg-node": "^1.0.0",
     "server-only": "^0.0.1"
   },
   "devDependencies": {

@@ -8,6 +8,7 @@ import {
   TimerOff,
   Brain,
   Lock,
+  Sparkles,
 } from "lucide-react";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
@@ -19,6 +20,12 @@ import {
 } from "@/lib/exercise-content";
 import { NoteBox, SubmitButton } from "@/components/ui";
 import { startFeynmanReviewAction } from "@/lib/actions/feynman";
+import { revealBasicAnswersAction } from "@/lib/actions/attempts";
+import { hasActiveAccess } from "@/lib/access-grants";
+import { feynmanSinglePrice } from "@/lib/payments/quote";
+import { isSePayConfigured } from "@/lib/payments/sepay";
+import { OFFERS, formatVnd, INTRO_PROMO_NOTICE } from "@/lib/payments/catalog";
+import { PurchaseButton } from "@/components/payments/purchase-button";
 
 export const metadata = { title: "Kết quả bài làm" };
 
@@ -51,12 +58,27 @@ export default async function AttemptResultPage({
   const isOwner = attempt.userId === user.id;
 
   /**
-   * KHÓA ĐÁP ÁN: đáp án đúng của câu sai chỉ được hiện khi người xem là quản
-   * trị viên, hoặc khi học viên đã hoàn thành phiên chữa bài Feynman. Đây là
-   * cơ chế buộc người học tự giải thích trước khi biết đáp án.
+   * ĐÁP ÁN CƠ BẢN LÀ MIỄN PHÍ. Học viên chỉ cần bấm một lần để mở — cú bấm đó
+   * giữ lại khoảnh khắc dừng suy nghĩ, chứ không phải hàng rào bán hàng.
+   * Feynman bán lớp chữa sâu (lời giải mẫu, bẫy, bằng chứng), không bán đáp án.
    */
   const answersUnlocked =
-    user.role === "ADMIN" || attempt.feynmanReview?.status === "COMPLETED";
+    user.role === "ADMIN" ||
+    attempt.answersRevealedAt !== null ||
+    attempt.feynmanReview?.status === "COMPLETED";
+
+  // Quyền Feynman chỉ cần hỏi khi thật sự sắp hiển thị lời mời chữa bài
+  const showFeynman = isReading && isOwner && attempt.status === "GRADED";
+  const [feynmanAccess, feynmanPrice] = showFeynman
+    ? await Promise.all([
+        hasActiveAccess({
+          userId: user.id,
+          feature: "FEYNMAN",
+          exerciseId: attempt.exerciseId,
+        }),
+        feynmanSinglePrice(user.id),
+      ])
+    : [false, null];
 
   return (
     <section className="mx-auto max-w-4xl px-6 py-12 md:py-16">
@@ -90,16 +112,24 @@ export default async function AttemptResultPage({
         </dl>
       </div>
 
-      {isReading && isOwner && attempt.status === "GRADED" && (
+      {showFeynman && (
         <FeynmanCta
           attemptId={attempt.id}
+          exerciseId={attempt.exerciseId}
           status={attempt.feynmanReview?.status ?? null}
           mode={attempt.feynmanReview?.mode ?? null}
+          hasAccess={feynmanAccess}
+          price={feynmanPrice}
+          canBuy={isSePayConfigured()}
         />
       )}
 
       {isReading ? (
-        <ReadingResult attempt={attempt} answersUnlocked={answersUnlocked} />
+        <ReadingResult
+          attempt={attempt}
+          answersUnlocked={answersUnlocked}
+          canReveal={isOwner && attempt.status === "GRADED"}
+        />
       ) : (
         <WritingResult attempt={attempt} />
       )}
@@ -107,17 +137,41 @@ export default async function AttemptResultPage({
   );
 }
 
-/** Lời mời / tiếp tục / xem lại phiên chữa bài Feynman. */
+/**
+ * Khối Feynman ở đầu trang kết quả, có năm hình thái:
+ * đang chữa dở · đã chữa xong · có quyền chưa bắt đầu · chưa có quyền (còn ưu
+ * đãi lần đầu) · chưa có quyền (đã dùng ưu đãi).
+ */
 function FeynmanCta({
   attemptId,
+  exerciseId,
   status,
   mode,
+  hasAccess,
+  price,
+  canBuy,
 }: {
   attemptId: string;
+  exerciseId: string;
   status: string | null;
   mode: string | null;
+  hasAccess: boolean;
+  price: { amount: number; isIntro: boolean } | null;
+  canBuy: boolean;
 }) {
   const href = `/hoc-vien/bai-lam/${attemptId}/feynman`;
+
+  // Chưa mua thì mời mua — nhưng chỉ khi chưa có phiên nào đang dở dang.
+  if (!hasAccess && !status) {
+    return (
+      <FeynmanPurchaseCta
+        exerciseId={exerciseId}
+        attemptId={attemptId}
+        price={price}
+        canBuy={canBuy}
+      />
+    );
+  }
 
   if (status === "COMPLETED") {
     return (
@@ -148,14 +202,14 @@ function FeynmanCta({
       <h2 className="mt-2.5 font-display text-xl font-bold text-navy-deep md:text-2xl">
         {started
           ? "Bạn đang chữa bài dở dang"
-          : "Biến bài này thành kiến thức dùng được cho bài sau"}
+          : "Chữa sâu bài này bằng Feynman"}
       </h2>
       <p className="mt-3 max-w-2xl text-[0.95rem] leading-relaxed text-ink-soft">
         {started
           ? mode === "DEEP"
-            ? "Tiếp tục phiên chữa sâu để mở toàn bộ đáp án."
-            : "Tiếp tục phiên chữa nhanh để mở toàn bộ đáp án."
-          : "Đáp án đúng của những câu bạn làm sai đang được giữ kín. Hãy tự giảng lại bài đọc và tự chẩn đoán lỗi trước — cách học này giúp bạn nhớ lâu hơn nhiều so với việc đọc đáp án ngay."}
+            ? "Tiếp tục phiên chữa sâu — bạn đang ở giữa chừng."
+            : "Tiếp tục phiên chữa nhanh — bạn đang ở giữa chừng."
+          : "Tự giảng lại, tìm bằng chứng, nhận diện bẫy và rút quy tắc cho bài sau. Bạn đã có quyền chữa bài này."}
       </p>
       <div className="mt-5">
         {started ? (
@@ -181,12 +235,79 @@ function FeynmanCta({
   );
 }
 
+/** Mời mua lớp chữa sâu Feynman, hiển thị đúng giá của tài khoản này. */
+function FeynmanPurchaseCta({
+  exerciseId,
+  attemptId,
+  price,
+  canBuy,
+}: {
+  exerciseId: string;
+  attemptId: string;
+  price: { amount: number; isIntro: boolean } | null;
+  canBuy: boolean;
+}) {
+  return (
+    <div className="mt-8 border border-gold bg-gold-pale p-7">
+      <p className="label-caps flex items-center gap-2">
+        <Brain className="h-3.5 w-3.5" aria-hidden="true" />
+        Phương pháp Feynman
+      </p>
+      <h2 className="mt-2.5 font-display text-xl font-bold text-navy-deep md:text-2xl">
+        Chữa sâu bài này bằng Feynman
+      </h2>
+      <p className="mt-3 max-w-2xl text-[0.95rem] leading-relaxed text-ink-soft">
+        Tự giảng lại, tìm bằng chứng, nhận diện bẫy và rút quy tắc cho bài sau.
+        Kèm lời giải mẫu của giáo viên cho từng câu bạn làm sai.
+      </p>
+
+      {price?.isIntro && (
+        <p className="mt-4 flex items-start gap-2 font-ui text-sm leading-relaxed text-ink">
+          <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-gold" aria-hidden="true" />
+          {INTRO_PROMO_NOTICE}
+        </p>
+      )}
+
+      {canBuy ? (
+        <div className="mt-5 flex flex-wrap items-center gap-3">
+          <PurchaseButton
+            offerCode="FEYNMAN_SINGLE"
+            exerciseId={exerciseId}
+            attemptId={attemptId}
+            variant="gold"
+          >
+            <Brain className="h-4 w-4" aria-hidden="true" />
+            {price?.isIntro ? "Mở bài Feynman đầu tiên" : "Mở Feynman bài này"} ·{" "}
+            {formatVnd(price?.amount ?? OFFERS.FEYNMAN_SINGLE.amount)}
+          </PurchaseButton>
+          <PurchaseButton offerCode="FEYNMAN_ALL_30D" variant="outline">
+            Mở toàn bộ 30 ngày · {formatVnd(OFFERS.FEYNMAN_ALL_30D.amount)}
+          </PurchaseButton>
+        </div>
+      ) : (
+        <p className="mt-5 font-ui text-sm text-ink-soft">
+          Thanh toán trực tuyến đang tạm đóng — liên hệ trung tâm để được mở
+          khóa phần chữa bài này.
+        </p>
+      )}
+
+      <p className="mt-4 font-ui text-xs leading-relaxed text-muted">
+        Đáp án đúng của bài Reading luôn miễn phí — bạn xem được ngay bên dưới
+        mà không cần mua gì.
+      </p>
+    </div>
+  );
+}
+
 function ReadingResult({
   attempt,
   answersUnlocked,
+  canReveal,
 }: {
   answersUnlocked: boolean;
+  canReveal: boolean;
   attempt: {
+    id: string;
     answers: string;
     scoreRaw: number | null;
     scoreTotal: number | null;
@@ -230,17 +351,29 @@ function ReadingResult({
         </div>
       </div>
 
-      <h2 className="mt-12 font-display text-2xl font-bold text-navy-deep">
+      <h2 id="chi-tiet" className="mt-12 font-display text-2xl font-bold text-navy-deep">
         Chi tiết từng câu
       </h2>
       {!answersUnlocked && (
-        <p className="mt-4 flex items-start gap-2.5 border-l-4 border-gold bg-cream-deep px-5 py-4 font-ui text-sm leading-relaxed text-ink-soft">
-          <Lock className="mt-0.5 h-4 w-4 shrink-0 text-gold" aria-hidden="true" />
-          <span>
-            Đáp án đúng của các câu sai đang được giữ kín. Hoàn thành phần chữa
-            bài Feynman ở trên để mở toàn bộ đáp án.
-          </span>
-        </p>
+        // Không phải hàng rào bán hàng: đáp án miễn phí, chỉ cách một cú bấm.
+        // Cú bấm đó để học viên kịp tự đoán trước khi nhìn đáp án.
+        <div className="mt-4 border-l-4 border-gold bg-cream-deep px-5 py-5">
+          <p className="flex items-start gap-2.5 font-ui text-sm leading-relaxed text-ink-soft">
+            <Lock className="mt-0.5 h-4 w-4 shrink-0 text-gold" aria-hidden="true" />
+            <span>
+              Trước khi xem đáp án, hãy thử tự nhớ lại xem mình đã chọn dựa vào
+              câu nào trong bài. Vài giây đó đáng giá hơn cả trang đáp án.
+            </span>
+          </p>
+          {canReveal && (
+            <form
+              action={revealBasicAnswersAction.bind(null, attempt.id)}
+              className="mt-4"
+            >
+              <SubmitButton variant="outline">Xem đáp án cơ bản — miễn phí</SubmitButton>
+            </form>
+          )}
+        </div>
       )}
       <ol className="mt-6 divide-y divide-line border-y border-line">
         {detail.map((q) => (
@@ -270,7 +403,7 @@ function ReadingResult({
                   ) : (
                     <span className="ml-4 inline-flex items-center gap-1 text-muted">
                       <Lock className="h-3.5 w-3.5" aria-hidden="true" />
-                      Đáp án mở sau khi chữa bài
+                      Bấm nút ở trên để xem đáp án
                     </span>
                   ))}
               </p>

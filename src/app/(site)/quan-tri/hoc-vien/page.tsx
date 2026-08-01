@@ -1,10 +1,18 @@
-import { UserRoundCheck, UserRoundX, LockKeyholeOpen, LockKeyhole } from "lucide-react";
+import {
+  UserRoundCheck,
+  UserRoundX,
+  LockKeyholeOpen,
+  LockKeyhole,
+  Brain,
+} from "lucide-react";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/session";
 import {
   toggleUserActiveAction,
   toggleAllExerciseAccessAction,
+  toggleAllFeynmanAccessAction,
 } from "@/lib/actions/admin";
+import { summarizeGrantsForAdmin } from "@/lib/access-grants";
 import { ResetPasswordForm } from "@/components/admin/reset-password-form";
 import { DeleteUserButton } from "@/components/admin/delete-user-button";
 
@@ -17,15 +25,16 @@ function fmt(d: Date) {
 export default async function AdminStudentsPage() {
   await requireAdmin();
 
-  const [students, restrictedCount] = await Promise.all([
+  const [students, restrictedCount, grants] = await Promise.all([
     db.user.findMany({
       where: { role: "STUDENT" },
       orderBy: { createdAt: "desc" },
-      include: {
-        _count: { select: { attempts: true, exerciseAccess: true } },
-      },
+      include: { _count: { select: { attempts: true } } },
     }),
     db.exercise.count({ where: { accessLevel: "RESTRICTED" } }),
+    // Cần phân biệt quyền trung tâm TẶNG với quyền học viên MUA, vì nút
+    // mở/thu hồi bên dưới chỉ được phép đụng tới phần tặng.
+    summarizeGrantsForAdmin(),
   ]);
 
   return (
@@ -38,7 +47,12 @@ export default async function AdminStudentsPage() {
       <p className="mt-5 max-w-3xl text-[0.95rem] leading-relaxed text-ink-soft">
         Học viên tự đăng ký bằng email. Bạn có thể đặt lại mật khẩu khi học viên
         quên (nhớ báo mật khẩu mới qua Zalo/điện thoại), khóa tài khoản bất
-        thường, mở khóa các bài tập cần cấp quyền, hoặc xóa vĩnh viễn tài khoản.
+        thường, tặng quyền học, hoặc xóa vĩnh viễn tài khoản.
+      </p>
+      <p className="mt-3 max-w-3xl border-l-4 border-gold bg-cream-deep px-5 py-3.5 font-ui text-sm leading-relaxed text-ink-soft">
+        Hai nút <strong>tặng quyền</strong> (ổ khóa = Reading, bộ não = Feynman)
+        chỉ thêm hoặc gỡ đúng phần trung tâm tặng. Bài học viên đã tự bỏ tiền mua
+        không bao giờ bị các nút này gỡ mất.
       </p>
 
       {restrictedCount === 0 && (
@@ -61,15 +75,17 @@ export default async function AdminStudentsPage() {
                 <th className="px-4 py-3 text-left font-semibold">Email</th>
                 <th className="px-4 py-3 text-center font-semibold">Ngày đăng ký</th>
                 <th className="px-4 py-3 text-center font-semibold">Bài đã làm</th>
-                <th className="px-4 py-3 text-center font-semibold">Bài đã mở khóa</th>
+                <th className="px-4 py-3 text-center font-semibold">Quyền Reading</th>
                 <th className="px-4 py-3 text-center font-semibold">Trạng thái</th>
                 <th className="px-4 py-3 text-right font-semibold">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
               {students.map((s) => {
-                const unlocked = s._count.exerciseAccess;
-                const allUnlocked = restrictedCount > 0 && unlocked >= restrictedCount;
+                // "Đã tặng" = quyền do trung tâm cấp, tách hẳn với quyền đã mua
+                const gifted = grants.readingGift.has(s.id);
+                const bought = grants.readingPurchases.get(s.id) ?? 0;
+                const boughtPackage = grants.readingPackage.has(s.id);
                 return (
                   <tr key={s.id} className={s.active ? "bg-paper" : "bg-cream opacity-70"}>
                     <td className="px-4 py-3 font-semibold text-ink">{s.name}</td>
@@ -80,13 +96,24 @@ export default async function AdminStudentsPage() {
                     <td className="px-4 py-3 text-center tabular-nums text-ink-soft">
                       {s._count.attempts}
                     </td>
-                    <td className="px-4 py-3 text-center tabular-nums">
-                      {restrictedCount === 0 ? (
-                        <span className="text-muted">—</span>
-                      ) : (
-                        <span className={allUnlocked ? "font-semibold text-success" : "text-ink-soft"}>
-                          {unlocked}/{restrictedCount}
+                    <td className="px-4 py-3 text-center text-xs">
+                      {gifted && (
+                        <span className="block font-semibold text-success">
+                          Trung tâm đã tặng toàn bộ
                         </span>
+                      )}
+                      {boughtPackage && (
+                        <span className="block font-semibold text-navy">
+                          Đã mua gói 30 ngày
+                        </span>
+                      )}
+                      {bought > 0 && !boughtPackage && (
+                        <span className="block text-ink-soft">
+                          Đã mua {bought} bài
+                        </span>
+                      )}
+                      {!gifted && bought === 0 && (
+                        <span className="text-muted">Chưa có quyền</span>
                       )}
                     </td>
                     <td className="px-4 py-3 text-center">
@@ -111,23 +138,46 @@ export default async function AdminStudentsPage() {
                             title={
                               restrictedCount === 0
                                 ? "Chưa có bài tập nào cần mở khóa"
-                                : allUnlocked
-                                  ? "Thu hồi toàn bộ bài tập đã mở khóa"
-                                  : "Mở khóa toàn bộ bài tập cần cấp quyền"
+                                : gifted
+                                  ? "Thu hồi phần trung tâm đã tặng (KHÔNG đụng tới bài học viên đã mua)"
+                                  : "Tặng quyền làm toàn bộ bài Reading"
                             }
                             className={`flex h-9 w-9 cursor-pointer items-center justify-center border transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${
-                              allUnlocked
+                              gifted
                                 ? "border-success bg-success-pale text-success"
                                 : "border-line text-ink-soft hover:border-gold hover:text-gold"
                             }`}
                           >
-                            {allUnlocked ? (
+                            {gifted ? (
                               <LockKeyholeOpen className="h-4 w-4" aria-hidden="true" />
                             ) : (
                               <LockKeyhole className="h-4 w-4" aria-hidden="true" />
                             )}
                             <span className="sr-only">
-                              {allUnlocked ? "Thu hồi bài tập" : "Mở khóa bài tập"}
+                              {gifted ? "Thu hồi quyền đã tặng" : "Tặng quyền Reading"}
+                            </span>
+                          </button>
+                        </form>
+
+                        <form action={toggleAllFeynmanAccessAction.bind(null, s.id)}>
+                          <button
+                            type="submit"
+                            title={
+                              grants.feynmanGift.has(s.id)
+                                ? "Thu hồi quyền chữa bài Feynman đã tặng"
+                                : "Tặng quyền chữa bài Feynman cho toàn bộ bài"
+                            }
+                            className={`flex h-9 w-9 cursor-pointer items-center justify-center border transition-colors ${
+                              grants.feynmanGift.has(s.id)
+                                ? "border-success bg-success-pale text-success"
+                                : "border-line text-ink-soft hover:border-gold hover:text-gold"
+                            }`}
+                          >
+                            <Brain className="h-4 w-4" aria-hidden="true" />
+                            <span className="sr-only">
+                              {grants.feynmanGift.has(s.id)
+                                ? "Thu hồi quyền Feynman"
+                                : "Tặng quyền Feynman"}
                             </span>
                           </button>
                         </form>

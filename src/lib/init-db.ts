@@ -141,6 +141,88 @@ const DDL = [
     CONSTRAINT \`ExerciseAccess_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT \`ExerciseAccess_exerciseId_fkey\` FOREIGN KEY (\`exerciseId\`) REFERENCES \`Exercise\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
   ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`PaymentOrder\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`invoiceNumber\` VARCHAR(191) NOT NULL,
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`exerciseId\` VARCHAR(191) NULL,
+    \`returnPath\` TEXT NOT NULL,
+    \`offerCode\` VARCHAR(191) NOT NULL,
+    \`feature\` VARCHAR(191) NOT NULL,
+    \`scope\` VARCHAR(191) NOT NULL,
+    \`amount\` INTEGER NOT NULL,
+    \`currency\` VARCHAR(16) NOT NULL DEFAULT 'VND',
+    \`priceVersion\` VARCHAR(191) NOT NULL,
+    \`priceRule\` VARCHAR(191) NOT NULL,
+    \`status\` VARCHAR(191) NOT NULL DEFAULT 'PENDING',
+    \`provider\` VARCHAR(191) NOT NULL DEFAULT 'SEPAY_PG',
+    \`providerEnvironment\` VARCHAR(32) NOT NULL,
+    \`providerOrderId\` VARCHAR(191) NULL,
+    \`providerTransactionId\` VARCHAR(191) NULL,
+    \`paymentMethod\` VARCHAR(191) NULL,
+    \`introPromoToken\` VARCHAR(191) NULL,
+    \`expiresAt\` DATETIME(3) NOT NULL,
+    \`paidAt\` DATETIME(3) NULL,
+    \`cancelledAt\` DATETIME(3) NULL,
+    \`voidedAt\` DATETIME(3) NULL,
+    \`lastError\` TEXT NULL,
+    \`rawLastPayload\` LONGTEXT NULL,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`updatedAt\` DATETIME(3) NOT NULL,
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`PaymentOrder_invoiceNumber_key\` (\`invoiceNumber\`),
+    UNIQUE INDEX \`PaymentOrder_providerTransactionId_key\` (\`providerTransactionId\`),
+    UNIQUE INDEX \`PaymentOrder_introPromoToken_key\` (\`introPromoToken\`),
+    INDEX \`PaymentOrder_userId_status_createdAt_idx\` (\`userId\`, \`status\`, \`createdAt\`),
+    INDEX \`PaymentOrder_exerciseId_status_idx\` (\`exerciseId\`, \`status\`),
+    CONSTRAINT \`PaymentOrder_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`PaymentOrder_exerciseId_fkey\` FOREIGN KEY (\`exerciseId\`) REFERENCES \`Exercise\` (\`id\`) ON DELETE SET NULL ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`PaymentEvent\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`eventKey\` VARCHAR(191) NOT NULL,
+    \`orderId\` VARCHAR(191) NULL,
+    \`notificationType\` VARCHAR(191) NOT NULL,
+    \`providerTransactionId\` VARCHAR(191) NULL,
+    \`processingStatus\` VARCHAR(191) NOT NULL DEFAULT 'RECEIVED',
+    \`payloadJson\` LONGTEXT NOT NULL,
+    \`errorMessage\` TEXT NULL,
+    \`receivedAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`processedAt\` DATETIME(3) NULL,
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`PaymentEvent_eventKey_key\` (\`eventKey\`),
+    INDEX \`PaymentEvent_orderId_receivedAt_idx\` (\`orderId\`, \`receivedAt\`),
+    INDEX \`PaymentEvent_processingStatus_receivedAt_idx\` (\`processingStatus\`, \`receivedAt\`),
+    CONSTRAINT \`PaymentEvent_orderId_fkey\` FOREIGN KEY (\`orderId\`) REFERENCES \`PaymentOrder\` (\`id\`) ON DELETE SET NULL ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`AccessGrant\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`exerciseId\` VARCHAR(191) NULL,
+    \`orderId\` VARCHAR(191) NULL,
+    \`grantKey\` VARCHAR(191) NOT NULL,
+    \`feature\` VARCHAR(191) NOT NULL,
+    \`scope\` VARCHAR(191) NOT NULL,
+    \`source\` VARCHAR(191) NOT NULL,
+    \`status\` VARCHAR(191) NOT NULL DEFAULT 'ACTIVE',
+    \`startsAt\` DATETIME(3) NOT NULL,
+    \`expiresAt\` DATETIME(3) NULL,
+    \`revokedAt\` DATETIME(3) NULL,
+    \`revokeReason\` TEXT NULL,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`updatedAt\` DATETIME(3) NOT NULL,
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`AccessGrant_orderId_key\` (\`orderId\`),
+    UNIQUE INDEX \`AccessGrant_grantKey_key\` (\`grantKey\`),
+    INDEX \`AccessGrant_userId_feature_status_expiresAt_idx\` (\`userId\`, \`feature\`, \`status\`, \`expiresAt\`),
+    INDEX \`AccessGrant_userId_feature_scope_exerciseId_status_idx\` (\`userId\`, \`feature\`, \`scope\`, \`exerciseId\`, \`status\`),
+    CONSTRAINT \`AccessGrant_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`AccessGrant_exerciseId_fkey\` FOREIGN KEY (\`exerciseId\`) REFERENCES \`Exercise\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`AccessGrant_orderId_fkey\` FOREIGN KEY (\`orderId\`) REFERENCES \`PaymentOrder\` (\`id\`) ON DELETE SET NULL ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
 ];
 
 /**
@@ -155,6 +237,7 @@ const MIGRATIONS = [
   `ALTER TABLE \`User\` ADD COLUMN \`targetSpeaking\` DOUBLE NULL`,
   `ALTER TABLE \`User\` ADD COLUMN \`examDate\` DATETIME(3) NULL`,
   `ALTER TABLE \`Exercise\` ADD COLUMN \`accessLevel\` VARCHAR(191) NOT NULL DEFAULT 'PUBLIC'`,
+  `ALTER TABLE \`Attempt\` ADD COLUMN \`answersRevealedAt\` DATETIME(3) NULL`,
 ];
 
 export async function initDatabase() {
@@ -232,6 +315,26 @@ export async function initDatabase() {
         );
       }
     }
+  });
+
+  // Chuyển quyền đã cấp ở bảng cũ ExerciseAccess sang sổ cái AccessGrant.
+  // Quyền cũ đều là Reading mở lẻ và vĩnh viễn (expiresAt = null) nên học viên
+  // không mất gì. INSERT IGNORE + grantKey duy nhất khiến chạy lại vô hại.
+  await applyOnce("MIGRATE_EXERCISE_ACCESS_TO_GRANT_v1", async () => {
+    const moved = await db.$executeRawUnsafe(`
+      INSERT IGNORE INTO \`AccessGrant\`
+        (\`id\`, \`userId\`, \`exerciseId\`, \`orderId\`, \`grantKey\`,
+         \`feature\`, \`scope\`, \`source\`, \`status\`, \`startsAt\`,
+         \`expiresAt\`, \`createdAt\`, \`updatedAt\`)
+      SELECT
+        CONCAT('legacy_', ea.id), ea.userId, ea.exerciseId, NULL,
+        CONCAT('LEGACY:', ea.id), 'READING', 'EXERCISE', 'LEGACY',
+        'ACTIVE', ea.grantedAt, NULL, ea.grantedAt, NOW(3)
+      FROM \`ExerciseAccess\` ea
+    `);
+    console.log(
+      `[wobridges] Đã chuyển ${moved} quyền truy cập cũ sang sổ cái AccessGrant`
+    );
   });
 }
 

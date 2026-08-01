@@ -54,39 +54,99 @@ export async function deleteUserAction(
 }
 
 /**
- * Mở khóa TOÀN BỘ bài tập cần cấp quyền cho một học viên
- * (hoặc thu hồi nếu học viên đã có đủ quyền).
+ * Mở / thu hồi quyền làm TOÀN BỘ bài Reading cho một học viên (quà tặng, học
+ * viên đóng học phí tại lớp, xử lý sự cố…).
+ *
+ * QUAN TRỌNG: chỉ đụng tới đúng một bản ghi mang nhãn ADMIN. Bản cũ xóa sạch
+ * quyền của học viên nên khi tắt là xóa luôn cả những bài họ đã BỎ TIỀN MUA —
+ * mất tiền thật của người học và không khôi phục được.
  */
 export async function toggleAllExerciseAccessAction(userId: string) {
-  const admin = await requireAdmin();
+  await requireAdmin();
 
   const user = await db.user.findUnique({ where: { id: userId } });
   if (!user) return;
 
-  const restricted = await db.exercise.findMany({
-    where: { accessLevel: "RESTRICTED" },
-    select: { id: true },
-  });
-  if (restricted.length === 0) return;
+  const grantKey = `ADMIN:READING:ALL:${userId}`;
+  const existing = await db.accessGrant.findUnique({ where: { grantKey } });
 
-  const granted = await db.exerciseAccess.count({ where: { userId } });
-
-  if (granted >= restricted.length) {
-    // Đã mở đủ → thu hồi toàn bộ
-    await db.exerciseAccess.deleteMany({ where: { userId } });
+  if (existing?.status === "ACTIVE") {
+    await db.accessGrant.update({
+      where: { id: existing.id },
+      data: {
+        status: "REVOKED",
+        revokedAt: new Date(),
+        revokeReason: "ADMIN_TOGGLE",
+      },
+    });
   } else {
-    // Cấp quyền cho những bài còn thiếu (bỏ qua bản ghi đã có)
-    await db.exerciseAccess.createMany({
-      data: restricted.map((ex) => ({
+    await db.accessGrant.upsert({
+      where: { grantKey },
+      update: {
+        status: "ACTIVE",
+        startsAt: new Date(),
+        expiresAt: null,
+        revokedAt: null,
+        revokeReason: null,
+      },
+      create: {
         userId,
-        exerciseId: ex.id,
-        grantedById: admin.id,
-      })),
-      skipDuplicates: true,
+        grantKey,
+        feature: "READING",
+        scope: "ALL",
+        source: "ADMIN",
+        status: "ACTIVE",
+        startsAt: new Date(),
+        expiresAt: null,
+      },
     });
   }
   revalidatePath("/quan-tri/hoc-vien");
   revalidatePath("/luyen-tap");
+}
+
+/** Tương tự nhưng cho quyền chữa bài Feynman. */
+export async function toggleAllFeynmanAccessAction(userId: string) {
+  await requireAdmin();
+
+  const user = await db.user.findUnique({ where: { id: userId } });
+  if (!user) return;
+
+  const grantKey = `ADMIN:FEYNMAN:ALL:${userId}`;
+  const existing = await db.accessGrant.findUnique({ where: { grantKey } });
+
+  if (existing?.status === "ACTIVE") {
+    await db.accessGrant.update({
+      where: { id: existing.id },
+      data: {
+        status: "REVOKED",
+        revokedAt: new Date(),
+        revokeReason: "ADMIN_TOGGLE",
+      },
+    });
+  } else {
+    await db.accessGrant.upsert({
+      where: { grantKey },
+      update: {
+        status: "ACTIVE",
+        startsAt: new Date(),
+        expiresAt: null,
+        revokedAt: null,
+        revokeReason: null,
+      },
+      create: {
+        userId,
+        grantKey,
+        feature: "FEYNMAN",
+        scope: "ALL",
+        source: "ADMIN",
+        status: "ACTIVE",
+        startsAt: new Date(),
+        expiresAt: null,
+      },
+    });
+  }
+  revalidatePath("/quan-tri/hoc-vien");
 }
 
 export async function resetUserPasswordAction(

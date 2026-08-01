@@ -129,3 +129,40 @@ export async function submitAttemptAction(
   revalidatePath("/hoc-vien");
   redirect(`/hoc-vien/bai-lam/${attemptId}`);
 }
+
+/**
+ * Mở đáp án cơ bản của bài Reading — MIỄN PHÍ và không ràng buộc gì.
+ *
+ * Feynman đã trở thành sản phẩm trả phí riêng, nên không được lấy đáp án làm
+ * con tin để bán nó: học viên trả tiền làm bài thì phải biết mình đúng sai chỗ
+ * nào. Thứ Feynman bán là lớp chữa sâu — lời giải mẫu, bẫy, bằng chứng và quy
+ * trình tự giảng lại.
+ *
+ * Vẫn cần một cú bấm thay vì hiện luôn: khoảnh khắc dừng lại trước khi xem đáp
+ * án là chỗ việc học thật sự diễn ra.
+ */
+export async function revealBasicAnswersAction(attemptId: string) {
+  const user = await requireUser();
+  const attempt = await db.attempt.findUnique({
+    where: { id: attemptId },
+    include: { exercise: { select: { skill: true } } },
+  });
+  if (
+    !attempt ||
+    attempt.userId !== user.id ||
+    attempt.exercise.skill !== "READING" ||
+    attempt.status !== "GRADED"
+  ) {
+    redirect("/hoc-vien");
+  }
+
+  // Giữ nguyên mốc thời gian lần đầu — bấm lại không làm sai lịch sử học tập
+  if (!attempt.answersRevealedAt) {
+    await db.attempt.update({
+      where: { id: attempt.id },
+      data: { answersRevealedAt: new Date() },
+    });
+  }
+  revalidatePath(`/hoc-vien/bai-lam/${attempt.id}`);
+  redirect(`/hoc-vien/bai-lam/${attempt.id}#chi-tiet`);
+}

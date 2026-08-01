@@ -9,7 +9,10 @@ import {
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
 import { startAttemptAction } from "@/lib/actions/attempts";
-import { grantedExerciseIds, isAdminRole } from "@/lib/exercise-access";
+import { readingAccessOf, isAdminRole } from "@/lib/exercise-access";
+import { isSePayConfigured } from "@/lib/payments/sepay";
+import { OFFERS, formatVnd } from "@/lib/payments/catalog";
+import { PurchaseButton } from "@/components/payments/purchase-button";
 import { SubmitButton } from "@/components/ui";
 
 /** Danh sách bài luyện của một kỹ năng, kèm trạng thái bài làm của học viên. */
@@ -27,11 +30,17 @@ export async function ExerciseList({ skill }: { skill: "READING" | "WRITING" }) 
       })
     : [];
 
-  // Bài "Cần mở khóa" chỉ làm được khi quản trị viên đã cấp quyền
-  const granted = user ? await grantedExerciseIds(user.id) : new Set<string>();
+  // Bài "Cần mở khóa" chỉ làm được khi học viên đã mua, hoặc admin đã cấp
+  const access = user
+    ? await readingAccessOf(user.id)
+    : { hasAll: false, exerciseIds: new Set<string>(), allExpiresAt: null };
   const canDo = (ex: { id: string; accessLevel: string }) =>
     ex.accessLevel !== "RESTRICTED" ||
-    (user ? isAdminRole(user.role) || granted.has(ex.id) : false);
+    (user
+      ? isAdminRole(user.role) || access.hasAll || access.exerciseIds.has(ex.id)
+      : false);
+
+  const canBuy = isSePayConfigured();
 
   if (exercises.length === 0) {
     return (
@@ -111,15 +120,36 @@ export async function ExerciseList({ skill }: { skill: "READING" | "WRITING" }) 
                   Đăng nhập để làm bài
                 </Link>
               ) : !canDo(ex) ? (
-                <div className="text-right">
-                  <span className="inline-flex cursor-not-allowed items-center gap-2 border border-line-strong bg-cream-deep px-6 py-2.5 font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-muted">
-                    <Lock className="h-4 w-4" aria-hidden="true" />
-                    Chưa được mở khóa
-                  </span>
-                  <p className="mt-2 max-w-[15rem] font-ui text-xs leading-relaxed text-muted">
-                    Liên hệ trung tâm để được cấp quyền làm bài này.
-                  </p>
-                </div>
+                // Bài cần mở khóa: hai lựa chọn — mua đúng bài này, hoặc gói
+                // 30 ngày. Số tiền chỉ để hiển thị; giá thật lấy ở máy chủ.
+                canBuy && ex.skill === "READING" ? (
+                  <div className="flex flex-col items-stretch gap-2.5 md:items-end">
+                    <PurchaseButton
+                      offerCode="READING_SINGLE"
+                      exerciseId={ex.id}
+                      className="w-full md:w-auto"
+                    >
+                      Mở bài này · {formatVnd(OFFERS.READING_SINGLE.amount)}
+                    </PurchaseButton>
+                    <PurchaseButton
+                      offerCode="READING_ALL_30D"
+                      variant="outline"
+                      className="w-full md:w-auto"
+                    >
+                      Mở toàn bộ 30 ngày · {formatVnd(OFFERS.READING_ALL_30D.amount)}
+                    </PurchaseButton>
+                  </div>
+                ) : (
+                  <div className="text-right">
+                    <span className="inline-flex cursor-not-allowed items-center gap-2 border border-line-strong bg-cream-deep px-6 py-2.5 font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-muted">
+                      <Lock className="h-4 w-4" aria-hidden="true" />
+                      Chưa được mở khóa
+                    </span>
+                    <p className="mt-2 max-w-[15rem] font-ui text-xs leading-relaxed text-muted">
+                      Liên hệ trung tâm để được cấp quyền làm bài này.
+                    </p>
+                  </div>
+                )
               ) : (
                 <form action={startAttemptAction.bind(null, ex.id)}>
                   <SubmitButton variant={inProgress ? "gold" : "primary"}>

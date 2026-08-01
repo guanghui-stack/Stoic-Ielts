@@ -6,7 +6,7 @@ import seedData from "../../../../prisma/seed-data.json";
  * Dấu mốc phiên bản mã nguồn — đổi mỗi khi có thay đổi cần xác nhận đã lên
  * production. Nhờ đó biết chắc máy chủ đang chạy bản nào.
  */
-const BUILD_MARKER = "2026-07-31-feynman-reading-v1";
+const BUILD_MARKER = "2026-08-01-sepay-payments-v1";
 
 /**
  * Trạm kiểm tra tình trạng hệ thống — dùng để chẩn đoán từ xa khi
@@ -20,6 +20,14 @@ export async function GET() {
     sessionSecretConfigured: Boolean(process.env.SESSION_SECRET),
     databaseUrlConfigured: Boolean(process.env.DATABASE_URL),
     adminPasswordEnvSet: Boolean(process.env.ADMIN_PASSWORD),
+    // Cấu hình thanh toán: chỉ báo ĐÃ ĐẶT hay CHƯA, tuyệt đối không trả giá trị
+    payment: {
+      appUrlConfigured: Boolean(process.env.APP_URL?.trim()),
+      merchantIdConfigured: Boolean(process.env.SEPAY_MERCHANT_ID?.trim()),
+      secretKeyConfigured: Boolean(process.env.SEPAY_SECRET_KEY?.trim()),
+      ipnSecretConfigured: Boolean(process.env.SEPAY_IPN_SECRET?.trim()),
+      environment: (process.env.SEPAY_ENV ?? "sandbox").trim(),
+    },
     initStatus:
       (globalThis as { __wobridgesInit?: string }).__wobridgesInit ??
       "chưa chạy (dev hoặc instrumentation không được gọi)",
@@ -65,6 +73,15 @@ export async function GET() {
     report.restrictedExerciseCount = await db.exercise.count({
       where: { accessLevel: "RESTRICTED" },
     });
+    // Ba bảng thanh toán có tồn tại chưa (biết ngay migration đã chạy hay chưa)
+    const [orderCount, grantCount, reviewCount] = await Promise.all([
+      db.paymentOrder.count(),
+      db.accessGrant.count({ where: { status: "ACTIVE" } }),
+      db.paymentOrder.count({ where: { status: "REQUIRES_REVIEW" } }),
+    ]);
+    report.paymentOrderCount = orderCount;
+    report.activeGrantCount = grantCount;
+    report.ordersNeedingReview = reviewCount;
     // Trả về trạng thái, không lộ email: đủ để biết việc đổi tài khoản
     // quản trị đã áp dụng thành công trên máy chủ này hay chưa.
     report.configuredAdmin = configuredAdmin
