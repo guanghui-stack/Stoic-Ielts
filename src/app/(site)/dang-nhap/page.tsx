@@ -5,7 +5,7 @@ import { LoginForm } from "@/components/auth-forms";
 
 export const metadata: Metadata = {
   title: "Đăng nhập",
-  description: "Đăng nhập tài khoản học viên Wobridges để vào phòng luyện tập 4 kỹ năng.",
+  description: "Đăng nhập tài khoản học viên Wobridges để vào kho IELTS Reading.",
 };
 
 export default async function LoginPage() {

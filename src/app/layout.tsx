@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     template: "%s | Wobridges English Center",
   },
   description:
-    "Trung tâm Anh ngữ Wobridges (World Bridges) — Lộ trình IELTS 3 giai đoạn (Pre-IELTS, Basic, Advanced), E-learning, luyện tập 4 kỹ năng chuẩn format IELTS và kho bài mẫu Writing 8.0+.",
+    "Wobridges IELTS Reading — kho đề Academic và General tách biệt, luyện thi theo thời gian thực, chấm điểm tự động và theo dõi tiến bộ.",
 };
 
 export default function RootLayout({

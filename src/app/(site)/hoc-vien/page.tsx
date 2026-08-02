@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import {
   BookOpen,
-  PenLine,
-  Hourglass,
   CheckCircle2,
   LogOut,
   KeyRound,
@@ -52,7 +50,7 @@ export default async function StudentDashboard() {
   const user = await requireUser();
 
   const attempts = await db.attempt.findMany({
-    where: { userId: user.id },
+    where: { userId: user.id, exercise: { skill: "READING" } },
     include: { exercise: true },
     orderBy: { startedAt: "desc" },
   });
@@ -65,8 +63,6 @@ export default async function StudentDashboard() {
     (a) => a.status === "IN_PROGRESS" && a.deadlineAt.getTime() > nowMs
   );
   const readingDone = finished.filter((a) => a.exercise.skill === "READING");
-  const writingDone = finished.filter((a) => a.exercise.skill === "WRITING");
-  const waitingGrade = writingDone.filter((a) => a.status === "SUBMITTED").length;
   const bestReading = readingDone.reduce<number | null>((best, a) => {
     if (a.scoreRaw == null || a.scoreTotal == null || a.scoreTotal === 0) return best;
     const pct = (a.scoreRaw / a.scoreTotal) * 100;
@@ -112,9 +108,6 @@ export default async function StudentDashboard() {
     return {
       label: keyToLabel(key),
       r: dayAttempts.filter((a) => a.exercise.skill === "READING").length,
-      l: dayAttempts.filter((a) => a.exercise.skill === "LISTENING").length,
-      w: dayAttempts.filter((a) => a.exercise.skill === "WRITING").length,
-      s: dayAttempts.filter((a) => a.exercise.skill === "SPEAKING").length,
       minutes,
     };
   });
@@ -131,20 +124,8 @@ export default async function StudentDashboard() {
   const historyItems: HistoryItem[] = finished.map((a) => ({
     id: a.id,
     title: a.exercise.title,
-    skill: a.exercise.skill as HistoryItem["skill"],
     submittedAtLabel: fmt(a.submittedAt),
-    resultKind:
-      a.exercise.skill === "READING"
-        ? "score"
-        : a.status === "GRADED" && a.band != null
-          ? "band"
-          : "pending",
-    resultLabel:
-      a.exercise.skill === "READING"
-        ? `${a.scoreRaw}/${a.scoreTotal}`
-        : a.status === "GRADED" && a.band != null
-          ? a.band.toFixed(1)
-          : "Chờ chấm",
+    resultLabel: `${a.scoreRaw}/${a.scoreTotal}`,
     href: `/hoc-vien/bai-lam/${a.id}`,
   }));
 
@@ -190,9 +171,6 @@ export default async function StudentDashboard() {
           targets={{
             overall: user.targetOverall,
             reading: user.targetReading,
-            listening: user.targetListening,
-            writing: user.targetWriting,
-            speaking: user.targetSpeaking,
           }}
           examDateValue={examKey ?? ""}
           examDateLabel={examKey ? keyToLabel(examKey) : "—"}
@@ -200,7 +178,7 @@ export default async function StudentDashboard() {
         />
 
         {/* Thống kê tổng */}
-        <div className="grid gap-px border border-line bg-line sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-px border border-line bg-line sm:grid-cols-2">
           <div className="bg-paper p-6">
             <p className="label-caps flex items-center gap-2">
               <BookOpen className="h-3.5 w-3.5" aria-hidden="true" />
@@ -208,24 +186,6 @@ export default async function StudentDashboard() {
             </p>
             <p className="mt-3 font-display text-4xl font-bold text-navy-deep">
               {readingDone.length}
-            </p>
-          </div>
-          <div className="bg-paper p-6">
-            <p className="label-caps flex items-center gap-2">
-              <PenLine className="h-3.5 w-3.5" aria-hidden="true" />
-              Writing đã nộp
-            </p>
-            <p className="mt-3 font-display text-4xl font-bold text-navy-deep">
-              {writingDone.length}
-            </p>
-          </div>
-          <div className="bg-paper p-6">
-            <p className="label-caps flex items-center gap-2">
-              <Hourglass className="h-3.5 w-3.5" aria-hidden="true" />
-              Chờ chấm
-            </p>
-            <p className="mt-3 font-display text-4xl font-bold text-gold">
-              {waitingGrade}
             </p>
           </div>
           <div className="bg-paper p-6">
@@ -277,13 +237,12 @@ export default async function StudentDashboard() {
           <WeeklyStats rows={weeklyRows} />
         </div>
 
-        {/* Lịch sử theo tab kỹ năng */}
+        {/* Lịch sử Reading */}
         {finished.length === 0 ? (
           <NoteBox title="Chưa có bài làm nào">
-            Hãy bắt đầu với một bài Reading để làm quen với áp lực thời gian,
-            hoặc thử sức với đề Writing Task 2.{" "}
+            Hãy bắt đầu với một bài Reading để làm quen với áp lực thời gian.{" "}
             <Link
-              href="/luyen-tap"
+              href="/luyen-tap/reading"
               className="font-semibold text-navy underline decoration-gold decoration-2 underline-offset-4"
             >
               Vào phòng luyện tập
@@ -296,10 +255,10 @@ export default async function StudentDashboard() {
 
         <div className="flex flex-wrap gap-3">
           <ButtonLink href="/luyen-tap/reading" variant="primary">
-            Luyện Reading
+            Reading Academic
           </ButtonLink>
-          <ButtonLink href="/luyen-tap/writing" variant="outline">
-            Luyện Writing
+          <ButtonLink href="/luyen-tap/reading/general" variant="outline">
+            Reading General
           </ButtonLink>
         </div>
       </section>

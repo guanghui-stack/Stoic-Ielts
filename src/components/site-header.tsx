@@ -39,7 +39,7 @@ export async function SiteHeader() {
                   href="/dang-ky"
                   className="border border-navy bg-navy px-5 py-2 font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-paper transition-colors hover:bg-navy-deep"
                 >
-                  Đăng ký học thử
+                  Đăng ký
                 </Link>
               </div>
             )}

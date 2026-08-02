@@ -1,16 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  async redirects() {
-    return [
-      // Đường dẫn cũ của trang khóa học — giữ để link cũ không gãy
-      {
-        source: "/khoa-hoc-intensive",
-        destination: "/khoa-hoc-ielts",
-        permanent: true,
-      },
-    ];
-  },
   experimental: {
     serverActions: {
       // Website chạy sau CDN/proxy của Hostinger — khai báo tên miền hợp lệ

@@ -4,7 +4,6 @@ import { ArrowLeft } from "lucide-react";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/session";
 import { ExerciseForm } from "@/components/admin/exercise-form";
-import type { WritingContent } from "@/lib/exercise-content";
 
 export const metadata = { title: "Sửa bài tập" };
 
@@ -17,33 +16,16 @@ export default async function EditExercisePage({
   const { exerciseId } = await params;
 
   const ex = await db.exercise.findUnique({ where: { id: exerciseId } });
-  if (!ex) redirect("/quan-tri/bai-tap");
+  if (!ex || ex.skill !== "READING") redirect("/quan-tri/bai-tap");
 
-  const base = {
-    skill: ex.skill,
+  const defaults = {
+    readingType: ex.readingType,
     title: ex.title,
     description: ex.description,
     durationMinutes: ex.durationMinutes,
     published: ex.published,
+    content: JSON.stringify(JSON.parse(ex.content), null, 2),
   };
-
-  let defaults;
-  if (ex.skill === "WRITING") {
-    const c = JSON.parse(ex.content) as WritingContent;
-    defaults = {
-      ...base,
-      task: c.task,
-      prompt: c.prompt,
-      guidance: c.guidance ?? "",
-      minWords: c.minWords,
-      dataTable: c.dataTable ? JSON.stringify(c.dataTable, null, 2) : "",
-    };
-  } else {
-    defaults = {
-      ...base,
-      content: JSON.stringify(JSON.parse(ex.content), null, 2),
-    };
-  }
 
   return (
     <section className="mx-auto max-w-4xl px-6 py-12">

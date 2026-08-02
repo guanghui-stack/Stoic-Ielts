@@ -28,7 +28,8 @@ export async function reconcileOrderAction(
 
   const outcome = await reconcileOneOrder(invoiceNumber);
   revalidatePath(ADMIN_PATH);
-  revalidatePath("/luyen-tap");
+  revalidatePath("/luyen-tap/reading");
+  revalidatePath("/luyen-tap/reading/general");
 
   switch (outcome.kind) {
     case "granted":
@@ -75,7 +76,8 @@ export async function refundOrderAction(
   const revoked = await revokeGrantsOfOrder(order.id, `REFUND:${reason}`);
 
   revalidatePath(ADMIN_PATH);
-  revalidatePath("/luyen-tap");
+  revalidatePath("/luyen-tap/reading");
+  revalidatePath("/luyen-tap/reading/general");
   return {
     success: `Đã ghi nhận hoàn tiền đơn ${invoiceNumber} và thu hồi ${revoked} quyền truy cập. Nhớ chuyển tiền lại cho học viên trên hệ thống SePay hoặc ngân hàng.`,
   };

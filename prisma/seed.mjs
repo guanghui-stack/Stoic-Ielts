@@ -3,11 +3,16 @@ import bcrypt from "bcryptjs";
 
 const db = new PrismaClient();
 
-// Chỉ dùng cho máy local. Mật khẩu KHÔNG nằm trong mã nguồn (repo công khai):
-// đặt qua biến môi trường, ví dụ  ADMIN_PASSWORD=... node prisma/seed.mjs
-const ADMIN_EMAIL =
-  process.env.ADMIN_EMAIL?.trim().toLowerCase() || "dangquanghuy17012001@gmail.com";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD?.trim() || "DevOnly@Local2026";
+// Chỉ dùng cho máy local. Thông tin quản trị phải được truyền qua biến môi
+// trường để không có mật khẩu hoặc email cá nhân nào nằm trong repo công khai.
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD?.trim();
+
+if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
+  throw new Error(
+    "Hãy đặt ADMIN_EMAIL và ADMIN_PASSWORD trước khi chạy prisma/seed.mjs."
+  );
+}
 
 const reading1 = {
   passage: {
@@ -265,61 +270,6 @@ const reading2 = {
   ],
 };
 
-const writingTask1a = {
-  task: "TASK_1",
-  minWords: 150,
-  prompt:
-    "The table below shows the percentage of households with internet access in three Southeast Asian countries between 2010 and 2020.\n\nSummarise the information by selecting and reporting the main features, and make comparisons where relevant.",
-  dataTable: {
-    caption: "Households with internet access (%)",
-    headers: ["Country", "2010", "2015", "2020"],
-    rows: [
-      ["Vietnam", "27", "52", "78"],
-      ["Thailand", "23", "52", "85"],
-      ["Singapore", "82", "91", "98"],
-    ],
-  },
-  guidance:
-    "Viết tối thiểu 150 từ. Nên dành khoảng 20 phút cho phần này. Mở bài paraphrase đề, đoạn overview nêu 2 xu hướng nổi bật, 2 đoạn thân bài so sánh số liệu cụ thể.",
-};
-
-const writingTask1b = {
-  task: "TASK_1",
-  minWords: 150,
-  prompt:
-    "The chart data below shows the number of international students enrolled at a university in Australia between 2018 and 2023, by region of origin.\n\nSummarise the information by selecting and reporting the main features, and make comparisons where relevant.",
-  dataTable: {
-    caption: "International student enrolments by region",
-    headers: ["Region", "2018", "2020", "2023"],
-    rows: [
-      ["Southeast Asia", "2,400", "1,900", "4,100"],
-      ["East Asia", "3,800", "2,600", "3,500"],
-      ["South Asia", "1,200", "1,100", "2,800"],
-      ["Europe", "600", "300", "700"],
-    ],
-  },
-  guidance:
-    "Viết tối thiểu 150 từ trong khoảng 20 phút. Chú ý xu hướng giảm năm 2020 và sự phục hồi khác nhau giữa các khu vực.",
-};
-
-const writingTask2a = {
-  task: "TASK_2",
-  minWords: 250,
-  prompt:
-    "Some people believe that the best way to learn a foreign language is to live in a country where it is spoken. Others think that success depends mainly on the learner's own effort, wherever they study.\n\nDiscuss both these views and give your own opinion.\n\nGive reasons for your answer and include any relevant examples from your own knowledge or experience.",
-  guidance:
-    "Viết tối thiểu 250 từ trong khoảng 40 phút. Cấu trúc gợi ý: mở bài paraphrase + nêu quan điểm; 1 đoạn cho mỗi luồng ý kiến; kết bài khẳng định lại lập trường.",
-};
-
-const writingTask2b = {
-  task: "TASK_2",
-  minWords: 250,
-  prompt:
-    "In many countries, secondary school students are required to learn a foreign language as part of the national curriculum.\n\nTo what extent do you agree or disagree with this policy?\n\nGive reasons for your answer and include any relevant examples from your own knowledge or experience.",
-  guidance:
-    "Viết tối thiểu 250 từ trong khoảng 40 phút. Chọn rõ mức độ đồng ý và bảo vệ nhất quán xuyên suốt bài.",
-};
-
 async function main() {
   const passwordHash = await bcrypt.hash(ADMIN_PASSWORD, 10);
   await db.user.upsert({
@@ -332,7 +282,7 @@ async function main() {
       role: "ADMIN",
     },
   });
-  console.log(`✓ Tài khoản admin: ${ADMIN_EMAIL} / ${ADMIN_PASSWORD}`);
+  console.log(`✓ Đã tạo tài khoản admin: ${ADMIN_EMAIL}`);
 
   const exercises = [
     {
@@ -352,38 +302,6 @@ async function main() {
         "1 passage · 12 câu hỏi · TRUE/FALSE/NOT GIVEN, Multiple Choice, Sentence Completion. Độ khó tương đương Passage 3 đề thi thật.",
       durationMinutes: 20,
       content: JSON.stringify(reading2),
-    },
-    {
-      skill: "WRITING",
-      taskType: "WRITING_TASK_1",
-      title: "Writing Task 1 — Internet Access in Southeast Asia",
-      description: "Dạng bài Table · tối thiểu 150 từ · thời gian khuyến nghị 20 phút.",
-      durationMinutes: 20,
-      content: JSON.stringify(writingTask1a),
-    },
-    {
-      skill: "WRITING",
-      taskType: "WRITING_TASK_1",
-      title: "Writing Task 1 — International Student Enrolments",
-      description: "Dạng bài Table · tối thiểu 150 từ · thời gian khuyến nghị 20 phút.",
-      durationMinutes: 20,
-      content: JSON.stringify(writingTask1b),
-    },
-    {
-      skill: "WRITING",
-      taskType: "WRITING_TASK_2",
-      title: "Writing Task 2 — Learning a Language Abroad",
-      description: "Dạng bài Discuss both views · tối thiểu 250 từ · 40 phút.",
-      durationMinutes: 40,
-      content: JSON.stringify(writingTask2a),
-    },
-    {
-      skill: "WRITING",
-      taskType: "WRITING_TASK_2",
-      title: "Writing Task 2 — Compulsory Foreign Languages at School",
-      description: "Dạng bài Agree/Disagree · tối thiểu 250 từ · 40 phút.",
-      durationMinutes: 40,
-      content: JSON.stringify(writingTask2b),
     },
   ];
 

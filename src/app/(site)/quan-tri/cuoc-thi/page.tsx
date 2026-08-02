@@ -53,7 +53,11 @@ export default async function AdminCompetitionPage() {
       },
     }),
     db.exercise.findMany({
-      where: { skill: "READING", competitionOnly: true },
+      where: {
+        skill: "READING",
+        readingType: "ACADEMIC",
+        competitionOnly: true,
+      },
       select: { id: true, title: true },
       orderBy: { createdAt: "asc" },
     }),

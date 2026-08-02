@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import {
   CheckCircle2,
   XCircle,
-  Hourglass,
   ArrowLeft,
   TimerOff,
   Brain,
@@ -14,9 +13,7 @@ import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
 import {
   gradeReading,
-  countWords,
   type ReadingContent,
-  type WritingContent,
 } from "@/lib/exercise-content";
 import { NoteBox, SubmitButton } from "@/components/ui";
 import { startFeynmanReviewAction } from "@/lib/actions/feynman";
@@ -53,9 +50,9 @@ export default async function AttemptResultPage({
   if (!attempt || (attempt.userId !== user.id && user.role !== "ADMIN")) {
     redirect("/hoc-vien");
   }
+  if (attempt.exercise.skill !== "READING") redirect("/hoc-vien");
   if (attempt.status === "IN_PROGRESS") redirect(`/lam-bai/${attempt.id}`);
 
-  const isReading = attempt.exercise.skill === "READING";
   const isOwner = attempt.userId === user.id;
 
   /**
@@ -69,7 +66,7 @@ export default async function AttemptResultPage({
     attempt.feynmanReview?.status === "COMPLETED";
 
   // Quyền Feynman chỉ cần hỏi khi thật sự sắp hiển thị lời mời chữa bài
-  const showFeynman = isReading && isOwner && attempt.status === "GRADED";
+  const showFeynman = isOwner && attempt.status === "GRADED";
   const [feynmanAccess, feynmanPrice] = showFeynman
     ? await Promise.all([
         hasActiveAccess({
@@ -93,7 +90,7 @@ export default async function AttemptResultPage({
 
       <div className="mt-6">
         <p className="label-caps">
-          {isReading ? "Kết quả Reading" : "Bài Writing đã nộp"}
+          Kết quả Reading
         </p>
         <h1 className="mt-3 font-display text-3xl font-bold leading-tight text-navy-deep md:text-4xl">
           {attempt.assemblyId
@@ -127,16 +124,12 @@ export default async function AttemptResultPage({
         />
       )}
 
-      {isReading ? (
-        <ReadingResult
-          attempt={attempt}
-          content={await readingContentForAttempt(attempt)}
-          answersUnlocked={answersUnlocked}
-          canReveal={isOwner && attempt.status === "GRADED"}
-        />
-      ) : (
-        <WritingResult attempt={attempt} />
-      )}
+      <ReadingResult
+        attempt={attempt}
+        content={await readingContentForAttempt(attempt)}
+        answersUnlocked={answersUnlocked}
+        canReveal={isOwner && attempt.status === "GRADED"}
+      />
     </section>
   );
 }
@@ -422,101 +415,4 @@ function ReadingResult({
       </NoteBox>
     </>
   );
-}
-
-function WritingResult({
-  attempt,
-}: {
-  attempt: {
-    answers: string;
-    status: string;
-    band: number | null;
-    feedback: string | null;
-    gradedAt: Date | null;
-    exercise: { content: string };
-  };
-}) {
-  const content = JSON.parse(attempt.exercise.content) as WritingContent;
-  const parsed = JSON.parse(attempt.answers || "{}") as { essay?: string };
-  const essay = parsed.essay ?? "";
-  const words = countWords(essay);
-  const graded = attempt.status === "GRADED";
-
-  return (
-    <>
-      <div className="mt-10 grid gap-px border border-line bg-line sm:grid-cols-3">
-        <div className="bg-paper p-7 text-center">
-          <p className="label-caps">Trạng thái</p>
-          <p className="mt-3 flex items-center justify-center gap-2 font-display text-2xl font-bold text-ink">
-            {graded ? (
-              <>
-                <CheckCircle2 className="h-6 w-6 text-success" aria-hidden="true" />
-                Đã chấm
-              </>
-            ) : (
-              <>
-                <Hourglass className="h-6 w-6 text-gold" aria-hidden="true" />
-                Chờ chấm
-              </>
-            )}
-          </p>
-        </div>
-        <div className="bg-paper p-7 text-center">
-          <p className="label-caps">Band điểm</p>
-          <p className="mt-3 font-display text-5xl font-bold text-gold">
-            {graded && attempt.band != null ? attempt.band.toFixed(1) : "—"}
-          </p>
-        </div>
-        <div className="bg-paper p-7 text-center">
-          <p className="label-caps">Số từ</p>
-          <p className="mt-3 font-display text-5xl font-bold text-navy-deep">
-            {words}
-            <span className="text-2xl text-muted">/{content.minWords}</span>
-          </p>
-        </div>
-      </div>
-
-      {graded && attempt.feedback && (
-        <div className="mt-10 border-l-4 border-gold bg-cream-deep p-7">
-          <p className="label-caps">Nhận xét của giáo viên</p>
-          <div className="mt-4 space-y-3 leading-relaxed text-ink">
-            {attempt.feedback.split("\n").map(
-              (line, i) => line.trim() && <p key={i}>{line}</p>
-            )}
-          </div>
-          <p className="mt-4 font-ui text-xs text-muted">
-            Chấm lúc {fmtDate(attempt.gradedAt)}
-          </p>
-        </div>
-      )}
-
-      {!graded && (
-        <NoteBox className="mt-10" title="Đang trong hàng chờ">
-          Giáo viên sẽ chấm bài theo rubric 4 tiêu chí và trả nhận xét trong
-          vòng 48 giờ. Kết quả sẽ hiển thị ngay tại trang này.
-        </NoteBox>
-      )}
-
-      <h2 className="mt-12 font-display text-2xl font-bold text-navy-deep">
-        Bài viết của bạn
-      </h2>
-      <div className="mt-5 border border-line bg-paper p-7 shadow-card md:p-9">
-        <p className="mb-5 border-b border-line pb-4 text-[0.92rem] italic leading-relaxed text-ink-soft">
-          {content.prompt.split("\n\n")[0]}
-        </p>
-        {essay ? (
-          <div className="space-y-4 leading-[1.9] text-ink">
-            {essay.split(/\n+/).map((p, i) => p.trim() && <p key={i}>{p}</p>)}
-          </div>
-        ) : (
-          <p className="italic text-muted">Bài nộp không có nội dung.</p>
-        )}
-      </div>
-    </>
-  );
-}
-
-function fmtDate(d: Date | null) {
-  if (!d) return "—";
-  return d.toLocaleString("vi-VN", { dateStyle: "short", timeStyle: "short" });
 }

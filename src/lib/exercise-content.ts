@@ -129,24 +129,11 @@ export type ReadingContent = {
   };
 };
 
-export type WritingContent = {
-  task: "TASK_1" | "TASK_2";
-  prompt: string;
-  minWords: number;
-  guidance?: string;
-  dataTable?: {
-    caption: string;
-    headers: string[];
-    rows: string[][];
-  };
-};
-
 /**
  * Đáp án Reading: qid → chuỗi (hoặc mảng chữ cái với MC_MULTI).
  * Khóa "__marked" lưu các câu đánh dấu xem lại (không chấm điểm).
  */
 export type ReadingAnswers = Record<string, string | string[]>;
-export type WritingAnswers = { essay: string; wordCount: number };
 
 /** Nhãn lựa chọn theo vị trí: headings dùng i/ii/iii…, còn lại A/B/C… */
 const ROMANS = ["i", "ii", "iii", "iv", "v", "vi", "vii", "viii", "ix", "x", "xi", "xii"];
@@ -348,10 +335,6 @@ export function countReadingQuestions(contentJson: string): number {
     }
   }
   return total;
-}
-
-export function countWords(text: string): number {
-  return text.trim() ? text.trim().split(/\s+/).length : 0;
 }
 
 /** Kiểm tra "mềm" giới hạn từ của dạng GAP (chỉ cảnh báo, không chặn). */

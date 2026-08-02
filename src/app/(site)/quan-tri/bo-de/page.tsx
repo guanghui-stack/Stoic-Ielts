@@ -22,7 +22,12 @@ export default async function AdminCollectionsPage() {
       include: { items: { select: { exerciseId: true } } },
     }),
     db.exercise.findMany({
-      where: { skill: "READING", published: true, competitionOnly: false },
+      where: {
+        skill: "READING",
+        readingType: "ACADEMIC",
+        published: true,
+        competitionOnly: false,
+      },
       orderBy: { createdAt: "asc" },
       select: { id: true, title: true, accessLevel: true, difficultyTier: true },
     }),

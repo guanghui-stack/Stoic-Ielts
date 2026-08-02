@@ -36,6 +36,7 @@ const DDL = [
   `CREATE TABLE IF NOT EXISTS \`Exercise\` (
     \`id\` VARCHAR(191) NOT NULL,
     \`skill\` VARCHAR(191) NOT NULL,
+    \`readingType\` VARCHAR(32) NOT NULL DEFAULT 'ACADEMIC',
     \`taskType\` VARCHAR(191) NOT NULL,
     \`title\` VARCHAR(191) NOT NULL,
     \`description\` TEXT NOT NULL,
@@ -568,6 +569,8 @@ const MIGRATIONS = [
   `ALTER TABLE \`Attempt\` ADD COLUMN \`assemblyId\` VARCHAR(191) NULL`,
   `ALTER TABLE \`Attempt\` ADD INDEX \`Attempt_assemblyId_idx\` (\`assemblyId\`)`,
   `ALTER TABLE \`Exercise\` ADD COLUMN \`difficultyTier\` VARCHAR(32) NOT NULL DEFAULT 'UNKNOWN'`,
+  // Tách hai kho IELTS Reading. Mọi đề cũ mặc định thuộc Academic.
+  `ALTER TABLE \`Exercise\` ADD COLUMN \`readingType\` VARCHAR(32) NOT NULL DEFAULT 'ACADEMIC'`,
 ];
 
 export async function initDatabase() {
@@ -613,7 +616,7 @@ export async function initDatabase() {
     ...seedData.exercises,
     readingGameTheory,
     ...readingPaidPack1,
-  ];
+  ].filter((exercise) => exercise.skill === "READING");
   for (const ex of exercises) {
     const existing = await db.exercise.findFirst({ where: { title: ex.title } });
     if (!existing) {

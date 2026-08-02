@@ -24,11 +24,13 @@ export async function startAttemptAction(exerciseId: string) {
   const user = await requireUser();
 
   const exercise = await db.exercise.findUnique({ where: { id: exerciseId } });
-  if (!exercise || !exercise.published) redirect("/luyen-tap");
+  if (!exercise || exercise.skill !== "READING" || !exercise.published) {
+    redirect("/luyen-tap/reading");
+  }
 
   // Chặn ngay tại máy chủ: bài RESTRICTED chưa được mở khóa thì không vào được,
   // kể cả khi học viên tự gọi thẳng đường dẫn.
-  if (!(await canAccessExercise(user, exercise))) redirect("/luyen-tap");
+  if (!(await canAccessExercise(user, exercise))) redirect("/luyen-tap/reading");
 
   // Nếu còn lượt đang làm dở và chưa quá hạn thì quay lại lượt đó
   const existing = await db.attempt.findFirst({
@@ -62,8 +64,16 @@ export async function startAttemptAction(exerciseId: string) {
 /** Lưu nháp trong lúc làm bài (autosave). */
 export async function saveProgressAction(attemptId: string, answersJson: string) {
   const user = await requireUser();
-  const attempt = await db.attempt.findUnique({ where: { id: attemptId } });
-  if (!attempt || attempt.userId !== user.id || attempt.status !== "IN_PROGRESS") {
+  const attempt = await db.attempt.findUnique({
+    where: { id: attemptId },
+    include: { exercise: { select: { skill: true } } },
+  });
+  if (
+    !attempt ||
+    attempt.userId !== user.id ||
+    attempt.exercise.skill !== "READING" ||
+    attempt.status !== "IN_PROGRESS"
+  ) {
     return { ok: false };
   }
   // Chống payload bất thường
@@ -80,13 +90,14 @@ export async function saveProgressAction(attemptId: string, answersJson: string)
   return { ok: true };
 }
 
-/** Chốt bài: chấm Reading tự động, Writing chuyển sang chờ giáo viên chấm. */
+/** Chốt bài Reading và chấm tự động. */
 async function finalizeAttempt(attemptId: string, auto: boolean) {
   const attempt = await db.attempt.findUnique({
     where: { id: attemptId },
     include: { exercise: true, assembly: true, competitionAttempt: true },
   });
   if (!attempt || attempt.status !== "IN_PROGRESS") return;
+  if (attempt.exercise.skill !== "READING") return;
 
   // Đề ghép có thời lượng riêng (60 phút như thi thật), không dùng thời lượng
   // của passage đầu tiên.
@@ -199,8 +210,13 @@ export async function submitAttemptAction(
   auto: boolean
 ) {
   const user = await requireUser();
-  const attempt = await db.attempt.findUnique({ where: { id: attemptId } });
-  if (!attempt || attempt.userId !== user.id) redirect("/hoc-vien");
+  const attempt = await db.attempt.findUnique({
+    where: { id: attemptId },
+    include: { exercise: { select: { skill: true } } },
+  });
+  if (!attempt || attempt.userId !== user.id || attempt.exercise.skill !== "READING") {
+    redirect("/hoc-vien");
+  }
   if (attempt.status !== "IN_PROGRESS") redirect(`/hoc-vien/bai-lam/${attemptId}`);
 
   // Lưu đáp án cuối cùng nếu hợp lệ và còn trong hạn (kèm dung sai)
