@@ -1,15 +1,39 @@
 import Link from "next/link";
 import { ArrowLeft, Award, Gift, Lock, Sparkles } from "lucide-react";
+import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
 import { titleOverviewFor, type TitleCard } from "@/lib/achievements/view";
 import { SectionHeading, NoteBox } from "@/components/ui";
+import { RewardClaimForm } from "@/components/achievements/reward-claim-form";
 
 export const metadata = { title: "Danh hiệu của tôi" };
 export const dynamic = "force-dynamic";
 
 export default async function MyTitlesPage() {
   const user = await requireUser();
-  const overview = await titleOverviewFor(user.id);
+  const [overview, pendingRewards] = await Promise.all([
+    titleOverviewFor(user.id),
+    db.rewardGrant.findMany({
+      where: { userId: user.id, status: { in: ["EARNED", "REQUESTED"] } },
+      orderBy: { createdAt: "asc" },
+      include: { titleAward: { include: { title: { select: { name: true } } } } },
+    }),
+  ]);
+
+  // Bài đang khóa mà học viên CHƯA có quyền — đó là những bài đổi thưởng được
+  const claimable = pendingRewards.some((r) => r.status === "EARNED")
+    ? await db.exercise.findMany({
+        where: {
+          skill: "READING",
+          published: true,
+          accessLevel: "RESTRICTED",
+          competitionOnly: false,
+          accessGrants: { none: { userId: user.id, status: "ACTIVE" } },
+        },
+        select: { id: true, title: true },
+        orderBy: { createdAt: "asc" },
+      })
+    : [];
 
   const byCategory = new Map<string, TitleCard[]>();
   for (const card of overview.cards) {
@@ -63,6 +87,27 @@ export default async function MyTitlesPage() {
           </p>
         </div>
       </div>
+
+      {pendingRewards.map((reward) =>
+        reward.status === "REQUESTED" ? (
+          <p
+            key={reward.id}
+            className="mt-8 border-l-4 border-gold bg-gold-pale px-6 py-5 font-ui text-sm leading-relaxed text-ink"
+          >
+            <strong>Yêu cầu đã gửi.</strong> Trung tâm đang kiểm tra và sẽ mở bài
+            bạn chọn. Phần thưởng từ danh hiệu{" "}
+            <em>{reward.titleAward.title.name}</em>.
+          </p>
+        ) : (
+          <RewardClaimForm
+            key={reward.id}
+            rewardId={reward.id}
+            titleName={reward.titleAward.title.name}
+            expiresLabel={reward.expiresAt.toLocaleDateString("vi-VN")}
+            options={claimable}
+          />
+        )
+      )}
 
       {overview.earnedCount === 0 && (
         <NoteBox className="mt-8" title="Bắt đầu từ đâu">

@@ -9,6 +9,7 @@ const TABS = [
   { href: "/quan-tri/bai-tap", label: "Bài tập" },
   { href: "/quan-tri/hoc-vien", label: "Học viên" },
   { href: "/quan-tri/thanh-toan", label: "Thanh toán" },
+  { href: "/quan-tri/phan-thuong", label: "Phần thưởng" },
   { href: "/doi-mat-khau", label: "Đổi mật khẩu" },
 ];
 
