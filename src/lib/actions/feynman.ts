@@ -9,6 +9,10 @@ import { FEYNMAN_LIMITS, isFeynmanErrorType } from "@/lib/feynman-constants";
 import { chooseFeynmanMode, selectPriorityMistakes } from "@/lib/feynman-rules";
 import { buildFeynmanLearningLookup } from "@/lib/feynman";
 import { hasActiveAccess } from "@/lib/access-grants";
+import {
+  processAchievementEvent,
+  recordAchievementEvent,
+} from "@/lib/achievements/engine";
 
 export type FeynmanFormState = { error?: string } | undefined;
 
@@ -316,6 +320,15 @@ export async function completeFeynmanReviewAction(
       },
     });
   });
+
+  // Chữa bài xong là một cột mốc học tập thật — xét lại danh hiệu ngay.
+  const eventId = await recordAchievementEvent({
+    userId: review.userId,
+    type: "FEYNMAN_COMPLETED",
+    key: review.id,
+    payload: { reviewId: review.id, attemptId: review.attempt.id },
+  });
+  if (eventId) await processAchievementEvent(eventId);
 
   revalidatePath(`/hoc-vien/bai-lam/${review.attempt.id}`);
   redirect(`/hoc-vien/bai-lam/${review.attempt.id}`);

@@ -226,6 +226,209 @@ const DDL = [
     CONSTRAINT \`AccessGrant_exerciseId_fkey\` FOREIGN KEY (\`exerciseId\`) REFERENCES \`Exercise\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT \`AccessGrant_orderId_fkey\` FOREIGN KEY (\`orderId\`) REFERENCES \`PaymentOrder\` (\`id\`) ON DELETE SET NULL ON UPDATE CASCADE
   ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  /* ===== Ghép đề Full Test từ ba passage ===== */
+
+  `CREATE TABLE IF NOT EXISTS \`ReadingAssembly\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`mode\` VARCHAR(32) NOT NULL,
+    \`countsForAchievements\` BOOLEAN NOT NULL,
+    \`totalQuestions\` INTEGER NOT NULL,
+    \`durationMinutes\` INTEGER NOT NULL DEFAULT 60,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (\`id\`),
+    INDEX \`ReadingAssembly_userId_createdAt_idx\` (\`userId\`, \`createdAt\`),
+    CONSTRAINT \`ReadingAssembly_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`ReadingAssemblyItem\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`assemblyId\` VARCHAR(191) NOT NULL,
+    \`exerciseId\` VARCHAR(191) NOT NULL,
+    \`orderIndex\` INTEGER NOT NULL,
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`ReadingAssemblyItem_assemblyId_orderIndex_key\` (\`assemblyId\`, \`orderIndex\`),
+    UNIQUE INDEX \`ReadingAssemblyItem_assemblyId_exerciseId_key\` (\`assemblyId\`, \`exerciseId\`),
+    INDEX \`ReadingAssemblyItem_exerciseId_idx\` (\`exerciseId\`),
+    CONSTRAINT \`ReadingAssemblyItem_assemblyId_fkey\` FOREIGN KEY (\`assemblyId\`) REFERENCES \`ReadingAssembly\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`ReadingAssemblyItem_exerciseId_fkey\` FOREIGN KEY (\`exerciseId\`) REFERENCES \`Exercise\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`ExerciseCollection\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`code\` VARCHAR(191) NOT NULL,
+    \`name\` VARCHAR(191) NOT NULL,
+    \`kind\` VARCHAR(64) NOT NULL DEFAULT 'FREE_READING',
+    \`status\` VARCHAR(32) NOT NULL DEFAULT 'DRAFT',
+    \`startsAt\` DATETIME(3) NULL,
+    \`endsAt\` DATETIME(3) NULL,
+    \`frozenAt\` DATETIME(3) NULL,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`ExerciseCollection_code_key\` (\`code\`)
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`ExerciseCollectionItem\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`collectionId\` VARCHAR(191) NOT NULL,
+    \`exerciseId\` VARCHAR(191) NOT NULL,
+    \`sortOrder\` INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`ExerciseCollectionItem_collectionId_exerciseId_key\` (\`collectionId\`, \`exerciseId\`),
+    INDEX \`ExerciseCollectionItem_exerciseId_idx\` (\`exerciseId\`),
+    CONSTRAINT \`ExerciseCollectionItem_collectionId_fkey\` FOREIGN KEY (\`collectionId\`) REFERENCES \`ExerciseCollection\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`ExerciseCollectionItem_exerciseId_fkey\` FOREIGN KEY (\`exerciseId\`) REFERENCES \`Exercise\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  /* ===== Hệ danh hiệu ===== */
+
+  `CREATE TABLE IF NOT EXISTS \`TitleDefinition\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`code\` VARCHAR(191) NOT NULL,
+    \`slug\` VARCHAR(191) NOT NULL,
+    \`name\` VARCHAR(191) NOT NULL,
+    \`description\` TEXT NOT NULL,
+    \`quoteKind\` VARCHAR(32) NOT NULL,
+    \`quoteSource\` TEXT NULL,
+    \`quoteSourceUrl\` TEXT NULL,
+    \`category\` VARCHAR(64) NOT NULL,
+    \`rarity\` VARCHAR(32) NOT NULL,
+    \`visibility\` VARCHAR(32) NOT NULL DEFAULT 'PUBLIC',
+    \`ruleKey\` VARCHAR(64) NOT NULL,
+    \`ruleConfigJson\` LONGTEXT NOT NULL,
+    \`repeatPolicy\` VARCHAR(32) NOT NULL DEFAULT 'ONCE',
+    \`rewardCode\` VARCHAR(64) NULL,
+    \`active\` BOOLEAN NOT NULL DEFAULT true,
+    \`sortOrder\` INTEGER NOT NULL DEFAULT 0,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`updatedAt\` DATETIME(3) NOT NULL,
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`TitleDefinition_code_key\` (\`code\`),
+    UNIQUE INDEX \`TitleDefinition_slug_key\` (\`slug\`),
+    INDEX \`TitleDefinition_category_sortOrder_idx\` (\`category\`, \`sortOrder\`)
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`UserTitle\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`titleId\` VARCHAR(191) NOT NULL,
+    \`cycleKey\` VARCHAR(191) NOT NULL DEFAULT 'GLOBAL',
+    \`status\` VARCHAR(32) NOT NULL DEFAULT 'EARNED',
+    \`publicVisible\` BOOLEAN NOT NULL DEFAULT false,
+    \`earnedAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`progressSnapshotJson\` LONGTEXT NOT NULL,
+    \`sourceEventId\` VARCHAR(191) NULL,
+    \`supersededById\` VARCHAR(191) NULL,
+    \`revokedAt\` DATETIME(3) NULL,
+    \`revokeReason\` TEXT NULL,
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`UserTitle_userId_titleId_cycleKey_key\` (\`userId\`, \`titleId\`, \`cycleKey\`),
+    INDEX \`UserTitle_userId_status_earnedAt_idx\` (\`userId\`, \`status\`, \`earnedAt\`),
+    INDEX \`UserTitle_titleId_status_idx\` (\`titleId\`, \`status\`),
+    CONSTRAINT \`UserTitle_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`UserTitle_titleId_fkey\` FOREIGN KEY (\`titleId\`) REFERENCES \`TitleDefinition\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`TitleProgress\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`titleId\` VARCHAR(191) NOT NULL,
+    \`cycleKey\` VARCHAR(191) NOT NULL DEFAULT 'GLOBAL',
+    \`percent\` INTEGER NOT NULL DEFAULT 0,
+    \`currentValue\` INTEGER NULL,
+    \`targetValue\` INTEGER NULL,
+    \`progressJson\` LONGTEXT NOT NULL,
+    \`updatedAt\` DATETIME(3) NOT NULL,
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`TitleProgress_userId_titleId_cycleKey_key\` (\`userId\`, \`titleId\`, \`cycleKey\`),
+    INDEX \`TitleProgress_userId_percent_idx\` (\`userId\`, \`percent\`),
+    CONSTRAINT \`TitleProgress_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`TitleProgress_titleId_fkey\` FOREIGN KEY (\`titleId\`) REFERENCES \`TitleDefinition\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`AchievementEvent\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`eventKey\` VARCHAR(191) NOT NULL,
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`type\` VARCHAR(64) NOT NULL,
+    \`payloadJson\` LONGTEXT NOT NULL,
+    \`status\` VARCHAR(32) NOT NULL DEFAULT 'PENDING',
+    \`attempts\` INTEGER NOT NULL DEFAULT 0,
+    \`occurredAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`processedAt\` DATETIME(3) NULL,
+    \`lastError\` TEXT NULL,
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`AchievementEvent_eventKey_key\` (\`eventKey\`),
+    INDEX \`AchievementEvent_status_occurredAt_idx\` (\`status\`, \`occurredAt\`),
+    INDEX \`AchievementEvent_userId_occurredAt_idx\` (\`userId\`, \`occurredAt\`),
+    CONSTRAINT \`AchievementEvent_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`RewardGrant\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`titleAwardId\` VARCHAR(191) NOT NULL,
+    \`rewardCode\` VARCHAR(64) NOT NULL,
+    \`status\` VARCHAR(32) NOT NULL DEFAULT 'EARNED',
+    \`selectedExerciseId\` VARCHAR(191) NULL,
+    \`requestedAt\` DATETIME(3) NULL,
+    \`reviewedAt\` DATETIME(3) NULL,
+    \`reviewedById\` VARCHAR(191) NULL,
+    \`fulfilledAt\` DATETIME(3) NULL,
+    \`expiresAt\` DATETIME(3) NOT NULL,
+    \`readingGrantKey\` VARCHAR(191) NULL,
+    \`feynmanGrantKey\` VARCHAR(191) NULL,
+    \`note\` TEXT NULL,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`updatedAt\` DATETIME(3) NOT NULL,
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`RewardGrant_titleAwardId_key\` (\`titleAwardId\`),
+    UNIQUE INDEX \`RewardGrant_readingGrantKey_key\` (\`readingGrantKey\`),
+    UNIQUE INDEX \`RewardGrant_feynmanGrantKey_key\` (\`feynmanGrantKey\`),
+    INDEX \`RewardGrant_status_createdAt_idx\` (\`status\`, \`createdAt\`),
+    INDEX \`RewardGrant_userId_status_idx\` (\`userId\`, \`status\`),
+    CONSTRAINT \`RewardGrant_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`RewardGrant_titleAwardId_fkey\` FOREIGN KEY (\`titleAwardId\`) REFERENCES \`UserTitle\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  /* ===== Thời gian học thật và hồ sơ công khai ===== */
+
+  `CREATE TABLE IF NOT EXISTS \`StudyDay\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`dateKey\` VARCHAR(16) NOT NULL,
+    \`activeSeconds\` INTEGER NOT NULL DEFAULT 0,
+    \`readingSeconds\` INTEGER NOT NULL DEFAULT 0,
+    \`feynmanSeconds\` INTEGER NOT NULL DEFAULT 0,
+    \`sessionsCount\` INTEGER NOT NULL DEFAULT 0,
+    \`updatedAt\` DATETIME(3) NOT NULL,
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`StudyDay_userId_dateKey_key\` (\`userId\`, \`dateKey\`),
+    INDEX \`StudyDay_dateKey_idx\` (\`dateKey\`),
+    CONSTRAINT \`StudyDay_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`StudyPresence\` (
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`sessionId\` VARCHAR(191) NOT NULL,
+    \`kind\` VARCHAR(32) NOT NULL,
+    \`lastSeenAt\` DATETIME(3) NOT NULL,
+    \`lastCreditedAt\` DATETIME(3) NOT NULL,
+    PRIMARY KEY (\`userId\`)
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`PublicProfile\` (
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`displayName\` VARCHAR(191) NOT NULL,
+    \`allowHall\` BOOLEAN NOT NULL DEFAULT false,
+    \`allowLeaderboard\` BOOLEAN NOT NULL DEFAULT false,
+    \`allowWinnerStory\` BOOLEAN NOT NULL DEFAULT false,
+    \`equippedTitleAwardId\` VARCHAR(191) NULL,
+    \`updatedAt\` DATETIME(3) NOT NULL,
+    PRIMARY KEY (\`userId\`),
+    CONSTRAINT \`PublicProfile_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
 ];
 
 /**
@@ -251,6 +454,9 @@ const MIGRATIONS = [
   `ALTER TABLE \`Attempt\` ADD COLUMN \`bandScaleVersion\` VARCHAR(191) NULL`,
   `ALTER TABLE \`Attempt\` ADD COLUMN \`validForAchievements\` BOOLEAN NOT NULL DEFAULT false`,
   `ALTER TABLE \`Attempt\` ADD COLUMN \`integrityStatus\` VARCHAR(32) NOT NULL DEFAULT 'CLEAR'`,
+  `ALTER TABLE \`Attempt\` ADD COLUMN \`assemblyId\` VARCHAR(191) NULL`,
+  `ALTER TABLE \`Attempt\` ADD INDEX \`Attempt_assemblyId_idx\` (\`assemblyId\`)`,
+  `ALTER TABLE \`Exercise\` ADD COLUMN \`difficultyTier\` VARCHAR(32) NOT NULL DEFAULT 'UNKNOWN'`,
 ];
 
 export async function initDatabase() {
@@ -454,6 +660,17 @@ export async function initDatabase() {
     );
   } catch {
     /* đã có, hoặc dữ liệu cũ còn trùng — không chặn khởi động */
+  }
+
+  // Đồng bộ danh mục danh hiệu. Chạy MỖI lần khởi động (không phải applyOnce)
+  // để sửa câu chữ trong mã nguồn là thấy ngay trên website; danh hiệu học
+  // viên đã nhận không bị đụng tới.
+  try {
+    const { seedTitleCatalog } = await import("@/lib/achievements/engine");
+    const count = await seedTitleCatalog();
+    console.log(`[wobridges] Đã đồng bộ ${count} danh hiệu`);
+  } catch (err) {
+    console.error("[wobridges] Không đồng bộ được danh mục danh hiệu:", err);
   }
 
   // Báo lỗi ở CUỐI, sau khi mọi việc độc lập đã chạy xong

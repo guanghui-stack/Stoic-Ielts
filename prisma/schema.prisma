@@ -35,6 +35,14 @@ model User {
   feynmanReviews FeynmanReview[]
   paymentOrders  PaymentOrder[]
   accessGrants   AccessGrant[]
+
+  assemblies        ReadingAssembly[]
+  titleAwards       UserTitle[]
+  titleProgress     TitleProgress[]
+  achievementEvents AchievementEvent[]
+  rewardGrants      RewardGrant[]
+  studyDays         StudyDay[]
+  publicProfile     PublicProfile?
 }
 
 model Exercise {
@@ -53,6 +61,12 @@ model Exercise {
   achievementEligible Boolean      @default(false)
   /// Đề chỉ dùng cho Nguyệt Thí — không hiện ở khu luyện tập công khai.
   competitionOnly     Boolean      @default(false)
+  /// EASY | MEDIUM | HARD | UNKNOWN — để ghép đề tự động cân bằng độ khó
+  /// theo đúng trình tự đề thi thật (passage 1 dễ nhất, passage 3 khó nhất).
+  difficultyTier      String       @default("UNKNOWN")
+
+  assemblyItems   ReadingAssemblyItem[]
+  collectionItems ExerciseCollectionItem[]
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   attempts        Attempt[]
@@ -109,13 +123,90 @@ model Attempt {
   validForAchievements Boolean  @default(false)
   /// CLEAR | REVIEW | FLAGGED — chỉ CLEAR mới được tính danh hiệu.
   integrityStatus      String   @default("CLEAR")
+  /// Nếu lượt này thuộc một đề ghép ba passage thì trỏ về đó.
+  assemblyId           String?
 
-  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  exercise      Exercise       @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercise      Exercise        @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
   feynmanReview FeynmanReview?
+  assembly      ReadingAssembly? @relation(fields: [assemblyId], references: [id], onDelete: SetNull)
 
   @@index([userId, status])
   @@index([exerciseId, status])
+  @@index([assemblyId])
+}
+
+/// Một đề Full Test được ghép từ ba passage rời.
+///
+/// Vì sao cần bảng riêng thay vì tạo Exercise mới mỗi lần ghép: đề ghép là của
+/// RIÊNG một học viên tại một thời điểm, không phải nội dung do giáo viên soạn.
+/// Nhồi chúng vào bảng Exercise sẽ làm ngập trang quản trị bài tập và khiến
+/// thống kê "số bài đã đăng" sai bét.
+model ReadingAssembly {
+  id     String @id @default(cuid())
+  userId String
+  /// AUTO = hệ thống chọn (tính danh hiệu) · MANUAL = học viên tự chọn (luyện tập)
+  mode   String
+  /// Chốt cứng ngay lúc tạo: đổi quy tắc về sau không được làm thay đổi
+  /// kết quả của những đề đã ghép trước đó.
+  countsForAchievements Boolean
+  totalQuestions        Int
+  durationMinutes       Int      @default(60)
+  createdAt             DateTime @default(now())
+
+  user     User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items    ReadingAssemblyItem[]
+  attempts Attempt[]
+
+  @@index([userId, createdAt])
+}
+
+model ReadingAssemblyItem {
+  id         String @id @default(cuid())
+  assemblyId String
+  exerciseId String
+  /// 1, 2, 3 — thứ tự passage trong đề, dễ trước khó sau
+  orderIndex Int
+
+  assembly ReadingAssembly @relation(fields: [assemblyId], references: [id], onDelete: Cascade)
+  exercise Exercise        @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  @@unique([assemblyId, orderIndex])
+  @@unique([assemblyId, exerciseId])
+  @@index([exerciseId])
+}
+
+/// Bộ đề được ĐÓNG BĂNG tại một thời điểm.
+///
+/// Các danh hiệu kiểu "hoàn thành toàn bộ đề miễn phí" phải xét trên một danh
+/// sách cố định. Nếu xét trên "mọi đề hiện có", chỉ cần giáo viên đăng thêm
+/// một bài là học viên vừa đạt danh hiệu bỗng dưng mất nó — điều không bao giờ
+/// được phép xảy ra.
+model ExerciseCollection {
+  id       String    @id @default(cuid())
+  code     String    @unique
+  name     String
+  kind     String    @default("FREE_READING")
+  status   String    @default("DRAFT") // DRAFT | ACTIVE | ARCHIVED
+  startsAt DateTime?
+  endsAt   DateTime?
+  frozenAt DateTime?
+  createdAt DateTime @default(now())
+
+  items ExerciseCollectionItem[]
+}
+
+model ExerciseCollectionItem {
+  id           String @id @default(cuid())
+  collectionId String
+  exerciseId   String
+  sortOrder    Int    @default(0)
+
+  collection ExerciseCollection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  exercise   Exercise           @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  @@unique([collectionId, exerciseId])
+  @@index([exerciseId])
 }
 
 /// Một phiên chữa bài theo phương pháp Feynman, gắn 1-1 với một lượt làm bài.
@@ -285,6 +376,179 @@ model AccessGrant {
   // byte của MySQL. Truy vấn luôn lọc theo userId + feature rồi lọc tiếp
   // scope/exerciseId trong bộ nhớ (số grant mỗi học viên rất nhỏ).
   @@index([userId, feature, status, expiresAt])
+}
+
+/// Định nghĩa một danh hiệu. Nội dung nằm ở catalog trong mã nguồn rồi được
+/// gieo xuống bảng này, để giao diện không phải hard-code tên danh hiệu.
+model TitleDefinition {
+  id          String @id @default(cuid())
+  code        String @unique
+  slug        String @unique
+  name        String
+  description String @db.Text
+  /// EXACT = trích nguyên văn · ADAPTED = phỏng theo · ORIGINAL = Wobridges tự viết.
+  /// Bắt buộc phân biệt để không gán nhầm câu tự sáng tác cho danh nhân lịch sử.
+  quoteKind      String
+  quoteSource    String? @db.Text
+  quoteSourceUrl String? @db.Text
+  /// PRACTICE | FEYNMAN | DISCIPLINE | COMPOSITE | TRANSFORMATION | COMPETITION
+  category   String
+  /// COMMON | UNCOMMON | RARE | EPIC | LEGENDARY | PRIVATE
+  rarity     String
+  /// PUBLIC | PRIVATE_ONLY — danh hiệu cảnh tỉnh KHÔNG bao giờ ra ngoài
+  visibility String @default("PUBLIC")
+
+  ruleKey        String
+  ruleConfigJson String  @db.LongText
+  /// ONCE | PER_COLLECTION | PER_COMPETITION
+  repeatPolicy   String  @default("ONCE")
+  rewardCode     String?
+  active         Boolean @default(true)
+  sortOrder      Int     @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  awards   UserTitle[]
+  progress TitleProgress[]
+
+  @@index([category, sortOrder])
+}
+
+/// Một danh hiệu đã trao cho học viên. Không bao giờ xóa — đây là bằng chứng
+/// về thời điểm họ đạt được và là căn cứ cho phần thưởng.
+model UserTitle {
+  id       String @id @default(cuid())
+  userId   String
+  titleId  String
+  /// GLOBAL, mã bộ đề, hoặc mã cuộc thi — để danh hiệu nhận lại được theo mùa
+  cycleKey String @default("GLOBAL")
+  /// EARNED | REVOKED | SUPERSEDED
+  status   String @default("EARNED")
+  publicVisible Boolean @default(false)
+  earnedAt      DateTime @default(now())
+  progressSnapshotJson String @db.LongText
+  sourceEventId String?
+  supersededById String?
+  revokedAt     DateTime?
+  revokeReason  String?  @db.Text
+
+  user   User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title  TitleDefinition @relation(fields: [titleId], references: [id], onDelete: Cascade)
+  reward RewardGrant?
+
+  @@unique([userId, titleId, cycleKey])
+  @@index([userId, status, earnedAt])
+  @@index([titleId, status])
+}
+
+/// Tiến độ tới một danh hiệu chưa đạt. Cập nhật tại chỗ, KHÔNG lưu lịch sử
+/// phần trăm — học viên chỉ cần biết mình đang ở đâu và còn thiếu gì.
+model TitleProgress {
+  id           String   @id @default(cuid())
+  userId       String
+  titleId      String
+  cycleKey     String   @default("GLOBAL")
+  percent      Int      @default(0)
+  currentValue Int?
+  targetValue  Int?
+  progressJson String   @db.LongText
+  updatedAt    DateTime @updatedAt
+
+  user  User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title TitleDefinition @relation(fields: [titleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, titleId, cycleKey])
+  @@index([userId, percent])
+}
+
+/// Hàng đợi sự kiện. Danh hiệu được xét theo SỰ KIỆN chứ không tính lại toàn
+/// bộ lịch sử mỗi lần học viên mở trang — cách đó vừa chậm vừa tốn.
+model AchievementEvent {
+  id          String @id @default(cuid())
+  eventKey    String @unique
+  userId      String
+  /// READING_GRADED | FEYNMAN_COMPLETED | STUDY_TIME_UPDATED | COLLECTION_ACTIVATED
+  type        String
+  payloadJson String @db.LongText
+  /// PENDING | PROCESSING | PROCESSED | FAILED
+  status      String @default("PENDING")
+  attempts    Int    @default(0)
+  occurredAt  DateTime  @default(now())
+  processedAt DateTime?
+  lastError   String?   @db.Text
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status, occurredAt])
+  @@index([userId, occurredAt])
+}
+
+/// Quyền được mở một bài trả phí kèm Feynman, sinh ra từ danh hiệu.
+/// Học viên chọn bài rồi gửi yêu cầu; quản trị viên duyệt mới cấp quyền thật.
+model RewardGrant {
+  id           String @id @default(cuid())
+  userId       String
+  titleAwardId String @unique
+  rewardCode   String
+  /// EARNED | REQUESTED | APPROVED | FULFILLED | REJECTED | EXPIRED
+  status       String @default("EARNED")
+  selectedExerciseId String?
+  requestedAt  DateTime?
+  reviewedAt   DateTime?
+  reviewedById String?
+  fulfilledAt  DateTime?
+  expiresAt    DateTime
+  readingGrantKey String? @unique
+  feynmanGrantKey String? @unique
+  note         String?  @db.Text
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  titleAward UserTitle @relation(fields: [titleAwardId], references: [id], onDelete: Cascade)
+
+  @@index([status, createdAt])
+  @@index([userId, status])
+}
+
+/// Thời gian học THẬT theo từng ngày (múi giờ Asia/Ho_Chi_Minh).
+model StudyDay {
+  id             String   @id @default(cuid())
+  userId         String
+  dateKey        String // YYYY-MM-DD
+  activeSeconds  Int      @default(0)
+  readingSeconds Int      @default(0)
+  feynmanSeconds Int      @default(0)
+  sessionsCount  Int      @default(0)
+  updatedAt      DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, dateKey])
+  @@index([dateKey])
+}
+
+/// Giữ chỗ một phiên học duy nhất cho mỗi học viên — mở mười tab cũng chỉ
+/// một tab được cộng giờ.
+model StudyPresence {
+  userId         String   @id
+  sessionId      String
+  kind           String
+  lastSeenAt     DateTime
+  lastCreditedAt DateTime
+}
+
+/// Lựa chọn công khai của học viên. Mặc định KHÔNG công khai gì cả.
+model PublicProfile {
+  userId           String   @id
+  displayName      String
+  allowHall        Boolean  @default(false)
+  allowLeaderboard Boolean  @default(false)
+  allowWinnerStory Boolean  @default(false)
+  equippedTitleAwardId String?
+  updatedAt        DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 // Cấu hình hệ thống bền vững (ví dụ SESSION_SECRET) — sống qua các lần deploy

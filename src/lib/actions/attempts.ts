@@ -14,6 +14,10 @@ import {
   calculateReadingBand,
   isValidAchievementAttempt,
 } from "@/lib/reading-band";
+import {
+  processAchievementEvent,
+  recordAchievementEvent,
+} from "@/lib/achievements/engine";
 
 /** Dung sai sau hạn chót (mạng chậm, tự nộp phía client trễ vài giây). */
 const GRACE_MS = 15_000;
@@ -152,6 +156,19 @@ async function finalizeAttempt(attemptId: string, auto: boolean) {
       gradedAt: status === "GRADED" ? now : null,
     },
   });
+
+  // Xét danh hiệu SAU khi bài đã được chốt điểm. Cố ý không nằm trong cùng
+  // transaction: nếu việc xét danh hiệu lỗi, học viên vẫn phải nộp bài được —
+  // danh hiệu là phần thưởng, không phải điều kiện để học.
+  if (status === "GRADED") {
+    const eventId = await recordAchievementEvent({
+      userId: attempt.userId,
+      type: "READING_GRADED",
+      key: attemptId,
+      payload: { attemptId },
+    });
+    if (eventId) await processAchievementEvent(eventId);
+  }
 }
 
 /** Học viên nộp bài (hoặc client tự nộp khi hết giờ). */
