@@ -1,0 +1,1333 @@
+[
+  {
+    "skill": "READING",
+    "taskType": "READING_PASSAGE",
+    "title": "Reading Practice 04 — New Agriculture in Oregon",
+    "description": "1 passage · 13 câu · Nối đặc điểm + True/False/Not Given · 20 phút",
+    "durationMinutes": 20,
+    "accessLevel": "RESTRICTED",
+    "achievementEligible": true,
+    "difficultyTier": "MEDIUM",
+    "content": {
+      "parts": [
+        {
+          "passage": {
+            "title": "New Agriculture in Oregon, US",
+            "labelParagraphs": true,
+            "paragraphs": [
+              "Onion growers in eastern Oregon are adopting a system that saves water and keeps topsoil in place, while producing the highest quality “super colossal” onions. Pear growers in southern Oregon have reduced their use of some of the most toxic pesticides by up to two-thirds, and are still producing top-quality pear. Range managers throughout the state have controlled the poisonous weed tansy ragwort with insect predators and saved the Oregon livestock industry up to $4.8 million a year.",
+              "These are some of the results Oregon growers have achieved in collaboration with Oregon State University (OSU) researchers as they test new farming methods including integrated pest management (IPM). Nationwide, however, IPM has not delivered results comparable to those in Oregon. A recent U.S General Accounting Office (GAO) report indicates that while integrated pest management can result in dramatically reduced pesticide use, the federal government has been lacking in effectively promoting that goal and implementing IPM. Farmers also blame the government for no making the new options of pest management attractive. “Wholesale changes in the way that farmers control the pests on their farms is an expensive business.” Tony Brown, of the National Farmers Association says. “If the farmers are given tax breaks to offset the expenditure, then they would willingly accept the new practices.” The report goes on to note that even though the use of the riskiest pesticides has declined nationwide, they still make up more than 40 percent of all pesticides used today; and national pesticide use has risen by 40 million kilograms since 1992. “Our food supply remains the safest and highest quality on Earth but we continue to overdose our farmland with powerful and toxic pesticides and to under-use the safe and effective alternatives,” charged Patrick Leahy, who commissioned the report. Green action groups disagree about the safety issue. “There is no way that habitual consumption of foodstuffs grown using toxic chemical of the nature found on today’s farms can be healthy for consumers,” noted Bill Bowler, spokesman for Green Action, one of many lobbyists interested in this issue.",
+              "The GAO report singles out Oregon’s apple and pear producers who have used the new IPM techniques with growing success. Although Oregon is clearly ahead of the nation, scientists at OSU are taking the Government Accounting Office criticisms seriously. “We must continue to develop effective alternative practices that will reduce environmental hazards and produce high quality products,” said Paul Jepson, a professor of entomology at OSU and new director of",
+              "OSU’s Integrated Plant Protection Centre (IPPC). The IPPC brings together scientists from OSU’s Agricultural Experiment Station, OSU Extension service, the U.S. Department of Agriculture and Oregon farmers to help develop agricultural systems that will save water and soil, and reduce pesticides. In response to the GAO report, the Centre is putting even more emphasis on integrating research and farming practices to improve Oregon agriculture environmentally and economically.",
+              "“The GAO report criticizes agencies for not clearly communicating the goals of IPM,” said Jepson. “Our challenge is to greatly improve the communication to and from growers, to learn what works and what doesn’t. the work coming from OSU researchers must be adopted in the field and not simple languish in scientific journals.”",
+              "In Oregon, growers and scientists are working together to instigate new practices. For example, a few years ago scientists at OSU’s Malheur Experiment Station began testing a new drip irrigation system to replace old ditches that wasted water and washed soil and fertilizer into streams. The new system cut water and fertilizer use by half, kept topsoil in place and protected water quality.",
+              "In addition, the new system produced crops of very large onions, rated “super colossal” and highly valued by the restaurant industry and food processors. Art Pimms, one of the researchers at Malheur comments: “Growers are finding that when they adopt more environmentally benign practices, they can have excellent results. The new practices benefit the environment and give the growers their success.”",
+              "OSU researcher in Malheur next tested straw mulch and found that it successfully held soil in place and kept the ground moist with less irrigation. In addition, and unexpectedly, the scientists found that the mulched soil created a home for beneficial beetles and spiders that prey on onion thrips – a notorious pest in commercial onion fields – a discovery that could reduce the need for pesticides. “I would never have believed that we could replace the artificial pest controls that we had before and still keep our good results,” commented Steve Black, a commercial onion farmer in Oregon, “but instead we have actually surpassed expectations.”",
+              "OSU researchers throughout the state have been working to reduce dependence on broad spectrum chemical sprays that are toxic to many kind of organisms, including humans. “Consumers are rightly putting more and more pressure on the industry to change its reliance on chemical pesticides, but they still want a picture-perfect product,” said Rick Hilton, entomologist at OSU’s Southern Oregon Research and Extension Centre, where researchers help pear growers reduce the need for highly toxic pesticides. Picture perfect pears are an important product in Oregon and traditionally they have required lots of chemicals. In recent years, the industry has faced stiff competition from overseas producers, so any new methods that growers adopt must make sense economically as well as environmentally. Hilton is testing a growth regulator that interferes with the molting of codling moth larvae. Another study used pheromone dispensers to disrupt codling moth mating. These and other methods of integrated pest management have allowed pear growers to reduce their use of organophosphates by two-thirds and reduce all other synthetic pesticides by even more and still produce top-quality pears. These and other studies around the state are part of the effort of the IPPC to find alternative farming practices that benefit both the economy and the environment."
+            ]
+          },
+          "questionGroups": [
+            {
+              "type": "MATCH_FEATURES",
+              "instruction": "Use the information in the passage to match the people (listed A–G) with opinions or deeds below. Write the appropriate letters A–G in boxes 1–8 on your answer sheet. NB You may use any letter more than once.",
+              "options": [
+                "Tony Brown",
+                "Patrick Leahy",
+                "Bill Bowler",
+                "Paul Jepson",
+                "Art Pimms",
+                "Steve Black",
+                "Rick Hilton"
+              ],
+              "reuseOptions": true,
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "There is a double-advantage to the new techniques.",
+                  "answer": "E",
+                  "learning": {
+                    "evidenceParagraph": "G",
+                    "evidenceText": "Art Pimms: “The new practices benefit the environment and give the growers their success.”",
+                    "explanation": "Câu này chứa đúng hai lợi ích nối bằng “and”: lợi cho môi trường và lợi cho nhà nông — chính là “double-advantage”. Steve Black (F) chỉ nói kết quả vượt mong đợi, tức một lợi ích được nhấn mạnh chứ không phải hai lợi ích song song. Rick Hilton (G) nói về áp lực của người tiêu dùng, không nói về lợi ích kép.",
+                    "trap": "Khi đề dùng số đếm ẩn (“double”, “two benefits”, “both”), hãy đi tìm câu văn có đúng hai vế được nối với nhau trong cùng một phát biểu, đừng chọn phát biểu chỉ khen chung chung là “kết quả tốt”.",
+                    "paraphrases": [
+                      {
+                        "question": "a double-advantage",
+                        "passage": "benefit the environment and give the growers their success"
+                      }
+                    ],
+                    "skillTag": "MATCH_FEATURES_DUAL_CLAIM"
+                  }
+                },
+                {
+                  "id": "q2",
+                  "prompt": "The work on developing these alternative techniques is not finished.",
+                  "answer": "D",
+                  "learning": {
+                    "evidenceParagraph": "C",
+                    "evidenceText": "Paul Jepson: “We must continue to develop effective alternative practices that will reduce environmental hazards and produce high quality products.”",
+                    "explanation": "“Must continue to develop” hàm ý công việc còn dang dở — khớp với “is not finished”. Các nhân vật khác đều nói về kết quả đã đạt được (Pimms, Black) hoặc về chính sách (Brown, Leahy), không ai nói về việc phải làm tiếp.",
+                    "trap": "Mệnh đề phủ định trong câu hỏi (“is not finished”) thường được passage diễn đạt bằng một cấu trúc khẳng định (“must continue”). Hãy dịch mệnh đề sang ý, đừng đi săn từ “not”.",
+                    "paraphrases": [
+                      {
+                        "question": "is not finished",
+                        "passage": "We must continue to develop"
+                      }
+                    ],
+                    "skillTag": "MATCH_FEATURES_NEGATION_REPHRASED"
+                  }
+                },
+                {
+                  "id": "q3",
+                  "prompt": "Eating food that has had chemicals used in its production is dangerous to our health.",
+                  "answer": "C",
+                  "learning": {
+                    "evidenceParagraph": "B",
+                    "evidenceText": "Bill Bowler: “There is no way that habitual consumption of foodstuffs grown using toxic chemical … can be healthy for consumers.”",
+                    "explanation": "“There is no way … can be healthy” là cách nói mạnh cho “có hại cho sức khỏe”. Patrick Leahy (B) cũng phê phán việc lạm dụng thuốc trừ sâu, nhưng ông lại khẳng định thực phẩm Mỹ “remains the safest” — tức ông không nói ăn vào là nguy hiểm. Phân biệt hai người này chính là điểm khó của câu.",
+                    "trap": "Hai nhân vật có thể cùng chỉ trích một hiện tượng nhưng kết luận khác nhau. Phải khớp đúng kết luận của câu hỏi, không khớp chủ đề chung.",
+                    "paraphrases": [
+                      {
+                        "question": "is dangerous to our health",
+                        "passage": "There is no way … can be healthy for consumers"
+                      }
+                    ],
+                    "skillTag": "MATCH_FEATURES_SIMILAR_SPEAKERS"
+                  }
+                },
+                {
+                  "id": "q4",
+                  "prompt": "Changing current farming methods into a new one is not a cheap process.",
+                  "answer": "A",
+                  "learning": {
+                    "evidenceParagraph": "B",
+                    "evidenceText": "Tony Brown: “Wholesale changes in the way that farmers control the pests on their farms is an expensive business.”",
+                    "explanation": "“An expensive business” = “not a cheap process”; “wholesale changes in the way farmers control pests” = “changing current farming methods”. Không nhân vật nào khác bàn về chi phí chuyển đổi.",
+                    "trap": "Câu hỏi viết theo lối phủ định của tính từ (“not cheap”), passage viết thẳng (“expensive”). Đây là kiểu paraphrase phổ biến nhất trong Matching Features.",
+                    "paraphrases": [
+                      {
+                        "question": "is not a cheap process",
+                        "passage": "is an expensive business"
+                      }
+                    ],
+                    "skillTag": "MATCH_FEATURES_ANTONYM_PAIR"
+                  }
+                },
+                {
+                  "id": "q5",
+                  "prompt": "Results have exceeded the anticipated goal.",
+                  "answer": "F",
+                  "learning": {
+                    "evidenceParagraph": "H",
+                    "evidenceText": "Steve Black: “I would never have believed that we could replace the artificial pest controls … but instead we have actually surpassed expectations.”",
+                    "explanation": "“Surpassed expectations” dịch thẳng thành “exceeded the anticipated goal”. Art Pimms (E) chỉ nói “excellent results” — kết quả tốt, không nói vượt kỳ vọng, nên chưa đủ mức độ.",
+                    "trap": "“Tốt” và “vượt mong đợi” là hai mức độ khác nhau. Matching Features thường đặt cạnh nhau hai phát biểu tích cực để kiểm tra xem học viên có đọc kỹ mức độ hay không.",
+                    "paraphrases": [
+                      {
+                        "question": "exceeded the anticipated goal",
+                        "passage": "surpassed expectations"
+                      }
+                    ],
+                    "skillTag": "MATCH_FEATURES_DEGREE"
+                  }
+                },
+                {
+                  "id": "q6",
+                  "prompt": "The research done could be translated into practical projects.",
+                  "answer": "D",
+                  "learning": {
+                    "evidenceParagraph": "E",
+                    "evidenceText": "Jepson: “the work coming from OSU researchers must be adopted in the field and not simple languish in scientific journals.”",
+                    "explanation": "“Adopted in the field” (áp dụng ngoài đồng ruộng) đối lập với “languish in scientific journals” (nằm chết trong tạp chí) — đúng ý “nghiên cứu phải biến thành dự án thực tế”. Câu 2 cũng thuộc Jepson nhưng lấy bằng chứng ở đoạn C và nói về việc phát triển tiếp, không phải việc áp dụng.",
+                    "trap": "Một nhân vật có thể là đáp án của nhiều câu. Đừng loại một cái tên chỉ vì đã dùng nó rồi — hãy đọc dòng “NB: You may use any letter more than once”.",
+                    "paraphrases": [
+                      {
+                        "question": "translated into practical projects",
+                        "passage": "adopted in the field, not … languish in scientific journals"
+                      }
+                    ],
+                    "skillTag": "MATCH_FEATURES_REUSE_OPTION"
+                  }
+                },
+                {
+                  "id": "q7",
+                  "prompt": "The U.S. produces the best food in the world nowadays.",
+                  "answer": "B",
+                  "learning": {
+                    "evidenceParagraph": "B",
+                    "evidenceText": "Patrick Leahy: “Our food supply remains the safest and highest quality on Earth but we continue to overdose our farmland with powerful and toxic pesticides…”",
+                    "explanation": "Vế đầu “the safest and highest quality on Earth” chính là “the best food in the world”. Bill Bowler (C) nói ngược hẳn lại nên bị loại ngay.",
+                    "trap": "Sau chữ “but”, giọng của Leahy chuyển sang phê phán, dễ khiến học viên nghĩ ông không khen thực phẩm Mỹ. Một phát biểu có thể chứa hai ý trái chiều — câu hỏi chỉ hỏi một trong hai.",
+                    "paraphrases": [
+                      {
+                        "question": "the best food in the world",
+                        "passage": "the safest and highest quality on Earth"
+                      }
+                    ],
+                    "skillTag": "MATCH_FEATURES_HALF_QUOTE"
+                  }
+                },
+                {
+                  "id": "q8",
+                  "prompt": "Expectations of end users of agricultural products affect the products.",
+                  "answer": "G",
+                  "learning": {
+                    "evidenceParagraph": "I",
+                    "evidenceText": "Rick Hilton: “Consumers are rightly putting more and more pressure on the industry … but they still want a picture-perfect product.”",
+                    "explanation": "“Consumers” chính là “end users”; “putting pressure on the industry” và “want a picture-perfect product” cho thấy kỳ vọng của họ định hình sản phẩm. Không nhân vật nào khác nhắc tới người tiêu dùng.",
+                    "trap": "“End users” là cách nói học thuật thay cho “consumers”. Với Matching Features, hãy dịch danh từ chỉ tác nhân trong câu hỏi sang từ đời thường trước khi quét bài.",
+                    "paraphrases": [
+                      {
+                        "question": "end users",
+                        "passage": "consumers"
+                      }
+                    ],
+                    "skillTag": "MATCH_FEATURES_ACTOR_PARAPHRASE"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "TFNG",
+              "instruction": "Do the following statements agree with the information given in Reading Passage 1? In boxes 9–13 on your answer sheet, write YES if the statement is true, NO if the statement is false, NOT GIVEN if the information is not given in the passage.",
+              "questions": [
+                {
+                  "id": "q9",
+                  "prompt": "Integrated Pest Management has generally been regarded as a success across the US.",
+                  "options": [
+                    "YES",
+                    "NO",
+                    "NOT GIVEN"
+                  ],
+                  "answer": "NO",
+                  "learning": {
+                    "evidenceParagraph": "B",
+                    "evidenceText": "“Nationwide, however, IPM has not delivered results comparable to those in Oregon.”",
+                    "explanation": "Bài nói thẳng rằng trên phạm vi toàn quốc, IPM chưa đạt kết quả như ở Oregon — trái ngược với “a success across the US”. Vì trích được câu phủ định nên đáp án là NO chứ không phải NOT GIVEN.",
+                    "trap": "Chữ “however” là dấu hiệu bài sắp đảo chiều. Thành công ở Oregon (đoạn A) không được phép suy rộng ra toàn nước Mỹ.",
+                    "paraphrases": [
+                      {
+                        "question": "across the US",
+                        "passage": "Nationwide"
+                      }
+                    ],
+                    "skillTag": "TFNG_SCOPE_REVERSAL"
+                  }
+                },
+                {
+                  "id": "q10",
+                  "prompt": "Oregon farmers of apples and pears have been promoted as successful examples of Integrated Pest Management.",
+                  "options": [
+                    "YES",
+                    "NO",
+                    "NOT GIVEN"
+                  ],
+                  "answer": "YES",
+                  "learning": {
+                    "evidenceParagraph": "C",
+                    "evidenceText": "“The GAO report singles out Oregon’s apple and pear producers who have used the new IPM techniques with growing success.”",
+                    "explanation": "“Singles out … with growing success” xác nhận đủ cả hai vế của mệnh đề: đúng đối tượng (apple and pear producers ở Oregon) và đúng nội dung (được nêu như ví dụ thành công).",
+                    "trap": "Với YES, phải kiểm tra rằng bài xác nhận toàn bộ mệnh đề, không chỉ một nửa. Ở đây cả “apple”, “pear” lẫn “successful” đều có trong cùng một câu.",
+                    "paraphrases": [
+                      {
+                        "question": "promoted as successful examples",
+                        "passage": "singles out … with growing success"
+                      }
+                    ],
+                    "skillTag": "TFNG_FULL_MATCH"
+                  }
+                },
+                {
+                  "id": "q11",
+                  "prompt": "The IPPC uses scientists from different organisations globally.",
+                  "options": [
+                    "YES",
+                    "NO",
+                    "NOT GIVEN"
+                  ],
+                  "answer": "NO",
+                  "learning": {
+                    "evidenceParagraph": "D",
+                    "evidenceText": "“The IPPC brings together scientists from OSU’s Agricultural Experiment Station, OSU Extension service, the U.S. Department of Agriculture and Oregon farmers.”",
+                    "explanation": "Danh sách liệt kê toàn là tổ chức của Mỹ, phần lớn là của bang Oregon. Vế “different organisations” đúng, nhưng vế “globally” bị bài bác bỏ bằng chính danh sách đó, nên đáp án là NO.",
+                    "trap": "Mệnh đề có hai vế mà bài xác nhận một vế và bác bỏ vế kia thì đáp án theo vế bị bác bỏ. Đừng thấy “different organisations” khớp là vội chọn YES.",
+                    "paraphrases": [
+                      {
+                        "question": "globally",
+                        "passage": "OSU … the U.S. Department of Agriculture and Oregon farmers"
+                      }
+                    ],
+                    "skillTag": "TFNG_PARTIAL_MATCH"
+                  }
+                },
+                {
+                  "id": "q12",
+                  "prompt": "Straw mulch experiments produced unplanned benefits.",
+                  "options": [
+                    "YES",
+                    "NO",
+                    "NOT GIVEN"
+                  ],
+                  "answer": "YES",
+                  "learning": {
+                    "evidenceParagraph": "H",
+                    "evidenceText": "“In addition, and unexpectedly, the scientists found that the mulched soil created a home for beneficial beetles and spiders that prey on onion thrips.”",
+                    "explanation": "“Unexpectedly” = “unplanned”, và lợi ích được nêu rõ (thiên địch diệt sâu, giảm nhu cầu thuốc trừ sâu). Cả hai vế của mệnh đề đều có bằng chứng trực tiếp.",
+                    "trap": "Một trạng từ nhỏ như “unexpectedly” có thể là toàn bộ bằng chứng của câu. Khi mệnh đề chứa tính từ chỉ tính bất ngờ, hãy quét trạng từ chứ đừng chỉ quét danh từ.",
+                    "paraphrases": [
+                      {
+                        "question": "unplanned benefits",
+                        "passage": "and unexpectedly, the scientists found"
+                      }
+                    ],
+                    "skillTag": "TFNG_ADVERB_EVIDENCE"
+                  }
+                },
+                {
+                  "id": "q13",
+                  "prompt": "The apple industry is now facing a lot of competition from abroad.",
+                  "options": [
+                    "YES",
+                    "NO",
+                    "NOT GIVEN"
+                  ],
+                  "answer": "NOT GIVEN",
+                  "learning": {
+                    "evidenceParagraph": "I",
+                    "evidenceText": "“In recent years, the industry has faced stiff competition from overseas producers” — nhưng cả đoạn I đang nói về ngành lê (pear), không phải táo.",
+                    "explanation": "Bài có nói về cạnh tranh từ nước ngoài, nhưng chủ thể là ngành lê. Không có câu nào khẳng định hay phủ định điều đó với ngành táo, nên đáp án là NOT GIVEN chứ không phải NO.",
+                    "trap": "Chủ đề xuất hiện trong bài không đồng nghĩa với việc mệnh đề được xác nhận. Luôn kiểm tra chủ thể của câu: đổi “pear” thành “apple” là bẫy đổi chủ thể kinh điển.",
+                    "paraphrases": [
+                      {
+                        "question": "competition from abroad",
+                        "passage": "stiff competition from overseas producers"
+                      }
+                    ],
+                    "skillTag": "TFNG_WRONG_SUBJECT"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "skill": "READING",
+    "taskType": "READING_PASSAGE",
+    "title": "Reading Practice 05 — Father of Modern Management",
+    "description": "1 passage · 14 câu · Nối tiêu đề đoạn + TFNG + chọn nhiều đáp án · 20 phút",
+    "durationMinutes": 20,
+    "accessLevel": "RESTRICTED",
+    "achievementEligible": true,
+    "difficultyTier": "HARD",
+    "content": {
+      "parts": [
+        {
+          "passage": {
+            "title": "Father of modern management",
+            "labelParagraphs": true,
+            "paragraphs": [
+              "Peter Drucker was one of the most important management thinkers of the past hundred years. He wrote about 40 book and thousands of articles and he never rested in his mission to persuade the world that management matters. “Management is an organ of institutions ... the organ that converts a mob into an organisation, and human efforts into performance.” Did he succeed? The range of his influence was extraordinary. Wherever people grapple with tricky management problems, from big organizations to small ones, from the public sector to the private, and increasingly in the voluntary sector, you can find Drucker’s fingerprints.",
+              "His first two books – The End of Economic Man (1939) and The Future of Industrial Man (1942) – had their admirers, including Winston Churchill, but they annoyed academic critics by ranging so widely over so many different subjects. Still, the second of these books attracted attention with its passionate insistence that companies had a social dimension as well as an economic purpose. His third book, The Concept of the Corporation, became an instant bestseller and has remained in print ever since.",
+              "The two most interesting arguments in The Concept of the Corporation actually had little to do with the decentralization fad. They were to dominate his work. The first had to do with “empowering” workers. Drucker believed in treating workers as resources rather than just as costs. He was a harsh critic of the assembly-line system of production that then dominated the manufacturing sector – partly because assembly lines moved at the speed of the slowest and partly because they failed to engage the creativity of individual workers. The second argument had to do with the rise of knowledge workers. Drucker argued that the world is moving from an “economy of goods” to an economy of “knowledge” – and from a society dominated by an industrial proletariat to one dominated by brain workers. He insisted that this had profound implications for both managers and politicians. Managers had to stop treating workers like cogs in a huge inhuman machine and start treating them as brain workers. In turn, politicians had to realise that knowledge, and hence education, was the single most important resource for any advanced society. Yet Drucker also thought that this economy had implications for knowledge workers themselves. They had to come to terms with the fact that they were neither “bosses” nor “workers”, but something in between: entrepreneurs who had responsibility for developing their most important resource, brainpower, and who also needed to take more control of their own careers, including their pension plans.",
+              "However, there was also a hard side to his work. Drucker was responsible for inventing one of the rational school of management’s most successful products – “management by objectives”. In one of his most substantial works, The Practice of Management (1954), he emphasised the importance of managers and corporations setting clear long-term objectives and then translating those long-term objectives into more immediate goals. He argued that firms should have an elite corps of general managers, who set these long-term objectives, and then a group of more specialised managers. For his critics, this was a retreat from his earlier emphasis on the soft side of management. For Drucker it was all perfectly consistent: if you rely too much on empowerment you risk anarchy, whereas if you rely too much on command-and-control you sacrifice creativity. The trick is for managers to set long-term goals, but then allow their employees to work out ways of achieving those goals. If Drucker helped make management a global industry, he also helped push it beyond its business base. He was emphatically a management thinker, not just a business one. He believed that management is “the defining organ of all modern institutions”, not just corporations.",
+              "There are three persistent criticisms of Drucker’s work. The first is that he focused on big organisations rather than small ones. The Concept of the Corporation was in many ways a fanfare to big organisations. As Drucker said, “We know today that in modern industrial production, particularly in modern mass production, the small unit is not only inefficient, it cannot produce at all.” The book helped to launch the “big organisation boom” that dominated business thinking for the next 20 years. The second criticism is that Drucker’s enthusiasm for management by objectives helped to lead the business down a dead end. They prefer to allow ideas, including ideas for long-term strategies, to bubble up from the bottom and middle of the organisations rather than being imposed from on high. Thirdly, Drucker is criticised for being a maverick who has increasingly been left behind by the increasing rigour of his chosen field. There is no single area of academic management theory that he made his own.",
+              "There is some truth in the first two arguments. Drucker never wrote anything as good as The Concept of the Corporation on entrepreneurial start-ups. Drucker’s work on management by objectives sits uneasily with his earlier and later writings on the importance of knowledge workers and self-directed teams. But the third argument is short-sighted and unfair because it ignores Drucker’s pioneering role in creating the modern profession of management. He produced one of the first systematic studies of a big company. He pioneered the idea that ideas can help galvanise companies. The biggest problem with evaluating Drucker’s influence is that so many of his ideas have passed into conventional wisdom. In other words, he is the victim of his own success. His writings on the importance of knowledge workers and empowerment may sound a little banal today. But they certainly weren’t banal when he first dreamed them up in the 1940s, or when they were first put in to practice in the Anglo-Saxon world in the 1980s. Moreover, Drucker continued to produce new ideas up until his 90s. His work on the management of voluntary organisations remained at the cutting edge."
+            ]
+          },
+          "questionGroups": [
+            {
+              "type": "MATCH_HEADINGS",
+              "instruction": "Reading Passage 2 has six paragraphs, A–F. Choose the correct heading for each paragraph from the list below. Write the correct number, i–ix, in boxes 1–6 on your answer sheet.",
+              "options": [
+                "The popularity and impact of Drucker’s work",
+                "Finding fault with Drucker",
+                "The impact of economic globalisation",
+                "Government regulation of business",
+                "Early publications of Drucker’s",
+                "Drucker’s view of balanced management",
+                "Drucker’s rejection of big business",
+                "An appreciation of the pros and cons of Drucker’s work",
+                "The changing role of the employee"
+              ],
+              "questions": [
+                {
+                  "id": "q1",
+                  "paragraph": "A",
+                  "answer": "i",
+                  "learning": {
+                    "evidenceParagraph": "A",
+                    "evidenceText": "“The range of his influence was extraordinary… you can find Drucker’s fingerprints.”",
+                    "explanation": "Cả đoạn A là lời giới thiệu về tầm ảnh hưởng rộng khắp của Drucker — từ tổ chức lớn đến nhỏ, từ công đến tư. Đó chính là “popularity and impact”. Heading viii (pros and cons) không hợp vì đoạn A không nêu bất kỳ nhược điểm nào.",
+                    "trap": "Đoạn mở bài của một bài chân dung hầu như luôn là “giới thiệu tầm quan trọng”. Hãy hỏi đoạn này làm nhiệm vụ gì trong mạch bài, chứ đừng bắt từ khóa nổi bật như “management matters”.",
+                    "paraphrases": [
+                      {
+                        "question": "popularity and impact",
+                        "passage": "The range of his influence was extraordinary"
+                      }
+                    ],
+                    "skillTag": "HEADINGS_FUNCTION_OF_INTRO"
+                  }
+                },
+                {
+                  "id": "q2",
+                  "paragraph": "B",
+                  "answer": "v",
+                  "learning": {
+                    "evidenceParagraph": "B",
+                    "evidenceText": "“His first two books – The End of Economic Man (1939) and The Future of Industrial Man (1942)… His third book, The Concept of the Corporation, became an instant bestseller.”",
+                    "explanation": "Toàn đoạn liệt kê ba cuốn sách đầu tiên theo trình tự thời gian — đúng nghĩa “early publications”. Heading i (popularity and impact) bị loại vì đoạn này chỉ nói tới phản ứng với từng cuốn sách, không nói tới ảnh hưởng tổng thể.",
+                    "trap": "Khi hai heading gần nghĩa, hãy chọn heading bao trùm được cả đoạn. Chi tiết “instant bestseller” chỉ là một câu, không đủ để đại diện cho cả đoạn.",
+                    "paraphrases": [
+                      {
+                        "question": "Early publications",
+                        "passage": "His first two books… His third book"
+                      }
+                    ],
+                    "skillTag": "HEADINGS_MAIN_IDEA_VS_DETAIL"
+                  }
+                },
+                {
+                  "id": "q3",
+                  "paragraph": "C",
+                  "answer": "ix",
+                  "learning": {
+                    "evidenceParagraph": "C",
+                    "evidenceText": "“Managers had to stop treating workers like cogs in a huge inhuman machine and start treating them as brain workers… they were neither ‘bosses’ nor ‘workers’, but something in between.”",
+                    "explanation": "Hai lập luận trong đoạn — trao quyền cho người lao động và sự trỗi dậy của người lao động tri thức — đều xoay quanh việc vai trò của người làm công thay đổi. Heading iii (globalisation) không có căn cứ; đoạn nói về chuyển dịch từ “economy of goods” sang “economy of knowledge”, không nói về toàn cầu hóa.",
+                    "trap": "“Economy” xuất hiện nhiều lần trong đoạn dễ kéo học viên sang heading về kinh tế toàn cầu. Từ khóa lặp lại là dấu hiệu của bẫy chứ không phải bằng chứng.",
+                    "paraphrases": [
+                      {
+                        "question": "The changing role of the employee",
+                        "passage": "stop treating workers like cogs… start treating them as brain workers"
+                      }
+                    ],
+                    "skillTag": "HEADINGS_KEYWORD_TRAP"
+                  }
+                },
+                {
+                  "id": "q4",
+                  "paragraph": "D",
+                  "answer": "vi",
+                  "learning": {
+                    "evidenceParagraph": "D",
+                    "evidenceText": "“If you rely too much on empowerment you risk anarchy, whereas if you rely too much on command-and-control you sacrifice creativity. The trick is for managers to set long-term goals, but then allow their employees to work out ways of achieving those goals.”",
+                    "explanation": "Câu này nêu chính xác thế cân bằng giữa hai thái cực — đúng ý “balanced management”. Đoạn mở đầu bằng “However, there was also a hard side”, tức bổ sung mặt cứng để cân với mặt mềm ở đoạn C.",
+                    "trap": "Ý chính của đoạn thường nằm ở câu giải thích sau một từ chuyển ý (“For Drucker it was all perfectly consistent…”), không nằm ở thuật ngữ nổi bật đầu đoạn (“management by objectives”).",
+                    "paraphrases": [
+                      {
+                        "question": "balanced management",
+                        "passage": "if you rely too much on empowerment… whereas if you rely too much on command-and-control"
+                      }
+                    ],
+                    "skillTag": "HEADINGS_TOPIC_SENTENCE_POSITION"
+                  }
+                },
+                {
+                  "id": "q5",
+                  "paragraph": "E",
+                  "answer": "ii",
+                  "learning": {
+                    "evidenceParagraph": "E",
+                    "evidenceText": "“There are three persistent criticisms of Drucker’s work.”",
+                    "explanation": "Câu đầu đoạn tuyên bố thẳng nội dung: đoạn E chỉ liệt kê ba lời chê. Heading viii (pros and cons) không hợp vì đoạn E hoàn toàn không nêu điểm mạnh; heading vii (rejection of big business) nói ngược — Drucker ca ngợi tổ chức lớn chứ không bác bỏ.",
+                    "trap": "Heading viii và ii đều nói về phê phán, nhưng viii đòi hỏi đoạn phải có cả khen lẫn chê. Đọc kỹ động từ và số lượng vế trong heading trước khi chọn.",
+                    "paraphrases": [
+                      {
+                        "question": "Finding fault with",
+                        "passage": "three persistent criticisms of"
+                      }
+                    ],
+                    "skillTag": "HEADINGS_ONE_SIDED_VS_BALANCED"
+                  }
+                },
+                {
+                  "id": "q6",
+                  "paragraph": "F",
+                  "answer": "viii",
+                  "learning": {
+                    "evidenceParagraph": "F",
+                    "evidenceText": "“There is some truth in the first two arguments… But the third argument is short-sighted and unfair because it ignores Drucker’s pioneering role.”",
+                    "explanation": "Đoạn F cân nhắc từng lời chê: thừa nhận hai lời đầu có lý, bác bỏ lời thứ ba và nêu công lao của Drucker. Đó đúng là “appreciation of the pros and cons”. Heading ii đã dùng cho đoạn E và cũng không đủ vì F có cả bênh vực.",
+                    "trap": "Hai đoạn liền nhau cùng chủ đề nhưng khác chức năng: một đoạn nêu vấn đề, đoạn sau đánh giá vấn đề đó. Hãy phân biệt “liệt kê” với “thẩm định”.",
+                    "paraphrases": [
+                      {
+                        "question": "pros and cons",
+                        "passage": "There is some truth in the first two arguments… But the third argument is short-sighted and unfair"
+                      }
+                    ],
+                    "skillTag": "HEADINGS_LIST_VS_EVALUATION"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "TFNG",
+              "instruction": "Do the following statements agree with the information given in Reading Passage 2? In boxes 7–10 on your answer sheet, write YES if the statement agrees with what is stated in the passage, NO if the statement counters what is stated in the passage, NOT GIVEN if there is no relevant information given in the passage.",
+              "questions": [
+                {
+                  "id": "q7",
+                  "prompt": "Drucker believed the employees should enjoy the same status as the employers in a company.",
+                  "options": [
+                    "YES",
+                    "NO",
+                    "NOT GIVEN"
+                  ],
+                  "answer": "NOT GIVEN",
+                  "learning": {
+                    "evidenceParagraph": "C",
+                    "evidenceText": "“They had to come to terms with the fact that they were neither ‘bosses’ nor ‘workers’, but something in between.”",
+                    "explanation": "Bài nói người lao động tri thức nằm ở vị trí trung gian giữa sếp và công nhân — nhưng “ở giữa” không có nghĩa là “ngang hàng với chủ”. Bài không hề so sánh địa vị của nhân viên với địa vị của chủ doanh nghiệp, nên không xác nhận cũng không bác bỏ được.",
+                    "trap": "“Trao quyền” (empowerment) không đồng nghĩa với “bình đẳng về địa vị”. Khi mệnh đề đưa ra một phép so sánh mà bài không thực hiện phép so sánh ấy, đáp án gần như luôn là NOT GIVEN.",
+                    "paraphrases": [
+                      {
+                        "question": "the same status as the employers",
+                        "passage": "neither ‘bosses’ nor ‘workers’, but something in between"
+                      }
+                    ],
+                    "skillTag": "YNNG_UNSTATED_COMPARISON"
+                  }
+                },
+                {
+                  "id": "q8",
+                  "prompt": "Drucker argued the managers and politicians will dominate the economy during a social transition.",
+                  "options": [
+                    "YES",
+                    "NO",
+                    "NOT GIVEN"
+                  ],
+                  "answer": "NO",
+                  "learning": {
+                    "evidenceParagraph": "C",
+                    "evidenceText": "“…from a society dominated by an industrial proletariat to one dominated by brain workers. He insisted that this had profound implications for both managers and politicians.”",
+                    "explanation": "Bài chỉ đích danh nhóm sẽ giữ vị trí thống trị sau chuyển đổi: brain workers (người lao động tri thức). Managers và politicians chỉ là những người *chịu ảnh hưởng* (“had profound implications for”), chứ không phải người thống trị. Mệnh đề gán vai trò thống trị cho sai nhóm nên bị bài bác bỏ.",
+                    "trap": "“Có ảnh hưởng tới X” hoàn toàn khác “X thống trị”. Khi mệnh đề nâng một nhóm phụ thành nhân vật trung tâm, hãy tìm câu trong bài chỉ rõ ai mới là trung tâm.",
+                    "paraphrases": [
+                      {
+                        "question": "managers and politicians will dominate",
+                        "passage": "implications for both managers and politicians / dominated by brain workers"
+                      }
+                    ],
+                    "skillTag": "YNNG_ROLE_SUBSTITUTION"
+                  }
+                },
+                {
+                  "id": "q9",
+                  "prompt": "Drucker supported that workers should not simply put themselves in the employment relationship and should develop their resources of intelligence voluntarily.",
+                  "options": [
+                    "YES",
+                    "NO",
+                    "NOT GIVEN"
+                  ],
+                  "answer": "YES",
+                  "learning": {
+                    "evidenceParagraph": "C",
+                    "evidenceText": "“…entrepreneurs who had responsibility for developing their most important resource, brainpower, and who also needed to take more control of their own careers.”",
+                    "explanation": "Bài xác nhận cả hai vế: (1) người lao động tri thức không chỉ là người làm thuê mà còn là “entrepreneurs”, (2) họ tự chịu trách nhiệm phát triển “brainpower” và tự cầm lái sự nghiệp mình. “Voluntarily” khớp với “take more control of their own careers”.",
+                    "trap": "Mệnh đề dài, nhiều vế thì phải soát từng vế. Chỉ khi mọi vế đều có bằng chứng mới được chọn YES — thiếu một vế là rơi xuống NOT GIVEN.",
+                    "paraphrases": [
+                      {
+                        "question": "develop their resources of intelligence",
+                        "passage": "developing their most important resource, brainpower"
+                      }
+                    ],
+                    "skillTag": "YNNG_MULTI_CLAUSE_CHECK"
+                  }
+                },
+                {
+                  "id": "q10",
+                  "prompt": "Drucker’s work on management is out of date in modern days.",
+                  "options": [
+                    "YES",
+                    "NO",
+                    "NOT GIVEN"
+                  ],
+                  "answer": "NO",
+                  "learning": {
+                    "evidenceParagraph": "F",
+                    "evidenceText": "“Drucker continued to produce new ideas up until his 90s. His work on the management of voluntary organisations remained at the cutting edge.”",
+                    "explanation": "“Remained at the cutting edge” (vẫn ở tuyến đầu) là điều ngược hẳn với “out of date”. Câu “may sound a little banal today” chỉ nói ý tưởng của ông nghe quen tai vì đã thành lẽ thường, chứ không phải lỗi thời — bài giải thích ngay: “he is the victim of his own success”.",
+                    "trap": "Một câu nghe có vẻ tiêu cực (“sound a little banal”) có thể bị chính câu sau đó đảo ngược. Phải đọc hết chuỗi lập luận trước khi chốt NO hay YES.",
+                    "paraphrases": [
+                      {
+                        "question": "out of date",
+                        "passage": "remained at the cutting edge"
+                      }
+                    ],
+                    "skillTag": "YNNG_READ_TO_END_OF_ARGUMENT"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "MC_MULTI",
+              "instruction": "Choose TWO letters from A–E. Which TWO of the following are true of Drucker’s views?",
+              "questions": [
+                {
+                  "id": "q11",
+                  "prompt": "Which TWO of the following are true of Drucker’s views?",
+                  "options": [
+                    "A. High-rank executives and workers should be put in balanced positions in management practice",
+                    "B. Young executives should be given chances to start from low-level jobs",
+                    "C. More emphasis should be laid on fostering the development of the union",
+                    "D. Management should facilitate workers with tools of self-appraisal instead of controlling them from the outside force",
+                    "E. Leaders should go beyond the scope of management details and strategically establish goals"
+                  ],
+                  "selectCount": 2,
+                  "answer": [
+                    "D",
+                    "E"
+                  ],
+                  "learning": {
+                    "evidenceParagraph": "D",
+                    "evidenceText": "“The trick is for managers to set long-term goals, but then allow their employees to work out ways of achieving those goals.”",
+                    "explanation": "Câu này chứa cả hai đáp án: vế đầu (“managers set long-term goals”) là E — lãnh đạo lo mục tiêu chiến lược thay vì chi tiết vận hành; vế sau (“allow their employees to work out ways”) là D — nhân viên tự tìm cách làm thay vì bị kiểm soát từ bên ngoài. A sai vì bài nói người lao động tri thức “neither bosses nor workers”, không nói địa vị ngang bằng. B và C hoàn toàn không xuất hiện: bài không nhắc tới lộ trình thăng tiến của quản lý trẻ hay công đoàn.",
+                    "trap": "Với dạng chọn nhiều đáp án, một câu văn có cấu trúc “but/while” thường chứa sẵn cả hai đáp án đúng. Tìm câu tổng kết quan điểm rồi tách vế, thay vì đi quét cả năm phương án một lượt.",
+                    "paraphrases": [
+                      {
+                        "question": "strategically establish goals",
+                        "passage": "managers to set long-term goals"
+                      },
+                      {
+                        "question": "instead of controlling them from the outside force",
+                        "passage": "allow their employees to work out ways of achieving those goals"
+                      }
+                    ],
+                    "skillTag": "MCMULTI_SPLIT_SENTENCE"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "MC_MULTI",
+              "instruction": "Choose TWO letters from A–E. Which TWO of the following are mentioned in the passage as criticisms of Drucker and his views?",
+              "questions": [
+                {
+                  "id": "q12",
+                  "prompt": "Which TWO of the following are mentioned in the passage as criticisms of Drucker and his views?",
+                  "options": [
+                    "A. His lectures focus too much on big organisations and ignore the small ones.",
+                    "B. His lectures are too broad and lack precision and accuracy about the facts.",
+                    "C. He put a source of objectives more on corporate executives but not on average workers.",
+                    "D. He acted much like a maverick and did not set up his own management groups.",
+                    "E. He was overstating the case for knowledge workers when warning business to get prepared."
+                  ],
+                  "selectCount": 2,
+                  "answer": [
+                    "A",
+                    "C"
+                  ],
+                  "learning": {
+                    "evidenceParagraph": "E",
+                    "evidenceText": "“The first is that he focused on big organisations rather than small ones… They prefer to allow ideas… to bubble up from the bottom and middle of the organisations rather than being imposed from on high.”",
+                    "explanation": "A khớp nguyên văn lời chê thứ nhất. C là cách diễn đạt lại lời chê thứ hai: “management by objectives” đặt mục tiêu ở cấp lãnh đạo và áp từ trên xuống (“imposed from on high”), trong khi người phê phán muốn ý tưởng đi lên từ tầng giữa và tầng đáy. D dùng đúng từ “maverick” nhưng bịa thêm chi tiết: bài nói ông không tạo được lĩnh vực lý thuyết riêng (“no single area of academic management theory that he made his own”), chứ không nói ông không lập nhóm quản lý. B cũng lệch: giới hàn lâm khó chịu vì sách của ông trải quá rộng (“ranging so widely”), không phải vì sai sự thật. E không có trong bài.",
+                    "trap": "Một từ khóa trùng khớp (“maverick”) chưa đủ để chọn cả phương án — phải kiểm tra toàn bộ nội dung phương án, kể cả vế đứng sau chữ “and”.",
+                    "paraphrases": [
+                      {
+                        "question": "put a source of objectives more on corporate executives",
+                        "passage": "being imposed from on high"
+                      },
+                      {
+                        "question": "not on average workers",
+                        "passage": "bubble up from the bottom and middle of the organisations"
+                      }
+                    ],
+                    "skillTag": "MCMULTI_KEYWORD_WITH_FALSE_TAIL"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "skill": "READING",
+    "taskType": "READING_PASSAGE",
+    "title": "Reading Practice 06 — Should We Stop Eating Meat?",
+    "description": "1 passage · 13 câu · Tìm đoạn chứa thông tin + điền từ + nối đặc điểm · 20 phút",
+    "durationMinutes": 20,
+    "accessLevel": "RESTRICTED",
+    "achievementEligible": true,
+    "difficultyTier": "MEDIUM",
+    "content": {
+      "parts": [
+        {
+          "passage": {
+            "title": "Should we stop eating meat?",
+            "labelParagraphs": true,
+            "paragraphs": [
+              "The call for people to eat less meat to save the planet is growing louder, so if less is good, wouldn’t none be better? To find out, let’s imagine what would happen if the world eliminated meat, milk and eggs from its diet, then trace the effects. Last year the world consumed 289 million tonnes of meat, 700 million tonnes of milk and 1.2 billion eggs. Environmentally speaking, this came at an enormous cost.",
+              "All agriculture damages the environment. Take for example the felled forests and the common use of irrigation systems. And it may surprise you to know that agriculture creates more greenhouse gases than all methods of transport put together. Livestock farming does the most damage. In part, that is because most livestock eat grain that could be used to feed human populations, and farmers are forced to grow more than we would otherwise need to meet the demand. Altogether, if we switched to a vegan diet, meaning no meat, dairy or eggs, the land currently required for crops would drop by an estimated 21 per cent, about 3.4 million hectares, roughly the size of India.",
+              "One environmental impact that would also lessen through a reduction in animal farming would be that of the nitrogen emitted from agricultural processes, which spreads into both waterways and land. According to environmental scientist Allison Leach, if everyone eliminated dairy products and eggs, this kind of pollution would fall by 60%. Livestock production has another serious environmental impact. Global statistics are hard to come by, but in the US at least, livestock account for 55% of erosion, mostly from forests being cut down to make way for grazing land. On top of this, half of all antibiotics manufactured are fed to livestock as part of their normal diet, a practice that is leading to drug-resistant bacteria.",
+              "A meat-free world, then, would be greener in many ways. However, if everyone opted to give up meat there would be significant costs too. For most of human history, livestock grazed on land that wasn’t suitable for ploughing, and in doing so they converted inedible grass into edible meat and milk. Even today, a flock of sheep or goats can be the most efficient way to get food from marginal land. In a world in which over a billion people do not have enough to eat, using this land for crop production would contribute to food insecurity.",
+              "In some parts of the world today, livestock like chickens, for instance, can subsist on leftovers and whatever they find. Tara Garnett, who heads the Food Climate Research Network at the University of Surrey, points out the usefulness of these animals. By giving them your leftovers, she says, they deal with your rubbish, and you get meat. Garnett admits, though, that if this kind of approach were generally adopted, it would require a major adjustment in food preferences; people would have to get used to chicken, for example, with less fat.",
+              "Another downside to a meat-free world would be the disappearance of animal by-products. Such a world would have to replace the 11 million tonnes of leather and 2 million tonnes of wool that come annually from livestock farming and which are turned into clothing. Furthermore, even ardent vegetarians acknowledge that dairy products and meat may be a good thing in poorer countries. ‘Whilst there’s no doubt that considerable reduction of meat consumption would have an environmental benefit, we do have to be careful about saying it would be the best solution if the whole world went vegetarian,’ says Annette Pinner, chief executive of the UK Vegetarian Society. For many of the world’s poorest rural residents, an animal may represent their only realistic hope for a little extra income, and a little animal protein can make a big difference to a marginal diet.",
+              "What if we decided on a no-meat vegetarian diet, rather than a vegan diet? After all, milk and eggs are very efficient ways of producing animal calories. ‘It’s difficult to switch to a no-meat-but-milk diet,’ says Helmut Haberl, a social ecologist. ‘Dairy cows must calve every year to keep producing milk, and only half their offspring will be female. While many vegetarians see moral reasons not to kill and eat the males, there is surely no practical reason to waste so much meat.’ Similar arguments apply to chickens kept for eggs.",
+              "So even though a meat-free world sounds good on paper, it is likely that a utopian future will still have some animal products in it. The real questions, then, are how much meat do we want, and how will we produce it? The answers depend on how you approach these questions. The most straightforward approach is to assume that the world will continue to want evermore meat. The United Nations’ best guess is that by 2050, the world will need to more than double its production of meat, an increase that would be environmentally disastrous.",
+              "Under this scenario the goal will have to be producing the most meat at the lowest environmental cost. According to Walter Falcon, an agricultural economist, this means fewer free range cattle and sheep in green fields. ‘If you’re going to keep some livestock systems, I think the ones you’ll want to keep are the intensive ones,’ he says. Of course this does not take into account animal welfare issues, as intensive farming usually means poor living conditions and the use of growth hormones."
+            ]
+          },
+          "questionGroups": [
+            {
+              "type": "MATCH_INFO",
+              "instruction": "Reading Passage has nine paragraphs, A–I. Which paragraph contains the following information? Write the correct letter, A–I, in boxes 1–4 on your answer sheet.",
+              "options": [
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F",
+                "G",
+                "H",
+                "I"
+              ],
+              "reuseOptions": true,
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "the suggestion that people may need to adapt to a different quality of meat",
+                  "answer": "E",
+                  "learning": {
+                    "evidenceParagraph": "E",
+                    "evidenceText": "“…it would require a major adjustment in food preferences; people would have to get used to chicken, for example, with less fat.”",
+                    "explanation": "“Get used to chicken … with less fat” đúng là “adapt to a different quality of meat”. Đoạn D cũng nói về việc lấy thịt từ đất xấu nhưng bàn về nguồn đất, không bàn về chất lượng thịt mà người ăn phải quen dần.",
+                    "trap": "Với Matching Information, hãy dịch câu hỏi thành một hành động cụ thể (“người ăn phải làm quen với thịt khác trước đây”) rồi mới quét bài; quét theo từ “quality” sẽ không tìm thấy vì bài không dùng từ đó.",
+                    "paraphrases": [
+                      {
+                        "question": "adapt to a different quality of meat",
+                        "passage": "get used to chicken … with less fat"
+                      }
+                    ],
+                    "skillTag": "MATCHINFO_CONCEPT_NOT_KEYWORD"
+                  }
+                },
+                {
+                  "id": "q2",
+                  "prompt": "a description of the way animals were fed in the past",
+                  "answer": "D",
+                  "learning": {
+                    "evidenceParagraph": "D",
+                    "evidenceText": "“For most of human history, livestock grazed on land that wasn’t suitable for ploughing, and in doing so they converted inedible grass into edible meat and milk.”",
+                    "explanation": "“For most of human history” là dấu mốc quá khứ, và câu mô tả đúng cách vật nuôi kiếm ăn (gặm cỏ trên đất không cày cấy được). Đoạn E cũng nói chuyện cho gà ăn thức ăn thừa nhưng mở đầu bằng “In some parts of the world today” — hiện tại, không phải quá khứ.",
+                    "trap": "Khi câu hỏi có mốc thời gian (“in the past”, “currently”, “in future”), hãy dùng chính mốc thời gian đó để loại các đoạn nội dung tương tự. Hai đoạn có thể cùng nói về việc cho vật nuôi ăn mà chỉ khác thì.",
+                    "paraphrases": [
+                      {
+                        "question": "in the past",
+                        "passage": "For most of human history"
+                      }
+                    ],
+                    "skillTag": "MATCHINFO_TIME_MARKER"
+                  }
+                },
+                {
+                  "id": "q3",
+                  "prompt": "a prediction in regard to human demand for meat",
+                  "answer": "H",
+                  "learning": {
+                    "evidenceParagraph": "H",
+                    "evidenceText": "“The United Nations’ best guess is that by 2050, the world will need to more than double its production of meat.”",
+                    "explanation": "“Best guess … by 2050” chính là một dự báo, và nội dung dự báo là nhu cầu thịt tăng gấp đôi. Đoạn A cũng có số liệu tiêu thụ thịt nhưng là số liệu năm ngoái — dữ kiện quá khứ, không phải dự báo.",
+                    "trap": "Phân biệt “số liệu thống kê” với “dự báo”. Dự báo luôn đi kèm mốc thời gian tương lai hoặc động từ tình thái (will, is projected to, best guess).",
+                    "paraphrases": [
+                      {
+                        "question": "a prediction",
+                        "passage": "best guess is that by 2050"
+                      }
+                    ],
+                    "skillTag": "MATCHINFO_FACT_VS_FORECAST"
+                  }
+                },
+                {
+                  "id": "q4",
+                  "prompt": "the potential consequences of a meat-free world for textile industries",
+                  "answer": "F",
+                  "learning": {
+                    "evidenceParagraph": "F",
+                    "evidenceText": "“Such a world would have to replace the 11 million tonnes of leather and 2 million tonnes of wool… which are turned into clothing.”",
+                    "explanation": "Da và len biến thành quần áo chính là ngành dệt may — bài không dùng chữ “textile” nhưng “turned into clothing” là định nghĩa của nó. Không đoạn nào khác nhắc tới sản phẩm phụ dùng để may mặc.",
+                    "trap": "Câu hỏi Matching Information hay dùng tên ngành/lĩnh vực trừu tượng (textile, healthcare, tourism) trong khi bài chỉ nêu sản phẩm cụ thể. Hãy tự hỏi “ngành này sản xuất ra cái gì” rồi đi tìm cái đó.",
+                    "paraphrases": [
+                      {
+                        "question": "textile industries",
+                        "passage": "leather and … wool … turned into clothing"
+                      }
+                    ],
+                    "skillTag": "MATCHINFO_CATEGORY_TO_INSTANCE"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "GAP",
+              "instruction": "Complete the summary below. Choose ONE WORD ONLY from the passage for each answer. Write your answers in boxes 5–9 on your answer sheet.",
+              "wordLimit": "ONE_WORD",
+              "boxTitle": "How does agriculture damage the environment?",
+              "questions": [
+                {
+                  "id": "q5",
+                  "prompt": "Agriculture causes significant harm to the environment in a number of ways, including the frequent use of ______ in modern farming and the cutting down of trees.",
+                  "answer": "irrigation",
+                  "altAnswers": [
+                    "irrigation systems"
+                  ],
+                  "learning": {
+                    "evidenceParagraph": "B",
+                    "evidenceText": "“Take for example the felled forests and the common use of irrigation systems.”",
+                    "explanation": "Bản tóm tắt đảo thứ tự hai ví dụ so với bài: “cutting down of trees” = “felled forests”, nên chỗ trống còn lại phải là “irrigation”. Giới hạn ONE WORD buộc bỏ chữ “systems”.",
+                    "trap": "Tóm tắt thường đảo thứ tự các ý so với bài gốc. Hãy xác định phần đã khớp trước, phần còn lại chính là đáp án — đừng đọc tuần tự và bỏ cuộc khi thứ tự lệch.",
+                    "paraphrases": [
+                      {
+                        "question": "the cutting down of trees",
+                        "passage": "the felled forests"
+                      }
+                    ],
+                    "skillTag": "GAP_ORDER_SHUFFLED"
+                  }
+                },
+                {
+                  "id": "q6",
+                  "prompt": "It is also responsible for the production of many greenhouse gases, more so than ______ is.",
+                  "answer": "transport",
+                  "learning": {
+                    "evidenceParagraph": "B",
+                    "evidenceText": "“agriculture creates more greenhouse gases than all methods of transport put together.”",
+                    "explanation": "Cấu trúc so sánh trong tóm tắt (“more so than ___ is”) sao chép cấu trúc “more … than …” trong bài, nên chỗ trống lấy đúng vế sau: transport. Giới hạn một từ loại bỏ “all methods of transport”.",
+                    "trap": "Khi ô trống nằm sau “than”, hãy tìm đúng cấu trúc so sánh trong bài rồi lấy danh từ chính ở vế sau, bỏ mọi từ bổ nghĩa để vừa giới hạn số từ.",
+                    "paraphrases": [
+                      {
+                        "question": "more so than ___ is",
+                        "passage": "more greenhouse gases than all methods of transport put together"
+                      }
+                    ],
+                    "skillTag": "GAP_COMPARATIVE_SLOT"
+                  }
+                },
+                {
+                  "id": "q7",
+                  "prompt": "A meat-free diet would mean that actually less ______ could be used for crops.",
+                  "answer": "land",
+                  "learning": {
+                    "evidenceParagraph": "B",
+                    "evidenceText": "“if we switched to a vegan diet… the land currently required for crops would drop by an estimated 21 per cent.”",
+                    "explanation": "“The land … for crops would drop” = “less land could be used for crops”. Chỗ trống là danh từ đứng sau “less” nên phải là danh từ không đếm được — “land” khớp cả nghĩa lẫn ngữ pháp.",
+                    "trap": "Trước khi điền, hãy xác định loại từ mà ô trống đòi hỏi (danh từ số ít / không đếm được / động từ…). Ngữ pháp loại bớt phân nửa số ứng viên trước cả khi bạn đọc lại bài.",
+                    "paraphrases": [
+                      {
+                        "question": "less land could be used for crops",
+                        "passage": "the land currently required for crops would drop"
+                      }
+                    ],
+                    "skillTag": "GAP_GRAMMAR_FIRST"
+                  }
+                },
+                {
+                  "id": "q8",
+                  "prompt": "Far less chemical pollution, specifically in the form of ______, would also be released into the environment, especially if consumers cut out dairy and egg products as well as meat.",
+                  "answer": "nitrogen",
+                  "learning": {
+                    "evidenceParagraph": "C",
+                    "evidenceText": "“…the nitrogen emitted from agricultural processes, which spreads into both waterways and land… if everyone eliminated dairy products and eggs, this kind of pollution would fall by 60%.”",
+                    "explanation": "Cả hai chi tiết trong câu tóm tắt đều nằm ở đoạn C: chất gây ô nhiễm là nitrogen, và điều kiện là bỏ sữa cùng trứng. Sự trùng khớp của chi tiết thứ hai xác nhận ta đang đọc đúng chỗ.",
+                    "trap": "Khi câu tóm tắt có hai chi tiết, hãy dùng chi tiết không phải ô trống làm mỏ neo để định vị đoạn. Đó là cách nhanh nhất để tránh điền đáp án từ nhầm đoạn.",
+                    "paraphrases": [
+                      {
+                        "question": "chemical pollution",
+                        "passage": "this kind of pollution … emitted from agricultural processes"
+                      }
+                    ],
+                    "skillTag": "GAP_ANCHOR_DETAIL"
+                  }
+                },
+                {
+                  "id": "q9",
+                  "prompt": "In the US, there is clear evidence that considerable ______ is caused by the demand for grazing land, although there is no information on this from other countries.",
+                  "answer": "erosion",
+                  "learning": {
+                    "evidenceParagraph": "C",
+                    "evidenceText": "“Global statistics are hard to come by, but in the US at least, livestock account for 55% of erosion, mostly from forests being cut down to make way for grazing land.”",
+                    "explanation": "Câu tóm tắt tái hiện đúng ba yếu tố: phạm vi (in the US), nguyên nhân (grazing land) và việc thiếu số liệu toàn cầu (“Global statistics are hard to come by”). Chỗ trống chỉ có thể là “erosion”.",
+                    "trap": "Vế “although there is no information on this from other countries” không phải câu thừa — nó là bằng chứng cho thấy bạn đã tìm đúng câu. Hãy dùng mệnh đề phụ trong tóm tắt để tự kiểm tra đáp án.",
+                    "paraphrases": [
+                      {
+                        "question": "no information on this from other countries",
+                        "passage": "Global statistics are hard to come by"
+                      }
+                    ],
+                    "skillTag": "GAP_SELF_CHECK_CLAUSE"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "MATCH_FEATURES",
+              "instruction": "Look at the following statements and the list of people below. Match each statement with the correct researcher, A–E. Write the correct letter, A–E, in boxes 10–13 on your answer sheet.",
+              "options": [
+                "Allison Leach",
+                "Tara Garnett",
+                "Annette Pinner",
+                "Helmut Haberl",
+                "Walter Falcon"
+              ],
+              "questions": [
+                {
+                  "id": "q10",
+                  "prompt": "It is not possible to say that a vegetarian diet is right for everyone.",
+                  "answer": "C",
+                  "learning": {
+                    "evidenceParagraph": "F",
+                    "evidenceText": "Annette Pinner: “we do have to be careful about saying it would be the best solution if the whole world went vegetarian.”",
+                    "explanation": "“Be careful about saying it would be the best solution” đúng là “không thể khẳng định ăn chay hợp với tất cả mọi người”. Điều đáng chú ý: Pinner là giám đốc Hội Ăn chay Anh — chính người trong cuộc lại dè dặt, và bài nhấn mạnh điều đó bằng “even ardent vegetarians acknowledge”.",
+                    "trap": "Đừng đoán quan điểm của nhân vật theo chức danh của họ. Người đứng đầu một hội ăn chay vẫn có thể là người cảnh báo về ăn chay toàn cầu — chỉ lời trích dẫn mới quyết định đáp án.",
+                    "paraphrases": [
+                      {
+                        "question": "not possible to say … right for everyone",
+                        "passage": "have to be careful about saying it would be the best solution if the whole world went vegetarian"
+                      }
+                    ],
+                    "skillTag": "MATCH_FEATURES_ROLE_BIAS"
+                  }
+                },
+                {
+                  "id": "q11",
+                  "prompt": "It may be economically preferable to farm animals in limited space.",
+                  "answer": "E",
+                  "learning": {
+                    "evidenceParagraph": "I",
+                    "evidenceText": "Walter Falcon: “If you’re going to keep some livestock systems, I think the ones you’ll want to keep are the intensive ones.”",
+                    "explanation": "“Intensive” farming là nuôi nhốt mật độ cao — đúng ý “in limited space”; và Falcon được giới thiệu là “an agricultural economist”, cùng bối cảnh “producing the most meat at the lowest environmental cost”, khớp với “economically preferable”. Không nhân vật nào khác bàn về mô hình chăn nuôi công nghiệp.",
+                    "trap": "Nghề nghiệp của người phát biểu (economist, ecologist, scientist) là gợi ý mạnh giúp thu hẹp phạm vi khi câu hỏi có sắc thái kinh tế hay sinh thái. Đọc phần giới thiệu nhân vật, đừng chỉ đọc lời trích.",
+                    "paraphrases": [
+                      {
+                        "question": "farm animals in limited space",
+                        "passage": "the intensive ones"
+                      }
+                    ],
+                    "skillTag": "MATCH_FEATURES_SPEAKER_PROFILE"
+                  }
+                },
+                {
+                  "id": "q12",
+                  "prompt": "It does not make sense to give up meat without giving up dairy products too.",
+                  "answer": "D",
+                  "learning": {
+                    "evidenceParagraph": "G",
+                    "evidenceText": "Helmut Haberl: “It’s difficult to switch to a no-meat-but-milk diet… there is surely no practical reason to waste so much meat.”",
+                    "explanation": "Haberl lập luận rằng bò sữa phải đẻ mỗi năm, một nửa bê là bê đực, nên chế độ “bỏ thịt nhưng vẫn uống sữa” là bất hợp lý — đúng ý câu hỏi. Annette Pinner (C) cũng dè dặt về ăn chay nhưng lý do của bà là người nghèo, không phải mối liên hệ thịt–sữa.",
+                    "trap": "Hai nhân vật có thể cùng phản đối một chế độ ăn nhưng vì hai lý do khác nhau. Hãy khớp *lập luận*, không khớp *lập trường*.",
+                    "paraphrases": [
+                      {
+                        "question": "give up meat without giving up dairy products",
+                        "passage": "a no-meat-but-milk diet"
+                      }
+                    ],
+                    "skillTag": "MATCH_FEATURES_SAME_STANCE_DIFFERENT_REASON"
+                  }
+                },
+                {
+                  "id": "q13",
+                  "prompt": "Some animals can be fed in a way that allows waste to be recycled.",
+                  "answer": "B",
+                  "learning": {
+                    "evidenceParagraph": "E",
+                    "evidenceText": "Tara Garnett: “By giving them your leftovers, she says, they deal with your rubbish, and you get meat.”",
+                    "explanation": "Cho gà ăn thức ăn thừa để chúng “xử lý rác” chính là tái sử dụng chất thải. Allison Leach (A) — phương án còn thừa — chỉ nói về ô nhiễm nitơ, hoàn toàn không nói về thức ăn thừa.",
+                    "trap": "Trong Matching Features luôn có ít nhất một cái tên không được dùng. Đừng cố ép phân bổ đủ mọi phương án — nếu không tìm được lời trích khớp, cái tên đó chính là phương án nhiễu.",
+                    "paraphrases": [
+                      {
+                        "question": "allows waste to be recycled",
+                        "passage": "they deal with your rubbish, and you get meat"
+                      }
+                    ],
+                    "skillTag": "MATCH_FEATURES_UNUSED_OPTION"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "skill": "READING",
+    "taskType": "READING_PASSAGE",
+    "title": "Reading Practice 07 — Population Growth and Hydrological Poverty",
+    "description": "1 passage dài 1.240 từ · 14 câu · TFNG + tìm đoạn + trắc nghiệm · 20 phút",
+    "durationMinutes": 20,
+    "accessLevel": "RESTRICTED",
+    "achievementEligible": true,
+    "difficultyTier": "HARD",
+    "content": {
+      "parts": [
+        {
+          "passage": {
+            "title": "Population growth sentencing millions to hydrological poverty",
+            "labelParagraphs": true,
+            "paragraphs": [
+              "At a time when drought in the United States, Ethiopia, and Afghanistan is in the news, it is easy to forget that far more serious water shortages are emerging as the demand for water in many countries simply outruns the supply. Water tables are now falling on every continent; literally, scores of countries are facing water shortages as the tables fall and wells go dry. We live in a water-challenged world, one that is becoming more so each year as 80 million additional people stake their claims to the Earth’s water resources. Unfortunately, nearly all the projected 3 billion people to be added over the next half-century will be born in countries that are already experiencing water shortages. Even now, many in these countries lack enough water to drink, to satisfy cleanliness needs, and to produce food.",
+              "By 2050, India is projected to have added 519 million people and China 211 million. Pakistan is projected to have added nearly 200 million, going from 151 million at present to 348 million. Egypt, Iran, and Mexico are slated to increase their populations by more than half by 2050. In these and other water-short countries, population growth is sentencing millions of people to hydrological poverty, a local form of poverty that is difficult to escape.",
+              "Even with today’s 6 billion people, the world has a huge water deficit. Using data on over-pumping for China, India, Saudi Arabia, North Africa, and the United States, Sandra Postel, author of Pillar of Sand: Can the Irrigation Miracle Last? reports the annual depletion of the aquifer to be at 160 billion cubic meters or 160 billion tons. Using the rule of thumb that it takes 1,000 tons of water to produce 1 ton of grain, this 160-billion-ton water deficit is equal to 160 million tons of grain or one-half the US grain harvest.",
+              "Average world grain consumption is just over 300 kilograms per person per annum – one-third of a ton per person per year – and grain reserves directly or indirectly feed 480 million people globally. Stated otherwise, 480 million of the world’s 6 billion people are being fed with grain produced with the unsustainable use of water.",
+              "Over-pumping is a new phenomenon, one largely confined to the last half-century. Only since the development of powerful diesel – and electrically-driven pumps have we had the capacity to pull water out of an aquifer faster than it is replaced by precipitation. Some 70 percent of the water consumed worldwide, including both that diverted from rivers and that, pumped from underground, is used for irrigation, while some 20 percent is used by industry, and 10 percent for residential purposes. In the increasingly intense competition for water among sectors, agriculture almost always loses. The 1,000 tons of water used in India to produce 1 ton of wheat worth perhaps $200 can also be used to expand industrial output by easily $10,000 or 50 times as much. This ratio helps explain why, in the American West, the sale of irrigation water rights by farmers to cities is an almost daily occurrence.",
+              "In addition to population growth, urbanisation and industrialisation also expand the demand for water. As developing country villagers, traditionally reliant on the village well, move to urban high-rise apartment buildings with indoor plumbing, their residential water use can easily triple. Industrialisation takes even more water than urbanisation. Rising affluence in itself generates additional demand for water. As people move up the food chain, consuming more beef, pork, poultry, eggs, and dairy products, they use more grain. A US diet rich in livestock products requires 800 kilograms of grain per person a year, whereas diets in India, dominated by a starchy food staple such as rice, typically need only 200 kilograms. Using four times as much grain per person means using four times as much water.",
+              "Once a localised phenomenon, water scarcity is now crossing national borders via the international grain trade. The world’s fastest-growing grain import market is North Africa and the Middle East; an area that includes Morocco, Algeria, Tunisia, Libya, Egypt, and Iran. Virtually every country in this region is simultaneously experiencing water shortages and rapid population growth.",
+              "As the demand for water in the region’s cities and industries increases, it is typically satisfied by diverting water from irrigation. The loss in food production capacity is then offset by importing grain from abroad. Since 1 ton of grain represents 1,000 tons of water, this becomes the most efficient way to import water.",
+              "Last year, Iran imported 7 million tons of wheat, eclipsing Japan to become the world’s leading wheat importer. This year, Egypt is also projected to move ahead of Japan. Iran and Egypt have nearly 70 million people each. Both populations are increasing by more than a million a year and both are pressing the limits of their water supplies.",
+              "The water required to produce the grain and other foodstuffs imported into North Africa and the Middle East last year was roughly equal to the annual flow of the Nile River. Stated otherwise, the fast-growing water deficit of this region is equal to another Nile flowing into the region in the form of imported grain.",
+              "It is now often said that future wars in the region will more likely be fought over water than oil. Perhaps, but given the difficulty in winning a water war, the competition for water seems more likely to take place in world grain markets. The countries that will “win” in this competition will be those that are financially strongest, not those that are militarily strongest. The world water deficit grows larger with each year, making it potentially more difficult to manage. If we decided abruptly to stabilise water tables everywhere by simply pumping less water, the world grain harvest would fall by some 160 million tons or 8 percent, and grain prices would go off the chart. If the deficit continues to widen, the eventual adjustment will be even greater.",
+              "Unless governments in water-short countries act quickly to stabilise their populations and to raise water productivity, their water shortages may soon become food shortages. The risk is that the growing number of water-short countries, including population giants China and India, with rising grain-import needs will overwhelm the exportable supply in food surplus countries, such as the United States, Canada, and Australia. This is turn could destabilise world grain markets. Another risk of delay in dealing with the deficit is that some low-income, water-short countries will not be able to afford to import needed grain, trapping millions of their people in hydrological poverty; thirsty and hungry, unable to escape.",
+              "Although there are still some opportunities for developing new water resources, restoring the balance between water use and developing a sustainable supply will depend primarily on demand-side initiatives, such as stabilising population and raising water productivity. Governments can no longer separate population policy from the supply of water. And just as the world turned to raise land productivity a half-century ago when the frontiers of agricultural settlement disappeared, so it must now turn to raise water productivity. The first step toward this goal is to eliminate the water subsidies that foster inefficiency. The second step is to raise the price of water to reflect its cost. Shifting to more water-efficient technologies, more water-efficient crops, and more water-efficient forms of animal protein offer a huge potential for raising water productivity. These shifts will move faster if the price of water more closely reflects its real value."
+            ]
+          },
+          "questionGroups": [
+            {
+              "type": "TFNG",
+              "instruction": "Do the following statements agree with the information given in Reading Passage 3? In boxes 1–6 on your answer sheet, write TRUE if the statement agrees with the writer’s claims, FALSE if the statement contradicts the writer’s claims, NOT GIVEN if it is impossible to say what the writer thinks about this.",
+              "questions": [
+                {
+                  "id": "q1",
+                  "prompt": "Vegetarians drink less water than meat-eaters.",
+                  "options": [
+                    "TRUE",
+                    "FALSE",
+                    "NOT GIVEN"
+                  ],
+                  "answer": "NOT GIVEN",
+                  "learning": {
+                    "evidenceParagraph": "F",
+                    "evidenceText": "“As people move up the food chain, consuming more beef, pork, poultry… Using four times as much grain per person means using four times as much water.”",
+                    "explanation": "Bài chỉ nói tới lượng nước *dùng để sản xuất* thực phẩm cho mỗi chế độ ăn, không hề nói tới lượng nước một người *uống*. Hai khái niệm khác nhau, nên không có căn cứ để xác nhận hay bác bỏ.",
+                    "trap": "“Nước tiêu tốn để làm ra thức ăn” không phải “nước uống”. Khi mệnh đề đổi loại tiêu thụ (uống / dùng sinh hoạt / sản xuất), hãy kiểm tra bài nói về loại nào trước khi chọn TRUE hay FALSE.",
+                    "paraphrases": [
+                      {
+                        "question": "drink less water",
+                        "passage": "using four times as much water (to produce grain)"
+                      }
+                    ],
+                    "skillTag": "TFNG_DIFFERENT_MEASURE"
+                  }
+                },
+                {
+                  "id": "q2",
+                  "prompt": "A typical Indian diet requires less grain than a typical USA diet.",
+                  "options": [
+                    "TRUE",
+                    "FALSE",
+                    "NOT GIVEN"
+                  ],
+                  "answer": "TRUE",
+                  "learning": {
+                    "evidenceParagraph": "F",
+                    "evidenceText": "“A US diet rich in livestock products requires 800 kilograms of grain per person a year, whereas diets in India… typically need only 200 kilograms.”",
+                    "explanation": "Hai con số 800 kg và 200 kg xác nhận trực tiếp phép so sánh trong mệnh đề, đúng chiều và đúng đối tượng. Không cần suy luận thêm bước nào.",
+                    "trap": "Câu TRUE dễ nhất thường là câu bài đưa số liệu song song. Hãy làm những câu này trước để lấy điểm chắc, rồi mới quay lại các câu so sánh mơ hồ.",
+                    "paraphrases": [
+                      {
+                        "question": "requires less grain",
+                        "passage": "typically need only 200 kilograms (vs 800)"
+                      }
+                    ],
+                    "skillTag": "TFNG_DIRECT_NUMBERS"
+                  }
+                },
+                {
+                  "id": "q3",
+                  "prompt": "Growing grain uses more water than raising beef.",
+                  "options": [
+                    "TRUE",
+                    "FALSE",
+                    "NOT GIVEN"
+                  ],
+                  "answer": "FALSE",
+                  "learning": {
+                    "evidenceParagraph": "F",
+                    "evidenceText": "“As people move up the food chain, consuming more beef… they use more grain… Using four times as much grain per person means using four times as much water.”",
+                    "explanation": "Bài lập luận rằng ăn thịt bò kéo theo dùng nhiều ngũ cốc hơn, và do đó nhiều nước hơn — tức nuôi bò tốn nước hơn trồng ngũ cốc. Mệnh đề đảo ngược đúng chiều so sánh đó nên là FALSE, không phải NOT GIVEN, vì bài có nêu rõ quan hệ giữa hai vế.",
+                    "trap": "Bẫy đảo chiều so sánh: bài nói A > B, mệnh đề nói B > A. Khi gặp câu so sánh, hãy vẽ nhanh mũi tên chiều lớn–nhỏ trong bài rồi mới đối chiếu.",
+                    "paraphrases": [
+                      {
+                        "question": "raising beef",
+                        "passage": "move up the food chain, consuming more beef"
+                      }
+                    ],
+                    "skillTag": "TFNG_REVERSED_COMPARISON"
+                  }
+                },
+                {
+                  "id": "q4",
+                  "prompt": "People that move from the country to the city may increase their water consumption considerably.",
+                  "options": [
+                    "TRUE",
+                    "FALSE",
+                    "NOT GIVEN"
+                  ],
+                  "answer": "TRUE",
+                  "learning": {
+                    "evidenceParagraph": "F",
+                    "evidenceText": "“As developing country villagers… move to urban high-rise apartment buildings with indoor plumbing, their residential water use can easily triple.”",
+                    "explanation": "“Can easily triple” (tăng gấp ba) xác nhận mức độ “considerably”, và “villagers move to urban apartment buildings” khớp với “move from the country to the city”. Cả hai vế đều có bằng chứng.",
+                    "trap": "Trạng từ mức độ trong mệnh đề (considerably, slightly, dramatically) phải khớp với mức độ trong bài. “Gấp ba” đủ mạnh cho “considerably”; nếu bài chỉ nói “tăng nhẹ” thì đáp án đã khác.",
+                    "paraphrases": [
+                      {
+                        "question": "increase … considerably",
+                        "passage": "can easily triple"
+                      }
+                    ],
+                    "skillTag": "TFNG_DEGREE_MATCH"
+                  }
+                },
+                {
+                  "id": "q5",
+                  "prompt": "Future conflicts will be fought as much over food as they will over oil.",
+                  "options": [
+                    "TRUE",
+                    "FALSE",
+                    "NOT GIVEN"
+                  ],
+                  "answer": "FALSE",
+                  "learning": {
+                    "evidenceParagraph": "K",
+                    "evidenceText": "“…the competition for water seems more likely to take place in world grain markets. The countries that will ‘win’ in this competition will be those that are financially strongest, not those that are militarily strongest.”",
+                    "explanation": "Tác giả bác bỏ chính ý “đánh nhau vì lương thực”: theo ông, cuộc tranh giành sẽ diễn ra trên thị trường ngũ cốc chứ không phải trên chiến trường, và phần thắng thuộc về nước mạnh về tài chính chứ không phải mạnh về quân sự. Mệnh đề vì thế đi ngược quan điểm của tác giả.",
+                    "trap": "Đừng dừng ở câu đầu đoạn (“wars … fought over water than oil”) — câu tiếp theo mở đầu bằng “Perhaps, but…” đảo lại toàn bộ. Với TFNG hỏi quan điểm tác giả, hãy đọc hết đoạn lập luận rồi mới chốt.",
+                    "paraphrases": [
+                      {
+                        "question": "conflicts will be fought",
+                        "passage": "competition … in world grain markets … not those that are militarily strongest"
+                      }
+                    ],
+                    "skillTag": "TFNG_AUTHOR_REBUTTAL"
+                  }
+                },
+                {
+                  "id": "q6",
+                  "prompt": "Egypt and Japan also import 7 million tons of oil annually.",
+                  "options": [
+                    "TRUE",
+                    "FALSE",
+                    "NOT GIVEN"
+                  ],
+                  "answer": "NOT GIVEN",
+                  "learning": {
+                    "evidenceParagraph": "I",
+                    "evidenceText": "“Last year, Iran imported 7 million tons of wheat, eclipsing Japan to become the world’s leading wheat importer.”",
+                    "explanation": "Con số 7 triệu tấn trong bài là của Iran và là lúa mì, không phải dầu; bài hoàn toàn không đề cập tới lượng dầu nhập khẩu của bất kỳ nước nào. Vì không có dữ liệu về dầu để đối chiếu nên đáp án là NOT GIVEN.",
+                    "trap": "Số liệu trùng khớp không đủ để chọn TRUE — phải trùng cả mặt hàng và cả chủ thể. Đây là kiểu bẫy “mượn con số” rất hay gặp ở nhóm TFNG.",
+                    "paraphrases": [
+                      {
+                        "question": "7 million tons of oil",
+                        "passage": "7 million tons of wheat"
+                      }
+                    ],
+                    "skillTag": "TFNG_BORROWED_NUMBER"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "MATCH_INFO",
+              "instruction": "Reading Passage 3 has 13 paragraphs, A–M. Which paragraph contains information about the following threats to water supplies? Write the correct letter A–M in boxes 7–10 on your answer sheet.",
+              "options": [
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F",
+                "G",
+                "H",
+                "I",
+                "J",
+                "K",
+                "L",
+                "M"
+              ],
+              "reuseOptions": true,
+              "questions": [
+                {
+                  "id": "q7",
+                  "prompt": "The volume of water needed for irrigation in grain production.",
+                  "answer": "C",
+                  "learning": {
+                    "evidenceParagraph": "C",
+                    "evidenceText": "“Using the rule of thumb that it takes 1,000 tons of water to produce 1 ton of grain, this 160-billion-ton water deficit is equal to 160 million tons of grain.”",
+                    "explanation": "Đoạn C là nơi bài đưa ra định lượng chuẩn cho quan hệ nước–ngũ cốc (1.000 tấn nước cho 1 tấn ngũ cốc) và dùng nó để quy đổi thâm hụt nước. Đoạn E cũng nhắc con số này nhưng để so sánh giá trị kinh tế giữa nông nghiệp và công nghiệp, còn trọng tâm đoạn E là hiện tượng bơm quá mức.",
+                    "trap": "Khi một con số xuất hiện ở hai đoạn, hãy chọn đoạn dùng con số đó làm *nội dung chính*, không phải đoạn chỉ mượn nó để minh họa cho ý khác.",
+                    "paraphrases": [
+                      {
+                        "question": "the volume of water needed … in grain production",
+                        "passage": "1,000 tons of water to produce 1 ton of grain"
+                      }
+                    ],
+                    "skillTag": "MATCHINFO_REPEATED_FIGURE"
+                  }
+                },
+                {
+                  "id": "q8",
+                  "prompt": "Over-pumping our underground water supplies.",
+                  "answer": "E",
+                  "learning": {
+                    "evidenceParagraph": "E",
+                    "evidenceText": "“Only since the development of powerful diesel – and electrically-driven pumps have we had the capacity to pull water out of an aquifer faster than it is replaced by precipitation.”",
+                    "explanation": "Đoạn E định nghĩa và giải thích hiện tượng bơm quá mức: công nghệ nào cho phép nó xảy ra và vì sao đó là khai thác vượt khả năng tái tạo. Đoạn C tuy có chữ “over-pumping” nhưng chỉ dùng số liệu bơm quá mức để tính ra thâm hụt nước.",
+                    "trap": "Matching Information hỏi đoạn nào *chứa thông tin về* chủ đề, tức đoạn giải thích nó — không phải mọi đoạn có nhắc tên chủ đề. Hãy ưu tiên đoạn có câu định nghĩa hoặc câu giải thích cơ chế.",
+                    "paraphrases": [
+                      {
+                        "question": "underground water supplies",
+                        "passage": "an aquifer"
+                      }
+                    ],
+                    "skillTag": "MATCHINFO_DEFINITION_PARAGRAPH"
+                  }
+                },
+                {
+                  "id": "q9",
+                  "prompt": "Population growth will be responsible for a new type of water-related poverty.",
+                  "answer": "B",
+                  "learning": {
+                    "evidenceParagraph": "B",
+                    "evidenceText": "“population growth is sentencing millions of people to hydrological poverty, a local form of poverty that is difficult to escape.”",
+                    "explanation": "Đoạn B là nơi khái niệm “hydrological poverty” được nêu ra và định nghĩa lần đầu, gắn trực tiếp với tăng dân số. Đoạn L cũng nhắc lại cụm này nhưng ở đó nó là hệ quả của việc chậm xử lý thâm hụt nước, không phải phần giới thiệu khái niệm.",
+                    "trap": "Khi một thuật ngữ xuất hiện nhiều lần, đoạn đúng thường là đoạn *lần đầu định nghĩa* nó — nhận ra nhờ mệnh đề giải thích đi kèm (“a local form of poverty that…”).",
+                    "paraphrases": [
+                      {
+                        "question": "a new type of water-related poverty",
+                        "passage": "hydrological poverty, a local form of poverty"
+                      }
+                    ],
+                    "skillTag": "MATCHINFO_FIRST_DEFINITION"
+                  }
+                },
+                {
+                  "id": "q10",
+                  "prompt": "Industrialisation demands greater water supplies.",
+                  "answer": "F",
+                  "learning": {
+                    "evidenceParagraph": "F",
+                    "evidenceText": "“Industrialisation takes even more water than urbanisation.”",
+                    "explanation": "Đoạn F nêu thẳng rằng công nghiệp hóa ngốn nước nhiều hơn cả đô thị hóa. Đoạn E có nói ngành công nghiệp dùng 20% lượng nước, nhưng đó là số liệu phân bổ theo ngành chứ không phải khẳng định công nghiệp hóa làm tăng nhu cầu nước.",
+                    "trap": "Số liệu tỷ lệ (“20 percent is used by industry”) mô tả hiện trạng; câu so sánh (“takes even more water than”) mô tả xu hướng tăng. Câu hỏi dùng động từ “demands greater” nên phải chọn đoạn nói về xu hướng.",
+                    "paraphrases": [
+                      {
+                        "question": "demands greater water supplies",
+                        "passage": "takes even more water than urbanisation"
+                      }
+                    ],
+                    "skillTag": "MATCHINFO_TREND_VS_SNAPSHOT"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "MC",
+              "instruction": "Choose the correct letter A, B, C or D.",
+              "questions": [
+                {
+                  "id": "q11",
+                  "prompt": "Our water supply is running low because",
+                  "options": [
+                    "A. grain is now exported globally.",
+                    "B. the world’s population is increasing rapidly.",
+                    "C. more people are moving to cities.",
+                    "D. people waste water foolishly."
+                  ],
+                  "answer": "B",
+                  "learning": {
+                    "evidenceParagraph": "A",
+                    "evidenceText": "“We live in a water-challenged world, one that is becoming more so each year as 80 million additional people stake their claims to the Earth’s water resources.”",
+                    "explanation": "Tăng dân số là nguyên nhân gốc mà bài nêu ngay từ nhan đề và đoạn A. C (đô thị hóa) và A (thương mại ngũ cốc) đều có trong bài nhưng chỉ là yếu tố cộng thêm — đoạn F mở đầu bằng “In addition to population growth”, tức xếp chúng sau nguyên nhân chính. D không hề xuất hiện trong bài.",
+                    "trap": "Câu MC hỏi nguyên nhân chính thường có 2–3 phương án đều “có trong bài”. Hãy tìm cụm chỉ thứ bậc như “in addition to”, “another”, “primarily” để biết bài xếp cái nào là gốc.",
+                    "paraphrases": [
+                      {
+                        "question": "population is increasing rapidly",
+                        "passage": "80 million additional people stake their claims"
+                      }
+                    ],
+                    "skillTag": "MC_PRIMARY_VS_SECONDARY_CAUSE"
+                  }
+                },
+                {
+                  "id": "q12",
+                  "prompt": "People who have a high-meat diet cause more water to be used because",
+                  "options": [
+                    "A. it takes more grain to feed livestock than it does a human.",
+                    "B. the industrial processes to produce meat require a lot of water.",
+                    "C. livestock drink a lot of water.",
+                    "D. packaging of meat products goes through an intensive washing process."
+                  ],
+                  "answer": "A",
+                  "learning": {
+                    "evidenceParagraph": "F",
+                    "evidenceText": "“As people move up the food chain… they use more grain… Using four times as much grain per person means using four times as much water.”",
+                    "explanation": "Chuỗi nhân quả trong bài là: ăn nhiều thịt → cần nhiều ngũ cốc để nuôi gia súc → cần nhiều nước. Đoạn B cũng xác nhận “most livestock eat grain that could be used to feed human populations”. B, C, D đều nghe hợp lý theo thường thức nhưng không có câu nào trong bài nói tới quy trình chế biến, lượng nước gia súc uống hay khâu đóng gói.",
+                    "trap": "Phương án “nghe rất hợp lý ngoài đời” là bẫy mạnh nhất của MC. Chỉ được chọn khi chỉ ra được câu văn trong bài — thường thức không phải bằng chứng.",
+                    "paraphrases": [
+                      {
+                        "question": "takes more grain to feed livestock",
+                        "passage": "most livestock eat grain that could be used to feed human populations"
+                      }
+                    ],
+                    "skillTag": "MC_COMMON_SENSE_DISTRACTOR"
+                  }
+                },
+                {
+                  "id": "q13",
+                  "prompt": "What would reduce the use of water without adversely affecting the food supply?",
+                  "options": [
+                    "A. growing fewer crops",
+                    "B. increasing water subsidies",
+                    "C. diverting water from irrigation",
+                    "D. falling population levels"
+                  ],
+                  "answer": "D",
+                  "learning": {
+                    "evidenceParagraph": "M",
+                    "evidenceText": "“…restoring the balance between water use and developing a sustainable supply will depend primarily on demand-side initiatives, such as stabilising population and raising water productivity.”",
+                    "explanation": "Bài chọn giải pháp phía cầu, đứng đầu là ổn định dân số — đó là cách giảm dùng nước mà không cắt nguồn lương thực. A và C đều làm giảm sản lượng lương thực (đoạn H nói việc chuyển nước khỏi tưới tiêu làm mất năng lực sản xuất thực phẩm). B nói ngược hẳn: đoạn M yêu cầu *xóa bỏ* trợ giá nước vì nó nuôi dưỡng sự lãng phí.",
+                    "trap": "Vế điều kiện trong câu hỏi (“without adversely affecting the food supply”) chính là bộ lọc. Hãy dùng nó để loại phương án trước, thay vì đi tìm phương án đúng ngay từ đầu.",
+                    "paraphrases": [
+                      {
+                        "question": "falling population levels",
+                        "passage": "stabilising population"
+                      }
+                    ],
+                    "skillTag": "MC_CONDITION_AS_FILTER"
+                  }
+                },
+                {
+                  "id": "q14",
+                  "prompt": "If there is a water war, who will win?",
+                  "options": [
+                    "A. the driest countries",
+                    "B. the richest countries",
+                    "C. the countries that are more forceful",
+                    "D. the countries that have the biggest population."
+                  ],
+                  "answer": "B",
+                  "learning": {
+                    "evidenceParagraph": "K",
+                    "evidenceText": "“The countries that will ‘win’ in this competition will be those that are financially strongest, not those that are militarily strongest.”",
+                    "explanation": "Bài trả lời thẳng: nước mạnh tài chính sẽ thắng. Vế “not those that are militarily strongest” loại luôn phương án C. A và D không được bài nhắc tới như yếu tố quyết định thắng thua.",
+                    "trap": "Khi bài có cấu trúc “X, not Y”, vế sau chữ “not” gần như luôn là một phương án nhiễu được soạn sẵn. Nhận ra cấu trúc này là loại được một phương án ngay lập tức.",
+                    "paraphrases": [
+                      {
+                        "question": "the richest countries",
+                        "passage": "those that are financially strongest"
+                      }
+                    ],
+                    "skillTag": "MC_X_NOT_Y_STRUCTURE"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+]

@@ -7,6 +7,7 @@ import {
 } from "@/lib/reading-band";
 import seedData from "../../prisma/seed-data.json";
 import readingGameTheory from "../../prisma/reading-game-theory.json";
+import readingPaidPack1 from "../../prisma/reading-paid-pack-1.json";
 
 /**
  * Tạo bảng trực tiếp bằng SQL MySQL (tương đương `prisma db push` cho schema
@@ -608,7 +609,11 @@ export async function initDatabase() {
     console.log(`[wobridges] ${msg}`);
   }
 
-  const exercises: SeedExercise[] = [...seedData.exercises, readingGameTheory];
+  const exercises: SeedExercise[] = [
+    ...seedData.exercises,
+    readingGameTheory,
+    ...readingPaidPack1,
+  ];
   for (const ex of exercises) {
     const existing = await db.exercise.findFirst({ where: { title: ex.title } });
     if (!existing) {
@@ -621,6 +626,10 @@ export async function initDatabase() {
           durationMinutes: ex.durationMinutes,
           content: JSON.stringify(ex.content),
           accessLevel: ex.accessLevel ?? "PUBLIC",
+          // Đề trả phí có sẵn mức độ khó và cờ tính danh hiệu, để quản trị
+          // viên không phải bấm lại từng cái sau mỗi lần thêm đề.
+          achievementEligible: ex.achievementEligible ?? false,
+          difficultyTier: ex.difficultyTier ?? "UNKNOWN",
         },
       });
       console.log(`[wobridges] Đã tạo bài tập: ${ex.title}`);
@@ -823,6 +832,8 @@ type SeedExercise = {
   durationMinutes: number;
   content: unknown;
   accessLevel?: string;
+  achievementEligible?: boolean;
+  difficultyTier?: string;
 };
 
 /** Đọc JSON không ném lỗi — dữ liệu cũ có thể hỏng, không được làm sập khởi động. */
