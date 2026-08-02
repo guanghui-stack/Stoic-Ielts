@@ -8,10 +8,12 @@ import {
 } from "@/lib/achievements/catalog";
 import {
   CATEGORY_BLURBS,
+  categoryAnchor,
   explainTitleRule,
   groupByCategory,
   rarityLabel,
 } from "@/lib/achievements/explain";
+import { CatalogToc } from "@/components/achievements/catalog-toc";
 import { PageHero, NoteBox } from "@/components/ui";
 
 export const metadata = {
@@ -58,6 +60,13 @@ export default async function HallOfFamePage() {
   // Danh hiệu trụ cột được nhắc tới bằng MÃ trong ruleConfig — đổi sang tên thật
   const nameOfCode = new Map(definitions.map((d) => [d.code, d.name]));
 
+  const tocItems = groups.map(({ category, items }) => ({
+    anchor: categoryAnchor(category),
+    label: CATEGORY_LABELS[category as TitleCategory] ?? category,
+    count: items.length,
+    blurb: CATEGORY_BLURBS[category] ?? "",
+  }));
+
   return (
     <>
       <PageHero
@@ -66,7 +75,7 @@ export default async function HallOfFamePage() {
         lede="Nơi ghi lại những cột mốc học viên STOIC-IELTS đã vượt qua. Danh hiệu không mua được — chỉ có làm bài đàng hoàng, sửa sai có chiều sâu và giữ được kỷ luật."
       />
 
-      <section className="mx-auto max-w-5xl px-6 py-14">
+      <section className="mx-auto max-w-6xl px-6 py-14">
         {recent.length > 0 && (
           <div className="mb-12">
             <h2 className="font-display text-2xl font-bold text-navy-deep">
@@ -105,9 +114,12 @@ export default async function HallOfFamePage() {
           Mỗi nhóm xếp từ dễ đến khó. Bấm vào tên danh hiệu để xem điều kiện chi tiết.
         </p>
 
-        <div className="mt-8 space-y-12">
+        <div className="mt-8 grid gap-x-12 gap-y-6 lg:grid-cols-[190px_minmax(0,1fr)]">
+          <CatalogToc items={tocItems} />
+
+          <div className="space-y-14">
           {groups.map(({ category, items }, groupIndex) => (
-            <section key={category}>
+            <section key={category} id={categoryAnchor(category)} className="scroll-mt-24">
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b-2 border-navy-deep pb-2.5">
                 <span className="font-display text-2xl font-bold tabular-nums text-gold">
                   {String(groupIndex + 1).padStart(2, "0")}
@@ -251,6 +263,7 @@ export default async function HallOfFamePage() {
               </div>
             </section>
           ))}
+          </div>
         </div>
 
         <NoteBox className="mt-10" title="Về quyền riêng tư">

@@ -95,6 +95,14 @@ body {
   color: inherit;
 }
 
+/* Bấm mục lục thì trượt tới nơi thay vì nhảy giật — người đọc thấy được mình
+   vừa đi từ đâu tới đâu. Chỉ bật cho ai không yêu cầu giảm chuyển động. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

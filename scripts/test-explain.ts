@@ -16,6 +16,8 @@ import {
   humanMinutes,
   CATEGORY_BLURBS,
   CATEGORY_ORDER,
+  CATEGORY_ANCHORS,
+  categoryAnchor,
 } from "../src/lib/achievements/explain.ts";
 
 let failures = 0;
@@ -210,6 +212,31 @@ check(
     { category: "PRACTICE", rarity: "COMMON", sortOrder: 2 },
   ]).map((g) => g.category),
   ["PRACTICE", "TUONG_LAI"]
+);
+
+/* ---------------------------------------------------------------- */
+console.log("\nMỤC LỤC — mã neo phải đúng và không trùng");
+
+const allCategories = [...new Set(TITLE_SEEDS.map((s) => s.category))];
+check(
+  "mọi nhóm trong catalog đều có mã neo khai báo sẵn",
+  allCategories.filter((c) => !CATEGORY_ANCHORS[c]),
+  []
+);
+check(
+  "không hai nhóm nào trùng mã neo",
+  new Set(allCategories.map(categoryAnchor)).size,
+  allCategories.length
+);
+check(
+  "mã neo chỉ gồm chữ thường, số và gạch nối (hợp lệ trong URL)",
+  allCategories.every((c) => /^[a-z0-9-]+$/.test(categoryAnchor(c))),
+  true
+);
+check(
+  "nhóm lạ vẫn sinh được mã neo hợp lệ",
+  categoryAnchor("MOT_NHOM_MOI"),
+  "nhom-mot-nhom-moi"
 );
 
 /* ---------------------------------------------------------------- */

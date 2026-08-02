@@ -392,6 +392,25 @@ export const CATEGORY_ORDER = [
   "TRANSFORMATION",
 ] as const;
 
+/**
+ * Mã neo của từng nhóm trên trang Điện Danh Vọng.
+ *
+ * Đặt cố định bằng tiếng Việt không dấu thay vì sinh tự động từ tên nhóm: đây là
+ * đường dẫn người ta gửi cho nhau (`/dien-danh-vong#nhom-ky-luat`), đổi tên
+ * hiển thị mà làm hỏng liên kết cũ thì phiền.
+ */
+export const CATEGORY_ANCHORS: Record<string, string> = {
+  PRACTICE: "nhom-giai-de",
+  FEYNMAN: "nhom-sua-de",
+  DISCIPLINE: "nhom-ky-luat",
+  COMPOSITE: "nhom-tong-hop",
+  TRANSFORMATION: "nhom-chuyen-hoa",
+};
+
+export function categoryAnchor(category: string): string {
+  return CATEGORY_ANCHORS[category] ?? `nhom-${category.toLowerCase().replace(/_/g, "-")}`;
+}
+
 /** Vì sao nhóm này tồn tại — hiện dưới tên nhóm để học viên biết mình đang xem gì. */
 export const CATEGORY_BLURBS: Record<string, string> = {
   PRACTICE:
