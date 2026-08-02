@@ -14,6 +14,7 @@ import {
   CONFIDENCE_LABELS,
   type FeynmanErrorType,
 } from "@/lib/feynman-constants";
+import { StudyHeartbeat } from "@/components/study/study-heartbeat";
 
 export const metadata = { title: "Chữa bài theo phương pháp Feynman" };
 
@@ -85,6 +86,8 @@ export default async function FeynmanPage({
 
   return (
     <section className="mx-auto max-w-4xl px-6 py-12 md:py-14">
+      {/* Chữa bài là học thật — thời gian ở đây được tính vào danh hiệu kỷ luật */}
+      <StudyHeartbeat kind="FEYNMAN" />
       <Link
         href={`/hoc-vien/bai-lam/${attemptId}`}
         className="inline-flex items-center gap-2 font-ui text-sm font-semibold text-navy hover:text-gold"

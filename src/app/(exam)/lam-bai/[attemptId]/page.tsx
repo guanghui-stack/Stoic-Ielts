@@ -6,6 +6,7 @@ import {
   type WritingContent,
 } from "@/lib/exercise-content";
 import { assemblyTitle, readingContentForAttempt } from "@/lib/attempt-content";
+import { StudyHeartbeat } from "@/components/study/study-heartbeat";
 import { WritingExam } from "@/components/exam/exam-room";
 import { ReadingCbtExam } from "@/components/exam/reading-cbt";
 
@@ -37,7 +38,12 @@ export default async function ExamPage({
 
   if (attempt.exercise.skill === "READING") {
     const content = await readingContentForAttempt(attempt);
-    return <ReadingCbtExam {...props} parts={sanitizeReadingParts(content)} />;
+    return (
+      <>
+        <StudyHeartbeat kind="READING" />
+        <ReadingCbtExam {...props} parts={sanitizeReadingParts(content)} />
+      </>
+    );
   }
 
   if (attempt.exercise.skill === "WRITING") {
