@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
-import { gradeReading, type ReadingContent } from "@/lib/exercise-content";
+import { gradeReading } from "@/lib/exercise-content";
 import { FEYNMAN_LIMITS, isFeynmanErrorType } from "@/lib/feynman-constants";
 import { chooseFeynmanMode, selectPriorityMistakes } from "@/lib/feynman-rules";
 import { buildFeynmanLearningLookup } from "@/lib/feynman";
@@ -13,6 +13,7 @@ import {
   processAchievementEvent,
   recordAchievementEvent,
 } from "@/lib/achievements/engine";
+import { readingContentForAttempt } from "@/lib/attempt-content";
 
 export type FeynmanFormState = { error?: string } | undefined;
 
@@ -72,7 +73,9 @@ export async function startFeynmanReviewAction(attemptId: string) {
     redirect(`/hoc-vien/bai-lam/${attemptId}?mua=feynman`);
   }
 
-  const content = JSON.parse(attempt.exercise.content) as ReadingContent;
+  // Đề ghép: lấy nội dung của CẢ BA passage để học viên tra được bằng chứng ở
+  // đúng phần chứa câu sai.
+  const content = await readingContentForAttempt(attempt);
   const answers = JSON.parse(attempt.answers || "{}");
   const graded = gradeReading(content, answers);
   const imperfectCount = graded.detail.filter((qd) => !qd.correct).length;

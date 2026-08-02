@@ -3,9 +3,9 @@ import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
 import {
   sanitizeReadingParts,
-  type ReadingContent,
   type WritingContent,
 } from "@/lib/exercise-content";
+import { assemblyTitle, readingContentForAttempt } from "@/lib/attempt-content";
 import { WritingExam } from "@/components/exam/exam-room";
 import { ReadingCbtExam } from "@/components/exam/reading-cbt";
 
@@ -28,13 +28,15 @@ export default async function ExamPage({
 
   const props = {
     attemptId: attempt.id,
-    title: attempt.exercise.title,
+    title: attempt.assemblyId
+      ? await assemblyTitle(attempt.assemblyId)
+      : attempt.exercise.title,
     deadlineIso: attempt.deadlineAt.toISOString(),
     initialAnswers: attempt.answers,
   };
 
   if (attempt.exercise.skill === "READING") {
-    const content = JSON.parse(attempt.exercise.content) as ReadingContent;
+    const content = await readingContentForAttempt(attempt);
     return <ReadingCbtExam {...props} parts={sanitizeReadingParts(content)} />;
   }
 

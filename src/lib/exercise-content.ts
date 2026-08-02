@@ -318,6 +318,38 @@ export function gradeReading(
   };
 }
 
+/**
+ * Đếm số CÂU HỎI (không phải số mục) của một đề Reading.
+ *
+ * Câu chọn nhiều đáp án chiếm nhiều số thứ tự nhưng chỉ là một mục, nên phải
+ * cộng theo độ dài mảng đáp án — nếu không, tổng số câu của đề ghép sẽ sai và
+ * band quy đổi cũng sai theo.
+ */
+export function countReadingQuestions(contentJson: string): number {
+  let content: ReadingContent;
+  try {
+    content = JSON.parse(contentJson) as ReadingContent;
+  } catch {
+    return 0;
+  }
+  const parts =
+    content.parts?.length
+      ? content.parts
+      : content.passage && content.questionGroups
+        ? [{ passage: content.passage, questionGroups: content.questionGroups }]
+        : [];
+
+  let total = 0;
+  for (const part of parts) {
+    for (const group of part.questionGroups ?? []) {
+      for (const question of group.questions ?? []) {
+        total += Array.isArray(question.answer) ? question.answer.length : 1;
+      }
+    }
+  }
+  return total;
+}
+
 export function countWords(text: string): number {
   return text.trim() ? text.trim().split(/\s+/).length : 0;
 }

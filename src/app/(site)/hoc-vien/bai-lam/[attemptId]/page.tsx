@@ -26,6 +26,7 @@ import { feynmanSinglePrice } from "@/lib/payments/quote";
 import { isSePayConfigured } from "@/lib/payments/sepay";
 import { OFFERS, formatVnd, INTRO_PROMO_NOTICE } from "@/lib/payments/catalog";
 import { PurchaseButton } from "@/components/payments/purchase-button";
+import { assemblyTitle, readingContentForAttempt } from "@/lib/attempt-content";
 
 export const metadata = { title: "Kết quả bài làm" };
 
@@ -95,7 +96,9 @@ export default async function AttemptResultPage({
           {isReading ? "Kết quả Reading" : "Bài Writing đã nộp"}
         </p>
         <h1 className="mt-3 font-display text-3xl font-bold leading-tight text-navy-deep md:text-4xl">
-          {attempt.exercise.title}
+          {attempt.assemblyId
+            ? await assemblyTitle(attempt.assemblyId)
+            : attempt.exercise.title}
         </h1>
         <div className="rule-gold mt-5" />
         <dl className="mt-6 flex flex-wrap gap-x-10 gap-y-3 font-ui text-sm text-ink-soft">
@@ -127,6 +130,7 @@ export default async function AttemptResultPage({
       {isReading ? (
         <ReadingResult
           attempt={attempt}
+          content={await readingContentForAttempt(attempt)}
           answersUnlocked={answersUnlocked}
           canReveal={isOwner && attempt.status === "GRADED"}
         />
@@ -301,20 +305,20 @@ function FeynmanPurchaseCta({
 
 function ReadingResult({
   attempt,
+  content,
   answersUnlocked,
   canReveal,
 }: {
   answersUnlocked: boolean;
   canReveal: boolean;
+  content: ReadingContent;
   attempt: {
     id: string;
     answers: string;
     scoreRaw: number | null;
     scoreTotal: number | null;
-    exercise: { content: string };
   };
 }) {
-  const content = JSON.parse(attempt.exercise.content) as ReadingContent;
   const answers = JSON.parse(attempt.answers || "{}");
   const { detail } = gradeReading(content, answers);
 

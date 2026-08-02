@@ -4,11 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
-import {
-  gradeReading,
-  type ReadingAnswers,
-  type ReadingContent,
-} from "@/lib/exercise-content";
+import { gradeReading, type ReadingAnswers } from "@/lib/exercise-content";
 import { canAccessExercise } from "@/lib/exercise-access";
 import {
   calculateReadingBand,
@@ -18,6 +14,7 @@ import {
   processAchievementEvent,
   recordAchievementEvent,
 } from "@/lib/achievements/engine";
+import { readingContentForAttempt } from "@/lib/attempt-content";
 
 /** Dung sai sau hạn chót (mạng chậm, tự nộp phía client trễ vài giây). */
 const GRACE_MS = 15_000;
@@ -87,9 +84,14 @@ export async function saveProgressAction(attemptId: string, answersJson: string)
 async function finalizeAttempt(attemptId: string, auto: boolean) {
   const attempt = await db.attempt.findUnique({
     where: { id: attemptId },
-    include: { exercise: true },
+    include: { exercise: true, assembly: true },
   });
   if (!attempt || attempt.status !== "IN_PROGRESS") return;
+
+  // Đề ghép có thời lượng riêng (60 phút như thi thật), không dùng thời lượng
+  // của passage đầu tiên.
+  const durationMinutes =
+    attempt.assembly?.durationMinutes ?? attempt.exercise.durationMinutes;
 
   let scoreRaw: number | null = null;
   let scoreTotal: number | null = null;
@@ -106,12 +108,12 @@ async function finalizeAttempt(attemptId: string, auto: boolean) {
     0,
     Math.min(
       Math.round((now.getTime() - attempt.startedAt.getTime()) / 1000),
-      attempt.exercise.durationMinutes * 60
+      durationMinutes * 60
     )
   );
 
   if (attempt.exercise.skill === "READING") {
-    const content = JSON.parse(attempt.exercise.content) as ReadingContent;
+    const content = await readingContentForAttempt(attempt);
     const answers = JSON.parse(attempt.answers || "{}") as ReadingAnswers;
     const graded = gradeReading(content, answers);
     scoreRaw = graded.scoreRaw;
@@ -130,12 +132,16 @@ async function finalizeAttempt(attemptId: string, auto: boolean) {
 
     validForAchievements = isValidAchievementAttempt({
       status,
-      achievementEligible: attempt.exercise.achievementEligible,
+      // Đề học viên TỰ CHỌN passage không tính danh hiệu — chốt ngay tại đây
+      // để trang kết quả nói đúng sự thật, không đợi engine lọc lại.
+      achievementEligible:
+        attempt.exercise.achievementEligible &&
+        (attempt.assembly === null || attempt.assembly.countsForAchievements),
       band,
       answeredCount,
       scoreTotal,
       elapsedSeconds,
-      durationMinutes: attempt.exercise.durationMinutes,
+      durationMinutes,
       integrityStatus: attempt.integrityStatus,
     });
   }
