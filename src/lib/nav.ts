@@ -5,6 +5,7 @@ export const MAIN_NAV = [
   { href: "/luyen-tap", label: "Luyện tập 4 kỹ năng" },
   { href: "/bai-mau-writing", label: "Bài mẫu Writing 8.0+" },
   { href: "/ket-qua-hoc-vien", label: "Kết quả học viên" },
+  { href: "/dien-danh-vong", label: "Điện Danh Vọng" },
 ] as const;
 
 export const SKILL_NAV = [

@@ -5,19 +5,21 @@ import { requireUser } from "@/lib/session";
 import { titleOverviewFor, type TitleCard } from "@/lib/achievements/view";
 import { SectionHeading, NoteBox } from "@/components/ui";
 import { RewardClaimForm } from "@/components/achievements/reward-claim-form";
+import { PublicProfileForm } from "@/components/achievements/public-profile-form";
 
 export const metadata = { title: "Danh hiệu của tôi" };
 export const dynamic = "force-dynamic";
 
 export default async function MyTitlesPage() {
   const user = await requireUser();
-  const [overview, pendingRewards] = await Promise.all([
+  const [overview, pendingRewards, profile] = await Promise.all([
     titleOverviewFor(user.id),
     db.rewardGrant.findMany({
       where: { userId: user.id, status: { in: ["EARNED", "REQUESTED"] } },
       orderBy: { createdAt: "asc" },
       include: { titleAward: { include: { title: { select: { name: true } } } } },
     }),
+    db.publicProfile.findUnique({ where: { userId: user.id } }),
   ]);
 
   // Bài đang khóa mà học viên CHƯA có quyền — đó là những bài đổi thưởng được
@@ -121,6 +123,11 @@ export default async function MyTitlesPage() {
           </Link>
         </NoteBox>
       )}
+
+      <PublicProfileForm
+        displayName={profile?.displayName ?? user.name}
+        allowHall={profile?.allowHall ?? false}
+      />
 
       {[...byCategory.entries()].map(([category, cards]) => (
         <div key={category} className="mt-12">
