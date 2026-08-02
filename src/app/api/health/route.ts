@@ -6,7 +6,7 @@ import seedData from "../../../../prisma/seed-data.json";
  * Dấu mốc phiên bản mã nguồn — đổi mỗi khi có thay đổi cần xác nhận đã lên
  * production. Nhờ đó biết chắc máy chủ đang chạy bản nào.
  */
-const BUILD_MARKER = "2026-08-02-achievements-v1";
+const BUILD_MARKER = "2026-08-02-achievements-v2-health";
 
 /**
  * Trạm kiểm tra tình trạng hệ thống — dùng để chẩn đoán từ xa khi
@@ -82,6 +82,31 @@ export async function GET() {
     report.paymentOrderCount = orderCount;
     report.activeGrantCount = grantCount;
     report.ordersNeedingReview = reviewCount;
+
+    // Hệ danh hiệu: đủ để biết catalog đã gieo chưa và bộ đề đã đóng băng chưa.
+    // `initStatus: ok` KHÔNG chứng minh được điều này vì phần gieo catalog nằm
+    // trong try/catch riêng để một lỗi ở đó không chặn cả việc khởi động.
+    const [titleCount, awardCount, activeCollection, eventsFailed] =
+      await Promise.all([
+        db.titleDefinition.count({ where: { active: true } }),
+        db.userTitle.count({ where: { status: "EARNED" } }),
+        db.exerciseCollection.findFirst({
+          where: { status: "ACTIVE" },
+          select: { code: true, _count: { select: { items: true } } },
+        }),
+        db.achievementEvent.count({ where: { status: "FAILED" } }),
+      ]);
+    report.achievements = {
+      titleCount,
+      awardCount,
+      activeCollection: activeCollection
+        ? `${activeCollection.code} (${activeCollection._count.items} bài)`
+        : "chưa có bộ đề nào được đóng băng",
+      failedEvents: eventsFailed,
+      achievementEligibleExercises: await db.exercise.count({
+        where: { achievementEligible: true },
+      }),
+    };
     // Trả về trạng thái, không lộ email: đủ để biết việc đổi tài khoản
     // quản trị đã áp dụng thành công trên máy chủ này hay chưa.
     report.configuredAdmin = configuredAdmin
