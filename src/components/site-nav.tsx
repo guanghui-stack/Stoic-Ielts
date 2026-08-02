@@ -3,18 +3,22 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { BookOpen, Headphones, PenLine, Mic, Menu, X, UserRound } from "lucide-react";
-import { MAIN_NAV, SKILL_NAV } from "@/lib/nav";
+import { BookOpen, Library, Menu, X, UserRound } from "lucide-react";
+import { MAIN_NAV, READING_NAV } from "@/lib/nav";
 
-const SKILL_ICONS = {
-  READING: BookOpen,
-  LISTENING: Headphones,
-  WRITING: PenLine,
-  SPEAKING: Mic,
+const READING_ICONS = {
+  ACADEMIC: BookOpen,
+  GENERAL: Library,
 } as const;
 
 function isActive(pathname: string, href: string) {
   if (href === "/") return pathname === "/";
+  if (
+    href === "/luyen-tap/reading" &&
+    pathname.startsWith("/luyen-tap/reading/general")
+  ) {
+    return false;
+  }
   return pathname === href || pathname.startsWith(href + "/");
 }
 
@@ -51,15 +55,15 @@ export function DesktopNav() {
         </ul>
       </nav>
 
-      {/* Tầng 2: menu phụ 4 kỹ năng nằm ngang */}
+      {/* Tầng 2: hai kho đề Reading tách biệt */}
       <nav
-        aria-label="Luyện tập 4 kỹ năng"
+        aria-label="Kho Reading"
         className="border-t border-line bg-cream-deep/60"
       >
         <ul className="mx-auto flex max-w-6xl items-center justify-center divide-x divide-line-strong/50">
-          {SKILL_NAV.map((item) => {
+          {READING_NAV.map((item) => {
             const active = isActive(pathname, item.href);
-            const Icon = SKILL_ICONS[item.skill];
+            const Icon = READING_ICONS[item.module];
             return (
               <li key={item.href}>
                 <Link
@@ -121,10 +125,10 @@ export function MobileNav({
                 </li>
               ))}
             </ul>
-            <p className="label-caps mt-5 mb-2">4 kỹ năng</p>
+            <p className="label-caps mt-5 mb-2">Kho Reading</p>
             <ul className="grid grid-cols-2 gap-1">
-              {SKILL_NAV.map((item) => {
-                const Icon = SKILL_ICONS[item.skill];
+              {READING_NAV.map((item) => {
+                const Icon = READING_ICONS[item.module];
                 return (
                   <li key={item.href}>
                     <Link

@@ -29,9 +29,15 @@ export default async function AdminStudentsPage() {
     db.user.findMany({
       where: { role: "STUDENT" },
       orderBy: { createdAt: "desc" },
-      include: { _count: { select: { attempts: true } } },
+      include: {
+        _count: {
+          select: { attempts: { where: { exercise: { skill: "READING" } } } },
+        },
+      },
     }),
-    db.exercise.count({ where: { accessLevel: "RESTRICTED" } }),
+    db.exercise.count({
+      where: { skill: "READING", accessLevel: "RESTRICTED" },
+    }),
     // Cần phân biệt quyền trung tâm TẶNG với quyền học viên MUA, vì nút
     // mở/thu hồi bên dưới chỉ được phép đụng tới phần tặng.
     summarizeGrantsForAdmin(),

@@ -102,7 +102,8 @@ export async function toggleAllExerciseAccessAction(userId: string) {
     });
   }
   revalidatePath("/quan-tri/hoc-vien");
-  revalidatePath("/luyen-tap");
+  revalidatePath("/luyen-tap/reading");
+  revalidatePath("/luyen-tap/reading/general");
 }
 
 /**
@@ -221,6 +222,7 @@ function parseExerciseForm(formData: FormData): {
   error?: string;
   data?: {
     skill: string;
+    readingType: string;
     taskType: string;
     title: string;
     description: string;
@@ -230,55 +232,24 @@ function parseExerciseForm(formData: FormData): {
   };
 } {
   const skill = String(formData.get("skill") ?? "");
+  const readingType = String(formData.get("readingType") ?? "");
   const title = String(formData.get("title") ?? "").trim();
   const description = String(formData.get("description") ?? "").trim();
   const durationMinutes = Number(formData.get("durationMinutes"));
   const published = formData.get("published") === "on";
 
-  if (!["READING", "WRITING"].includes(skill)) {
-    return { error: "Kỹ năng không hợp lệ (hiện hỗ trợ READING và WRITING)." };
+  if (skill !== "READING") return { error: "Hệ thống hiện chỉ hỗ trợ Reading." };
+  if (!["ACADEMIC", "GENERAL"].includes(readingType)) {
+    return { error: "Kho Reading không hợp lệ." };
   }
   if (title.length < 5) return { error: "Tiêu đề cần tối thiểu 5 ký tự." };
   if (!Number.isFinite(durationMinutes) || durationMinutes < 1 || durationMinutes > 240) {
     return { error: "Thời gian làm bài phải từ 1 đến 240 phút." };
   }
 
-  let taskType: string;
   let content: string;
-
-  if (skill === "WRITING") {
-    const task = String(formData.get("task") ?? "");
-    const prompt = String(formData.get("prompt") ?? "").trim();
-    const guidance = String(formData.get("guidance") ?? "").trim();
-    const minWords = Number(formData.get("minWords"));
-    const dataTableRaw = String(formData.get("dataTable") ?? "").trim();
-
-    if (!["TASK_1", "TASK_2"].includes(task)) return { error: "Chọn Task 1 hoặc Task 2." };
-    if (prompt.length < 20) return { error: "Đề bài cần tối thiểu 20 ký tự." };
-    if (!Number.isFinite(minWords) || minWords < 50 || minWords > 1000) {
-      return { error: "Số từ tối thiểu phải từ 50 đến 1000." };
-    }
-
-    let dataTable: unknown = undefined;
-    if (dataTableRaw) {
-      try {
-        dataTable = JSON.parse(dataTableRaw);
-      } catch {
-        return { error: "Bảng số liệu không phải JSON hợp lệ." };
-      }
-    }
-
-    taskType = task === "TASK_1" ? "WRITING_TASK_1" : "WRITING_TASK_2";
-    content = JSON.stringify({
-      task,
-      prompt,
-      minWords,
-      ...(guidance ? { guidance } : {}),
-      ...(dataTable ? { dataTable } : {}),
-    });
-  } else {
-    const contentRaw = String(formData.get("content") ?? "").trim();
-    try {
+  const contentRaw = String(formData.get("content") ?? "").trim();
+  try {
       const parsed = JSON.parse(contentRaw);
       // Chấp nhận cả 2 dạng: { parts: [...] } (mới, 1–3 part) và
       // { passage, questionGroups } (dạng cũ, 1 passage)
@@ -376,16 +347,23 @@ function parseExerciseForm(formData: FormData): {
           }
         }
       }
-      content = JSON.stringify(parsed);
-    } catch (e) {
-      if (e instanceof SyntaxError) return { error: "Nội dung không phải JSON hợp lệ." };
-      throw e;
-    }
-    taskType = "READING_PASSAGE";
+    content = JSON.stringify(parsed);
+  } catch (e) {
+    if (e instanceof SyntaxError) return { error: "Nội dung không phải JSON hợp lệ." };
+    throw e;
   }
 
   return {
-    data: { skill, taskType, title, description, durationMinutes, content, published },
+    data: {
+      skill,
+      readingType,
+      taskType: "READING_PASSAGE",
+      title,
+      description,
+      durationMinutes,
+      content,
+      published,
+    },
   };
 }
 
@@ -407,6 +385,10 @@ export async function updateExerciseAction(
   formData: FormData
 ): Promise<AdminFormState> {
   await requireAdmin();
+  const existing = await db.exercise.findUnique({ where: { id: exerciseId } });
+  if (!existing || existing.skill !== "READING") {
+    return { error: "Chỉ có thể chỉnh sửa bài Reading." };
+  }
   const parsed = parseExerciseForm(formData);
   if (parsed.error) return { error: parsed.error };
   await db.exercise.update({ where: { id: exerciseId }, data: parsed.data! });
@@ -427,7 +409,8 @@ export async function toggleExerciseAccessLevelAction(exerciseId: string) {
   });
   revalidatePath("/quan-tri/bai-tap");
   revalidatePath("/quan-tri/hoc-vien");
-  revalidatePath("/luyen-tap");
+  revalidatePath("/luyen-tap/reading");
+  revalidatePath("/luyen-tap/reading/general");
 }
 
 export async function toggleExercisePublishedAction(exerciseId: string) {
@@ -439,49 +422,16 @@ export async function toggleExercisePublishedAction(exerciseId: string) {
     data: { published: !ex.published },
   });
   revalidatePath("/quan-tri/bai-tap");
-  revalidatePath("/luyen-tap");
+  revalidatePath("/luyen-tap/reading");
+  revalidatePath("/luyen-tap/reading/general");
 }
 
 export async function deleteExerciseAction(exerciseId: string) {
   await requireAdmin();
+  const exercise = await db.exercise.findUnique({ where: { id: exerciseId } });
+  if (!exercise || exercise.skill !== "READING") return;
   await db.exercise.delete({ where: { id: exerciseId } });
   revalidatePath("/quan-tri/bai-tap");
-  revalidatePath("/luyen-tap");
-}
-
-/* ===== Chấm bài Writing ===== */
-
-export async function gradeAttemptAction(
-  attemptId: string,
-  _prev: AdminFormState,
-  formData: FormData
-): Promise<AdminFormState> {
-  const admin = await requireAdmin();
-  const band = Number(formData.get("band"));
-  const feedback = String(formData.get("feedback") ?? "").trim();
-
-  if (!Number.isFinite(band) || band < 0 || band > 9 || (band * 2) % 1 !== 0) {
-    return { error: "Band điểm phải từ 0 đến 9, bước nhảy 0.5 (ví dụ 6.5)." };
-  }
-  if (feedback.length < 10) {
-    return { error: "Nhận xét cần tối thiểu 10 ký tự để có giá trị với học viên." };
-  }
-
-  const attempt = await db.attempt.findUnique({ where: { id: attemptId } });
-  if (!attempt || attempt.status === "IN_PROGRESS") {
-    return { error: "Bài làm không hợp lệ hoặc chưa được nộp." };
-  }
-
-  await db.attempt.update({
-    where: { id: attemptId },
-    data: {
-      status: "GRADED",
-      band,
-      feedback,
-      gradedAt: new Date(),
-      gradedById: admin.id,
-    },
-  });
-  revalidatePath("/quan-tri/cham-bai");
-  redirect("/quan-tri/cham-bai");
+  revalidatePath("/luyen-tap/reading");
+  revalidatePath("/luyen-tap/reading/general");
 }

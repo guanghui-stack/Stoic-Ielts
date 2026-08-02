@@ -15,19 +15,31 @@ import { OFFERS, formatVnd } from "@/lib/payments/catalog";
 import { PurchaseButton } from "@/components/payments/purchase-button";
 import { SubmitButton } from "@/components/ui";
 
-/** Danh sách bài luyện của một kỹ năng, kèm trạng thái bài làm của học viên. */
-export async function ExerciseList({ skill }: { skill: "READING" | "WRITING" }) {
+/** Danh sách bài Reading của một kho, kèm trạng thái bài làm của học viên. */
+export async function ExerciseList({
+  readingType,
+}: {
+  readingType: "ACADEMIC" | "GENERAL";
+}) {
   const user = await getCurrentUser();
   const exercises = await db.exercise.findMany({
     // Đề Nguyệt Thí bị loại khỏi khu luyện tập: luyện trước bằng chính đề thi
     // thì cuộc thi mất hết ý nghĩa.
-    where: { skill, published: true, competitionOnly: false },
+    where: {
+      skill: "READING",
+      readingType,
+      published: true,
+      competitionOnly: false,
+    },
     orderBy: { createdAt: "asc" },
   });
 
   const attempts = user
     ? await db.attempt.findMany({
-        where: { userId: user.id, exercise: { skill } },
+        where: {
+          userId: user.id,
+          exercise: { skill: "READING", readingType },
+        },
         orderBy: { startedAt: "desc" },
       })
     : [];
@@ -47,7 +59,9 @@ export async function ExerciseList({ skill }: { skill: "READING" | "WRITING" }) 
   if (exercises.length === 0) {
     return (
       <div className="border border-line bg-paper p-10 text-center text-ink-soft">
-        Chưa có bài luyện nào được mở — vui lòng quay lại sau.
+        {readingType === "GENERAL"
+          ? "Kho Reading General hiện chưa có đề — vui lòng quay lại sau."
+          : "Chưa có bài luyện Academic nào được mở — vui lòng quay lại sau."}
       </div>
     );
   }
@@ -95,18 +109,10 @@ export async function ExerciseList({ skill }: { skill: "READING" | "WRITING" }) 
                   <CalendarClock className="h-3.5 w-3.5" aria-hidden="true" />
                   {ex.durationMinutes} phút · tự nộp khi hết giờ
                 </span>
-                {best && ex.skill === "READING" && best.scoreRaw != null && (
+                {best && best.scoreRaw != null && (
                   <span className="flex items-center gap-1.5 text-success">
                     <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
                     Kết quả tốt nhất: {best.scoreRaw}/{best.scoreTotal}
-                  </span>
-                )}
-                {best && ex.skill === "WRITING" && (
-                  <span className="flex items-center gap-1.5 text-success">
-                    <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
-                    {best.status === "GRADED" && best.band != null
-                      ? `Đã chấm: Band ${best.band.toFixed(1)}`
-                      : "Đã nộp — đang chờ chấm"}
                   </span>
                 )}
               </div>
@@ -124,7 +130,7 @@ export async function ExerciseList({ skill }: { skill: "READING" | "WRITING" }) 
               ) : !canDo(ex) ? (
                 // Bài cần mở khóa: hai lựa chọn — mua đúng bài này, hoặc gói
                 // 30 ngày. Số tiền chỉ để hiển thị; giá thật lấy ở máy chủ.
-                canBuy && ex.skill === "READING" ? (
+                canBuy ? (
                   <div className="flex flex-col items-stretch gap-2.5 md:items-end">
                     <PurchaseButton
                       offerCode="READING_SINGLE"

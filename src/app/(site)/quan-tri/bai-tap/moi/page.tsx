@@ -3,7 +3,7 @@ import { ArrowLeft } from "lucide-react";
 import { requireAdmin } from "@/lib/session";
 import { ExerciseForm } from "@/components/admin/exercise-form";
 
-export const metadata = { title: "Tạo bài tập mới" };
+export const metadata = { title: "Tạo đề Reading mới" };
 
 export default async function NewExercisePage() {
   await requireAdmin();
@@ -18,7 +18,7 @@ export default async function NewExercisePage() {
       </Link>
       <p className="label-caps mt-6">Ngân hàng đề</p>
       <h1 className="mt-3 font-display text-3xl font-bold text-navy-deep">
-        Tạo bài tập mới
+        Tạo đề Reading mới
       </h1>
       <div className="rule-gold mt-5" />
       <div className="mt-10 border border-line bg-paper p-8 shadow-card">

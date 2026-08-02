@@ -12,11 +12,9 @@ import {
 
 export const metadata = { title: "Quản lý bài tập" };
 
-const SKILL_LABEL: Record<string, string> = {
-  READING: "Reading",
-  WRITING: "Writing",
-  LISTENING: "Listening",
-  SPEAKING: "Speaking",
+const READING_TYPE_LABEL: Record<string, string> = {
+  ACADEMIC: "Academic",
+  GENERAL: "General",
 };
 
 const TIER_LABEL: Record<string, string> = {
@@ -29,7 +27,8 @@ const TIER_LABEL: Record<string, string> = {
 export default async function AdminExercisesPage() {
   await requireAdmin();
   const exercises = await db.exercise.findMany({
-    orderBy: [{ skill: "asc" }, { createdAt: "asc" }],
+    where: { skill: "READING" },
+    orderBy: [{ readingType: "asc" }, { createdAt: "asc" }],
     include: { _count: { select: { attempts: true } } },
   });
 
@@ -57,7 +56,7 @@ export default async function AdminExercisesPage() {
           <thead>
             <tr className="bg-navy text-paper">
               <th className="px-4 py-3 text-left font-semibold">Bài tập</th>
-              <th className="px-4 py-3 text-left font-semibold">Kỹ năng</th>
+              <th className="px-4 py-3 text-left font-semibold">Kho Reading</th>
               <th className="px-4 py-3 text-center font-semibold">Thời gian</th>
               <th className="px-4 py-3 text-center font-semibold">Lượt làm</th>
               <th className="px-4 py-3 text-center font-semibold">Danh hiệu</th>
@@ -74,7 +73,7 @@ export default async function AdminExercisesPage() {
                   <p className="truncate text-xs text-muted">{ex.description}</p>
                 </td>
                 <td className="px-4 py-3 text-ink-soft">
-                  {SKILL_LABEL[ex.skill] ?? ex.skill}
+                  {READING_TYPE_LABEL[ex.readingType] ?? ex.readingType}
                 </td>
                 <td className="px-4 py-3 text-center tabular-nums text-ink-soft">
                   {ex.durationMinutes}&apos;
@@ -84,8 +83,7 @@ export default async function AdminExercisesPage() {
                 </td>
                 {/* Độ khó + tính danh hiệu: chỉ có ý nghĩa với đề Reading */}
                 <td className="px-4 py-3 text-center">
-                  {ex.skill === "READING" ? (
-                    <div className="flex flex-col items-center gap-1.5">
+                  <div className="flex flex-col items-center gap-1.5">
                       <form action={cycleDifficultyTierAction.bind(null, ex.id)}>
                         <button
                           type="submit"
@@ -108,10 +106,7 @@ export default async function AdminExercisesPage() {
                           {ex.achievementEligible ? "Tính danh hiệu" : "Không tính"}
                         </button>
                       </form>
-                    </div>
-                  ) : (
-                    <span className="text-muted">—</span>
-                  )}
+                  </div>
                 </td>
                 <td className="px-4 py-3 text-center">
                   <form action={toggleExerciseAccessLevelAction.bind(null, ex.id)}>

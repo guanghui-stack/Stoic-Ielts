@@ -5,7 +5,6 @@ import { logoutAction } from "@/lib/actions/auth";
 
 const TABS = [
   { href: "/quan-tri", label: "Tổng quan" },
-  { href: "/quan-tri/cham-bai", label: "Chấm bài" },
   { href: "/quan-tri/bai-tap", label: "Bài tập" },
   { href: "/quan-tri/hoc-vien", label: "Học viên" },
   { href: "/quan-tri/thanh-toan", label: "Thanh toán" },

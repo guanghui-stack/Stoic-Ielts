@@ -8,17 +8,11 @@ import { ErrorBanner, SubmitButton } from "@/components/ui";
 export type GoalValues = {
   overall: number | null;
   reading: number | null;
-  listening: number | null;
-  writing: number | null;
-  speaking: number | null;
 };
 
 const BAND_FIELDS = [
   { name: "targetOverall", key: "overall", label: "Overall" },
   { name: "targetReading", key: "reading", label: "Reading" },
-  { name: "targetListening", key: "listening", label: "Listening" },
-  { name: "targetWriting", key: "writing", label: "Writing" },
-  { name: "targetSpeaking", key: "speaking", label: "Speaking" },
 ] as const;
 
 function band(v: number | null) {
@@ -73,7 +67,7 @@ export function GoalsCard({
         <div className="mt-4">
           <ErrorBanner message={state?.error} />
         </div>
-        <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+        <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3">
           {BAND_FIELDS.map((f) => (
             <div key={f.name}>
               <label
@@ -145,7 +139,7 @@ export function GoalsCard({
             {state.success}
           </p>
         )}
-        <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-5">
+        <div className="mt-5 grid grid-cols-2 gap-3">
           {BAND_FIELDS.map((f, i) => (
             <div
               key={f.name}

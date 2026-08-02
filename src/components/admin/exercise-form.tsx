@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState } from "react";
 import { Save } from "lucide-react";
 import {
   createExerciseAction,
@@ -16,18 +16,11 @@ const labelCls =
   "block font-ui text-[0.8rem] font-semibold uppercase tracking-[0.1em] text-ink";
 
 type Defaults = {
-  skill?: string;
+  readingType?: string;
   title?: string;
   description?: string;
   durationMinutes?: number;
   published?: boolean;
-  // Writing
-  task?: string;
-  prompt?: string;
-  guidance?: string;
-  minWords?: number;
-  dataTable?: string;
-  // Reading
   content?: string;
 };
 
@@ -45,27 +38,29 @@ export function ExerciseForm({
     action,
     undefined
   );
-  const [skill, setSkill] = useState(defaults?.skill ?? "WRITING");
 
   return (
     <form action={formAction} className="space-y-6">
       <ErrorBanner message={state?.error} />
+      <input type="hidden" name="skill" value="READING" />
 
       <div className="grid gap-5 md:grid-cols-2">
         <div>
-          <label htmlFor="skill" className={labelCls}>
-            Kỹ năng <span className="text-danger">*</span>
+          <label htmlFor="readingType" className={labelCls}>
+            Kho Reading <span className="text-danger">*</span>
           </label>
           <select
-            id="skill"
-            name="skill"
-            value={skill}
-            onChange={(e) => setSkill(e.target.value)}
+            id="readingType"
+            name="readingType"
+            defaultValue={defaults?.readingType ?? "ACADEMIC"}
             className={inputCls}
           >
-            <option value="WRITING">Writing</option>
-            <option value="READING">Reading</option>
+            <option value="ACADEMIC">Academic</option>
+            <option value="GENERAL">General</option>
           </select>
+          <p className="mt-1.5 font-ui text-xs text-muted">
+            Đề chỉ xuất hiện trong đúng kho đã chọn.
+          </p>
         </div>
         <div>
           <label htmlFor="durationMinutes" className={labelCls}>
@@ -78,11 +73,11 @@ export function ExerciseForm({
             min={1}
             max={240}
             required
-            defaultValue={defaults?.durationMinutes ?? (skill === "READING" ? 20 : 40)}
+            defaultValue={defaults?.durationMinutes ?? 20}
             className={inputCls}
           />
           <p className="mt-1.5 font-ui text-xs text-muted">
-            Chuẩn IELTS: Task 1 — 20&apos;, Task 2 — 40&apos;, 1 passage Reading — 20&apos;.
+            Một passage thường là 20 phút; Full Test Academic là 60 phút.
           </p>
         </div>
       </div>
@@ -96,7 +91,7 @@ export function ExerciseForm({
           name="title"
           required
           defaultValue={defaults?.title}
-          placeholder="Ví dụ: Writing Task 2 — Technology in Education"
+          placeholder="Ví dụ: Academic Reading — The Future of Cities"
           className={inputCls}
         />
       </div>
@@ -109,98 +104,19 @@ export function ExerciseForm({
           id="description"
           name="description"
           defaultValue={defaults?.description}
-          placeholder="Ví dụ: Dạng bài Agree/Disagree · tối thiểu 250 từ · 40 phút."
+          placeholder="Ví dụ: Passage 1 · 13 câu · 20 phút."
           className={inputCls}
         />
       </div>
 
-      {skill === "WRITING" ? (
-        <>
-          <div className="grid gap-5 md:grid-cols-2">
-            <div>
-              <label htmlFor="task" className={labelCls}>
-                Task <span className="text-danger">*</span>
-              </label>
-              <select
-                id="task"
-                name="task"
-                defaultValue={defaults?.task ?? "TASK_2"}
-                className={inputCls}
-              >
-                <option value="TASK_1">Task 1 (mô tả số liệu)</option>
-                <option value="TASK_2">Task 2 (bài luận)</option>
-              </select>
-            </div>
-            <div>
-              <label htmlFor="minWords" className={labelCls}>
-                Số từ tối thiểu <span className="text-danger">*</span>
-              </label>
-              <input
-                id="minWords"
-                name="minWords"
-                type="number"
-                min={50}
-                max={1000}
-                required
-                defaultValue={defaults?.minWords ?? 250}
-                className={inputCls}
-              />
-            </div>
-          </div>
-          <div>
-            <label htmlFor="prompt" className={labelCls}>
-              Đề bài (tiếng Anh) <span className="text-danger">*</span>
-            </label>
-            <textarea
-              id="prompt"
-              name="prompt"
-              required
-              rows={5}
-              defaultValue={defaults?.prompt}
-              placeholder={"Some people believe that…\n\nTo what extent do you agree or disagree?"}
-              className={`${inputCls} resize-y`}
-            />
-            <p className="mt-1.5 font-ui text-xs text-muted">
-              Ngăn cách các đoạn của đề bằng một dòng trống.
-            </p>
-          </div>
-          <div>
-            <label htmlFor="guidance" className={labelCls}>
-              Hướng dẫn cho học viên (tiếng Việt)
-            </label>
-            <textarea
-              id="guidance"
-              name="guidance"
-              rows={2}
-              defaultValue={defaults?.guidance}
-              placeholder="Gợi ý cấu trúc, lưu ý thời gian…"
-              className={`${inputCls} resize-y`}
-            />
-          </div>
-          <div>
-            <label htmlFor="dataTable" className={labelCls}>
-              Bảng số liệu (JSON — chỉ dành cho Task 1)
-            </label>
-            <textarea
-              id="dataTable"
-              name="dataTable"
-              rows={5}
-              defaultValue={defaults?.dataTable}
-              placeholder={`{"caption": "Tiêu đề bảng", "headers": ["Cột 1", "Cột 2"], "rows": [["a", "b"]]}`}
-              className={`${inputCls} resize-y font-mono text-sm`}
-            />
-          </div>
-        </>
-      ) : (
-        <div>
-          <label className={labelCls}>
-            Nội dung bài Reading <span className="text-danger">*</span>
-          </label>
-          <div className="mt-2">
-            <ReadingBuilder name="content" defaultJson={defaults?.content} />
-          </div>
+      <div>
+        <label className={labelCls}>
+          Nội dung bài Reading <span className="text-danger">*</span>
+        </label>
+        <div className="mt-2">
+          <ReadingBuilder name="content" defaultJson={defaults?.content} />
         </div>
-      )}
+      </div>
 
       <label className="flex cursor-pointer items-center gap-3 font-ui text-sm text-ink">
         <input

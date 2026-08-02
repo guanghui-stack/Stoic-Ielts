@@ -27,7 +27,12 @@ const ERROR_PATH = "/luyen-tap/reading/ghep-de";
 export async function assemblyCandidates(userId: string): Promise<PassageCandidate[]> {
   const [exercises, access, attempts] = await Promise.all([
     db.exercise.findMany({
-      where: { skill: "READING", taskType: "READING_PASSAGE", published: true },
+      where: {
+        skill: "READING",
+        readingType: "ACADEMIC",
+        taskType: "READING_PASSAGE",
+        published: true,
+      },
       orderBy: { createdAt: "asc" },
     }),
     getAccessSnapshot(userId, "READING"),

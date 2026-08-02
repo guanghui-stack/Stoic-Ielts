@@ -26,9 +26,6 @@ export async function updateGoalsAction(
   const fields = [
     "targetOverall",
     "targetReading",
-    "targetListening",
-    "targetWriting",
-    "targetSpeaking",
   ] as const;
 
   const data: Record<string, number | null | Date> = {};

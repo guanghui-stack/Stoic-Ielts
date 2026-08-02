@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { MapPin, Phone, Mail } from "lucide-react";
-import { MAIN_NAV, SKILL_NAV } from "@/lib/nav";
+import { MAIN_NAV, READING_NAV } from "@/lib/nav";
 import { BridgeMark } from "@/components/brand";
 
 export function SiteFooter() {
@@ -19,9 +19,8 @@ export function SiteFooter() {
             </div>
           </div>
           <p className="mt-5 max-w-sm text-[0.95rem] leading-relaxed text-cream/75">
-            Những cây cầu nối bạn với thế giới — đào tạo IELTS chuyên sâu với lộ
-            trình cá nhân hóa, luyện tập 4 kỹ năng chuẩn format và đội ngũ giáo
-            viên chấm chữa tận tâm.
+            Những cây cầu nối bạn với thế giới — nền tảng luyện IELTS Reading
+            theo hai định dạng Academic và General, bám sát điều kiện phòng thi.
           </p>
           <p className="mt-5 text-[0.95rem] font-semibold leading-relaxed text-cream/90">
             Công ty TNHH Kết Nối Toàn Cầu
@@ -60,16 +59,16 @@ export function SiteFooter() {
           </ul>
         </nav>
 
-        <nav aria-label="Luyện tập">
-          <p className="label-caps text-gold-soft">Luyện tập 4 kỹ năng</p>
+        <nav aria-label="Kho Reading">
+          <p className="label-caps text-gold-soft">IELTS Reading</p>
           <ul className="mt-4 space-y-2.5">
-            {SKILL_NAV.map((item) => (
+            {READING_NAV.map((item) => (
               <li key={item.href}>
                 <Link
                   href={item.href}
                   className="font-ui text-sm text-cream/80 transition-colors hover:text-gold-soft"
                 >
-                  IELTS {item.label}
+                  Reading {item.label}
                 </Link>
               </li>
             ))}

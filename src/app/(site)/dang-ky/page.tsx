@@ -6,7 +6,7 @@ import { RegisterForm } from "@/components/auth-forms";
 export const metadata: Metadata = {
   title: "Đăng ký tài khoản",
   description:
-    "Tạo tài khoản học viên Wobridges miễn phí — luyện tập 4 kỹ năng IELTS với đồng hồ thi thật và được giáo viên chấm chữa Writing.",
+    "Tạo tài khoản học viên Wobridges để luyện IELTS Reading Academic và General, lưu kết quả và theo dõi tiến bộ.",
 };
 
 export default async function RegisterPage() {
@@ -21,8 +21,8 @@ export default async function RegisterPage() {
       </h1>
       <div className="rule-gold mx-auto mt-5" />
       <p className="mt-5 text-center text-[0.98rem] leading-relaxed text-ink-soft">
-        Một tài khoản — toàn bộ phòng luyện tập: đề Reading chấm tự động, đề
-        Writing có giáo viên nhận xét và hồ sơ tiến độ của riêng bạn.
+        Một tài khoản cho hai kho Reading Academic và General, kết quả chấm tự
+        động và hồ sơ tiến độ của riêng bạn.
       </p>
       <div className="mt-10 border border-line bg-paper p-8 shadow-card">
         <RegisterForm />
