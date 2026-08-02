@@ -105,6 +105,52 @@ export async function toggleAllExerciseAccessAction(userId: string) {
   revalidatePath("/luyen-tap");
 }
 
+/**
+ * Xoay vòng mức độ khó của một đề: Chưa xếp → Dễ → Vừa → Khó → Chưa xếp.
+ *
+ * Ghép đề tự động dùng thông tin này để chọn mỗi tầng một bài, đúng trình tự
+ * đề thi thật (passage 1 dễ nhất, passage 3 khó nhất). Bài chưa xếp vẫn ghép
+ * được nhưng sẽ bị ưu tiên thấp hơn.
+ */
+const TIER_CYCLE = ["UNKNOWN", "EASY", "MEDIUM", "HARD"] as const;
+
+export async function cycleDifficultyTierAction(exerciseId: string) {
+  await requireAdmin();
+  const exercise = await db.exercise.findUnique({
+    where: { id: exerciseId },
+    select: { difficultyTier: true },
+  });
+  if (!exercise) return;
+
+  const current = TIER_CYCLE.indexOf(
+    exercise.difficultyTier as (typeof TIER_CYCLE)[number]
+  );
+  const next = TIER_CYCLE[(current + 1) % TIER_CYCLE.length];
+
+  await db.exercise.update({
+    where: { id: exerciseId },
+    data: { difficultyTier: next },
+  });
+  revalidatePath("/quan-tri/bai-tap");
+  revalidatePath("/luyen-tap/reading/ghep-de");
+}
+
+/** Bật/tắt việc tính bài này vào danh hiệu. */
+export async function toggleAchievementEligibleAction(exerciseId: string) {
+  await requireAdmin();
+  const exercise = await db.exercise.findUnique({
+    where: { id: exerciseId },
+    select: { achievementEligible: true },
+  });
+  if (!exercise) return;
+
+  await db.exercise.update({
+    where: { id: exerciseId },
+    data: { achievementEligible: !exercise.achievementEligible },
+  });
+  revalidatePath("/quan-tri/bai-tap");
+}
+
 /** Tương tự nhưng cho quyền chữa bài Feynman. */
 export async function toggleAllFeynmanAccessAction(userId: string) {
   await requireAdmin();

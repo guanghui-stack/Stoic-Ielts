@@ -6,6 +6,8 @@ import {
   toggleExercisePublishedAction,
   toggleExerciseAccessLevelAction,
   deleteExerciseAction,
+  cycleDifficultyTierAction,
+  toggleAchievementEligibleAction,
 } from "@/lib/actions/admin";
 
 export const metadata = { title: "Quản lý bài tập" };
@@ -15,6 +17,13 @@ const SKILL_LABEL: Record<string, string> = {
   WRITING: "Writing",
   LISTENING: "Listening",
   SPEAKING: "Speaking",
+};
+
+const TIER_LABEL: Record<string, string> = {
+  EASY: "Dễ",
+  MEDIUM: "Vừa",
+  HARD: "Khó",
+  UNKNOWN: "Chưa xếp",
 };
 
 export default async function AdminExercisesPage() {
@@ -51,6 +60,7 @@ export default async function AdminExercisesPage() {
               <th className="px-4 py-3 text-left font-semibold">Kỹ năng</th>
               <th className="px-4 py-3 text-center font-semibold">Thời gian</th>
               <th className="px-4 py-3 text-center font-semibold">Lượt làm</th>
+              <th className="px-4 py-3 text-center font-semibold">Danh hiệu</th>
               <th className="px-4 py-3 text-center font-semibold">Truy cập</th>
               <th className="px-4 py-3 text-center font-semibold">Trạng thái</th>
               <th className="px-4 py-3 text-right font-semibold">Thao tác</th>
@@ -71,6 +81,37 @@ export default async function AdminExercisesPage() {
                 </td>
                 <td className="px-4 py-3 text-center tabular-nums text-ink-soft">
                   {ex._count.attempts}
+                </td>
+                {/* Độ khó + tính danh hiệu: chỉ có ý nghĩa với đề Reading */}
+                <td className="px-4 py-3 text-center">
+                  {ex.skill === "READING" ? (
+                    <div className="flex flex-col items-center gap-1.5">
+                      <form action={cycleDifficultyTierAction.bind(null, ex.id)}>
+                        <button
+                          type="submit"
+                          title="Bấm để đổi mức độ khó — dùng khi ghép đề tự động"
+                          className="cursor-pointer border border-line-strong px-2.5 py-0.5 font-ui text-[0.68rem] font-semibold uppercase tracking-[0.06em] text-ink-soft transition-colors hover:border-navy hover:text-navy"
+                        >
+                          {TIER_LABEL[ex.difficultyTier] ?? ex.difficultyTier}
+                        </button>
+                      </form>
+                      <form action={toggleAchievementEligibleAction.bind(null, ex.id)}>
+                        <button
+                          type="submit"
+                          title="Bài này có được tính vào danh hiệu không"
+                          className={`cursor-pointer border px-2.5 py-0.5 font-ui text-[0.68rem] font-semibold uppercase tracking-[0.06em] transition-colors ${
+                            ex.achievementEligible
+                              ? "border-success bg-success-pale text-success"
+                              : "border-line-strong text-muted"
+                          }`}
+                        >
+                          {ex.achievementEligible ? "Tính danh hiệu" : "Không tính"}
+                        </button>
+                      </form>
+                    </div>
+                  ) : (
+                    <span className="text-muted">—</span>
+                  )}
                 </td>
                 <td className="px-4 py-3 text-center">
                   <form action={toggleExerciseAccessLevelAction.bind(null, ex.id)}>
