@@ -95,10 +95,16 @@ export function CatalogToc({ items }: { items: TocItem[] }) {
         </p>
       </nav>
 
-      {/* ===== Điện thoại: hàng thẻ cuộn ngang, dính dưới thanh menu ===== */}
+      {/*
+        Điện thoại: hàng thẻ cuộn ngang, dính trên đầu.
+
+        `min-w-0` là bắt buộc chứ không phải trang trí: đây là một ô lưới, mà ô
+        lưới mặc định không co nhỏ hơn nội dung của nó. Thiếu nó thì năm thẻ
+        `shrink-0` bên trong đẩy phình cả cột và làm TOÀN TRANG trôi ngang.
+      */}
       <nav
         aria-label="Mục lục nhóm danh hiệu"
-        className="sticky top-0 z-30 -mx-6 border-b border-line bg-paper/95 px-6 py-3 backdrop-blur lg:hidden"
+        className="sticky top-0 z-30 -mx-6 min-w-0 border-b border-line bg-paper/95 px-6 py-3 backdrop-blur lg:hidden"
       >
         <ul className="flex gap-2 overflow-x-auto pb-1">
           {items.map((item) => {
