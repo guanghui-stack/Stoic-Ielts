@@ -23,13 +23,21 @@ import {
 
 const ERROR_PATH = "/luyen-tap/reading/ghep-de";
 
-/** Danh sách passage có thể ghép, kèm tình trạng quyền của học viên. */
-export async function assemblyCandidates(userId: string): Promise<PassageCandidate[]> {
+/**
+ * Danh sách passage có thể ghép, kèm tình trạng quyền của học viên.
+ *
+ * Luôn giới hạn trong MỘT dạng đề: ghép một passage Academic với hai passage
+ * General cho ra một con số không ứng với kỳ thi nào cả.
+ */
+export async function assemblyCandidates(
+  userId: string,
+  readingType: "ACADEMIC" | "GENERAL" = "ACADEMIC"
+): Promise<PassageCandidate[]> {
   const [exercises, access, attempts] = await Promise.all([
     db.exercise.findMany({
       where: {
         skill: "READING",
-        readingType: "ACADEMIC",
+        readingType,
         taskType: "READING_PASSAGE",
         published: true,
       },
@@ -66,24 +74,30 @@ export async function assemblyCandidates(userId: string): Promise<PassageCandida
 export async function createAssemblyAction(formData: FormData) {
   const user = await requireUser();
   const mode = String(formData.get("mode") ?? "AUTO");
+  // Dạng đề đi kèm biểu mẫu; giá trị lạ thì lùi về Academic cho an toàn.
+  const readingType =
+    String(formData.get("readingType") ?? "") === "GENERAL" ? "GENERAL" : "ACADEMIC";
   const selected = formData
     .getAll("exerciseId")
     .map((v) => String(v))
     .filter(Boolean);
 
-  const candidates = await assemblyCandidates(user.id);
+  const candidates = await assemblyCandidates(user.id, readingType);
 
   const plan: AssemblyResult =
     mode === "MANUAL"
       ? planManualAssembly(candidates, selected)
       : planAutoAssembly(candidates);
 
-  if (!plan.ok) redirect(`${ERROR_PATH}?loi=${plan.reason}`);
+  // Giữ nguyên dạng đề khi quay lại, nếu không học viên General bị đá về Academic.
+  const backTo = `${ERROR_PATH}?dang=${readingType}`;
+
+  if (!plan.ok) redirect(`${backTo}&loi=${plan.reason}`);
 
   // CHẶN Ở MÁY CHỦ: phải sở hữu đủ cả ba passage. Kiểm tra lại tại đây chứ
   // không tin vào việc giao diện đã ẩn nút — người dùng gọi thẳng action được.
   if (plan.missingAccess.length > 0 && !isAdminRole(user.role)) {
-    redirect(`${ERROR_PATH}?loi=CHUA_MUA_DU`);
+    redirect(`${backTo}&loi=CHUA_MUA_DU`);
   }
 
   const assembly = await db.readingAssembly.create({

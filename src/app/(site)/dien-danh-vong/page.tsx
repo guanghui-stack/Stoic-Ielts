@@ -13,7 +13,7 @@ import { PageHero, NoteBox } from "@/components/ui";
 export const metadata = {
   title: "Điện Danh Vọng",
   description:
-    "Bảng vinh danh học viên Wobridges — danh hiệu, độ hiếm và số người đã đạt.",
+    "Bảng vinh danh học viên STOIC-IELTS — danh hiệu, độ hiếm và số người đã đạt.",
 };
 export const dynamic = "force-dynamic";
 
@@ -54,7 +54,7 @@ export default async function HallOfFamePage() {
       <PageHero
         label="Vinh danh"
         title="Điện Danh Vọng"
-        lede="Nơi ghi lại những cột mốc học viên Wobridges đã vượt qua. Danh hiệu không mua được — chỉ có làm bài đàng hoàng, sửa sai có chiều sâu và giữ được kỷ luật."
+        lede="Nơi ghi lại những cột mốc học viên STOIC-IELTS đã vượt qua. Danh hiệu không mua được — chỉ có làm bài đàng hoàng, sửa sai có chiều sâu và giữ được kỷ luật."
       />
 
       <section className="mx-auto max-w-5xl px-6 py-14">

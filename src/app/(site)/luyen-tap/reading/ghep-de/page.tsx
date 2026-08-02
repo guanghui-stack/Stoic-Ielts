@@ -12,6 +12,7 @@ import {
   TARGET_QUESTIONS,
   FULL_TEST_MINUTES,
 } from "@/lib/reading-assembly";
+import { MODULE_LABELS } from "@/lib/nav";
 import { OFFERS, formatVnd } from "@/lib/payments/catalog";
 import { PurchaseButton } from "@/components/payments/purchase-button";
 import { ErrorBanner, NoteBox, SectionHeading, SubmitButton } from "@/components/ui";
@@ -39,21 +40,36 @@ const TIER_LABELS: Record<string, string> = {
 export default async function AssemblyPage({
   searchParams,
 }: {
-  searchParams: Promise<{ loi?: string }>;
+  searchParams: Promise<{ loi?: string; dang?: string }>;
 }) {
-  const { loi } = await searchParams;
+  const { loi, dang } = await searchParams;
   const user = await requireUser();
 
-  const candidates = await assemblyCandidates(user.id);
+  // Chỉ ghép trong một dạng đề. Mặc định Academic vì đa số học viên thi dạng này.
+  const readingType = dang === "GENERAL" ? "GENERAL" : "ACADEMIC";
+  const moduleLabel = MODULE_LABELS[readingType];
+  const otherType = readingType === "GENERAL" ? "ACADEMIC" : "GENERAL";
+
+  const candidates = await assemblyCandidates(user.id, readingType);
   const usable = candidates.filter(isAssemblable);
   const autoPlan = planAutoAssembly(candidates);
 
   return (
     <section className="mx-auto max-w-4xl px-6 py-12 md:py-16">
       <SectionHeading
-        label="Reading"
+        label={`Reading ${moduleLabel}`}
         title="Ghép ba bài đọc thành một đề Full Test"
       />
+
+      <p className="mt-5 flex flex-wrap items-center gap-x-2 gap-y-1 border-l-4 border-line-strong bg-cream-deep px-5 py-3.5 font-ui text-sm text-ink-soft">
+        Đang ghép từ kho <strong className="text-ink">{moduleLabel}</strong>.
+        <Link
+          href={`/luyen-tap/reading/ghep-de?dang=${otherType}`}
+          className="font-semibold text-navy underline underline-offset-4 hover:text-gold"
+        >
+          Chuyển sang {MODULE_LABELS[otherType]}
+        </Link>
+      </p>
       <p className="mt-6 max-w-2xl text-[0.98rem] leading-relaxed text-ink-soft">
         Đề một bài đọc chỉ có hơn chục câu, nên một câu đúng sai đã làm lệch
         khoảng nửa band. Làm trọn ba bài trong {FULL_TEST_MINUTES} phút cho bạn
@@ -144,6 +160,7 @@ export default async function AssemblyPage({
             ) : (
               <form action={createAssemblyAction} className="mt-6">
                 <input type="hidden" name="mode" value="AUTO" />
+                <input type="hidden" name="readingType" value={readingType} />
                 <SubmitButton>
                   <Shuffle className="h-4 w-4" aria-hidden="true" />
                   Bắt đầu đề này
@@ -153,8 +170,8 @@ export default async function AssemblyPage({
           </>
         ) : (
           <NoteBox className="mt-6" title="Chưa ghép được">
-            Kho đề hiện có {usable.length} bài đọc dùng để ghép được, cần tối
-            thiểu {PASSAGES_PER_TEST}. Trung tâm sẽ bổ sung thêm đề.
+            Kho {moduleLabel} hiện có {usable.length} bài đọc dùng để ghép được, cần
+            tối thiểu {PASSAGES_PER_TEST}. Trung tâm sẽ bổ sung thêm đề.
           </NoteBox>
         )}
       </article>
@@ -190,16 +207,17 @@ export default async function AssemblyPage({
               attemptCount: c.attemptCount,
             }))}
             action={createAssemblyAction}
+            readingType={readingType}
           />
         )}
       </article>
 
       <p className="mt-8 text-center">
         <Link
-          href="/luyen-tap/reading"
+          href={readingType === "GENERAL" ? "/luyen-tap/reading/general" : "/luyen-tap/reading"}
           className="font-ui text-sm font-semibold text-navy underline-offset-4 hover:text-gold hover:underline"
         >
-          Quay lại danh sách bài Reading
+          Quay lại kho Reading {moduleLabel}
         </Link>
       </p>
     </section>

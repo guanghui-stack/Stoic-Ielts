@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { MapPin, Phone, Mail } from "lucide-react";
 import { MAIN_NAV, READING_NAV } from "@/lib/nav";
-import { BridgeMark } from "@/components/brand";
+import { StoicMark } from "@/components/brand";
 
 export function SiteFooter() {
   return (
@@ -10,17 +10,20 @@ export function SiteFooter() {
       <div className="mx-auto grid max-w-6xl gap-10 px-6 py-14 md:grid-cols-[1.4fr_1fr_1fr]">
         <div>
           <div className="flex items-center gap-3">
-            <BridgeMark className="h-10 w-10 [&_circle]:stroke-cream [&_path]:stroke-gold-soft" />
+            <StoicMark className="h-10 w-10 [&_circle]:stroke-cream [&_path]:stroke-gold-soft" />
             <div className="leading-none">
-              <p className="font-display text-xl font-bold text-paper">Wobridges</p>
+              <p className="font-display text-xl font-bold text-paper">
+                STOIC<span className="text-gold-soft">·</span>IELTS
+              </p>
               <p className="mt-1 font-ui text-[0.62rem] font-semibold uppercase tracking-[0.22em] text-gold-soft">
-                World Bridges · English Center
+                Kiên trì · Kỷ luật · Danh dự
               </p>
             </div>
           </div>
           <p className="mt-5 max-w-sm text-[0.95rem] leading-relaxed text-cream/75">
-            Những cây cầu nối bạn với thế giới — nền tảng luyện IELTS Reading
-            theo hai định dạng Academic và General, bám sát điều kiện phòng thi.
+            Điểm số là hệ quả, kỷ luật mới là thứ bạn kiểm soát. Nền tảng luyện
+            IELTS Reading theo hai định dạng Academic và General, bám sát điều
+            kiện phòng thi thật.
           </p>
           <p className="mt-5 text-[0.95rem] font-semibold leading-relaxed text-cream/90">
             Công ty TNHH Kết Nối Toàn Cầu

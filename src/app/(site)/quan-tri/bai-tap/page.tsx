@@ -8,6 +8,7 @@ import {
   deleteExerciseAction,
   cycleDifficultyTierAction,
   toggleAchievementEligibleAction,
+  toggleReadingTypeAction,
 } from "@/lib/actions/admin";
 
 export const metadata = { title: "Quản lý bài tập" };
@@ -73,7 +74,15 @@ export default async function AdminExercisesPage() {
                   <p className="truncate text-xs text-muted">{ex.description}</p>
                 </td>
                 <td className="px-4 py-3 text-ink-soft">
-                  {READING_TYPE_LABEL[ex.readingType] ?? ex.readingType}
+                  <form action={toggleReadingTypeAction.bind(null, ex.id)}>
+                    <button
+                      type="submit"
+                      title="Bấm để chuyển bài này sang kho Reading còn lại"
+                      className="cursor-pointer border border-navy px-2.5 py-0.5 font-ui text-[0.68rem] font-semibold uppercase tracking-[0.06em] text-navy transition-colors hover:bg-navy hover:text-paper"
+                    >
+                      {READING_TYPE_LABEL[ex.readingType] ?? ex.readingType}
+                    </button>
+                  </form>
                 </td>
                 <td className="px-4 py-3 text-center tabular-nums text-ink-soft">
                   {ex.durationMinutes}&apos;

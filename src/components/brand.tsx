@@ -1,7 +1,14 @@
 import Link from "next/link";
 
-/** Logomark: nhịp cầu vòm cách điệu — World Bridges. */
-export function BridgeMark({ className = "h-9 w-9" }: { className?: string }) {
+/**
+ * Logomark STOIC·IELTS — cây cột đá đứng trong vòng tròn.
+ *
+ * Cột đá là hình ảnh cổ điển của chủ nghĩa Khắc kỷ: thứ trụ được qua hàng nghìn
+ * năm mưa nắng nhờ đứng vững, không nhờ chạy nhanh. Ba rãnh dọc là ba trụ của
+ * hành trình — Giải đề, Sửa đề, Kỷ luật. Chân đế được vẽ dày nhất vì nền móng
+ * mới là thứ đỡ tất cả những gì bên trên.
+ */
+export function StoicMark({ className = "h-9 w-9" }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 48 48"
@@ -11,43 +18,36 @@ export function BridgeMark({ className = "h-9 w-9" }: { className?: string }) {
       aria-hidden="true"
     >
       <circle cx="24" cy="24" r="22" stroke="#1e3a5c" strokeWidth="2" />
+      {/* Đầu cột */}
+      <path d="M15 15.5h18" stroke="#b8862b" strokeWidth="2.6" strokeLinecap="round" />
+      {/* Thân cột: ba rãnh dọc = ba trụ */}
       <path
-        d="M10 30h28"
-        stroke="#b8862b"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-      />
-      <path
-        d="M15 30v-5.5M20 30v-8M24 30v-9M28 30v-8M33 30v-5.5"
-        stroke="#b8862b"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-      />
-      <path
-        d="M10 24.5c4.5-8 9.5-12 14-12s9.5 4 14 12"
+        d="M19 18v12.5M24 18v12.5M29 18v12.5"
         stroke="#1e3a5c"
-        strokeWidth="2.5"
+        strokeWidth="2.1"
         strokeLinecap="round"
-        fill="none"
       />
+      {/* Chân đế — dày nhất, vì nền móng đỡ tất cả */}
+      <path d="M13.5 33h21" stroke="#1e3a5c" strokeWidth="3" strokeLinecap="round" />
+      <path d="M16 36.5h16" stroke="#b8862b" strokeWidth="2.2" strokeLinecap="round" />
     </svg>
   );
 }
 
 export function BrandLockup({ compact = false }: { compact?: boolean }) {
   return (
-    <Link href="/" className="flex items-center gap-3 group">
-      <BridgeMark className={compact ? "h-8 w-8" : "h-10 w-10"} />
+    <Link href="/" className="group flex items-center gap-3">
+      <StoicMark className={compact ? "h-8 w-8" : "h-10 w-10"} />
       <span className="flex flex-col leading-none">
         <span
-          className={`font-display font-bold tracking-tight text-navy-deep group-hover:text-navy transition-colors ${
+          className={`font-display font-bold tracking-tight text-navy-deep transition-colors group-hover:text-navy ${
             compact ? "text-lg" : "text-xl"
           }`}
         >
-          Wobridges
+          STOIC<span className="text-gold">·</span>IELTS
         </span>
-        <span className="font-ui text-[0.62rem] font-semibold uppercase tracking-[0.22em] text-gold mt-1">
-          World Bridges · English Center
+        <span className="mt-1 font-ui text-[0.62rem] font-semibold uppercase tracking-[0.22em] text-gold">
+          Kiên trì · Kỷ luật · Danh dự
         </span>
       </span>
     </Link>

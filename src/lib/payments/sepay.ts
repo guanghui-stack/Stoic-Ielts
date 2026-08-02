@@ -92,7 +92,7 @@ export function buildSePayCheckout(order: {
     order_invoice_number: order.invoiceNumber,
     order_amount: order.amount,
     currency: order.currency,
-    order_description: `Wobridges - ${label}`,
+    order_description: `STOIC-IELTS - ${label}`,
     customer_id: order.userId,
     // Ba đường quay về này CHỈ để hiển thị giao diện. Việc mở quyền hoàn toàn
     // dựa vào IPN máy chủ-tới-máy chủ, nên tự mở success_url không ăn thua.

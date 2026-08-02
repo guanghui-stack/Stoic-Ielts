@@ -26,9 +26,11 @@ const REQUIRED = 3;
 export function ManualAssemblyPicker({
   candidates,
   action,
+  readingType,
 }: {
   candidates: PickerItem[];
   action: (formData: FormData) => void;
+  readingType: "ACADEMIC" | "GENERAL";
 }) {
   const [picked, setPicked] = useState<string[]>([]);
 
@@ -50,6 +52,7 @@ export function ManualAssemblyPicker({
   return (
     <form action={action} className="mt-6">
       <input type="hidden" name="mode" value="MANUAL" />
+      <input type="hidden" name="readingType" value={readingType} />
       {picked.map((id) => (
         <input key={id} type="hidden" name="exerciseId" value={id} />
       ))}

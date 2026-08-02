@@ -4,7 +4,7 @@
  * Ba nguyên tắc bắt buộc khi thêm danh hiệu mới:
  *
  * 1. `quoteKind` phải trung thực. EXACT là trích nguyên văn có nguồn kiểm chứng
- *    được; ADAPTED là phỏng theo; ORIGINAL là Wobridges tự viết. Gán một câu tự
+ *    được; ADAPTED là phỏng theo; ORIGINAL là STOIC-IELTS tự viết. Gán một câu tự
  *    sáng tác cho danh nhân lịch sử là bịa nguồn — không bao giờ được làm.
  *
  * 2. Danh hiệu tiêu cực chỉ được `PRIVATE_ONLY`. Bêu tên người học kém trước
@@ -385,7 +385,7 @@ export const TITLE_SEEDS: TitleSeed[] = [
     description:
       "Một lời cảnh tỉnh riêng tư, chỉ mình bạn thấy. Đây không phải bản án về năng lực của bạn — nó tồn tại để bạn có cái mà vượt qua.",
     quoteKind: "ORIGINAL",
-    quoteSource: "Thông điệp của Wobridges",
+    quoteSource: "Thông điệp của STOIC-IELTS",
     category: "TRANSFORMATION",
     rarity: "PRIVATE",
     visibility: "PRIVATE_ONLY",
@@ -400,7 +400,7 @@ export const TITLE_SEEDS: TitleSeed[] = [
     description:
       "Từ đáy vực đi lên: hai bài Full Test liên tiếp đạt từ 7.0 sau giai đoạn sa sút. Phân cửu tất hợp.",
     quoteKind: "ORIGINAL",
-    quoteSource: "Thông điệp của Wobridges",
+    quoteSource: "Thông điệp của STOIC-IELTS",
     category: "TRANSFORMATION",
     rarity: "EPIC",
     ruleKey: "RECOVERY_CHAIN",

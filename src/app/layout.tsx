@@ -23,11 +23,11 @@ const beVietnam = Be_Vietnam_Pro({
 
 export const metadata: Metadata = {
   title: {
-    default: "Wobridges English Center — Những cây cầu nối bạn với thế giới",
-    template: "%s | Wobridges English Center",
+    default: "STOIC-IELTS — Luyện IELTS Reading bằng kỷ luật",
+    template: "%s | STOIC-IELTS",
   },
   description:
-    "Wobridges IELTS Reading — kho đề Academic và General tách biệt, luyện thi theo thời gian thực, chấm điểm tự động và theo dõi tiến bộ.",
+    "STOIC-IELTS — kho đề IELTS Reading Academic và General tách biệt, quy đổi band ngay khi nộp, hệ danh hiệu dành cho người kiên trì và cuộc thi Nguyệt Thí hằng tháng.",
 };
 
 export default function RootLayout({

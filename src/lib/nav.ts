@@ -1,10 +1,44 @@
+/**
+ * Điều hướng chung của cả site.
+ *
+ * Gom về một chỗ để nav trên đầu trang, footer và các trang nội dung không bao
+ * giờ nói khác nhau về cùng một đường dẫn.
+ */
+
 export const MAIN_NAV = [
   { href: "/", label: "Trang chủ" },
+  { href: "/nguyet-thi", label: "Nguyệt Thí" },
   { href: "/dien-danh-vong", label: "Điện Danh Vọng" },
   { href: "/bang-vang", label: "Bảng Vàng" },
 ] as const;
 
+/**
+ * Hai kho đề Reading.
+ *
+ * Academic và General là hai kỳ thi khác nhau: luyện nhầm dạng nghĩa là đang
+ * giỏi lên ở một kỳ thi mình không dự. Vì vậy chúng tách nhau từ đường dẫn,
+ * danh sách đề cho tới việc ghép đề Full Test.
+ */
 export const READING_NAV = [
-  { href: "/luyen-tap/reading", label: "Academic", module: "ACADEMIC" },
-  { href: "/luyen-tap/reading/general", label: "General", module: "GENERAL" },
+  {
+    href: "/luyen-tap/reading",
+    label: "Academic",
+    module: "ACADEMIC",
+    blurb:
+      "Passage học thuật lấy từ báo khoa học, tạp chí chuyên ngành và sách nghiên cứu. Dạng đề dành cho người nộp hồ sơ du học hoặc xin việc chuyên môn.",
+  },
+  {
+    href: "/luyen-tap/reading/general",
+    label: "General",
+    module: "GENERAL",
+    blurb:
+      "Văn bản đời sống: thông báo, quảng cáo, sổ tay nhân viên và bài báo phổ thông. Dạng đề dành cho người đi định cư hoặc làm việc phổ thông.",
+  },
 ] as const;
+
+export type ReadingModule = (typeof READING_NAV)[number]["module"];
+
+export const MODULE_LABELS: Record<string, string> = {
+  ACADEMIC: "Academic",
+  GENERAL: "General",
+};

@@ -136,6 +136,33 @@ export async function cycleDifficultyTierAction(exerciseId: string) {
   revalidatePath("/luyen-tap/reading/ghep-de");
 }
 
+/**
+ * Đổi dạng đề giữa Academic và General.
+ *
+ * Xếp nhầm kho là lỗi tốn kém: học viên thi General luyện bằng đề Academic sẽ
+ * nhận một con số không phản ánh đúng kỳ thi họ sắp dự. Đặt ngay trong bảng
+ * danh sách để sửa được bằng một cú bấm, không phải mở form chỉnh sửa.
+ */
+export async function toggleReadingTypeAction(exerciseId: string) {
+  await requireAdmin();
+  const exercise = await db.exercise.findUnique({
+    where: { id: exerciseId },
+    select: { readingType: true },
+  });
+  if (!exercise) return;
+
+  await db.exercise.update({
+    where: { id: exerciseId },
+    data: {
+      readingType: exercise.readingType === "GENERAL" ? "ACADEMIC" : "GENERAL",
+    },
+  });
+  revalidatePath("/quan-tri/bai-tap");
+  revalidatePath("/luyen-tap/reading");
+  revalidatePath("/luyen-tap/reading/general");
+  revalidatePath("/luyen-tap/reading/ghep-de");
+}
+
 /** Bật/tắt việc tính bài này vào danh hiệu. */
 export async function toggleAchievementEligibleAction(exerciseId: string) {
   await requireAdmin();
