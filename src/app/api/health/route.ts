@@ -6,7 +6,7 @@ import seedData from "../../../../prisma/seed-data.json";
  * Dấu mốc phiên bản mã nguồn — đổi mỗi khi có thay đổi cần xác nhận đã lên
  * production. Nhờ đó biết chắc máy chủ đang chạy bản nào.
  */
-const BUILD_MARKER = "2026-08-02-stoic-rebrand";
+const BUILD_MARKER = "2026-08-02-title-catalog-groups";
 
 /**
  * Trạm kiểm tra tình trạng hệ thống — dùng để chẩn đoán từ xa khi

@@ -1,13 +1,17 @@
 import Link from "next/link";
-import { Award, Users } from "lucide-react";
+import { Award, ChevronDown, Info, Users } from "lucide-react";
 import { db } from "@/lib/db";
 import {
   CATEGORY_LABELS,
-  RARITY_LABELS,
   quoteAttribution,
-  type Rarity,
   type TitleCategory,
 } from "@/lib/achievements/catalog";
+import {
+  CATEGORY_BLURBS,
+  explainTitleRule,
+  groupByCategory,
+  rarityLabel,
+} from "@/lib/achievements/explain";
 import { PageHero, NoteBox } from "@/components/ui";
 
 export const metadata = {
@@ -48,6 +52,11 @@ export default async function HallOfFamePage() {
   const recent = awards
     .filter((a) => nameOf.has(a.userId))
     .slice(0, 12);
+
+  // Gom theo nhóm, mỗi nhóm xếp từ dễ đến khó (xem `explain.ts`)
+  const groups = groupByCategory(definitions);
+  // Danh hiệu trụ cột được nhắc tới bằng MÃ trong ruleConfig — đổi sang tên thật
+  const nameOfCode = new Map(definitions.map((d) => [d.code, d.name]));
 
   return (
     <>
@@ -92,51 +101,156 @@ export default async function HallOfFamePage() {
           Tỷ lệ tính trên {eligibleCount} học viên đã hoàn thành ít nhất một bài
         </p>
 
-        <div className="mt-6 space-y-3">
-          {definitions.map((def) => {
-            const count = countOf.get(def.id) ?? 0;
-            const percent =
-              eligibleCount > 0 ? Math.round((count / eligibleCount) * 100) : 0;
-            const attribution = quoteAttribution({
-              quoteKind: def.quoteKind as "EXACT" | "ADAPTED" | "ORIGINAL",
-              quoteSource: def.quoteSource,
-            });
-            return (
-              <article
-                key={def.id}
-                className="flex flex-wrap items-start justify-between gap-4 border border-line bg-paper p-6"
-              >
-                <div className="min-w-0 flex-1">
-                  <p className="flex flex-wrap items-center gap-2">
-                    <Award className="h-4 w-4 shrink-0 text-gold" aria-hidden="true" />
-                    <span className="font-display text-lg font-bold text-navy-deep">
-                      {def.name}
-                    </span>
-                    <span className="border border-line-strong px-2 py-0.5 font-ui text-[0.65rem] font-semibold uppercase tracking-[0.06em] text-muted">
-                      {RARITY_LABELS[def.rarity as Rarity] ?? def.rarity}
-                    </span>
-                    <span className="font-ui text-[0.65rem] uppercase tracking-[0.06em] text-muted">
-                      {CATEGORY_LABELS[def.category as TitleCategory] ?? def.category}
-                    </span>
-                  </p>
-                  {attribution && (
-                    <p className="mt-1.5 font-ui text-xs italic text-muted">{attribution}</p>
-                  )}
-                  <p className="mt-2.5 text-[0.93rem] leading-relaxed text-ink-soft">
-                    {def.description}
-                  </p>
-                </div>
-                <div className="shrink-0 text-right">
-                  <p className="font-display text-3xl font-bold text-navy-deep tabular-nums">
-                    {count}
-                  </p>
-                  <p className="font-ui text-xs text-muted">
-                    {percent}% học viên
-                  </p>
-                </div>
-              </article>
-            );
-          })}
+        <p className="mt-1 font-ui text-sm text-muted">
+          Mỗi nhóm xếp từ dễ đến khó. Bấm vào tên danh hiệu để xem điều kiện chi tiết.
+        </p>
+
+        <div className="mt-8 space-y-12">
+          {groups.map(({ category, items }, groupIndex) => (
+            <section key={category}>
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b-2 border-navy-deep pb-2.5">
+                <span className="font-display text-2xl font-bold tabular-nums text-gold">
+                  {String(groupIndex + 1).padStart(2, "0")}
+                </span>
+                <h3 className="font-display text-xl font-bold text-navy-deep">
+                  {CATEGORY_LABELS[category as TitleCategory] ?? category}
+                </h3>
+                <span className="font-ui text-xs text-muted">
+                  {items.length} danh hiệu
+                </span>
+              </div>
+              <p className="mt-3 max-w-2xl text-[0.93rem] leading-relaxed text-ink-soft">
+                {CATEGORY_BLURBS[category] ?? ""}
+              </p>
+
+              <div className="mt-5 space-y-2.5">
+                {items.map((def, index) => {
+                  const count = countOf.get(def.id) ?? 0;
+                  const percent =
+                    eligibleCount > 0
+                      ? Math.round((count / eligibleCount) * 100)
+                      : 0;
+                  const attribution = quoteAttribution({
+                    quoteKind: def.quoteKind as "EXACT" | "ADAPTED" | "ORIGINAL",
+                    quoteSource: def.quoteSource,
+                  });
+
+                  // ruleConfigJson do chính hệ thống ghi ra, nhưng vẫn bọc try
+                  // để một bản ghi hỏng không làm sập cả trang công khai
+                  let ruleConfig: Record<string, unknown> = {};
+                  try {
+                    ruleConfig = JSON.parse(def.ruleConfigJson ?? "{}");
+                  } catch {
+                    ruleConfig = {};
+                  }
+                  const guide = explainTitleRule({
+                    ruleKey: def.ruleKey,
+                    ruleConfig,
+                    repeatPolicy: def.repeatPolicy,
+                    rewardCode: def.rewardCode,
+                    titleNameOf: (code) => nameOfCode.get(code),
+                  });
+
+                  return (
+                    <details
+                      key={def.id}
+                      className="group border border-line bg-paper open:border-navy open:shadow-card"
+                    >
+                      <summary className="flex cursor-pointer list-none flex-wrap items-start gap-4 p-6 transition-colors hover:bg-cream [&::-webkit-details-marker]:hidden">
+                        <span className="flex shrink-0 items-baseline gap-2 pt-0.5">
+                          <span className="font-ui text-xs font-semibold tabular-nums text-muted">
+                            {index + 1}
+                          </span>
+                          <Award className="h-4 w-4 text-gold" aria-hidden="true" />
+                        </span>
+
+                        <span className="min-w-0 flex-1">
+                          <span className="flex flex-wrap items-center gap-2">
+                            <span className="font-display text-lg font-bold text-navy-deep">
+                              {def.name}
+                            </span>
+                            <span className="border border-line-strong px-2 py-0.5 font-ui text-[0.65rem] font-semibold uppercase tracking-[0.06em] text-muted">
+                              {rarityLabel(def.rarity)}
+                            </span>
+                          </span>
+                          {attribution && (
+                            <span className="mt-1.5 block font-ui text-xs italic text-muted">
+                              {attribution}
+                            </span>
+                          )}
+                          <span className="mt-2.5 block text-[0.93rem] leading-relaxed text-ink-soft">
+                            {def.description}
+                          </span>
+                          <span className="mt-3 inline-flex items-center gap-1.5 font-ui text-[0.72rem] font-semibold uppercase tracking-[0.1em] text-navy">
+                            <ChevronDown
+                              className="h-3.5 w-3.5 transition-transform group-open:rotate-180"
+                              aria-hidden="true"
+                            />
+                            <span className="group-open:hidden">Cách đạt được</span>
+                            <span className="hidden group-open:inline">Thu gọn</span>
+                          </span>
+                        </span>
+
+                        <span className="shrink-0 text-right">
+                          <span className="block font-display text-3xl font-bold tabular-nums text-navy-deep">
+                            {count}
+                          </span>
+                          <span className="block font-ui text-xs text-muted">
+                            {percent}% học viên
+                          </span>
+                        </span>
+                      </summary>
+
+                      <div className="border-t border-line bg-cream px-6 py-6">
+                        <p className="font-ui text-sm font-semibold text-navy-deep">
+                          {guide.summary}
+                        </p>
+
+                        {guide.steps.length > 0 && (
+                          <>
+                            <p className="label-caps mt-5">
+                              Cần đạt đủ các điều kiện sau
+                            </p>
+                            <ul className="mt-3 space-y-2">
+                              {guide.steps.map((step, i) => (
+                                <li
+                                  key={i}
+                                  className="flex gap-3 text-[0.93rem] leading-relaxed text-ink-soft"
+                                >
+                                  <span
+                                    className="mt-[0.55rem] h-1.5 w-1.5 shrink-0 bg-gold"
+                                    aria-hidden="true"
+                                  />
+                                  <span>{step}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </>
+                        )}
+
+                        {guide.notes.length > 0 && (
+                          <div className="mt-6 space-y-2.5 border-t border-line pt-5">
+                            {guide.notes.map((note, i) => (
+                              <p
+                                key={i}
+                                className="flex gap-2.5 font-ui text-[0.85rem] leading-relaxed text-muted"
+                              >
+                                <Info
+                                  className="mt-0.5 h-3.5 w-3.5 shrink-0"
+                                  aria-hidden="true"
+                                />
+                                <span>{note}</span>
+                              </p>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </details>
+                  );
+                })}
+              </div>
+            </section>
+          ))}
         </div>
 
         <NoteBox className="mt-10" title="Về quyền riêng tư">
