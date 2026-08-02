@@ -61,6 +61,9 @@ export function DesktopNav() {
         className="border-t border-line bg-cream-deep/60"
       >
         <ul className="mx-auto flex max-w-6xl items-center justify-center divide-x divide-line-strong/50">
+          <li className="px-6 py-2.5 font-ui text-[0.78rem] font-semibold tracking-wide text-navy-deep">
+            Reading
+          </li>
           {READING_NAV.map((item) => {
             const active = isActive(pathname, item.href);
             const Icon = READING_ICONS[item.module];
@@ -125,7 +128,7 @@ export function MobileNav({
                 </li>
               ))}
             </ul>
-            <p className="label-caps mt-5 mb-2">Kho Reading</p>
+            <p className="label-caps mt-5 mb-2">Reading</p>
             <ul className="grid grid-cols-2 gap-1">
               {READING_NAV.map((item) => {
                 const Icon = READING_ICONS[item.module];
