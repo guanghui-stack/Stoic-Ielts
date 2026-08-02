@@ -6,7 +6,7 @@ import seedData from "../../../../prisma/seed-data.json";
  * Dấu mốc phiên bản mã nguồn — đổi mỗi khi có thay đổi cần xác nhận đã lên
  * production. Nhờ đó biết chắc máy chủ đang chạy bản nào.
  */
-const BUILD_MARKER = "2026-08-02-achievements-v3-backfill";
+const BUILD_MARKER = "2026-08-02-achievements-v4-diag";
 
 /**
  * Trạm kiểm tra tình trạng hệ thống — dùng để chẩn đoán từ xa khi
@@ -96,9 +96,24 @@ export async function GET() {
         }),
         db.achievementEvent.count({ where: { status: "FAILED" } }),
       ]);
+    // Ba con số này phân biệt được "chưa đủ điều kiện" với "hệ thống hỏng":
+    //  - progressRows = 0  → engine chưa từng chạy cho ai
+    //  - validAttempts = 0 → hàng rào chống cày đang loại sạch bài làm
+    //  - cả hai > 0 mà awardCount = 0 → học viên đúng là chưa đủ điều kiện
+    const [progressRows, validAttempts, gradedReading] = await Promise.all([
+      db.titleProgress.count(),
+      db.attempt.count({ where: { validForAchievements: true } }),
+      db.attempt.count({
+        where: { status: "GRADED", exercise: { skill: "READING" } },
+      }),
+    ]);
+
     report.achievements = {
       titleCount,
       awardCount,
+      progressRows,
+      validAttempts,
+      gradedReadingAttempts: gradedReading,
       activeCollection: activeCollection
         ? `${activeCollection.code} (${activeCollection._count.items} bài)`
         : "chưa có bộ đề nào được đóng băng",
