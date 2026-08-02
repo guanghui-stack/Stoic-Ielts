@@ -673,6 +673,32 @@ export async function initDatabase() {
     console.error("[wobridges] Không đồng bộ được danh mục danh hiệu:", err);
   }
 
+  // Xét danh hiệu MỘT LẦN cho bài làm đã có từ trước.
+  //
+  // Việc dựng lại band ở trên mới chỉ chuẩn bị số liệu; nếu không chạy thêm
+  // bước này, học viên đã làm đủ ba bài từ tuần trước vẫn thấy 0 danh hiệu cho
+  // tới khi họ nộp thêm một bài nữa. Công sức có thật mà hệ thống làm ngơ.
+  await applyOnce("EVALUATE_TITLES_BACKFILL_v1", async () => {
+    const { evaluateUser } = await import("@/lib/achievements/engine");
+    const students = await db.user.findMany({
+      where: { role: "STUDENT", active: true },
+      select: { id: true },
+      // Giới hạn phòng khi database lớn: phần còn lại sẽ được xét dần khi họ
+      // nộp bài tiếp theo, không ai mất gì.
+      take: 500,
+    });
+    let awarded = 0;
+    for (const student of students) {
+      try {
+        await evaluateUser(student.id);
+        awarded++;
+      } catch (err) {
+        console.error(`[wobridges] Không xét được danh hiệu cho ${student.id}:`, err);
+      }
+    }
+    console.log(`[wobridges] Đã xét danh hiệu lần đầu cho ${awarded} học viên`);
+  });
+
   // Báo lỗi ở CUỐI, sau khi mọi việc độc lập đã chạy xong
   if (ddlErrors.length > 0) {
     throw new Error(`Lỗi tạo bảng — ${ddlErrors.join(" | ")}`);
