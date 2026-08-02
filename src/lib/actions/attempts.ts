@@ -84,7 +84,7 @@ export async function saveProgressAction(attemptId: string, answersJson: string)
 async function finalizeAttempt(attemptId: string, auto: boolean) {
   const attempt = await db.attempt.findUnique({
     where: { id: attemptId },
-    include: { exercise: true, assembly: true },
+    include: { exercise: true, assembly: true, competitionAttempt: true },
   });
   if (!attempt || attempt.status !== "IN_PROGRESS") return;
 
@@ -162,6 +162,21 @@ async function finalizeAttempt(attemptId: string, auto: boolean) {
       gradedAt: status === "GRADED" ? now : null,
     },
   });
+
+  // Bài thi Nguyệt Thí: chụp lại kết quả sang bảng riêng NGAY lúc chấm.
+  // Xếp hạng sau này đọc từ ảnh chụp đó, nên sửa đề về sau không làm thay đổi
+  // kết quả một cuộc thi đã diễn ra.
+  if (status === "GRADED" && attempt.competitionAttempt) {
+    await db.competitionAttempt.update({
+      where: { attemptId },
+      data: {
+        bandSnapshot: band,
+        rawSnapshot: scoreRaw,
+        elapsedSeconds,
+        submittedAt: now,
+      },
+    });
+  }
 
   // Xét danh hiệu SAU khi bài đã được chốt điểm. Cố ý không nằm trong cùng
   // transaction: nếu việc xét danh hiệu lỗi, học viên vẫn phải nộp bài được —

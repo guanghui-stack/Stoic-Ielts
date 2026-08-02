@@ -37,6 +37,9 @@ model User {
   accessGrants   AccessGrant[]
 
   assemblies        ReadingAssembly[]
+  competitionEntries CompetitionEntry[]
+  badges            UserBadge[]
+  integrityFlags    IntegrityFlag[]
   titleAwards       UserTitle[]
   titleProgress     TitleProgress[]
   achievementEvents AchievementEvent[]
@@ -65,8 +68,9 @@ model Exercise {
   /// theo đúng trình tự đề thi thật (passage 1 dễ nhất, passage 3 khó nhất).
   difficultyTier      String       @default("UNKNOWN")
 
-  assemblyItems   ReadingAssemblyItem[]
-  collectionItems ExerciseCollectionItem[]
+  assemblyItems    ReadingAssemblyItem[]
+  collectionItems  ExerciseCollectionItem[]
+  competitionItems CompetitionExercise[]
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
   attempts        Attempt[]
@@ -130,6 +134,7 @@ model Attempt {
   exercise      Exercise        @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
   feynmanReview FeynmanReview?
   assembly      ReadingAssembly? @relation(fields: [assemblyId], references: [id], onDelete: SetNull)
+  competitionAttempt CompetitionAttempt?
 
   @@index([userId, status])
   @@index([exerciseId, status])
@@ -549,6 +554,143 @@ model PublicProfile {
   updatedAt        DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+/// Một kỳ Nguyệt Thí.
+///
+/// KHÔNG có bảng xếp hạng trực tiếp trong lúc thi — cố ý. Thấy mình đang đứng
+/// thứ mấy khiến người ta thi lấy thứ hạng thay vì làm bài tử tế, và tạo áp lực
+/// khiến người yếu bỏ cuộc giữa chừng. Kết quả chỉ công bố sau khi đã rà soát.
+model Competition {
+  id     String @id @default(cuid())
+  code   String @unique
+  name   String
+  /// DRAFT | REGISTRATION | RUNNING | REVIEW | FINALIZED | CANCELLED
+  status String @default("DRAFT")
+  timezone String @default("Asia/Ho_Chi_Minh")
+
+  registrationOpenAt  DateTime
+  registrationCloseAt DateTime
+  startAt             DateTime
+  endAt               DateTime
+  termsVersion        String   @default("v1")
+  finalizedAt         DateTime?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  exercises CompetitionExercise[]
+  entries   CompetitionEntry[]
+  badges    UserBadge[]
+}
+
+/// Ba đề của một kỳ thi, mở dần theo ngày 1 · 3 · 5.
+model CompetitionExercise {
+  id            String   @id @default(cuid())
+  competitionId String
+  exerciseId    String
+  orderIndex    Int
+  opensAt       DateTime
+
+  competition Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  exercise    Exercise    @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  @@unique([competitionId, exerciseId])
+  @@unique([competitionId, orderIndex])
+  @@index([exerciseId])
+}
+
+/// Một thí sinh trong một kỳ thi.
+model CompetitionEntry {
+  id            String @id @default(cuid())
+  competitionId String
+  userId        String
+  /// REAL_NAME | ALIAS | PRIVATE — học viên tự chọn cách xuất hiện trên Bảng Vàng
+  publicMode    String @default("PRIVATE")
+  publicAlias   String?
+  /// REGISTERED | COMPLETED | DISQUALIFIED
+  status        String @default("REGISTERED")
+
+  averageBand         Float?
+  lowestBand          Float?
+  totalRaw            Int?
+  totalElapsedSeconds Int?
+  completedAt         DateTime?
+  finalRank           Int?
+  prizeAmount         Int?
+  /// PENDING_REVIEW | APPROVED | PAID | VOID — tiền KHÔNG bao giờ tự chuyển
+  prizeStatus         String?
+  registeredAt        DateTime @default(now())
+  finalizedAt         DateTime?
+
+  competition Competition          @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  user        User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  attempts    CompetitionAttempt[]
+
+  @@unique([competitionId, userId])
+  @@index([competitionId, status])
+}
+
+/// Một lượt thi. Ràng buộc duy nhất (entryId, exerciseId) là thứ CHẶN THẬT
+/// việc làm đề hai lần — không dựa vào giao diện ẩn nút.
+model CompetitionAttempt {
+  id              String    @id @default(cuid())
+  entryId         String
+  exerciseId      String
+  attemptId       String    @unique
+  bandSnapshot    Float?
+  rawSnapshot     Int?
+  elapsedSeconds  Int?
+  integrityStatus String    @default("CLEAR")
+  submittedAt     DateTime?
+
+  entry   CompetitionEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  attempt Attempt          @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  @@unique([entryId, exerciseId])
+}
+
+/// Huy hiệu Top 3, hiệu lực 30 ngày. Danh hiệu thì vĩnh viễn, huy hiệu thì không —
+/// vinh quang của tháng này không nên che mờ người giỏi của tháng sau.
+model UserBadge {
+  id             String    @id @default(cuid())
+  userId         String
+  competitionId  String
+  /// MONTHLY_CROWN | MONTHLY_CHANCELLOR | MONTHLY_GENERAL
+  code           String
+  displayVariant String?
+  startsAt       DateTime
+  expiresAt      DateTime
+  awardedAt      DateTime  @default(now())
+  revokedAt      DateTime?
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  competition Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, competitionId, code])
+  @@index([userId, expiresAt])
+}
+
+/// Cờ nghi vấn liêm chính. CHỈ để người thật xem xét — hệ thống không bao giờ
+/// tự kết luận ai gian lận từ một tín hiệu đơn lẻ.
+model IntegrityFlag {
+  id            String    @id @default(cuid())
+  userId        String
+  attemptId     String?
+  competitionId String?
+  type          String
+  /// LOW | MEDIUM | HIGH | CRITICAL
+  severity      String
+  /// OPEN | RESOLVED | DISMISSED
+  status        String    @default("OPEN")
+  detailsJson   String    @db.LongText
+  createdAt     DateTime  @default(now())
+  resolvedAt    DateTime?
+  resolvedById  String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status, severity])
+  @@index([status, createdAt])
 }
 
 // Cấu hình hệ thống bền vững (ví dụ SESSION_SECRET) — sống qua các lần deploy

@@ -418,6 +418,116 @@ const DDL = [
     PRIMARY KEY (\`userId\`)
   ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
 
+  /* ===== Nguyệt Thí ===== */
+
+  `CREATE TABLE IF NOT EXISTS \`Competition\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`code\` VARCHAR(191) NOT NULL,
+    \`name\` VARCHAR(191) NOT NULL,
+    \`status\` VARCHAR(32) NOT NULL DEFAULT 'DRAFT',
+    \`timezone\` VARCHAR(64) NOT NULL DEFAULT 'Asia/Ho_Chi_Minh',
+    \`registrationOpenAt\` DATETIME(3) NOT NULL,
+    \`registrationCloseAt\` DATETIME(3) NOT NULL,
+    \`startAt\` DATETIME(3) NOT NULL,
+    \`endAt\` DATETIME(3) NOT NULL,
+    \`termsVersion\` VARCHAR(32) NOT NULL DEFAULT 'v1',
+    \`finalizedAt\` DATETIME(3) NULL,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`updatedAt\` DATETIME(3) NOT NULL,
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`Competition_code_key\` (\`code\`)
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`CompetitionExercise\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`competitionId\` VARCHAR(191) NOT NULL,
+    \`exerciseId\` VARCHAR(191) NOT NULL,
+    \`orderIndex\` INTEGER NOT NULL,
+    \`opensAt\` DATETIME(3) NOT NULL,
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`CompetitionExercise_competitionId_exerciseId_key\` (\`competitionId\`, \`exerciseId\`),
+    UNIQUE INDEX \`CompetitionExercise_competitionId_orderIndex_key\` (\`competitionId\`, \`orderIndex\`),
+    INDEX \`CompetitionExercise_exerciseId_idx\` (\`exerciseId\`),
+    CONSTRAINT \`CompetitionExercise_competitionId_fkey\` FOREIGN KEY (\`competitionId\`) REFERENCES \`Competition\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`CompetitionExercise_exerciseId_fkey\` FOREIGN KEY (\`exerciseId\`) REFERENCES \`Exercise\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`CompetitionEntry\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`competitionId\` VARCHAR(191) NOT NULL,
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`publicMode\` VARCHAR(32) NOT NULL DEFAULT 'PRIVATE',
+    \`publicAlias\` VARCHAR(191) NULL,
+    \`status\` VARCHAR(32) NOT NULL DEFAULT 'REGISTERED',
+    \`averageBand\` DOUBLE NULL,
+    \`lowestBand\` DOUBLE NULL,
+    \`totalRaw\` INTEGER NULL,
+    \`totalElapsedSeconds\` INTEGER NULL,
+    \`completedAt\` DATETIME(3) NULL,
+    \`finalRank\` INTEGER NULL,
+    \`prizeAmount\` INTEGER NULL,
+    \`prizeStatus\` VARCHAR(32) NULL,
+    \`registeredAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`finalizedAt\` DATETIME(3) NULL,
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`CompetitionEntry_competitionId_userId_key\` (\`competitionId\`, \`userId\`),
+    INDEX \`CompetitionEntry_competitionId_status_idx\` (\`competitionId\`, \`status\`),
+    CONSTRAINT \`CompetitionEntry_competitionId_fkey\` FOREIGN KEY (\`competitionId\`) REFERENCES \`Competition\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`CompetitionEntry_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`CompetitionAttempt\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`entryId\` VARCHAR(191) NOT NULL,
+    \`exerciseId\` VARCHAR(191) NOT NULL,
+    \`attemptId\` VARCHAR(191) NOT NULL,
+    \`bandSnapshot\` DOUBLE NULL,
+    \`rawSnapshot\` INTEGER NULL,
+    \`elapsedSeconds\` INTEGER NULL,
+    \`integrityStatus\` VARCHAR(32) NOT NULL DEFAULT 'CLEAR',
+    \`submittedAt\` DATETIME(3) NULL,
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`CompetitionAttempt_attemptId_key\` (\`attemptId\`),
+    UNIQUE INDEX \`CompetitionAttempt_entryId_exerciseId_key\` (\`entryId\`, \`exerciseId\`),
+    CONSTRAINT \`CompetitionAttempt_entryId_fkey\` FOREIGN KEY (\`entryId\`) REFERENCES \`CompetitionEntry\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`CompetitionAttempt_attemptId_fkey\` FOREIGN KEY (\`attemptId\`) REFERENCES \`Attempt\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`UserBadge\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`competitionId\` VARCHAR(191) NOT NULL,
+    \`code\` VARCHAR(64) NOT NULL,
+    \`displayVariant\` VARCHAR(64) NULL,
+    \`startsAt\` DATETIME(3) NOT NULL,
+    \`expiresAt\` DATETIME(3) NOT NULL,
+    \`awardedAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`revokedAt\` DATETIME(3) NULL,
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`UserBadge_userId_competitionId_code_key\` (\`userId\`, \`competitionId\`, \`code\`),
+    INDEX \`UserBadge_userId_expiresAt_idx\` (\`userId\`, \`expiresAt\`),
+    CONSTRAINT \`UserBadge_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`UserBadge_competitionId_fkey\` FOREIGN KEY (\`competitionId\`) REFERENCES \`Competition\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`IntegrityFlag\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`attemptId\` VARCHAR(191) NULL,
+    \`competitionId\` VARCHAR(191) NULL,
+    \`type\` VARCHAR(64) NOT NULL,
+    \`severity\` VARCHAR(32) NOT NULL,
+    \`status\` VARCHAR(32) NOT NULL DEFAULT 'OPEN',
+    \`detailsJson\` LONGTEXT NOT NULL,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`resolvedAt\` DATETIME(3) NULL,
+    \`resolvedById\` VARCHAR(191) NULL,
+    PRIMARY KEY (\`id\`),
+    INDEX \`IntegrityFlag_userId_status_severity_idx\` (\`userId\`, \`status\`, \`severity\`),
+    INDEX \`IntegrityFlag_status_createdAt_idx\` (\`status\`, \`createdAt\`),
+    CONSTRAINT \`IntegrityFlag_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
   `CREATE TABLE IF NOT EXISTS \`PublicProfile\` (
     \`userId\` VARCHAR(191) NOT NULL,
     \`displayName\` VARCHAR(191) NOT NULL,

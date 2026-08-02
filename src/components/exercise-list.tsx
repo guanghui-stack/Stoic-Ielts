@@ -19,7 +19,9 @@ import { SubmitButton } from "@/components/ui";
 export async function ExerciseList({ skill }: { skill: "READING" | "WRITING" }) {
   const user = await getCurrentUser();
   const exercises = await db.exercise.findMany({
-    where: { skill, published: true },
+    // Đề Nguyệt Thí bị loại khỏi khu luyện tập: luyện trước bằng chính đề thi
+    // thì cuộc thi mất hết ý nghĩa.
+    where: { skill, published: true, competitionOnly: false },
     orderBy: { createdAt: "asc" },
   });
 
