@@ -36,49 +36,56 @@ model User {
   paymentOrders  PaymentOrder[]
   accessGrants   AccessGrant[]
 
-  assemblies        ReadingAssembly[]
+  assemblies         ReadingAssembly[]
   competitionEntries CompetitionEntry[]
-  badges            UserBadge[]
-  integrityFlags    IntegrityFlag[]
-  titleAwards       UserTitle[]
-  titleProgress     TitleProgress[]
-  achievementEvents AchievementEvent[]
-  rewardGrants      RewardGrant[]
-  studyDays         StudyDay[]
-  publicProfile     PublicProfile?
+  badges             UserBadge[]
+  integrityFlags     IntegrityFlag[]
+  titleAwards        UserTitle[]
+  titleProgress      TitleProgress[]
+  achievementEvents  AchievementEvent[]
+  rewardGrants       RewardGrant[]
+  studyDays          StudyDay[]
+
+  // Liêm chính Nguyệt Thí
+  identityProfile    IdentityProfile?
+  consentRecords     ConsentRecord[]
+  identityLocks      IdentityCompetitionLock[]
+  examSessions       ExamSession[]
+  competitionAppeals CompetitionAppeal[]
+  publicProfile      PublicProfile?
 }
 
 model Exercise {
-  id              String           @id @default(cuid())
-  skill           String
+  id                  String  @id @default(cuid())
+  skill               String
   /// ACADEMIC | GENERAL — hai kho Reading tách biệt.
-  readingType     String           @default("ACADEMIC")
-  taskType        String
-  title           String
-  description     String           @db.Text
-  durationMinutes Int              @default(60)
-  content         String           @db.Text // JSON: đề bài, passage, câu hỏi, đáp án
-  published       Boolean          @default(true)
+  readingType         String  @default("ACADEMIC")
+  taskType            String
+  title               String
+  description         String  @db.Text
+  durationMinutes     Int     @default(60)
+  content             String  @db.Text // JSON: đề bài, passage, câu hỏi, đáp án
+  published           Boolean @default(true)
   /// PUBLIC = mọi học viên làm được · RESTRICTED = phải được quản trị viên mở khóa
-  accessLevel     String           @default("PUBLIC")
+  accessLevel         String  @default("PUBLIC")
   /// Bài này có được tính vào điều kiện danh hiệu không. Mặc định TẮT: đề nháp
   /// hoặc đề thử nghiệm không được phép làm sai lệch hành trình của học viên.
-  achievementEligible Boolean      @default(false)
+  achievementEligible Boolean @default(false)
   /// Đề chỉ dùng cho Nguyệt Thí — không hiện ở khu luyện tập công khai.
-  competitionOnly     Boolean      @default(false)
+  competitionOnly     Boolean @default(false)
   /// EASY | MEDIUM | HARD | UNKNOWN — để ghép đề tự động cân bằng độ khó
   /// theo đúng trình tự đề thi thật (passage 1 dễ nhất, passage 3 khó nhất).
-  difficultyTier      String       @default("UNKNOWN")
+  difficultyTier      String  @default("UNKNOWN")
 
   assemblyItems    ReadingAssemblyItem[]
   collectionItems  ExerciseCollectionItem[]
   competitionItems CompetitionExercise[]
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  attempts        Attempt[]
-  access          ExerciseAccess[]
-  paymentOrders   PaymentOrder[]
-  accessGrants    AccessGrant[]
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
+  attempts         Attempt[]
+  access           ExerciseAccess[]
+  paymentOrders    PaymentOrder[]
+  accessGrants     AccessGrant[]
 }
 
 /// Quyền truy cập bài tập RESTRICTED được cấp cho từng học viên.
@@ -97,28 +104,28 @@ model ExerciseAccess {
 }
 
 model Attempt {
-  id            String    @id @default(cuid())
-  userId        String
-  exerciseId    String
-  status        String    @default("IN_PROGRESS")
-  startedAt     DateTime  @default(now())
-  deadlineAt    DateTime
-  submittedAt   DateTime?
-  autoSubmitted Boolean   @default(false)
-  answers       String    @db.Text // JSON: đáp án Reading hoặc bài luận Writing
-  scoreRaw      Int? // Reading: số câu đúng (chấm tự động)
-  scoreTotal    Int? // Reading: tổng số câu
-  band          Float? // Band điểm do giáo viên chấm (Writing) hoặc quy đổi
-  feedback      String?   @db.Text // Nhận xét của giáo viên
-  gradedAt      DateTime?
-  gradedById    String?
+  id                String    @id @default(cuid())
+  userId            String
+  exerciseId        String
+  status            String    @default("IN_PROGRESS")
+  startedAt         DateTime  @default(now())
+  deadlineAt        DateTime
+  submittedAt       DateTime?
+  autoSubmitted     Boolean   @default(false)
+  answers           String    @db.Text // JSON: đáp án Reading hoặc bài luận Writing
+  scoreRaw          Int? // Reading: số câu đúng (chấm tự động)
+  scoreTotal        Int? // Reading: tổng số câu
+  band              Float? // Band điểm do giáo viên chấm (Writing) hoặc quy đổi
+  feedback          String?   @db.Text // Nhận xét của giáo viên
+  gradedAt          DateTime?
+  gradedById        String?
   /// Thời điểm học viên bấm "Xem đáp án cơ bản" — đáp án Reading luôn miễn phí,
   /// Feynman chỉ khóa lớp chữa sâu (lời giải mẫu, bẫy, quy trình tự giảng lại).
   answersRevealedAt DateTime?
 
   /// Lần thứ mấy học viên làm đúng bài này. Danh hiệu xét "lần hợp lệ ĐẦU TIÊN"
   /// nên con số này phải cố định, không được đổi khi làm lại.
-  attemptNumber        Int      @default(1)
+  attemptNumber        Int     @default(1)
   /// Số câu thực sự có trả lời — dùng để loại lượt nộp bừa.
   answeredCount        Int?
   /// Thời gian làm bài thật (giây), đo từ lúc bắt đầu tới lúc nộp.
@@ -126,16 +133,20 @@ model Attempt {
   /// Thang quy đổi band đã dùng, để đổi thang không làm sai lệch lịch sử.
   bandScaleVersion     String?
   /// Kết quả của hàng rào chống cày, chốt ngay lúc chấm.
-  validForAchievements Boolean  @default(false)
+  validForAchievements Boolean @default(false)
   /// CLEAR | REVIEW | FLAGGED — chỉ CLEAR mới được tính danh hiệu.
-  integrityStatus      String   @default("CLEAR")
+  integrityStatus      String  @default("CLEAR")
+  /// NORMAL | TIMEOUT | INTEGRITY_AUTO | PROCTOR | DISCONNECT_EXPIRED
+  /// Vì sao cần: "tự động nộp" gộp chung cả hết giờ lẫn bị buộc nộp vì liêm
+  /// chính. Hai việc này khác hẳn nhau khi xử lý khiếu nại.
+  submissionReason     String  @default("NORMAL") @db.VarChar(24)
   /// Nếu lượt này thuộc một đề ghép ba passage thì trỏ về đó.
   assemblyId           String?
 
-  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  exercise      Exercise        @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
-  feynmanReview FeynmanReview?
-  assembly      ReadingAssembly? @relation(fields: [assemblyId], references: [id], onDelete: SetNull)
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercise           Exercise            @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  feynmanReview      FeynmanReview?
+  assembly           ReadingAssembly?    @relation(fields: [assemblyId], references: [id], onDelete: SetNull)
   competitionAttempt CompetitionAttempt?
 
   @@index([userId, status])
@@ -150,10 +161,10 @@ model Attempt {
 /// Nhồi chúng vào bảng Exercise sẽ làm ngập trang quản trị bài tập và khiến
 /// thống kê "số bài đã đăng" sai bét.
 model ReadingAssembly {
-  id     String @id @default(cuid())
-  userId String
+  id                    String   @id @default(cuid())
+  userId                String
   /// AUTO = hệ thống chọn (tính danh hiệu) · MANUAL = học viên tự chọn (luyện tập)
-  mode   String
+  mode                  String
   /// Chốt cứng ngay lúc tạo: đổi quy tắc về sau không được làm thay đổi
   /// kết quả của những đề đã ghép trước đó.
   countsForAchievements Boolean
@@ -190,15 +201,15 @@ model ReadingAssemblyItem {
 /// một bài là học viên vừa đạt danh hiệu bỗng dưng mất nó — điều không bao giờ
 /// được phép xảy ra.
 model ExerciseCollection {
-  id       String    @id @default(cuid())
-  code     String    @unique
-  name     String
-  kind     String    @default("FREE_READING")
-  status   String    @default("DRAFT") // DRAFT | ACTIVE | ARCHIVED
-  startsAt DateTime?
-  endsAt   DateTime?
-  frozenAt DateTime?
-  createdAt DateTime @default(now())
+  id        String    @id @default(cuid())
+  code      String    @unique
+  name      String
+  kind      String    @default("FREE_READING")
+  status    String    @default("DRAFT") // DRAFT | ACTIVE | ARCHIVED
+  startsAt  DateTime?
+  endsAt    DateTime?
+  frozenAt  DateTime?
+  createdAt DateTime  @default(now())
 
   items ExerciseCollectionItem[]
 }
@@ -388,30 +399,30 @@ model AccessGrant {
 /// Định nghĩa một danh hiệu. Nội dung nằm ở catalog trong mã nguồn rồi được
 /// gieo xuống bảng này, để giao diện không phải hard-code tên danh hiệu.
 model TitleDefinition {
-  id          String @id @default(cuid())
-  code        String @unique
-  slug        String @unique
-  name        String
-  description String @db.Text
+  id             String  @id @default(cuid())
+  code           String  @unique
+  slug           String  @unique
+  name           String
+  description    String  @db.Text
   /// EXACT = trích nguyên văn · ADAPTED = phỏng theo · ORIGINAL = Wobridges tự viết.
   /// Bắt buộc phân biệt để không gán nhầm câu tự sáng tác cho danh nhân lịch sử.
   quoteKind      String
   quoteSource    String? @db.Text
   quoteSourceUrl String? @db.Text
   /// PRACTICE | FEYNMAN | DISCIPLINE | COMPOSITE | TRANSFORMATION | COMPETITION
-  category   String
+  category       String
   /// COMMON | UNCOMMON | RARE | EPIC | LEGENDARY | PRIVATE
-  rarity     String
+  rarity         String
   /// PUBLIC | PRIVATE_ONLY — danh hiệu cảnh tỉnh KHÔNG bao giờ ra ngoài
-  visibility String @default("PUBLIC")
+  visibility     String  @default("PUBLIC")
 
   ruleKey        String
-  ruleConfigJson String  @db.LongText
+  ruleConfigJson String   @db.LongText
   /// ONCE | PER_COLLECTION | PER_COMPETITION
-  repeatPolicy   String  @default("ONCE")
+  repeatPolicy   String   @default("ONCE")
   rewardCode     String?
-  active         Boolean @default(true)
-  sortOrder      Int     @default(0)
+  active         Boolean  @default(true)
+  sortOrder      Int      @default(0)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -424,20 +435,20 @@ model TitleDefinition {
 /// Một danh hiệu đã trao cho học viên. Không bao giờ xóa — đây là bằng chứng
 /// về thời điểm họ đạt được và là căn cứ cho phần thưởng.
 model UserTitle {
-  id       String @id @default(cuid())
-  userId   String
-  titleId  String
+  id                   String    @id @default(cuid())
+  userId               String
+  titleId              String
   /// GLOBAL, mã bộ đề, hoặc mã cuộc thi — để danh hiệu nhận lại được theo mùa
-  cycleKey String @default("GLOBAL")
+  cycleKey             String    @default("GLOBAL")
   /// EARNED | REVOKED | SUPERSEDED
-  status   String @default("EARNED")
-  publicVisible Boolean @default(false)
-  earnedAt      DateTime @default(now())
-  progressSnapshotJson String @db.LongText
-  sourceEventId String?
-  supersededById String?
-  revokedAt     DateTime?
-  revokeReason  String?  @db.Text
+  status               String    @default("EARNED")
+  publicVisible        Boolean   @default(false)
+  earnedAt             DateTime  @default(now())
+  progressSnapshotJson String    @db.LongText
+  sourceEventId        String?
+  supersededById       String?
+  revokedAt            DateTime?
+  revokeReason         String?   @db.Text
 
   user   User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   title  TitleDefinition @relation(fields: [titleId], references: [id], onDelete: Cascade)
@@ -471,15 +482,15 @@ model TitleProgress {
 /// Hàng đợi sự kiện. Danh hiệu được xét theo SỰ KIỆN chứ không tính lại toàn
 /// bộ lịch sử mỗi lần học viên mở trang — cách đó vừa chậm vừa tốn.
 model AchievementEvent {
-  id          String @id @default(cuid())
-  eventKey    String @unique
+  id          String    @id @default(cuid())
+  eventKey    String    @unique
   userId      String
   /// READING_GRADED | FEYNMAN_COMPLETED | STUDY_TIME_UPDATED | COLLECTION_ACTIVATED
   type        String
-  payloadJson String @db.LongText
+  payloadJson String    @db.LongText
   /// PENDING | PROCESSING | PROCESSED | FAILED
-  status      String @default("PENDING")
-  attempts    Int    @default(0)
+  status      String    @default("PENDING")
+  attempts    Int       @default(0)
   occurredAt  DateTime  @default(now())
   processedAt DateTime?
   lastError   String?   @db.Text
@@ -493,23 +504,23 @@ model AchievementEvent {
 /// Quyền được mở một bài trả phí kèm Feynman, sinh ra từ danh hiệu.
 /// Học viên chọn bài rồi gửi yêu cầu; quản trị viên duyệt mới cấp quyền thật.
 model RewardGrant {
-  id           String @id @default(cuid())
-  userId       String
-  titleAwardId String @unique
-  rewardCode   String
+  id                 String    @id @default(cuid())
+  userId             String
+  titleAwardId       String    @unique
+  rewardCode         String
   /// EARNED | REQUESTED | APPROVED | FULFILLED | REJECTED | EXPIRED
-  status       String @default("EARNED")
+  status             String    @default("EARNED")
   selectedExerciseId String?
-  requestedAt  DateTime?
-  reviewedAt   DateTime?
-  reviewedById String?
-  fulfilledAt  DateTime?
-  expiresAt    DateTime
-  readingGrantKey String? @unique
-  feynmanGrantKey String? @unique
-  note         String?  @db.Text
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  requestedAt        DateTime?
+  reviewedAt         DateTime?
+  reviewedById       String?
+  fulfilledAt        DateTime?
+  expiresAt          DateTime
+  readingGrantKey    String?   @unique
+  feynmanGrantKey    String?   @unique
+  note               String?   @db.Text
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
   user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   titleAward UserTitle @relation(fields: [titleAwardId], references: [id], onDelete: Cascade)
@@ -547,13 +558,13 @@ model StudyPresence {
 
 /// Lựa chọn công khai của học viên. Mặc định KHÔNG công khai gì cả.
 model PublicProfile {
-  userId           String   @id
-  displayName      String
-  allowHall        Boolean  @default(false)
-  allowLeaderboard Boolean  @default(false)
-  allowWinnerStory Boolean  @default(false)
+  userId               String   @id
+  displayName          String
+  allowHall            Boolean  @default(false)
+  allowLeaderboard     Boolean  @default(false)
+  allowWinnerStory     Boolean  @default(false)
   equippedTitleAwardId String?
-  updatedAt        DateTime @updatedAt
+  updatedAt            DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -564,34 +575,66 @@ model PublicProfile {
 /// thứ mấy khiến người ta thi lấy thứ hạng thay vì làm bài tử tế, và tạo áp lực
 /// khiến người yếu bỏ cuộc giữa chừng. Kết quả chỉ công bố sau khi đã rà soát.
 model Competition {
-  id     String @id @default(cuid())
-  code   String @unique
-  name   String
+  id       String @id @default(cuid())
+  code     String @unique
+  name     String
   /// DRAFT | REGISTRATION | RUNNING | REVIEW | FINALIZED | CANCELLED
-  status String @default("DRAFT")
+  status   String @default("DRAFT")
   timezone String @default("Asia/Ho_Chi_Minh")
 
   registrationOpenAt  DateTime
   registrationCloseAt DateTime
   startAt             DateTime
   endAt               DateTime
-  termsVersion        String   @default("v1")
+  termsVersion        String    @default("v1")
   finalizedAt         DateTime?
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
-  exercises CompetitionExercise[]
-  entries   CompetitionEntry[]
-  badges    UserBadge[]
+  /// Phiên bản chính sách liêm chính đang áp dụng. Ghi lại tại đây vì ngưỡng
+  /// strike có thể đổi giữa các kỳ; khi xử lý khiếu nại phải xét theo đúng luật
+  /// đã công bố lúc thi, không phải luật hiện hành.
+  integrityPolicyVersion String  @default("2026-08-v1") @db.VarChar(32)
+  /// Phiên bản văn bản đồng ý. Cùng lý do: chứng minh được người ta đồng ý với
+  /// đúng bản nào.
+  consentPolicyVersion   String  @default("consent-2026-08-v1") @db.VarChar(48)
+  /// Mã cấu hình .seb dùng cho kỳ này — đổi một setting là đổi key, nên phải ghi.
+  sebConfigVersion       String? @db.VarChar(64)
+  /// SANDBOX | PRODUCTION — môi trường Exam Vault phát gói đề.
+  examVaultEnvironment   String  @default("SANDBOX") @db.VarChar(16)
+
+  exercises     CompetitionExercise[]
+  entries       CompetitionEntry[]
+  badges        UserBadge[]
+  identityLocks IdentityCompetitionLock[]
 }
 
-/// Ba đề của một kỳ thi, mở dần theo ngày 1 · 3 · 5.
+/// Ba đề của một kỳ thi.
+///
+/// ĐỔI SO VỚI BẢN CŨ: không còn cửa sổ linh hoạt nhiều ngày. Mọi thí sinh làm
+/// cùng một đề trong CÙNG MỘT KHUNG GIỜ, vì cửa sổ linh hoạt cho phép người thi
+/// sớm chụp đề gửi người thi sau — và đó là kiểu rò rỉ khó phát hiện nhất.
 model CompetitionExercise {
   id            String   @id @default(cuid())
   competitionId String
   exerciseId    String
   orderIndex    Int
+  /// DI SẢN — giữ lại để migration không mất dữ liệu kỳ cũ. Code mới KHÔNG đọc.
   opensAt       DateTime
+
+  /// Mở check-in (xác minh danh tính, kiểm tra webcam) — thường trước giờ thi 30 phút.
+  checkInOpenAt DateTime?
+  /// Giờ phát đề. Trước mốc này Exam Vault không trả nội dung, kể cả khi đã check-in.
+  startsAt      DateTime?
+  /// Giờ đóng. Đồng hồ do máy chủ giữ, không phụ thuộc client.
+  endsAt        DateTime?
+
+  /// Phiên bản nội dung trong Exam Vault. Repo công khai CHỈ giữ mã này và hash,
+  /// tuyệt đối không chứa đề hay đáp án.
+  vaultContentVersionId String? @db.VarChar(64)
+  vaultContentHash      String? @db.VarChar(64)
+  /// Mã cấu hình .seb áp dụng cho đề này.
+  sebConfigCode         String? @db.VarChar(64)
 
   competition Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
   exercise    Exercise    @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
@@ -603,14 +646,14 @@ model CompetitionExercise {
 
 /// Một thí sinh trong một kỳ thi.
 model CompetitionEntry {
-  id            String @id @default(cuid())
+  id            String  @id @default(cuid())
   competitionId String
   userId        String
   /// REAL_NAME | ALIAS | PRIVATE — học viên tự chọn cách xuất hiện trên Bảng Vàng
-  publicMode    String @default("PRIVATE")
+  publicMode    String  @default("PRIVATE")
   publicAlias   String?
   /// REGISTERED | COMPLETED | DISQUALIFIED
-  status        String @default("REGISTERED")
+  status        String  @default("REGISTERED")
 
   averageBand         Float?
   lowestBand          Float?
@@ -621,8 +664,22 @@ model CompetitionEntry {
   prizeAmount         Int?
   /// PENDING_REVIEW | APPROVED | PAID | VOID — tiền KHÔNG bao giờ tự chuyển
   prizeStatus         String?
-  registeredAt        DateTime @default(now())
+  registeredAt        DateTime  @default(now())
   finalizedAt         DateTime?
+
+  /// Hồ sơ định danh đã dùng để đăng ký kỳ này.
+  identityProfileId       String?   @db.VarChar(191)
+  /// NOT_READY | PREFLIGHT_PASSED | READY — chỉ READY mới được vào phòng thi.
+  /// Tách khỏi status vì "đã đăng ký" và "đã sẵn sàng thi" là hai việc khác nhau:
+  /// đăng ký xong mà chưa qua kiểm tra thiết bị thì tới giờ thi mới phát hiện.
+  readinessStatus         String    @default("NOT_READY") @db.VarChar(24)
+  /// CLEAR | REVIEW | DISQUALIFICATION_PROPOSED | DISQUALIFIED | APPEALED | UPHELD | OVERTURNED
+  reviewStatus            String    @default("CLEAR") @db.VarChar(32)
+  /// Admin đề xuất loại. Người này KHÔNG được tự phê duyệt bước sau.
+  proposedByAdminId       String?   @db.VarChar(191)
+  confirmedByAdminId      String?   @db.VarChar(191)
+  /// Đã rà soát thủ công chưa — top 10 bắt buộc có mốc này trước khi chốt giải.
+  manualReviewCompletedAt DateTime?
 
   competition Competition          @relation(fields: [competitionId], references: [id], onDelete: Cascade)
   user        User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -645,8 +702,9 @@ model CompetitionAttempt {
   integrityStatus String    @default("CLEAR")
   submittedAt     DateTime?
 
-  entry   CompetitionEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
-  attempt Attempt          @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  entry       CompetitionEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  attempt     Attempt          @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  examSession ExamSession?
 
   @@unique([entryId, exerciseId])
 }
@@ -689,10 +747,338 @@ model IntegrityFlag {
   resolvedAt    DateTime?
   resolvedById  String?
 
+  /// Nối cờ tổng hợp với phiên thi và sự kiện gốc, để bảng rà soát mở thẳng
+  /// được timeline và bằng chứng thay vì bắt giám thị tự dò.
+  sessionId     String? @db.VarChar(191)
+  sourceEventId String? @db.VarChar(191)
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, status, severity])
   @@index([status, createdAt])
+}
+
+/**
+ * ====================================================================
+ */
+/**
+ * LIÊM CHÍNH NGUYỆT THÍ
+ */
+/**
+ */
+/**
+ * Nguyên tắc chi phối toàn bộ nhóm bảng dưới đây:
+ */
+/**
+ */
+/**
+ * 1. MySQL chỉ giữ SIÊU DỮ LIỆU, băm và khóa đối tượng. Không một byte
+ */
+/**
+ * ảnh hay video nào nằm trong database.
+ */
+/**
+ * 2. Không lưu số giấy tờ dạng rõ. Chỉ HMAC không hoàn nguyên được.
+ */
+/**
+ * 3. Mọi cột kiểu enum dùng VARCHAR ngắn — vừa gọn, vừa giữ index dưới
+ */
+/**
+ * giới hạn 3072 byte của MySQL. Bài học từ sự cố index quá dài từng
+ */
+/**
+ * làm sập production.
+ */
+/**
+ * 4. Hệ thống chỉ NGHI NGỜ, con người mới KẾT LUẬN.
+ */
+/**
+ * ====================================================================
+ */
+
+/// Hồ sơ định danh của một học viên. Chỉ tạo khi đăng ký Nguyệt Thí.
+model IdentityProfile {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  /// HMAC-SHA256 của số giấy tờ. KHÔNG BAO GIỜ lưu số CCCD dạng rõ: không gian
+  /// số chỉ 12 chữ số nên băm thường có thể dò cạn trong vài giờ nếu lộ database.
+  identityKey      String   @unique @db.VarChar(64)
+  fullNameSnapshot String
+  birthDate        DateTime
+  /// Bốn số cuối, để nhân viên đối chiếu bằng mắt khi xác minh thủ công.
+  documentLast4    String   @db.VarChar(8)
+  /// PENDING | VERIFIED | REJECTED | EXPIRED
+  status           String   @default("PENDING") @db.VarChar(16)
+
+  /// Khóa đối tượng trong kho lưu trữ riêng — KHÔNG phải nội dung file.
+  documentFrontObjectKey String? @db.VarChar(255)
+  documentBackObjectKey  String? @db.VarChar(255)
+  selfieObjectKey        String? @db.VarChar(255)
+  /// Đặc trưng khuôn mặt đã mã hóa. Mặc định xóa sau 30 ngày; muốn dùng lại cho
+  /// kỳ sau phải có sự đồng ý riêng.
+  faceTemplateCiphertext String? @db.LongText
+
+  verifiedAt   DateTime?
+  reviewedById String?   @db.VarChar(191)
+  /// Mốc xóa dữ liệu thô theo lịch lưu trữ.
+  expiresAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status, expiresAt])
+}
+
+/// Một lần đồng ý cho MỘT mục đích.
+///
+/// Tách lớp là bắt buộc: gộp mọi mục đích vào một ô tích thì sự đồng ý không còn
+/// là tự nguyện cho từng mục đích. `evidenceHash` chứng minh được người ta đã
+/// đồng ý với ĐÚNG BẢN VĂN NÀO — thiếu nó thì tranh chấp về sau không phân xử được.
+model ConsentRecord {
+  id            String @id @default(cuid())
+  subjectUserId String
+  /// TERMS | PROCTORING | BIOMETRIC | PUBLICITY
+  purposeCode   String @db.VarChar(24)
+  policyVersion String @db.VarChar(48)
+  /// GRANTED | WITHDRAWN
+  status        String @default("GRANTED") @db.VarChar(16)
+
+  grantedAt     DateTime  @default(now())
+  withdrawnAt   DateTime?
+  /// Băm, không lưu IP và user-agent dạng rõ.
+  ipHash        String?   @db.VarChar(64)
+  userAgentHash String?   @db.VarChar(64)
+  /// Băm nội dung văn bản người dùng đã đọc tại thời điểm đồng ý.
+  evidenceHash  String    @db.VarChar(64)
+  evidenceJson  String    @db.LongText
+
+  subject User @relation(fields: [subjectUserId], references: [id], onDelete: Cascade)
+
+  @@index([subjectUserId, purposeCode, status])
+}
+
+/// Một danh tính chỉ được dự MỘT lần trong mỗi kỳ thi.
+///
+/// Đây là thứ chặn thật việc tạo nhiều tài khoản, chứ không phải giao diện ẩn
+/// nút. Hai ràng buộc duy nhất: một danh tính một kỳ, và một tài khoản một kỳ.
+model IdentityCompetitionLock {
+  id            String   @id @default(cuid())
+  competitionId String
+  userId        String
+  identityKey   String   @db.VarChar(64)
+  createdAt     DateTime @default(now())
+
+  competition Competition @relation(fields: [competitionId], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([competitionId, identityKey])
+  @@unique([competitionId, userId])
+}
+
+/// Một phiên thi trong Safe Exam Browser.
+///
+/// Đây là trung tâm của toàn bộ hệ thống liêm chính: mọi sự kiện, bằng chứng,
+/// hành động của giám thị và khiếu nại đều treo vào đây. Máy chủ giữ toàn bộ bộ
+/// đếm — client chỉ báo cáo, không tự quyết định gì.
+model ExamSession {
+  id                   String @id @default(cuid())
+  competitionAttemptId String @unique
+  userId               String
+
+  /// Băm của token phiên. Token thật chỉ gửi cho client một lần.
+  sessionTokenHash  String @unique @db.VarChar(64)
+  /// Vân tay thiết bị mềm — đủ chặn đăng nhập tùy tiện ở máy thứ hai, KHÔNG
+  /// phải chứng thực phần cứng. Không được mô tả quá lời trong tài liệu.
+  deviceBindingHash String @db.VarChar(64)
+
+  sebVersion        String @db.VarChar(32)
+  sebConfigKey      String @db.VarChar(64)
+  sebBrowserExamKey String @db.VarChar(64)
+  policyVersion     String @db.VarChar(32)
+
+  /// CREATED | CHECKIN | READY | ACTIVE | DISCONNECTED | AUTO_SUBMITTED | COMPLETED | CLOSED
+  status          String @default("CREATED") @db.VarChar(24)
+  /// CLEAR | REVIEW
+  integrityStatus String @default("CLEAR") @db.VarChar(16)
+
+  strikeCount           Int @default(0)
+  /// Chỉ dùng để XẾP THỨ TỰ hàng chờ rà soát. Không bao giờ tự loại ai.
+  riskScore             Int @default(0)
+  protectedLossMs       Int @default(0)
+  continuousMediaLossMs Int @default(0)
+  lastClientSequence    Int @default(0)
+
+  /// UNKNOWN | LIVE | LOST
+  webcamState  String @default("UNKNOWN") @db.VarChar(16)
+  screenState  String @default("UNKNOWN") @db.VarChar(16)
+  /// ONLINE | OFFLINE — quyết định có tính thời gian mất media hay không.
+  networkState String @default("ONLINE") @db.VarChar(16)
+
+  lastHeartbeatAt     DateTime?
+  disconnectStartedAt DateTime?
+  /// Hạn nối lại, không bao giờ vượt quá giờ kết thúc đề.
+  resumeUntil         DateTime?
+  forceSubmitAt       DateTime?
+  /// STRIKES | PROTECTED_LOSS | MEDIA_LOSS | PROCTOR | DISCONNECT_EXPIRED | TIMEOUT
+  forceSubmitReason   String?   @db.VarChar(32)
+  startedAt           DateTime?
+  endedAt             DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  competitionAttempt CompetitionAttempt @relation(fields: [competitionAttemptId], references: [id], onDelete: Cascade)
+  user               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  events   ExamIntegrityEvent[]
+  evidence ProctorEvidence[]
+  actions  ProctorActionLog[]
+  variant  CandidateExamVariant?
+  appeal   CompetitionAppeal?
+
+  @@index([status, lastHeartbeatAt])
+  @@index([userId, status])
+}
+
+/// Một sự kiện thô trong phiên thi.
+///
+/// Sự kiện thô KHÔNG đồng nghĩa với vi phạm. Alt+Tab sinh ra ba sự kiện trong
+/// vài mili-giây; chỉ sự kiện đầu tiên trong cửa sổ gom mới thành incident và
+/// mới cộng strike. `countsAsStrike` ghi lại kết luận đó để bảng rà soát giải
+/// thích được vì sao một dòng có trong timeline mà không bị tính.
+model ExamIntegrityEvent {
+  id        String @id @default(cuid())
+  sessionId String
+  /// Chặn đếm trùng khi client gửi lại cùng một sự kiện sau khi mất mạng.
+  dedupeKey String @unique @db.VarChar(191)
+
+  clientSequence Int?
+  type           String  @db.VarChar(32)
+  /// CLIENT | SEB | SERVER | PROCTOR | ANALYTICS — sự kiện do máy chủ ghi nhận
+  /// đáng tin hơn sự kiện client tự báo.
+  source         String  @db.VarChar(16)
+  /// LOW | MEDIUM | HIGH
+  trustLevel     String  @db.VarChar(16)
+  /// TECHNICAL | LOW | MEDIUM | HIGH | CRITICAL
+  severity       String  @db.VarChar(16)
+  countsAsStrike Boolean @default(false)
+  /// Lý do KHÔNG tính: COALESCED | TOO_SHORT | NETWORK_SUSPENDED | NOT_A_STRIKE
+  skipReason     String? @db.VarChar(24)
+  durationMs     Int?
+  detailsJson    String  @db.LongText
+
+  occurredAt   DateTime
+  receivedAt   DateTime  @default(now())
+  /// OPEN | REVIEWED | DISMISSED
+  status       String    @default("OPEN") @db.VarChar(16)
+  reviewedAt   DateTime?
+  reviewedById String?   @db.VarChar(191)
+
+  session  ExamSession       @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  evidence ProctorEvidence[]
+
+  @@index([sessionId, occurredAt])
+  @@index([status, severity, receivedAt])
+}
+
+/// Con trỏ tới một tệp bằng chứng trong kho lưu trữ riêng.
+///
+/// Database KHÔNG chứa nội dung tệp. Đường dẫn xem là link ký số hết hạn sau 60
+/// giây, và mỗi lần xem đều bị ghi vào ProctorActionLog.
+model ProctorEvidence {
+  id        String  @id @default(cuid())
+  sessionId String
+  eventId   String?
+
+  /// SCREENSHOT | WEBCAM_FRAME | SCREEN_ARCHIVE | AV_CLIP
+  type      String @db.VarChar(24)
+  objectKey String @db.VarChar(255)
+  sha256    String @db.VarChar(64)
+  mimeType  String @db.VarChar(64)
+
+  capturedAt DateTime
+  /// Mốc xóa tự động. Ảnh màn hình 7 ngày, ảnh webcam 30 ngày.
+  expiresAt  DateTime
+  /// Đang có khiếu nại thì GIỮ LẠI, tiến trình xóa phải bỏ qua.
+  legalHold  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  session ExamSession         @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  event   ExamIntegrityEvent? @relation(fields: [eventId], references: [id], onDelete: SetNull)
+
+  @@index([expiresAt, legalHold])
+  @@index([sessionId, capturedAt])
+}
+
+/// Biến thể đề riêng của một thí sinh.
+///
+/// Lưu lại bản đồ quy chuẩn là bắt buộc: không có nó thì không chấm được bài đã
+/// đảo, và cũng không so sánh được đáp án giữa các thí sinh.
+model CandidateExamVariant {
+  id        String @id @default(cuid())
+  sessionId String @unique
+
+  contentVersionId   String @db.VarChar(64)
+  contentVersionHash String @db.VarChar(64)
+  seedHash           String @db.VarChar(64)
+
+  passageOrderJson     String @db.LongText
+  questionOrderJson    String @db.LongText
+  optionOrderJson      String @db.LongText
+  canonicalMappingJson String @db.LongText
+
+  createdAt DateTime @default(now())
+
+  session ExamSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+}
+
+/// Nhật ký mọi thao tác của giám thị, KỂ CẢ việc chỉ mở xem bằng chứng.
+///
+/// Ghi cả hành vi xem là có chủ đích: đây là biện pháp phòng chính người quản
+/// trị tò mò xem dữ liệu ngoài nhiệm vụ, thứ mà không cơ chế kỹ thuật nào khác
+/// ngăn được.
+model ProctorActionLog {
+  id           String   @id @default(cuid())
+  sessionId    String
+  adminUserId  String   @db.VarChar(191)
+  /// VIEW_EVIDENCE | OPEN_MEDIA | ENABLE_AUDIO | WARN | REQUEST_SCAN |
+  /// FORCE_SUBMIT | DISMISS | CONFIRM | PROPOSE_DQ | CONFIRM_DQ
+  action       String   @db.VarChar(24)
+  reason       String?  @db.Text
+  metadataJson String   @db.LongText
+  createdAt    DateTime @default(now())
+
+  session ExamSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId, createdAt])
+  @@index([adminUserId, createdAt])
+}
+
+/// Khiếu nại của thí sinh trong 24 giờ kể từ khi nhận thông báo.
+///
+/// Còn khiếu nại đang mở thì kỳ thi KHÔNG được chốt giải — nếu không, quyền
+/// khiếu nại chỉ còn là hình thức.
+model CompetitionAppeal {
+  id        String @id @default(cuid())
+  sessionId String @unique
+  userId    String
+
+  /// OPEN | UPHELD | OVERTURNED
+  status      String   @default("OPEN") @db.VarChar(16)
+  explanation String   @db.LongText
+  submittedAt DateTime @default(now())
+  deadlineAt  DateTime
+
+  decision       String?   @db.VarChar(16)
+  decisionReason String?   @db.Text
+  proposedById   String?   @db.VarChar(191)
+  confirmedById  String?   @db.VarChar(191)
+  resolvedAt     DateTime?
+
+  session ExamSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user    User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status, submittedAt])
 }
 
 // Cấu hình hệ thống bền vững (ví dụ SESSION_SECRET) — sống qua các lần deploy

@@ -541,6 +541,202 @@ const DDL = [
     PRIMARY KEY (\`userId\`),
     CONSTRAINT \`PublicProfile_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
   ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  /* ================================================================== */
+  /*  LIÊM CHÍNH NGUYỆT THÍ                                              */
+  /*                                                                     */
+  /*  GIỚI HẠN PHẢI NHỚ: index tổng hợp của MySQL tối đa 3072 byte, mỗi   */
+  /*  ký tự utf8mb4 chiếm 4 byte — VARCHAR(191) là 764 byte. Từng có lần  */
+  /*  một index 5 cột vượt giới hạn khiến bảng không tạo được và sập cả   */
+  /*  production. Vì vậy mọi cột kiểu enum ở đây dùng VARCHAR ngắn, và    */
+  /*  index dài nhất trong nhóm này là 1528 byte.                         */
+  /* ================================================================== */
+
+  `CREATE TABLE IF NOT EXISTS \`IdentityProfile\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`identityKey\` VARCHAR(64) NOT NULL,
+    \`fullNameSnapshot\` VARCHAR(191) NOT NULL,
+    \`birthDate\` DATETIME(3) NOT NULL,
+    \`documentLast4\` VARCHAR(8) NOT NULL,
+    \`status\` VARCHAR(16) NOT NULL DEFAULT 'PENDING',
+    \`documentFrontObjectKey\` VARCHAR(255) NULL,
+    \`documentBackObjectKey\` VARCHAR(255) NULL,
+    \`selfieObjectKey\` VARCHAR(255) NULL,
+    \`faceTemplateCiphertext\` LONGTEXT NULL,
+    \`verifiedAt\` DATETIME(3) NULL,
+    \`reviewedById\` VARCHAR(191) NULL,
+    \`expiresAt\` DATETIME(3) NULL,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`updatedAt\` DATETIME(3) NOT NULL,
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`IdentityProfile_userId_key\` (\`userId\`),
+    UNIQUE INDEX \`IdentityProfile_identityKey_key\` (\`identityKey\`),
+    INDEX \`IdentityProfile_status_expiresAt_idx\` (\`status\`, \`expiresAt\`),
+    CONSTRAINT \`IdentityProfile_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`ConsentRecord\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`subjectUserId\` VARCHAR(191) NOT NULL,
+    \`purposeCode\` VARCHAR(24) NOT NULL,
+    \`policyVersion\` VARCHAR(48) NOT NULL,
+    \`status\` VARCHAR(16) NOT NULL DEFAULT 'GRANTED',
+    \`grantedAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`withdrawnAt\` DATETIME(3) NULL,
+    \`ipHash\` VARCHAR(64) NULL,
+    \`userAgentHash\` VARCHAR(64) NULL,
+    \`evidenceHash\` VARCHAR(64) NOT NULL,
+    \`evidenceJson\` LONGTEXT NOT NULL,
+    PRIMARY KEY (\`id\`),
+    INDEX \`ConsentRecord_subject_purpose_status_idx\` (\`subjectUserId\`, \`purposeCode\`, \`status\`),
+    CONSTRAINT \`ConsentRecord_subjectUserId_fkey\` FOREIGN KEY (\`subjectUserId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`IdentityCompetitionLock\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`competitionId\` VARCHAR(191) NOT NULL,
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`identityKey\` VARCHAR(64) NOT NULL,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`IdentityLock_competitionId_identityKey_key\` (\`competitionId\`, \`identityKey\`),
+    UNIQUE INDEX \`IdentityLock_competitionId_userId_key\` (\`competitionId\`, \`userId\`),
+    CONSTRAINT \`IdentityLock_competitionId_fkey\` FOREIGN KEY (\`competitionId\`) REFERENCES \`Competition\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`IdentityLock_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`ExamSession\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`competitionAttemptId\` VARCHAR(191) NOT NULL,
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`sessionTokenHash\` VARCHAR(64) NOT NULL,
+    \`deviceBindingHash\` VARCHAR(64) NOT NULL,
+    \`sebVersion\` VARCHAR(32) NOT NULL,
+    \`sebConfigKey\` VARCHAR(64) NOT NULL,
+    \`sebBrowserExamKey\` VARCHAR(64) NOT NULL,
+    \`policyVersion\` VARCHAR(32) NOT NULL,
+    \`status\` VARCHAR(24) NOT NULL DEFAULT 'CREATED',
+    \`integrityStatus\` VARCHAR(16) NOT NULL DEFAULT 'CLEAR',
+    \`strikeCount\` INTEGER NOT NULL DEFAULT 0,
+    \`riskScore\` INTEGER NOT NULL DEFAULT 0,
+    \`protectedLossMs\` INTEGER NOT NULL DEFAULT 0,
+    \`continuousMediaLossMs\` INTEGER NOT NULL DEFAULT 0,
+    \`lastClientSequence\` INTEGER NOT NULL DEFAULT 0,
+    \`webcamState\` VARCHAR(16) NOT NULL DEFAULT 'UNKNOWN',
+    \`screenState\` VARCHAR(16) NOT NULL DEFAULT 'UNKNOWN',
+    \`networkState\` VARCHAR(16) NOT NULL DEFAULT 'ONLINE',
+    \`lastHeartbeatAt\` DATETIME(3) NULL,
+    \`disconnectStartedAt\` DATETIME(3) NULL,
+    \`resumeUntil\` DATETIME(3) NULL,
+    \`forceSubmitAt\` DATETIME(3) NULL,
+    \`forceSubmitReason\` VARCHAR(32) NULL,
+    \`startedAt\` DATETIME(3) NULL,
+    \`endedAt\` DATETIME(3) NULL,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`updatedAt\` DATETIME(3) NOT NULL,
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`ExamSession_competitionAttemptId_key\` (\`competitionAttemptId\`),
+    UNIQUE INDEX \`ExamSession_sessionTokenHash_key\` (\`sessionTokenHash\`),
+    INDEX \`ExamSession_status_lastHeartbeatAt_idx\` (\`status\`, \`lastHeartbeatAt\`),
+    INDEX \`ExamSession_userId_status_idx\` (\`userId\`, \`status\`),
+    CONSTRAINT \`ExamSession_competitionAttemptId_fkey\` FOREIGN KEY (\`competitionAttemptId\`) REFERENCES \`CompetitionAttempt\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`ExamSession_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`ExamIntegrityEvent\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`sessionId\` VARCHAR(191) NOT NULL,
+    \`dedupeKey\` VARCHAR(191) NOT NULL,
+    \`clientSequence\` INTEGER NULL,
+    \`type\` VARCHAR(32) NOT NULL,
+    \`source\` VARCHAR(16) NOT NULL,
+    \`trustLevel\` VARCHAR(16) NOT NULL,
+    \`severity\` VARCHAR(16) NOT NULL,
+    \`countsAsStrike\` BOOLEAN NOT NULL DEFAULT false,
+    \`skipReason\` VARCHAR(24) NULL,
+    \`durationMs\` INTEGER NULL,
+    \`detailsJson\` LONGTEXT NOT NULL,
+    \`occurredAt\` DATETIME(3) NOT NULL,
+    \`receivedAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`status\` VARCHAR(16) NOT NULL DEFAULT 'OPEN',
+    \`reviewedAt\` DATETIME(3) NULL,
+    \`reviewedById\` VARCHAR(191) NULL,
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`ExamIntegrityEvent_dedupeKey_key\` (\`dedupeKey\`),
+    INDEX \`ExamIntegrityEvent_sessionId_occurredAt_idx\` (\`sessionId\`, \`occurredAt\`),
+    INDEX \`ExamIntegrityEvent_status_severity_receivedAt_idx\` (\`status\`, \`severity\`, \`receivedAt\`),
+    CONSTRAINT \`ExamIntegrityEvent_sessionId_fkey\` FOREIGN KEY (\`sessionId\`) REFERENCES \`ExamSession\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`ProctorEvidence\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`sessionId\` VARCHAR(191) NOT NULL,
+    \`eventId\` VARCHAR(191) NULL,
+    \`type\` VARCHAR(24) NOT NULL,
+    \`objectKey\` VARCHAR(255) NOT NULL,
+    \`sha256\` VARCHAR(64) NOT NULL,
+    \`mimeType\` VARCHAR(64) NOT NULL,
+    \`capturedAt\` DATETIME(3) NOT NULL,
+    \`expiresAt\` DATETIME(3) NOT NULL,
+    \`legalHold\` BOOLEAN NOT NULL DEFAULT false,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (\`id\`),
+    INDEX \`ProctorEvidence_expiresAt_legalHold_idx\` (\`expiresAt\`, \`legalHold\`),
+    INDEX \`ProctorEvidence_sessionId_capturedAt_idx\` (\`sessionId\`, \`capturedAt\`),
+    CONSTRAINT \`ProctorEvidence_sessionId_fkey\` FOREIGN KEY (\`sessionId\`) REFERENCES \`ExamSession\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`ProctorEvidence_eventId_fkey\` FOREIGN KEY (\`eventId\`) REFERENCES \`ExamIntegrityEvent\` (\`id\`) ON DELETE SET NULL ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`CandidateExamVariant\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`sessionId\` VARCHAR(191) NOT NULL,
+    \`contentVersionId\` VARCHAR(64) NOT NULL,
+    \`contentVersionHash\` VARCHAR(64) NOT NULL,
+    \`seedHash\` VARCHAR(64) NOT NULL,
+    \`passageOrderJson\` LONGTEXT NOT NULL,
+    \`questionOrderJson\` LONGTEXT NOT NULL,
+    \`optionOrderJson\` LONGTEXT NOT NULL,
+    \`canonicalMappingJson\` LONGTEXT NOT NULL,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`CandidateExamVariant_sessionId_key\` (\`sessionId\`),
+    CONSTRAINT \`CandidateExamVariant_sessionId_fkey\` FOREIGN KEY (\`sessionId\`) REFERENCES \`ExamSession\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`ProctorActionLog\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`sessionId\` VARCHAR(191) NOT NULL,
+    \`adminUserId\` VARCHAR(191) NOT NULL,
+    \`action\` VARCHAR(24) NOT NULL,
+    \`reason\` TEXT NULL,
+    \`metadataJson\` LONGTEXT NOT NULL,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (\`id\`),
+    INDEX \`ProctorActionLog_sessionId_createdAt_idx\` (\`sessionId\`, \`createdAt\`),
+    INDEX \`ProctorActionLog_adminUserId_createdAt_idx\` (\`adminUserId\`, \`createdAt\`),
+    CONSTRAINT \`ProctorActionLog_sessionId_fkey\` FOREIGN KEY (\`sessionId\`) REFERENCES \`ExamSession\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`CompetitionAppeal\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`sessionId\` VARCHAR(191) NOT NULL,
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`status\` VARCHAR(16) NOT NULL DEFAULT 'OPEN',
+    \`explanation\` LONGTEXT NOT NULL,
+    \`submittedAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`deadlineAt\` DATETIME(3) NOT NULL,
+    \`decision\` VARCHAR(16) NULL,
+    \`decisionReason\` TEXT NULL,
+    \`proposedById\` VARCHAR(191) NULL,
+    \`confirmedById\` VARCHAR(191) NULL,
+    \`resolvedAt\` DATETIME(3) NULL,
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`CompetitionAppeal_sessionId_key\` (\`sessionId\`),
+    INDEX \`CompetitionAppeal_status_submittedAt_idx\` (\`status\`, \`submittedAt\`),
+    CONSTRAINT \`CompetitionAppeal_sessionId_fkey\` FOREIGN KEY (\`sessionId\`) REFERENCES \`ExamSession\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`CompetitionAppeal_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
 ];
 
 /**
@@ -571,6 +767,39 @@ const MIGRATIONS = [
   `ALTER TABLE \`Exercise\` ADD COLUMN \`difficultyTier\` VARCHAR(32) NOT NULL DEFAULT 'UNKNOWN'`,
   // Tách hai kho IELTS Reading. Mọi đề cũ mặc định thuộc Academic.
   `ALTER TABLE \`Exercise\` ADD COLUMN \`readingType\` VARCHAR(32) NOT NULL DEFAULT 'ACADEMIC'`,
+
+  /* ---- Liêm chính Nguyệt Thí ---- */
+
+  // Phiên bản chính sách được chốt theo TỪNG KỲ THI. Khi xử lý khiếu nại phải
+  // xét theo đúng luật đã công bố lúc thi, không phải luật hiện hành.
+  `ALTER TABLE \`Competition\` ADD COLUMN \`integrityPolicyVersion\` VARCHAR(32) NOT NULL DEFAULT '2026-08-v1'`,
+  `ALTER TABLE \`Competition\` ADD COLUMN \`consentPolicyVersion\` VARCHAR(48) NOT NULL DEFAULT 'consent-2026-08-v1'`,
+  `ALTER TABLE \`Competition\` ADD COLUMN \`sebConfigVersion\` VARCHAR(64) NULL`,
+  `ALTER TABLE \`Competition\` ADD COLUMN \`examVaultEnvironment\` VARCHAR(16) NOT NULL DEFAULT 'SANDBOX'`,
+
+  // Khung giờ chung thay cho cửa sổ linh hoạt nhiều ngày. Để NULL vì đây là
+  // cột thêm vào bảng đã có dữ liệu; mã nguồn bắt buộc phải có đủ ba mốc mới
+  // cho mở kỳ thi, chứ không dựa vào ràng buộc NOT NULL của database.
+  `ALTER TABLE \`CompetitionExercise\` ADD COLUMN \`checkInOpenAt\` DATETIME(3) NULL`,
+  `ALTER TABLE \`CompetitionExercise\` ADD COLUMN \`startsAt\` DATETIME(3) NULL`,
+  `ALTER TABLE \`CompetitionExercise\` ADD COLUMN \`endsAt\` DATETIME(3) NULL`,
+  `ALTER TABLE \`CompetitionExercise\` ADD COLUMN \`vaultContentVersionId\` VARCHAR(64) NULL`,
+  `ALTER TABLE \`CompetitionExercise\` ADD COLUMN \`vaultContentHash\` VARCHAR(64) NULL`,
+  `ALTER TABLE \`CompetitionExercise\` ADD COLUMN \`sebConfigCode\` VARCHAR(64) NULL`,
+
+  `ALTER TABLE \`CompetitionEntry\` ADD COLUMN \`identityProfileId\` VARCHAR(191) NULL`,
+  `ALTER TABLE \`CompetitionEntry\` ADD COLUMN \`readinessStatus\` VARCHAR(24) NOT NULL DEFAULT 'NOT_READY'`,
+  `ALTER TABLE \`CompetitionEntry\` ADD COLUMN \`reviewStatus\` VARCHAR(32) NOT NULL DEFAULT 'CLEAR'`,
+  `ALTER TABLE \`CompetitionEntry\` ADD COLUMN \`proposedByAdminId\` VARCHAR(191) NULL`,
+  `ALTER TABLE \`CompetitionEntry\` ADD COLUMN \`confirmedByAdminId\` VARCHAR(191) NULL`,
+  `ALTER TABLE \`CompetitionEntry\` ADD COLUMN \`manualReviewCompletedAt\` DATETIME(3) NULL`,
+
+  // Phân biệt "hết giờ" với "bị buộc nộp vì liêm chính" — hai việc khác hẳn
+  // nhau khi xử lý khiếu nại, mà cột autoSubmitted cũ gộp chung cả hai.
+  `ALTER TABLE \`Attempt\` ADD COLUMN \`submissionReason\` VARCHAR(24) NOT NULL DEFAULT 'NORMAL'`,
+
+  `ALTER TABLE \`IntegrityFlag\` ADD COLUMN \`sessionId\` VARCHAR(191) NULL`,
+  `ALTER TABLE \`IntegrityFlag\` ADD COLUMN \`sourceEventId\` VARCHAR(191) NULL`,
 ];
 
 export async function initDatabase() {
