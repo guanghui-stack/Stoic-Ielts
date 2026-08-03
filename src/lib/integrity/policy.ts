@@ -18,6 +18,8 @@
  * File KHÔNG import "server-only" để bộ kiểm thử chạy được bằng node thuần.
  */
 
+import { createHash } from "node:crypto";
+
 export const INTEGRITY_POLICY = {
   version: "2026-08-v1",
   /** Client báo cáo còn sống mỗi 5 giây. */
@@ -320,6 +322,26 @@ export function applyEvents(
     forceSubmitReason,
     outcomes,
   };
+}
+
+/**
+ * Khóa chống trùng cho một sự kiện.
+ *
+ * Sau khi mạng có lại, client gửi lại CẢ hàng đợi sự kiện — nên cùng một sự kiện
+ * tới máy chủ nhiều lần là chuyện bình thường, không phải dấu hiệu gian lận.
+ * Khóa dựa trên NỘI DUNG sự kiện chứ không phải thời điểm nhận, nên gửi lại bao
+ * nhiêu lần cũng chỉ ghi một bản và chỉ tính một strike.
+ */
+export function buildDedupeKey(input: {
+  sessionId: string;
+  type: string;
+  occurredAtMs: number;
+  durationMs?: number;
+}): string {
+  return createHash("sha256")
+    .update(`${input.sessionId}|${input.type}|${input.occurredAtMs}|${input.durationMs ?? 0}`)
+    .digest("hex")
+    .slice(0, 48);
 }
 
 /* ================================================================== */

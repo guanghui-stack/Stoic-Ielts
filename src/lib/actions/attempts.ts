@@ -4,17 +4,8 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
-import { gradeReading, type ReadingAnswers } from "@/lib/exercise-content";
 import { canAccessExercise } from "@/lib/exercise-access";
-import {
-  calculateReadingBand,
-  isValidAchievementAttempt,
-} from "@/lib/reading-band";
-import {
-  processAchievementEvent,
-  recordAchievementEvent,
-} from "@/lib/achievements/engine";
-import { readingContentForAttempt } from "@/lib/attempt-content";
+import { finalizeReadingAttempt } from "@/lib/attempts/finalize";
 
 /** Dung sai sau hạn chót (mạng chậm, tự nộp phía client trễ vài giây). */
 const GRACE_MS = 15_000;
@@ -42,7 +33,7 @@ export async function startAttemptAction(exerciseId: string) {
       redirect(`/lam-bai/${existing.id}`);
     }
     // Quá hạn từ phiên trước → chốt bài với phần đã lưu
-    await finalizeAttempt(existing.id, true);
+    await finalizeReadingAttempt(existing.id, { submissionReason: "TIMEOUT" });
   }
 
   // Số thứ tự lượt làm phải cố định: danh hiệu xét "lần hợp lệ ĐẦU TIÊN",
@@ -91,118 +82,6 @@ export async function saveProgressAction(attemptId: string, answersJson: string)
 }
 
 /** Chốt bài Reading và chấm tự động. */
-async function finalizeAttempt(attemptId: string, auto: boolean) {
-  const attempt = await db.attempt.findUnique({
-    where: { id: attemptId },
-    include: { exercise: true, assembly: true, competitionAttempt: true },
-  });
-  if (!attempt || attempt.status !== "IN_PROGRESS") return;
-  if (attempt.exercise.skill !== "READING") return;
-
-  // Đề ghép có thời lượng riêng (60 phút như thi thật), không dùng thời lượng
-  // của passage đầu tiên.
-  const durationMinutes =
-    attempt.assembly?.durationMinutes ?? attempt.exercise.durationMinutes;
-
-  let scoreRaw: number | null = null;
-  let scoreTotal: number | null = null;
-  let status = "SUBMITTED";
-  let band: number | null = null;
-  let bandScaleVersion: string | null = null;
-  let answeredCount: number | null = null;
-  let validForAchievements = false;
-
-  const now = new Date();
-  // Thời gian làm bài THẬT, kẹp theo thời lượng đề để lượt bị treo qua đêm
-  // không biến thành một con số vô lý.
-  const elapsedSeconds = Math.max(
-    0,
-    Math.min(
-      Math.round((now.getTime() - attempt.startedAt.getTime()) / 1000),
-      durationMinutes * 60
-    )
-  );
-
-  if (attempt.exercise.skill === "READING") {
-    const content = await readingContentForAttempt(attempt);
-    const answers = JSON.parse(attempt.answers || "{}") as ReadingAnswers;
-    const graded = gradeReading(content, answers);
-    scoreRaw = graded.scoreRaw;
-    scoreTotal = graded.scoreTotal;
-    status = "GRADED"; // Reading chấm máy, không cần giáo viên
-
-    answeredCount = Object.values(answers).filter(
-      (v) => v !== null && v !== undefined && String(v).trim() !== ""
-    ).length;
-
-    // Band phải được CHỐT ngay lúc chấm: nếu tính lại khi hiển thị, đổi thang
-    // quy đổi về sau sẽ âm thầm làm thay đổi kết quả cũ của học viên.
-    const bandResult = calculateReadingBand(content, scoreRaw, scoreTotal);
-    band = bandResult?.band ?? null;
-    bandScaleVersion = bandResult?.scaleVersion ?? null;
-
-    validForAchievements = isValidAchievementAttempt({
-      status,
-      // Đề học viên TỰ CHỌN passage không tính danh hiệu — chốt ngay tại đây
-      // để trang kết quả nói đúng sự thật, không đợi engine lọc lại.
-      achievementEligible:
-        attempt.exercise.achievementEligible &&
-        (attempt.assembly === null || attempt.assembly.countsForAchievements),
-      band,
-      answeredCount,
-      scoreTotal,
-      elapsedSeconds,
-      durationMinutes,
-      integrityStatus: attempt.integrityStatus,
-    });
-  }
-
-  await db.attempt.update({
-    where: { id: attemptId },
-    data: {
-      status,
-      submittedAt: now,
-      autoSubmitted: auto,
-      scoreRaw,
-      scoreTotal,
-      band,
-      bandScaleVersion,
-      answeredCount,
-      elapsedSeconds,
-      validForAchievements,
-      gradedAt: status === "GRADED" ? now : null,
-    },
-  });
-
-  // Bài thi Nguyệt Thí: chụp lại kết quả sang bảng riêng NGAY lúc chấm.
-  // Xếp hạng sau này đọc từ ảnh chụp đó, nên sửa đề về sau không làm thay đổi
-  // kết quả một cuộc thi đã diễn ra.
-  if (status === "GRADED" && attempt.competitionAttempt) {
-    await db.competitionAttempt.update({
-      where: { attemptId },
-      data: {
-        bandSnapshot: band,
-        rawSnapshot: scoreRaw,
-        elapsedSeconds,
-        submittedAt: now,
-      },
-    });
-  }
-
-  // Xét danh hiệu SAU khi bài đã được chốt điểm. Cố ý không nằm trong cùng
-  // transaction: nếu việc xét danh hiệu lỗi, học viên vẫn phải nộp bài được —
-  // danh hiệu là phần thưởng, không phải điều kiện để học.
-  if (status === "GRADED") {
-    const eventId = await recordAchievementEvent({
-      userId: attempt.userId,
-      type: "READING_GRADED",
-      key: attemptId,
-      payload: { attemptId },
-    });
-    if (eventId) await processAchievementEvent(eventId);
-  }
-}
-
 /** Học viên nộp bài (hoặc client tự nộp khi hết giờ). */
 export async function submitAttemptAction(
   attemptId: string,
@@ -233,7 +112,9 @@ export async function submitAttemptAction(
     }
   }
 
-  await finalizeAttempt(attemptId, auto || !withinGrace);
+  await finalizeReadingAttempt(attemptId, {
+    submissionReason: auto || !withinGrace ? "TIMEOUT" : "NORMAL",
+  });
   revalidatePath("/hoc-vien");
   redirect(`/hoc-vien/bai-lam/${attemptId}`);
 }

@@ -19,6 +19,7 @@ import {
   computeResumeDeadline,
   decideReconnect,
   computeRiskScore,
+  buildDedupeKey,
   type SessionCounters,
   type ReportedEvent,
 } from "../src/lib/integrity/policy.ts";
@@ -630,6 +631,25 @@ check(
   shuffled([1, 2, 3, 4, 5], mulberry32(9)).sort((a, b) => a - b),
   [1, 2, 3, 4, 5]
 );
+
+/* ================================================================== */
+console.log("\nKHÓA CHỐNG TRÙNG — gửi lại hàng đợi sau khi có mạng");
+
+type DedupeArgs = {
+  sessionId?: string;
+  type?: string;
+  occurredAtMs?: number;
+  durationMs?: number;
+};
+const k = (o: DedupeArgs = {}) =>
+  buildDedupeKey({ sessionId: "s1", type: "COPY_ATTEMPT", occurredAtMs: 1000, ...o });
+
+check("cùng sự kiện gửi lại cho cùng một khóa", k(), k());
+check("khác phiên thi thì khác khóa", k() === k({ sessionId: "s2" }), false);
+check("khác loại sự kiện thì khác khóa", k() === k({ type: "CUT_ATTEMPT" }), false);
+check("khác thời điểm thì khác khóa", k() === k({ occurredAtMs: 2000 }), false);
+check("khác thời lượng thì khác khóa", k() === k({ durationMs: 5000 }), false);
+check("khóa vừa cột VARCHAR(191) của database", k().length <= 191, true);
 
 console.log(
   failures === 0
