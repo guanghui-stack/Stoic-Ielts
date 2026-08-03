@@ -570,8 +570,7 @@ check("trước sinh nhật một ngày vẫn là 15", ageAt(new Date("2010-09-0
 const fullConsent = {
   identityVerified: true,
   consentTerms: true,
-  consentProctoring: true,
-  consentBiometric: true,
+  consentMonitoring: true,
 };
 check(
   "16 tuổi, đủ giấy tờ và đồng ý → được đăng ký",
@@ -592,21 +591,21 @@ check(
   false
 );
 check(
-  "thiếu đồng ý giám sát thì nói rõ thiếu gì, không từ chối suông",
+  "thiếu đồng ý ghi nhật ký thì nói rõ thiếu gì, không từ chối suông",
   checkIdentityEligibility({
     birthDate: new Date("2000-01-01"),
     at: new Date("2026-09-01"),
     ...fullConsent,
-    consentProctoring: false,
+    consentMonitoring: false,
   }).missing,
-  ["Chưa đồng ý giám sát webcam và màn hình"]
+  ["Chưa đồng ý việc ghi nhật ký thao tác trong lúc thi"]
 );
 check(
   "đồng ý hiện tên trên Bảng Vàng KHÔNG phải điều kiện bắt buộc",
   requiredConsents().includes("PUBLICITY" as never),
   false
 );
-check("ba loại đồng ý bắt buộc", requiredConsents().length, 3);
+check("chỉ còn HAI loại đồng ý bắt buộc sau khi bỏ webcam", requiredConsents().length, 2);
 check("tuổi tối thiểu là 16", MIN_COMPETITION_AGE, 16);
 
 /* ================================================================== */

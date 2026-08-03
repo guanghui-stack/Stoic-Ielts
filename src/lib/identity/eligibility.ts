@@ -37,10 +37,10 @@ export type EligibilityCheck = {
 export function checkIdentityEligibility(input: {
   birthDate: Date | null;
   at: Date;
+  /** Đã xác minh danh tính qua video trước ngày thi chưa. */
   identityVerified: boolean;
   consentTerms: boolean;
-  consentProctoring: boolean;
-  consentBiometric: boolean;
+  consentMonitoring: boolean;
 }): EligibilityCheck {
   const missing: string[] = [];
   const age = input.birthDate ? ageAt(input.birthDate, input.at) : -1;
@@ -50,10 +50,13 @@ export function checkIdentityEligibility(input: {
     missing.push(`Nguyệt Thí chỉ dành cho thí sinh từ ${MIN_COMPETITION_AGE} tuổi`);
   }
 
-  if (!input.identityVerified) missing.push("Giấy tờ và ảnh chân dung chưa được xác minh");
+  if (!input.identityVerified) {
+    missing.push("Chưa hoàn tất buổi xác minh danh tính qua video với trung tâm");
+  }
   if (!input.consentTerms) missing.push("Chưa đồng ý thể lệ Nguyệt Thí");
-  if (!input.consentProctoring) missing.push("Chưa đồng ý giám sát webcam và màn hình");
-  if (!input.consentBiometric) missing.push("Chưa đồng ý đối chiếu khuôn mặt");
+  if (!input.consentMonitoring) {
+    missing.push("Chưa đồng ý việc ghi nhật ký thao tác trong lúc thi");
+  }
 
   return { eligible: missing.length === 0, age, missing };
 }
@@ -64,11 +67,21 @@ export function checkIdentityEligibility(input: {
  * Tách lớp là bắt buộc: gộp tất cả vào một ô tích thì sự đồng ý không còn là tự
  * nguyện cho từng mục đích. Riêng PUBLICITY (hiện tên trên Bảng Vàng) KHÔNG được
  * gộp vào nhóm bắt buộc — không ai phải đánh đổi quyền riêng tư để được dự thi.
+ *
+ * PHẠM VI ĐÃ THU HẸP (chốt 2026-08-03): kỳ thi KHÔNG dùng webcam, KHÔNG ghi ảnh
+ * màn hình và KHÔNG đối chiếu khuôn mặt tự động. Xác minh danh tính do nhân viên
+ * làm trực tiếp qua video và KHÔNG lưu lại ảnh nào. Nhờ vậy hệ thống không xử lý
+ * dữ liệu sinh trắc học, và loại đồng ý BIOMETRIC đã được bỏ hẳn.
+ *
+ * MONITORING nay chỉ còn nghĩa: ghi nhật ký thao tác trong phòng thi (sao chép,
+ * chuyển cửa sổ, phím tắt). Không có hình ảnh nào.
  */
 export const CONSENT_PURPOSES = {
   TERMS: { required: true, label: "Thể lệ Nguyệt Thí và các hành vi bị cấm" },
-  PROCTORING: { required: true, label: "Giám sát webcam, màn hình và ảnh chụp định kỳ" },
-  BIOMETRIC: { required: true, label: "Đối chiếu khuôn mặt với giấy tờ tùy thân" },
+  MONITORING: {
+    required: true,
+    label: "Ghi nhật ký thao tác trong lúc thi (không có hình ảnh)",
+  },
   PUBLICITY: { required: false, label: "Hiện tên trên Bảng Vàng khi đoạt giải" },
 } as const;
 
