@@ -1,9 +1,17 @@
 @import "tailwindcss";
 
 /*
-  STOIC-IELTS — luyện IELTS Reading bằng kỷ luật
-  Hệ thiết kế editorial: nền kem, mực navy, điểm nhấn vàng đồng,
-  tiêu đề serif, nhãn in hoa giãn cách. Tham chiếu: cẩm nang in ấn cao cấp.
+  HỔ PHÙ · IELTS — Chiến trận · Phục bàn · Luyện binh
+  Hệ thiết kế thủy mặc Đông Á: nền giấy gạo, mực navy-đen, con dấu chu sa,
+  tiêu đề serif, nhãn in hoa giãn cách.
+
+  Một quyết định thị giác duy nhất, lặp lại nhất quán: TRANH MỰC TRÊN GIẤY.
+  80–90% bề mặt là đen, xám và kem; mỗi module chỉ được dùng ĐÚNG MỘT màu
+  accent. Trộn nhiều accent trên cùng một màn hình là lỗi thiết kế, không
+  phải lựa chọn phong cách.
+
+  Ngoại lệ tuyệt đối: phòng thi Reading CBT giữ giao diện trung tính mô phỏng
+  đề thi thật — không giấy gạo, không mực, không nhân vật. Xem .font-exam.
 */
 
 @theme {
@@ -24,6 +32,49 @@
   --color-gold: #b8862b;
   --color-gold-soft: #d3b264;
   --color-gold-pale: #efe4c8;
+
+  /* ===== Màu chức năng Tam Quốc (Master Spec §8.2) =====
+     Mỗi màu gắn với MỘT module và MỘT danh tướng. Không dùng lẫn.
+
+     Hậu tố -ink là biến thể đã tối đủ để làm CHỮ trên nền kem (tương phản
+     WCAG AA ≥ 4.5:1). Bản gốc chỉ dùng cho viền, nền, biểu tượng và mảng
+     đồ họa — dùng nó làm chữ nhỏ là không đạt chuẩn tiếp cận. */
+
+  /* Chu sa — Phục bàn, con dấu, cấp bậc cao. Trương Phi. */
+  --color-vermilion: #a33a2b;
+  --color-vermilion-ink: #8e3125;
+  --color-vermilion-pale: #f4e6e2;
+
+  /* Lam điện — Chiến trận. Triệu Vân. */
+  --color-azure: #3a7fc4;
+  --color-azure-ink: #2c6099;
+  --color-azure-pale: #e6eef7;
+
+  /* Lục ngọc — chính đạo, liêm chính. Quan Vũ. */
+  --color-jade: #2e6b4f;
+  --color-jade-ink: #275c44;
+  --color-jade-pale: #e7f0ea;
+
+  /* Kim đồng — Luyện binh, kỷ luật, lương thảo. Hoàng Trung.
+     (Trùng --color-gold; -ink là bản đạt chuẩn chữ.) */
+  --color-gold-ink: #8a6318;
+
+  /* Bạc lam — biến hóa, thích nghi. Mã Siêu. */
+  --color-silver-blue: #7d97ac;
+  --color-silver-blue-ink: #4e6e8c;
+
+  /* Hỏa cam — đối thủ phản chiếu, thử thách cuối. Lữ Bố. */
+  --color-fire: #c2591f;
+  --color-fire-ink: #a94d1b;
+  --color-fire-pale: #f8ebe2;
+
+  /* Bạc trăng & indigo — Nguyệt Thí và các tầng đại thí. */
+  --color-moon-silver: #c3cbd5;
+  --color-indigo: #273a63;
+
+  /* Tro — huy hiệu tướng quân: sức bền, không bóng bẩy. */
+  --color-ash: #77736c;
+  --color-ash-ink: #5f5b54;
 
   /* Ngữ nghĩa */
   --color-line: #e6ddcb;
@@ -58,14 +109,25 @@ body {
   color: var(--color-navy-deep);
 }
 
-/* Nhãn mục in hoa giãn cách — mô-típ editorial chủ đạo */
+/*
+  Nhãn mục in hoa giãn cách — mô-típ editorial chủ đạo.
+
+  Dùng --color-gold-ink chứ không phải --color-gold: bản vàng gốc chỉ đạt tỷ
+  lệ tương phản 3.01:1 trên nền kem, không đủ chuẩn AA cho chữ thường, mà đây
+  lại là chữ 12px in hoa giãn cách — cỡ chữ khó đọc nhất trong cả hệ. Bản
+  -ink đạt 5.03:1. Vàng gốc vẫn giữ nguyên cho viền, gạch nhấn và biểu tượng,
+  nơi ngưỡng áp dụng là 3:1.
+
+  Chỗ nào đặt nhãn trên nền tối (ví dụ chân trang) thì đè bằng text-gold-soft
+  như cũ, nên thay đổi này không đụng tới các trường hợp đó.
+*/
 .label-caps {
   font-family: var(--font-ui);
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
-  color: var(--color-gold);
+  color: var(--color-gold-ink);
 }
 
 /* Gạch nhấn vàng dưới tiêu đề */
@@ -78,6 +140,101 @@ body {
 /* Đồng hồ đếm ngược dùng chữ số đều nhau tránh nhảy layout */
 .tabular-nums {
   font-variant-numeric: tabular-nums;
+}
+
+/* ===== Lớp thủy mặc — mô-típ thị giác chủ đạo ===== */
+
+/*
+  Vân giấy gạo. Dệt bằng gradient thay vì ảnh texture: không tốn thêm một
+  request nào, không có gì để tải hỏng, và không bao giờ làm nhảy layout.
+  Rất nhạt — vân giấy phải cảm thấy được chứ không nhìn thấy được.
+*/
+.paper-grain {
+  background-color: var(--color-cream);
+  background-image:
+    repeating-linear-gradient(
+      92deg,
+      rgb(34 48 62 / 0.016) 0 1px,
+      transparent 1px 3px
+    ),
+    repeating-linear-gradient(
+      3deg,
+      rgb(34 48 62 / 0.012) 0 1px,
+      transparent 1px 4px
+    ),
+    radial-gradient(
+      ellipse 80% 60% at 30% 20%,
+      rgb(184 134 43 / 0.05),
+      transparent 70%
+    );
+}
+
+/*
+  Nền mực dự phòng khi ảnh thủy mặc chưa có hoặc tải hỏng.
+  Đây là điều kiện MẶC ĐỊNH, không phải trường hợp hiếm: art production đi
+  qua kiểm duyệt thủ công nên phần lớn thời gian phát triển sẽ không có ảnh.
+  Hero phải đọc được và CTA phải bấm được kể cả khi không một ảnh nào tồn tại.
+*/
+.ink-wash-fallback {
+  background-color: var(--color-cream);
+  background-image:
+    radial-gradient(
+      ellipse 55% 75% at 78% 62%,
+      rgb(34 48 62 / 0.2),
+      transparent 68%
+    ),
+    radial-gradient(
+      ellipse 38% 50% at 88% 30%,
+      rgb(30 58 92 / 0.16),
+      transparent 70%
+    ),
+    linear-gradient(
+      104deg,
+      transparent 46%,
+      rgb(34 48 62 / 0.08) 62%,
+      transparent 78%
+    );
+}
+
+/*
+  Con dấu chu sa. Hình vuông bo nhẹ, RỖNG RUỘT — không chứa ký tự nào.
+  Quy tắc production cấm mọi ký tự chữ Hán, kể cả trong con dấu trang trí,
+  nên con dấu ở đây thuần túy là một mảng hình học.
+*/
+.seal {
+  display: inline-block;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 2px solid var(--color-vermilion);
+  border-radius: 3px;
+  opacity: 0.75;
+  position: relative;
+}
+.seal::after {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border: 1px solid var(--color-vermilion);
+  border-radius: 1px;
+}
+
+/* Gạch mực dưới tiêu đề — bản trầm của .rule-gold, dùng ở trang nội dung */
+.rule-ink {
+  width: 3.5rem;
+  height: 3px;
+  background: var(--color-navy);
+}
+
+/*
+  Nhãn kép: tên cổ phong ở trên, chức năng thật ở dưới (Master Spec §3).
+  Tên Tam Quốc để ghi nhớ, dòng chức năng để người mới không lạc đường —
+  người chưa biết "Phục Bàn" là gì vẫn phải đọc được "Feynman Review".
+*/
+.dual-label__function {
+  font-family: var(--font-ui);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--color-ink-soft);
 }
 
 /* ===== Phòng thi Reading kiểu CBT (mô phỏng đề thi thật) ===== */
