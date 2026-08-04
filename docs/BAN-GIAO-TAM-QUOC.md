@@ -57,20 +57,41 @@ trong `src/lib/init-db.ts`, `src/lib/features.ts` (cờ tính năng, mặc đị
 Hai cảnh báo CSS về `::highlight()` khi build là **có sẵn từ trước**, thuộc
 tính năng bôi vàng của phòng thi, không liên quan tới thay đổi này.
 
+## Đã xong trong phiên 04/08/2026 (phiên thứ hai)
+
+**Toàn bộ 16 ảnh art manifest đã có file.** Sáu ảnh Lục tướng do chủ dự án
+cung cấp (nhúng trong file Word đặc tả) đã xoá chữ và ký tự Hán bằng
+`scripts/clean-art-text.mjs`; tám ảnh cửa ải và nền bản đồ sinh mới bằng
+`scripts/generate-art.mjs`. Nén bằng `scripts/optimize-art.mjs`, tất cả dưới
+trần dung lượng §8.5. Khóa Gemini đọc từ `.env.local` (đã gitignore).
+
+**PR-04 rank engine.** `ranks/rules.ts` (8 luật gate + 8 luật success, hàm
+thuần), `facts.ts`, `engine.ts`, `actions/ranks.ts`. Nối vào
+`processAchievementEvent` chứ không tạo hàng đợi mới. 24 phép thử ở
+`npm run test:rank-rules`.
+
+**PR-05 bản đồ Chiến Dịch.** `campaign/catalog.ts` + `view.ts` (hàm thuần),
+hai component desktop/mobile, trang `/hoc-vien/chien-dich`. 22 phép thử ở
+`npm run test:campaign`.
+
+Cổng chất lượng sau hai PR: tsc sạch, lint sạch, 15 bộ kiểm thử đạt, build
+exit 0, `test:no-han` sạch.
+
 ## Việc còn lại, theo thứ tự nên làm
 
-1. **PR-04 rank engine** — `rules.ts` (hàm thuần đánh giá gate/success),
-   `facts.ts` (đọc Attempt/Feynman/StudyDay), `engine.ts` (xử lý sự kiện
-   idempotent), `service.ts`, `actions/ranks.ts`. Nối vào
-   `processAchievementEvent` hiện có, KHÔNG tạo hàng đợi mới. Đặc tả §6.
-2. **PR-05 bản đồ Chiến Dịch** — `src/lib/campaign/catalog.ts` với 8 node và
-   tọa độ có sẵn ở §7.2, `view.ts` suy trạng thái, map desktop và timeline
-   dọc cho mobile. Đặc tả §7 và §10.2.
-3. **PR-06 nhãn Tam Quốc toàn site** — dùng `src/lib/ui-labels.ts` đã có. Giữ
+1. **PR-06 nhãn Tam Quốc toàn site** — dùng `src/lib/ui-labels.ts` đã có. Giữ
    nguyên URL.
-4. **PR-07 ba tầng đại thí** — `competition/tiers.ts`, `qualification.ts`,
+2. **PR-07 ba tầng đại thí** — `competition/tiers.ts`, `qualification.ts`,
    routes `/duong-thi` và `/thien-thi`. Đặc tả §9.3.
-5. **PR-08 tài liệu QA**, **PR-09 liêm chính và consent**.
+3. **PR-08 tài liệu QA**, **PR-09 liêm chính và consent**.
+
+Còn thiếu ở phần cấp bậc: trang chi tiết một cửa ải
+`/hoc-vien/thi-luyen/[trialCode]` (bản đồ đã trỏ link tới đó), component
+`current-rank-card` và `cardinal-title-picker`, và luồng nhập
+TrialReflection miễn phí. Đây là phần giao diện của PR-04/05, cố ý để lại vì
+đặc tả xếp PR-04 là "không UI lớn".
+
+Một ảnh còn nợ: Mã Siêu dùng vàng kim, manifest chốt bạc lam.
 
 ## Ba việc đang chặn, cần chủ dự án xử lý
 
