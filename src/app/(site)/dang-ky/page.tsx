@@ -6,7 +6,7 @@ import { RegisterForm } from "@/components/auth-forms";
 export const metadata: Metadata = {
   title: "Đăng ký tài khoản",
   description:
-    "Tạo tài khoản học viên STOIC-IELTS miễn phí — luyện tập 4 kỹ năng IELTS với đồng hồ thi thật và được giáo viên chấm chữa Writing.",
+    "Tạo tài khoản học viên HỔ PHÙ · IELTS miễn phí — luyện tập 4 kỹ năng IELTS với đồng hồ thi thật và được giáo viên chấm chữa Writing.",
 };
 
 export default async function RegisterPage() {

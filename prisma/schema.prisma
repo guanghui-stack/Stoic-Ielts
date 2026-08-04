@@ -53,6 +53,12 @@ model User {
   examSessions       ExamSession[]
   competitionAppeals CompetitionAppeal[]
   publicProfile      PublicProfile?
+
+  // Hệ cấp bậc và thí luyện
+  rankProfile      UserRank?
+  trials           UserTrial[]
+  graceState       UserGraceState?
+  trialReflections TrialReflection[]
 }
 
 model Exercise {
@@ -1086,4 +1092,193 @@ model CompetitionAppeal {
 model Config {
   key   String @id
   value String @db.Text
+}
+
+/* ============================================================
+   Hệ cấp bậc và thí luyện
+
+   Toàn bộ nhóm bảng này là bổ sung thuần túy: không sửa và không xóa cột
+   nào của bảng cũ. Nhờ vậy khi cần rút lui chỉ việc tắt cờ tính năng và
+   revert mã nguồn — dữ liệu ở lại nguyên vẹn để điều tra, không có bảng
+   nào bị drop trong lúc khẩn cấp.
+
+   Catalog TypeScript vẫn là nguồn sự thật cho nội dung và ngưỡng. Hai bảng
+   định nghĩa dưới đây chỉ là bản đã seed để truy vấn, hiển thị trong khu
+   quản trị và chụp lại cấu hình tại thời điểm học viên bắt đầu thí luyện.
+   ============================================================ */
+
+model RankDefinition {
+  id          String   @id @default(cuid())
+  level       Int      @unique
+  code        String   @unique
+  slug        String   @unique
+  name        String
+  era         String   @db.VarChar(32)
+  bandAnchor  String
+  description String   @db.Text
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model TrialDefinition {
+  id                  String   @id @default(cuid())
+  code                String   @unique
+  slug                String   @unique
+  name                String
+  featuredGeneralCode String   @db.VarChar(32)
+  fromLevel           Int
+  toLevel             Int
+  skill               String
+  rationale           String   @db.Text
+  narrative           String   @db.Text
+  quoteSource         String?
+  quoteSourceUrl      String?  @db.Text
+
+  // Gate quyết định "cửa đã hiện ra chưa"; success quyết định "đã vượt chưa".
+  // Hai luật tách rời vì gate được phép nhìn dữ liệu quá khứ, còn success
+  // chỉ được tính sự kiện xảy ra sau startedAt.
+  gateRuleKey       String @db.VarChar(64)
+  gateConfigJson    String @db.LongText
+  successRuleKey    String @db.VarChar(64)
+  successConfigJson String @db.LongText
+
+  retryUnlimited Boolean  @default(true)
+  estimate       String
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([fromLevel, toLevel])
+}
+
+model UserRank {
+  id              String @id @default(cuid())
+  userId          String @unique
+  currentLevel    Int    @default(1)
+  currentRankCode String @default("RANK_01_BACH_THAN")
+
+  // Hiệu Trấn Đông/Tây/Nam/Bắc ở bậc 8. Bốn hiệu cùng cấp, không khác quyền lợi.
+  cardinalTitleCode String? @db.VarChar(32)
+
+  promotedAt   DateTime  @default(now())
+  lastActiveAt DateTime?
+
+  // Khóa lạc quan cho giao dịch thăng cấp: hai sự kiện tới cùng lúc thì chỉ
+  // một cái được tăng cấp, cái còn lại thấy version đã đổi và dừng lại.
+  version Int @default(1)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserTrial {
+  id        String @id @default(cuid())
+  userId    String
+  trialCode String @db.VarChar(64)
+
+  // LOCKED | ELIGIBLE | ACTIVE | PASSED — không có trạng thái hạ cấp.
+  status String @default("LOCKED") @db.VarChar(24)
+
+  gateSnapshotJson   String? @db.LongText
+  progressJson       String? @db.LongText
+  resultSnapshotJson String? @db.LongText
+
+  eligibleAt    DateTime?
+  startedAt     DateTime?
+  completedAt   DateTime?
+  sourceEventId String?   @db.VarChar(191)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  runs        TrialRun[]
+  reflections TrialReflection[]
+
+  @@unique([userId, trialCode])
+  @@index([status, updatedAt])
+}
+
+model TrialRun {
+  id          String @id @default(cuid())
+  userTrialId String
+  runNumber   Int
+
+  // ACTIVE | PASSED | FAILED | ABANDONED
+  status String @default("ACTIVE") @db.VarChar(24)
+
+  // Chụp lại cấu hình lúc bắt đầu. Sửa ngưỡng trong catalog về sau không
+  // được phép đổi luật của một lượt đang chạy dở.
+  configSnapshotJson String  @db.LongText
+  progressJson       String? @db.LongText
+  resultJson         String? @db.LongText
+
+  startedAt DateTime  @default(now())
+  endedAt   DateTime?
+
+  userTrial UserTrial       @relation(fields: [userTrialId], references: [id], onDelete: Cascade)
+  events    TrialRunEvent[]
+
+  @@unique([userTrialId, runNumber])
+  @@index([status, startedAt])
+}
+
+model TrialRunEvent {
+  id          String @id @default(cuid())
+  userTrialId String
+  trialRunId  String
+
+  // Khóa chống lặp: cùng một sự kiện gửi hai lần chỉ được ghi một lần, nên
+  // một lượt chấm bài bị phát lại không làm tiến độ nhân đôi.
+  eventKey String @unique @db.VarChar(191)
+
+  type        String   @db.VarChar(64)
+  sourceId    String?  @db.VarChar(191)
+  payloadJson String   @db.LongText
+  occurredAt  DateTime @default(now())
+
+  run TrialRun @relation(fields: [trialRunId], references: [id], onDelete: Cascade)
+
+  @@index([userTrialId, occurredAt])
+}
+
+model TrialReflection {
+  id              String  @id @default(cuid())
+  userId          String
+  userTrialId     String
+  sourceAttemptId String? @db.VarChar(191)
+  questionType    String? @db.VarChar(64)
+
+  // Đường phục bàn MIỄN PHÍ. Đây là thứ giữ cho hệ cấp bậc không trở thành
+  // trả tiền để mạnh hơn: mọi cửa ải đòi hỏi phục bàn đều chấp nhận bản này
+  // thay cho Feynman trả phí.
+  evidenceText String @db.Text
+  explanation  String @db.Text
+  lessonRule   String @db.Text
+
+  qualityStatus String    @default("STRUCTURALLY_VALID") @db.VarChar(32)
+  approvedAt    DateTime?
+  approvedById  String?   @db.VarChar(191)
+  createdAt     DateTime  @default(now())
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userTrial UserTrial @relation(fields: [userTrialId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([userTrialId, qualityStatus])
+}
+
+model UserGraceState {
+  userId         String    @id
+  tokenCode      String    @default("HOA_DUNG_DAO") @db.VarChar(32)
+  availableCount Int       @default(1)
+  lastGrantedAt  DateTime  @default(now())
+  lastUsedAt     DateTime?
+  nextGrantAt    DateTime?
+  updatedAt      DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

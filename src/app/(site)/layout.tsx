@@ -7,7 +7,12 @@ export default function SiteLayout({
   return (
     <>
       <SiteHeader />
-      <main className="flex-1">{children}</main>
+      {/*
+        Vân giấy gạo chỉ phủ khu vực trang thường. Nhóm route (exam) có
+        layout riêng và cố ý không nhận lớp này: phòng thi Reading giữ nền
+        trắng trung tính mô phỏng đề thi thật.
+      */}
+      <main className="paper-grain flex-1">{children}</main>
       <SiteFooter />
     </>
   );

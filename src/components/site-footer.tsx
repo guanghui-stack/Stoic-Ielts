@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { MapPin, Phone, Mail } from "lucide-react";
 import { MAIN_NAV, READING_NAV } from "@/lib/nav";
-import { StoicMark } from "@/components/brand";
+import { HoPhuMark } from "@/components/brand";
 
 export function SiteFooter() {
   return (
@@ -10,13 +10,13 @@ export function SiteFooter() {
       <div className="mx-auto grid max-w-6xl gap-10 px-6 py-14 md:grid-cols-[1.4fr_1fr_1fr]">
         <div>
           <div className="flex items-center gap-3">
-            <StoicMark className="h-10 w-10 [&_circle]:stroke-cream [&_path]:stroke-gold-soft" />
+            <HoPhuMark className="h-10 w-10 [&_circle]:stroke-cream [&_path]:fill-cream [&_path]:stroke-gold-soft" />
             <div className="leading-none">
               <p className="font-display text-xl font-bold text-paper">
-                STOIC<span className="text-gold-soft">·</span>IELTS
+                HỔ PHÙ<span className="text-gold-soft">·</span>IELTS
               </p>
               <p className="mt-1 font-ui text-[0.62rem] font-semibold uppercase tracking-[0.22em] text-gold-soft">
-                Kiên trì · Kỷ luật · Danh dự
+                Chiến trận · Phục bàn · Luyện binh
               </p>
             </div>
           </div>

@@ -57,9 +57,9 @@ check(
   true
 );
 check(
-  "câu STOIC-IELTS tự viết KHÔNG được gán cho danh nhân lịch sử",
+  "câu HỔ PHÙ · IELTS tự viết KHÔNG được gán cho danh nhân lịch sử",
   TITLE_SEEDS.filter((t) => t.quoteKind === "ORIGINAL").every((t) =>
-    (t.quoteSource ?? "").includes("STOIC-IELTS")
+    (t.quoteSource ?? "").includes("HỔ PHÙ")
   ),
   true
 );

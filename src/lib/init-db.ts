@@ -5,6 +5,7 @@ import {
   calculateReadingBand,
   isValidAchievementAttempt,
 } from "@/lib/reading-band";
+import { seedRankCatalog, backfillUserRanks } from "@/lib/ranks/seeds";
 import seedData from "../../prisma/seed-data.json";
 import readingGameTheory from "../../prisma/reading-game-theory.json";
 import readingPaidPack1 from "../../prisma/reading-paid-pack-1.json";
@@ -737,6 +738,155 @@ const DDL = [
     CONSTRAINT \`CompetitionAppeal_sessionId_fkey\` FOREIGN KEY (\`sessionId\`) REFERENCES \`ExamSession\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT \`CompetitionAppeal_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
   ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  /* ===== Hệ cấp bậc và thí luyện =====
+     Chỉ thêm bảng mới, không đụng tới bảng cũ. Rút lui bằng cách tắt cờ
+     tính năng và revert mã nguồn; không bảng nào bị xóa. */
+
+  `CREATE TABLE IF NOT EXISTS \`RankDefinition\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`level\` INTEGER NOT NULL,
+    \`code\` VARCHAR(191) NOT NULL,
+    \`slug\` VARCHAR(191) NOT NULL,
+    \`name\` VARCHAR(191) NOT NULL,
+    \`era\` VARCHAR(32) NOT NULL,
+    \`bandAnchor\` VARCHAR(191) NOT NULL,
+    \`description\` TEXT NOT NULL,
+    \`active\` BOOLEAN NOT NULL DEFAULT true,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`updatedAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`RankDefinition_level_key\` (\`level\`),
+    UNIQUE INDEX \`RankDefinition_code_key\` (\`code\`),
+    UNIQUE INDEX \`RankDefinition_slug_key\` (\`slug\`)
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`TrialDefinition\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`code\` VARCHAR(191) NOT NULL,
+    \`slug\` VARCHAR(191) NOT NULL,
+    \`name\` VARCHAR(191) NOT NULL,
+    \`featuredGeneralCode\` VARCHAR(32) NOT NULL,
+    \`fromLevel\` INTEGER NOT NULL,
+    \`toLevel\` INTEGER NOT NULL,
+    \`skill\` VARCHAR(191) NOT NULL,
+    \`rationale\` TEXT NOT NULL,
+    \`narrative\` TEXT NOT NULL,
+    \`quoteSource\` VARCHAR(191) NULL,
+    \`quoteSourceUrl\` TEXT NULL,
+    \`gateRuleKey\` VARCHAR(64) NOT NULL,
+    \`gateConfigJson\` LONGTEXT NOT NULL,
+    \`successRuleKey\` VARCHAR(64) NOT NULL,
+    \`successConfigJson\` LONGTEXT NOT NULL,
+    \`retryUnlimited\` BOOLEAN NOT NULL DEFAULT true,
+    \`estimate\` VARCHAR(191) NOT NULL,
+    \`active\` BOOLEAN NOT NULL DEFAULT true,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`updatedAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`TrialDefinition_code_key\` (\`code\`),
+    UNIQUE INDEX \`TrialDefinition_slug_key\` (\`slug\`),
+    UNIQUE INDEX \`TrialDefinition_fromLevel_toLevel_key\` (\`fromLevel\`, \`toLevel\`)
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`UserRank\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`currentLevel\` INTEGER NOT NULL DEFAULT 1,
+    \`currentRankCode\` VARCHAR(191) NOT NULL DEFAULT 'RANK_01_BACH_THAN',
+    \`cardinalTitleCode\` VARCHAR(32) NULL,
+    \`promotedAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`lastActiveAt\` DATETIME(3) NULL,
+    \`version\` INTEGER NOT NULL DEFAULT 1,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`updatedAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`UserRank_userId_key\` (\`userId\`),
+    CONSTRAINT \`UserRank_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`UserTrial\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`trialCode\` VARCHAR(64) NOT NULL,
+    \`status\` VARCHAR(24) NOT NULL DEFAULT 'LOCKED',
+    \`gateSnapshotJson\` LONGTEXT NULL,
+    \`progressJson\` LONGTEXT NULL,
+    \`resultSnapshotJson\` LONGTEXT NULL,
+    \`eligibleAt\` DATETIME(3) NULL,
+    \`startedAt\` DATETIME(3) NULL,
+    \`completedAt\` DATETIME(3) NULL,
+    \`sourceEventId\` VARCHAR(191) NULL,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`updatedAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`UserTrial_userId_trialCode_key\` (\`userId\`, \`trialCode\`),
+    INDEX \`UserTrial_status_updatedAt_idx\` (\`status\`, \`updatedAt\`),
+    CONSTRAINT \`UserTrial_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`TrialRun\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`userTrialId\` VARCHAR(191) NOT NULL,
+    \`runNumber\` INTEGER NOT NULL,
+    \`status\` VARCHAR(24) NOT NULL DEFAULT 'ACTIVE',
+    \`configSnapshotJson\` LONGTEXT NOT NULL,
+    \`progressJson\` LONGTEXT NULL,
+    \`resultJson\` LONGTEXT NULL,
+    \`startedAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`endedAt\` DATETIME(3) NULL,
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`TrialRun_userTrialId_runNumber_key\` (\`userTrialId\`, \`runNumber\`),
+    INDEX \`TrialRun_status_startedAt_idx\` (\`status\`, \`startedAt\`),
+    CONSTRAINT \`TrialRun_userTrialId_fkey\` FOREIGN KEY (\`userTrialId\`) REFERENCES \`UserTrial\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`TrialRunEvent\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`userTrialId\` VARCHAR(191) NOT NULL,
+    \`trialRunId\` VARCHAR(191) NOT NULL,
+    \`eventKey\` VARCHAR(191) NOT NULL,
+    \`type\` VARCHAR(64) NOT NULL,
+    \`sourceId\` VARCHAR(191) NULL,
+    \`payloadJson\` LONGTEXT NOT NULL,
+    \`occurredAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`TrialRunEvent_eventKey_key\` (\`eventKey\`),
+    INDEX \`TrialRunEvent_userTrialId_occurredAt_idx\` (\`userTrialId\`, \`occurredAt\`),
+    CONSTRAINT \`TrialRunEvent_trialRunId_fkey\` FOREIGN KEY (\`trialRunId\`) REFERENCES \`TrialRun\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`TrialReflection\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`userTrialId\` VARCHAR(191) NOT NULL,
+    \`sourceAttemptId\` VARCHAR(191) NULL,
+    \`questionType\` VARCHAR(64) NULL,
+    \`evidenceText\` TEXT NOT NULL,
+    \`explanation\` TEXT NOT NULL,
+    \`lessonRule\` TEXT NOT NULL,
+    \`qualityStatus\` VARCHAR(32) NOT NULL DEFAULT 'STRUCTURALLY_VALID',
+    \`approvedAt\` DATETIME(3) NULL,
+    \`approvedById\` VARCHAR(191) NULL,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (\`id\`),
+    INDEX \`TrialReflection_userId_createdAt_idx\` (\`userId\`, \`createdAt\`),
+    INDEX \`TrialReflection_userTrialId_qualityStatus_idx\` (\`userTrialId\`, \`qualityStatus\`),
+    CONSTRAINT \`TrialReflection_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`TrialReflection_userTrialId_fkey\` FOREIGN KEY (\`userTrialId\`) REFERENCES \`UserTrial\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`UserGraceState\` (
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`tokenCode\` VARCHAR(32) NOT NULL DEFAULT 'HOA_DUNG_DAO',
+    \`availableCount\` INTEGER NOT NULL DEFAULT 1,
+    \`lastGrantedAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`lastUsedAt\` DATETIME(3) NULL,
+    \`nextGrantAt\` DATETIME(3) NULL,
+    \`updatedAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (\`userId\`),
+    CONSTRAINT \`UserGraceState_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
 ];
 
 /**
@@ -839,6 +989,27 @@ export async function initDatabase() {
   });
   for (const msg of adminResult.messages) {
     console.log(`[wobridges] ${msg}`);
+  }
+
+  /**
+   * Catalog cấp bậc và hồ sơ cấp bậc mức 1.
+   *
+   * Chạy KHÔNG phụ thuộc cờ ENABLE_RANK_ENGINE, và đó là chủ ý: dữ liệu phải
+   * có mặt sẵn trước khi giao diện được mở, để lúc bật cờ không ai phải chờ
+   * một đợt backfill chạy giữa giờ cao điểm.
+   *
+   * Bọc try/catch riêng vì đây là module mới nhất. Một lỗi ở đây không được
+   * phép làm hỏng việc khởi tạo của những phần đã chạy ổn định lâu nay.
+   */
+  try {
+    const seeded = await seedRankCatalog(db);
+    const backfilled = await backfillUserRanks(db);
+    console.log(
+      `[wobridges] Cap bac: ${seeded.ranks} cap, ${seeded.trials} thi luyen; ` +
+        `tao moi ${backfilled} ho so cap bac.`,
+    );
+  } catch (err) {
+    console.error("[wobridges] Khong seed duoc he cap bac:", err);
   }
 
   const exercises: SeedExercise[] = [
