@@ -16,6 +16,7 @@ import { StudyCalendar } from "@/components/student/study-calendar";
 import { WeeklyStats, type WeeklyRow } from "@/components/student/weekly-stats";
 import { HistoryTabs, type HistoryItem } from "@/components/student/history-tabs";
 import { AchievementSummaryCard } from "@/components/achievements/achievement-summary-card";
+import { RankDashboardBlock } from "@/components/ranks/rank-dashboard-block";
 
 export const metadata: Metadata = { title: "Hồ sơ học tập" };
 
@@ -163,6 +164,10 @@ export default async function StudentDashboard() {
       </section>
 
       <section className="mx-auto max-w-6xl space-y-8 px-6 py-12">
+        {/* Cấp bậc đứng đầu vì nó trả lời câu hỏi "giờ làm gì tiếp". Tự ẩn khi
+            cờ ENABLE_RANK_ENGINE còn tắt. */}
+        <RankDashboardBlock userId={user.id} />
+
         {/* Danh hiệu: chỉ tóm tắt, KHÔNG truy vấn cả danh mục ở trang này */}
         <AchievementSummaryCard userId={user.id} />
 

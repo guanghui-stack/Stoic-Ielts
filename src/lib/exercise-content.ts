@@ -72,6 +72,25 @@ export type FeynmanLearningNote = {
   skillTag?: string;
 };
 
+/**
+ * Tên hiển thị của tám dạng câu.
+ *
+ * Đặt ở đây thay vì trong từng component: bảng này đã có hai bản sao ở hai
+ * chỗ khác nhau, và bản sao thứ hai luôn là bản bị quên khi tên dạng đổi.
+ * Giữ tiếng Anh vì đây là thuật ngữ IELTS, học viên gặp đúng chữ này trong
+ * đề thi thật.
+ */
+export const QUESTION_TYPE_LABELS: Record<string, string> = {
+  TFNG: "True / False / Not Given",
+  MC: "Multiple Choice",
+  MC_MULTI: "Multiple Choice (nhiều đáp án)",
+  GAP: "Gap Filling",
+  MATCH_HEADINGS: "Matching Headings",
+  MATCH_INFO: "Matching Information",
+  MATCH_FEATURES: "Matching Features",
+  MATCH_ENDINGS: "Matching Sentence Endings",
+};
+
 export type ReadingQuestion = {
   id: string;
   /** Nội dung câu hỏi/câu khẳng định. Với GAP có thể chứa ______ (ô điền inline). */
