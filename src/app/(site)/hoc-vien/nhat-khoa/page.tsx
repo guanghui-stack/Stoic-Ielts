@@ -1,8 +1,8 @@
-import Link from "next/link";
-import { ArrowLeft, Flame, CalendarCheck } from "lucide-react";
+import { Flame, CalendarCheck } from "lucide-react";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
 import { SectionHeading, NoteBox } from "@/components/ui";
+import { StudentNav } from "@/components/student/student-nav";
 
 export const metadata = { title: "Nhật Khóa — Ngày học thật" };
 export const dynamic = "force-dynamic";
@@ -72,13 +72,8 @@ export default async function StudyLogPage() {
 
   return (
     <main className="mx-auto max-w-4xl px-6 py-10">
-      <Link
-        href="/hoc-vien"
-        className="mb-6 inline-flex items-center gap-2 text-sm text-muted hover:text-navy"
-      >
-        <ArrowLeft className="size-4" aria-hidden />
-        Trung Quân Trướng
-      </Link>
+      <StudentNav current="studyDays" />
+
 
       <SectionHeading label="Nhật Khóa" title="Ngày học thật của bạn" />
 

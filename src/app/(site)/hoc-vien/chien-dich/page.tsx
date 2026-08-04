@@ -1,10 +1,9 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
 import { features } from "@/lib/features";
 import { SectionHeading, NoteBox } from "@/components/ui";
+import { StudentNav } from "@/components/student/student-nav";
 import { CampaignMap } from "@/components/campaign/campaign-map";
 import { CampaignTimelineMobile } from "@/components/campaign/campaign-timeline-mobile";
 import { campaignView, type TrialStatusMap } from "@/lib/campaign/view";
@@ -54,13 +53,8 @@ export default async function CampaignPage() {
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-10">
-      <Link
-        href="/hoc-vien"
-        className="mb-6 inline-flex items-center gap-2 text-sm text-muted hover:text-navy"
-      >
-        <ArrowLeft className="size-4" aria-hidden />
-        Trung Quân Trướng
-      </Link>
+      <StudentNav current="campaign" />
+
 
       <SectionHeading label="Chiến Dịch" title="Bản đồ thăng cấp" />
 

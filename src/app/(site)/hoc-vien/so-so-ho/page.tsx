@@ -1,7 +1,7 @@
-import Link from "next/link";
-import { ArrowLeft, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { requireUser } from "@/lib/session";
 import { SectionHeading, NoteBox, ButtonLink } from "@/components/ui";
+import { StudentNav } from "@/components/student/student-nav";
 import { loadRankFacts } from "@/lib/ranks/facts";
 import {
   MIN_SAMPLES,
@@ -29,13 +29,8 @@ export default async function WeaknessPage() {
 
   return (
     <main className="mx-auto max-w-4xl px-6 py-10">
-      <Link
-        href="/hoc-vien"
-        className="mb-6 inline-flex items-center gap-2 text-sm text-muted hover:text-navy"
-      >
-        <ArrowLeft className="size-4" aria-hidden />
-        Trung Quân Trướng
-      </Link>
+      <StudentNav current="weakness" />
+
 
       <SectionHeading label="Sổ Sơ Hở" title="Dạng câu bạn hay sai" />
 

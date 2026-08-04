@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
 import { titleOverviewFor, type TitleCard } from "@/lib/achievements/view";
 import { SectionHeading, NoteBox } from "@/components/ui";
+import { StudentNav } from "@/components/student/student-nav";
 import { RewardClaimForm } from "@/components/achievements/reward-claim-form";
 import { PublicProfileForm } from "@/components/achievements/public-profile-form";
 
@@ -46,6 +47,8 @@ export default async function MyTitlesPage() {
 
   return (
     <section className="mx-auto max-w-4xl px-6 py-12 md:py-16">
+      <StudentNav current="titles" />
+
       <Link
         href="/hoc-vien"
         className="inline-flex items-center gap-2 font-ui text-sm font-semibold text-navy hover:text-gold"

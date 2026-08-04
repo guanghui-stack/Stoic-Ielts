@@ -11,6 +11,7 @@ import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
 import { logoutAction } from "@/lib/actions/auth";
 import { ButtonLink, NoteBox } from "@/components/ui";
+import { StudentNav } from "@/components/student/student-nav";
 import { GoalsCard } from "@/components/student/goals-card";
 import { StudyCalendar } from "@/components/student/study-calendar";
 import { WeeklyStats, type WeeklyRow } from "@/components/student/weekly-stats";
@@ -164,6 +165,8 @@ export default async function StudentDashboard() {
       </section>
 
       <section className="mx-auto max-w-6xl space-y-8 px-6 py-12">
+        <StudentNav current="student" />
+
         {/* Cấp bậc đứng đầu vì nó trả lời câu hỏi "giờ làm gì tiếp". Tự ẩn khi
             cờ ENABLE_RANK_ENGINE còn tắt. */}
         <RankDashboardBlock userId={user.id} />
