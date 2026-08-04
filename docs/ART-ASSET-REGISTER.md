@@ -10,10 +10,34 @@ Nguồn sự thật về đường dẫn, tỷ lệ, điểm lấy nét và acce
 
 ## Trạng thái hiện tại
 
-**Chưa có ảnh nào được duyệt.** Toàn bộ mục trong art manifest đang là hợp
-đồng đã chốt trước, chờ art đi qua pipeline duyệt. Giao diện chạy bình thường
-khi thiếu ảnh: `InkWashHero` tự thay bằng lớp mực CSS và mọi chữ vẫn nằm
-trong DOM.
+**Đã duyệt đủ 16 ảnh của art manifest (04/08/2026).** Hero trang chủ, sáu chân
+dung Lục tướng, tám ảnh cửa ải và nền bản đồ Chiến Dịch. Không còn mục nào
+thiếu file.
+
+Cơ chế dự phòng khi thiếu ảnh vẫn giữ nguyên và vẫn phải giữ: `InkWashArt` tự
+biến mất khi ảnh không tải được, lớp mực CSS lộ ra, mọi chữ vẫn nằm trong DOM.
+
+### Nguồn gốc bảy ảnh này
+
+Chủ dự án cung cấp sáu ảnh gốc, nhúng trong file đặc tả Word. Cả sáu đều có chữ
+nung sẵn ở góc trên trái và bốn ảnh có ký tự chữ Hán, nên **không dùng trực tiếp
+được**. Chúng đã đi qua `scripts/clean-art-text.mjs` (Gemini image editing) để xoá
+chữ, ký tự Hán và con dấu có chữ; phần bị xoá được lấp lại bằng vân giấy. Bố cục,
+nhân vật, màu accent và mực bắn tóe giữ nguyên bản gốc.
+
+Từng ảnh sau khi xử lý đã được mở ra kiểm tra bằng mắt, xác nhận không còn ký tự
+chữ Hán và con dấu đã thành ô chu sa trừu tượng không chữ, đúng §8.4.
+
+Tám ảnh cửa ải và nền bản đồ do `scripts/generate-art.mjs` sinh mới. Hai ảnh
+bị loại ở vòng duyệt đầu và đã sinh lại: cửa 2 có ký tự chữ Hán trên lá cờ,
+cửa 4 vẽ nhầm cổng torii Nhật Bản thay vì cổng thành Trung Hoa. Bản thay thế
+đã kiểm tra lại bằng mắt.
+
+### Một việc còn nợ
+
+| Việc | Lý do |
+|---|---|
+| Mã Siêu sai accent | Ảnh gốc dùng vàng kim, manifest chốt **bạc lam**. Cần sinh lại; hiện tạm dùng vì bố cục và chất lượng vẫn đạt |
 
 ## Quy tắc bắt buộc
 
@@ -44,7 +68,22 @@ trong DOM.
 
 | Khóa manifest | File | Accent | Nhân vật | Người duyệt | Ngày duyệt | Phiên bản |
 |---|---|---|---|---|---|---|
-| _(chưa có mục nào)_ | | | | | | |
+| `homeTrieuVan` | `art/home/trieu-van-hero.webp` | Lam điện | Triệu Vân | chủ dự án | 04/08/2026 | 1 |
+| `generalTrieuVan` | `art/generals/trieu-van.webp` | Lam điện | Triệu Vân | chủ dự án | 04/08/2026 | 1 |
+| `generalTruongPhi` | `art/generals/truong-phi.webp` | Chu sa | Trương Phi | chủ dự án | 04/08/2026 | 2 |
+| `generalQuanVu` | `art/generals/quan-vu.webp` | Lục ngọc | Quan Vũ | chủ dự án | 04/08/2026 | 1 |
+| `generalHoangTrung` | `art/generals/hoang-trung.webp` | Kim đồng | Hoàng Trung | chủ dự án | 04/08/2026 | 1 |
+| `generalMaSieu` | `art/generals/ma-sieu.webp` | ⚠ vàng kim, phải là bạc lam | Mã Siêu | tạm dùng | 04/08/2026 | 1 |
+| `generalLuBo` | `art/generals/lu-bo.webp` | Hỏa cam | Lữ Bố | chủ dự án | 04/08/2026 | 1 |
+| `trialDaoVien` | `art/trials/trial-01-dao-vien.webp` | Chu sa | Trương Phi, Quan Vũ | sinh mới | 04/08/2026 | 1 |
+| `trialHoangCan` | `art/trials/trial-02-hoang-can.webp` | Kim đồng | Trương Phi | sinh lại lần 2 | 04/08/2026 | 2 |
+| `trialHoaHung` | `art/trials/trial-03-hoa-hung.webp` | Lục ngọc | Quan Vũ | sinh mới | 04/08/2026 | 1 |
+| `trialNguQuan` | `art/trials/trial-04-ngu-quan.webp` | Chu sa | Quan Vũ | sinh lại lần 2 | 04/08/2026 | 2 |
+| `trialTruongBan` | `art/trials/trial-05-truong-ban.webp` | Lam điện | Triệu Vân | sinh mới | 04/08/2026 | 1 |
+| `trialLaoTuong` | `art/trials/trial-06-hoang-trung.webp` | Kim đồng | Hoàng Trung | sinh mới | 04/08/2026 | 1 |
+| `trialTayLuong` | `art/trials/trial-07-ma-sieu.webp` | Bạc lam | Mã Siêu | sinh mới | 04/08/2026 | 1 |
+| `trialHoLao` | `art/trials/trial-08-lu-bo.webp` | Hỏa cam | Lữ Bố | sinh mới | 04/08/2026 | 1 |
+| `campaignMap` | `art/campaign/map-loan-the-quan-hung-tam-phan.webp` | Mực navy | — | sinh mới | 04/08/2026 | 1 |
 
 ## Prompt khung
 
