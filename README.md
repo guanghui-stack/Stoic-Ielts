@@ -1,10 +1,24 @@
-# Wobridges IELTS Reading
+# HỔ PHÙ · IELTS
 
-Nền tảng luyện IELTS Reading của **Trung tâm Anh ngữ Wobridges** (World Bridges — “những cây cầu kết nối thế giới”).
+**Chiến trận · Phục bàn · Luyện binh**
+
+Nền tảng luyện IELTS Reading vận hành như một hành trình Tam Quốc, do **Công ty
+TNHH Kết Nối Toàn Cầu** (Wobridges — World Bridges) phát triển.
+
+Hổ phù là binh phù xẻ đôi: lệnh chỉ có hiệu lực khi hai nửa khớp nhau. Một nửa
+là kết quả đo được (band, độ chính xác, thời gian), nửa còn lại là quá trình
+kiểm chứng được (phục bàn, ngày học thật, liêm chính). Cấp bậc chỉ được trao
+khi cả hai phía cùng hợp lệ.
+
+Cốt truyện xoay quanh đúng sáu nhân vật: Lữ Bố, Triệu Vân, Quan Vũ, Trương Phi,
+Hoàng Trung và Mã Siêu. Toàn bộ giao diện, tài liệu và metadata chỉ dùng tiếng
+Việt và danh xưng Hán-Việt viết bằng chữ cái Latin — không ký tự chữ Hán ở bất
+kỳ đâu. Quy tắc này được `npm run test:no-han` kiểm tra tự động.
 
 ## Tính năng
 
-**Trang công khai** giữ phong cách editorial nền kem, navy, vàng đồng và font serif:
+**Trang công khai** dùng hệ thiết kế thủy mặc: nền giấy gạo, mực navy, con dấu
+chu sa, mỗi module một màu accent duy nhất, tiêu đề serif:
 
 - Trang chủ Reading
 - Hai kho đề tách biệt: **Academic** và **General**

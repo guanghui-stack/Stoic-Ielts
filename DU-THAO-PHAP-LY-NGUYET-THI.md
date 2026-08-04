@@ -106,7 +106,7 @@ Mã nguồn ép tách riêng từng loại, mỗi loại một ô tích. Gộp c
 
 ### 3.2. Ghi nhật ký thao tác trong lúc thi *(bắt buộc)*
 
-> Tôi đồng ý để STOIC-IELTS ghi lại các thao tác của tôi trên màn hình thi trong
+> Tôi đồng ý để HỔ PHÙ · IELTS ghi lại các thao tác của tôi trên màn hình thi trong
 > thời gian làm bài Nguyệt Thí: nỗ lực sao chép, chuyển cửa sổ, sử dụng phím tắt
 > bị cấm, thời điểm và thời lượng rời khỏi màn hình thi, trạng thái kết nối mạng.
 >
@@ -117,7 +117,7 @@ Mã nguồn ép tách riêng từng loại, mỗi loại một ô tích. Gộp c
 
 ### 3.3. Công bố tên trên Bảng Vàng *(tự nguyện)*
 
-> Tôi đồng ý cho STOIC-IELTS công bố tên hoặc biệt danh của tôi trên Bảng Vàng và
+> Tôi đồng ý cho HỔ PHÙ · IELTS công bố tên hoặc biệt danh của tôi trên Bảng Vàng và
 > Điện Danh Vọng nếu tôi đoạt giải.
 
 **Điều mã nguồn bảo đảm:** không tích ô này **vẫn dự thi và vẫn nhận giải bình
