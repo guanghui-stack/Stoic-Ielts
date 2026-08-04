@@ -13,7 +13,11 @@ import {
 } from "@/lib/ranks/catalog";
 import { ensureUserRank, startTrial, syncTrialEligibility } from "@/lib/ranks/engine";
 import { loadRankFacts } from "@/lib/ranks/facts";
-import { evaluateTrialGate, evaluateTrialSuccess } from "@/lib/ranks/rules";
+import {
+  evaluateTrialGate,
+  evaluateTrialSuccess,
+  validateReflection,
+} from "@/lib/ranks/rules";
 
 /**
  * Server Action của hệ cấp bậc.
@@ -79,6 +83,74 @@ export async function chooseCardinalTitleAction(
 
   revalidatePath("/hoc-vien");
   return { ok: true };
+}
+
+/* ================================================================== */
+/* Phục bàn miễn phí trong thí luyện                                   */
+/* ================================================================== */
+
+export type ReflectionState =
+  | { error?: string; fieldErrors?: Record<string, string>; success?: string }
+  | undefined;
+
+/**
+ * Ghi một lượt phục bàn miễn phí gắn với thí luyện đang chạy.
+ *
+ * Chỉ nhận khi thí luyện ở trạng thái ACTIVE. Viết trước khi bấm "Khởi thí
+ * luyện" thì không tính — cùng một ranh giới startedAt mà cả engine tuân theo,
+ * nếu không học viên có thể tích sẵn một tập phục bàn rồi bấm nút là vượt luôn.
+ */
+export async function submitTrialReflectionAction(
+  _prev: ReflectionState,
+  formData: FormData,
+): Promise<ReflectionState> {
+  const blocked = guard();
+  if (blocked) return { error: blocked.error };
+
+  const user = await getCurrentUser();
+  if (!user) return { error: "Bạn cần đăng nhập." };
+
+  const trialCode = String(formData.get("trialCode") ?? "");
+  const input = {
+    evidenceText: String(formData.get("evidenceText") ?? ""),
+    explanation: String(formData.get("explanation") ?? ""),
+    lessonRule: String(formData.get("lessonRule") ?? ""),
+  };
+
+  const check = validateReflection(input);
+  if (!check.valid) {
+    return {
+      error: "Còn thiếu thông tin, xem lại các ô bên dưới.",
+      fieldErrors: check.errors as Record<string, string>,
+    };
+  }
+
+  const userTrial = await db.userTrial.findUnique({
+    where: { userId_trialCode: { userId: user.id, trialCode } },
+    select: { id: true, status: true },
+  });
+
+  if (!userTrial || userTrial.status !== "ACTIVE") {
+    return { error: "Cửa ải này chưa được khởi, hoặc đã kết thúc." };
+  }
+
+  const questionType = String(formData.get("questionType") ?? "").trim();
+  const sourceAttemptId = String(formData.get("sourceAttemptId") ?? "").trim();
+
+  await db.trialReflection.create({
+    data: {
+      userId: user.id,
+      userTrialId: userTrial.id,
+      questionType: questionType || null,
+      sourceAttemptId: sourceAttemptId || null,
+      evidenceText: input.evidenceText.trim(),
+      explanation: input.explanation.trim(),
+      lessonRule: input.lessonRule.trim(),
+    },
+  });
+
+  revalidatePath(`/hoc-vien/thi-luyen/${trialCode}`);
+  return { success: "Đã ghi lượt phục bàn. Tiến độ cửa ải sẽ cập nhật ở lượt xét tiếp theo." };
 }
 
 /* ================================================================== */

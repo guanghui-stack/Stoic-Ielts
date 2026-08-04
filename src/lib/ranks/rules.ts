@@ -539,6 +539,63 @@ export function evaluateSuccess(
   }
 }
 
+/* ===================== Phục bàn miễn phí ===================== */
+
+/**
+ * Bốn trường tối thiểu của một TrialReflection, theo đặc tả §4.3.
+ *
+ * Đây là đường phục bàn KHÔNG MẤT TIỀN. Nó tồn tại để mọi cửa ải có yêu cầu
+ * chữa bài đều đi qua được mà không phải mua Feynman — nếu chỗ này lỏng lẻo
+ * thì hoặc học viên viết một chữ cho xong và cấp bậc mất giá trị, hoặc nó
+ * khắt khe tới mức người ta bỏ tiền mua cho nhanh, và cả hai đều phá vỡ lời
+ * hứa "không trả tiền để mạnh hơn".
+ *
+ * Ngưỡng ký tự cố tình đặt thấp: đủ để chặn "abc" và khoảng trắng, không đủ
+ * để ép người học viết văn. Chất lượng thật do giáo viên duyệt sau, không do
+ * máy đếm chữ quyết định.
+ */
+export const REFLECTION_MIN_LENGTH = {
+  evidenceText: 10,
+  explanation: 20,
+  lessonRule: 15,
+} as const;
+
+export type ReflectionInput = {
+  evidenceText: string;
+  explanation: string;
+  lessonRule: string;
+};
+
+export type ReflectionCheck = {
+  valid: boolean;
+  /** Lỗi theo từng trường, để giao diện chỉ đúng ô cần sửa. */
+  errors: Partial<Record<keyof ReflectionInput, string>>;
+};
+
+const REFLECTION_LABELS: Record<keyof ReflectionInput, string> = {
+  evidenceText: "Vị trí bằng chứng trong bài",
+  explanation: "Vì sao đáp án cũ sai",
+  lessonRule: "Quy tắc rút ra cho bài sau",
+};
+
+export function validateReflection(input: ReflectionInput): ReflectionCheck {
+  const errors: ReflectionCheck["errors"] = {};
+
+  for (const key of Object.keys(REFLECTION_MIN_LENGTH) as Array<
+    keyof ReflectionInput
+  >) {
+    const value = (input[key] ?? "").trim();
+    const min = REFLECTION_MIN_LENGTH[key];
+    if (value.length === 0) {
+      errors[key] = `${REFLECTION_LABELS[key]} chưa được điền.`;
+    } else if (value.length < min) {
+      errors[key] = `${REFLECTION_LABELS[key]} cần ít nhất ${min} ký tự.`;
+    }
+  }
+
+  return { valid: Object.keys(errors).length === 0, errors };
+}
+
 /* ===================== Hàm tiện dụng cho engine ===================== */
 
 export function evaluateTrialGate(
