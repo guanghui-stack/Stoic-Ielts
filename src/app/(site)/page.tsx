@@ -11,22 +11,33 @@ import {
 import { READING_NAV } from "@/lib/nav";
 import { BADGE_INFO } from "@/components/competition/badges";
 import { SectionHeading, NoteBox, ButtonLink } from "@/components/ui";
+import { InkWashHero } from "@/components/brand/ink-wash-hero";
+import { ART_ASSETS } from "@/lib/brand/art-manifest";
 
-/** Ba trụ — cũng chính là ba rãnh trên logomark. */
+/**
+ * Ba trụ — cũng chính là ba khấc răng cưa trên binh phù.
+ *
+ * Mỗi trụ hiển thị theo nhãn kép: tên cổ phong để ghi nhớ, dòng chức năng
+ * ngay bên dưới để người mới không phải đoán. Ai chưa từng nghe "Phục bàn"
+ * vẫn phải đọc được "Chữa bài Feynman" mà hiểu ngay.
+ */
 const PILLARS = [
   {
     icon: BookOpen,
-    title: "Giải đề",
+    title: "Chiến trận",
+    functional: "Làm đề Reading",
     body: "Làm bài trong đúng điều kiện phòng thi máy tính, chấm và quy đổi band ngay khi nộp. Không có band ảo: điểm được tính theo bảng quy đổi IELTS thật, không phải phần trăm số câu đúng.",
   },
   {
     icon: Brain,
-    title: "Sửa đề",
+    title: "Phục bàn",
+    functional: "Chữa bài Feynman",
     body: "Làm thêm đề không tự khiến bạn giỏi hơn. Sau mỗi bài, bạn tự giảng lại vì sao mình sai, tìm bằng chứng trong đoạn văn, rồi rút một quy tắc dùng được cho bài sau.",
   },
   {
     icon: Repeat,
-    title: "Kỷ luật",
+    title: "Luyện binh",
+    functional: "Ngày học thật",
     body: "Hệ thống đếm thời gian học THẬT — chỉ tính khi bạn đang thực sự làm bài, không tính tab mở quên tắt. Danh hiệu kỷ luật cần hàng chục ngày, và không có cách nào rút ngắn.",
   },
 ];
@@ -35,32 +46,33 @@ export default function HomePage() {
   return (
     <>
       {/* ===== Hero ===== */}
-      <section className="border-b border-line bg-paper">
-        <div className="mx-auto max-w-6xl px-6 py-16 md:py-24">
-          <div className="max-w-3xl">
-            <p className="label-caps">STOIC-IELTS · Luyện Reading Academic &amp; General</p>
-            <h1 className="mt-4 font-display text-4xl font-bold leading-[1.12] text-navy-deep md:text-6xl">
-              Điểm số là hệ quả.<br />Kỷ luật mới là thứ bạn kiểm soát.
-            </h1>
-            <div className="rule-gold mt-7" />
-            <p className="mt-7 max-w-2xl text-lg leading-relaxed text-ink-soft">
-              Người Khắc kỷ không lo về kết quả — họ lo về việc hôm nay đã làm
-              đúng phần của mình chưa. Ở đây cũng vậy: bạn không mua được danh
-              hiệu, không cày tắt được Nguyệt Thí. Chỉ có làm bài đều đặn, chữa
-              sai tử tế, và để thời gian làm nốt phần còn lại.
-            </p>
-            <div className="mt-9 flex flex-wrap gap-3">
-              <ButtonLink href="/dang-ky" variant="primary">
-                Bắt đầu miễn phí
-                <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              </ButtonLink>
-              <ButtonLink href="/nguyet-thi" variant="outline">
-                Tìm hiểu Nguyệt Thí
-              </ButtonLink>
-            </div>
-          </div>
+      <InkWashHero
+        asset={ART_ASSETS.homeTrieuVan}
+        eyebrow="HỔ PHÙ · IELTS · Luyện Reading Academic và General"
+        title={
+          <>
+            Binh phù chỉ hiệu lực<br />khi hai nửa khớp nhau.
+          </>
+        }
+        functionalLabel="Cổng Doanh — Trang chủ HỔ PHÙ · IELTS"
+      >
+        <p className="text-lg leading-relaxed text-ink-soft">
+          Hổ phù là binh phù xẻ đôi: lệnh chỉ có giá trị khi hai mảnh ăn khớp.
+          Ở đây, một nửa là kết quả đo được — band, độ chính xác, thời gian
+          làm bài. Nửa còn lại là quá trình kiểm chứng được — bài đã chữa,
+          ngày đã học thật. Bạn không mua được cấp bậc, không cày tắt được
+          Nguyệt Thí: cấp bậc chỉ trao khi cả hai nửa cùng hợp lệ.
+        </p>
+        <div className="mt-9 flex flex-wrap gap-3">
+          <ButtonLink href="/dang-ky" variant="primary">
+            Bắt đầu miễn phí
+            <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          </ButtonLink>
+          <ButtonLink href="/nguyet-thi" variant="outline">
+            Tìm hiểu Nguyệt Thí
+          </ButtonLink>
         </div>
-      </section>
+      </InkWashHero>
 
       {/* ===== Hai dạng đề ===== */}
       <section className="mx-auto max-w-6xl px-6 py-16 md:py-20">
@@ -110,10 +122,11 @@ export default function HomePage() {
           <div className="mt-12 grid gap-px border border-line bg-line md:grid-cols-3">
             {PILLARS.map((p) => (
               <article key={p.title} className="bg-paper p-8">
-                <p.icon className="h-6 w-6 text-gold" aria-hidden="true" />
+                <p.icon className="h-6 w-6 text-gold-ink" aria-hidden="true" />
                 <h3 className="mt-5 font-display text-xl font-semibold text-navy-deep">
                   {p.title}
                 </h3>
+                <p className="dual-label__function mt-1">{p.functional}</p>
                 <p className="mt-3 text-[0.92rem] leading-relaxed text-ink-soft">
                   {p.body}
                 </p>
