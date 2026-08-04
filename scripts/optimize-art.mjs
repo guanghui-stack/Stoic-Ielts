@@ -34,7 +34,8 @@ const JOBS = [
   { dir: "suaMau", src: "truong-phi-v2.png", out: "art/generals/truong-phi.webp", width: 1280, maxKb: 220 },
   { dir: "sach", src: "quan-vu-v1.png", out: "art/generals/quan-vu.webp", width: 1280, maxKb: 220 },
   { dir: "sach", src: "hoang-trung-v1.png", out: "art/generals/hoang-trung.webp", width: 1280, maxKb: 220 },
-  { dir: "sach", src: "ma-sieu-v1.png", out: "art/generals/ma-sieu.webp", width: 1280, maxKb: 220 },
+  // Mã Siêu cũng dùng bản sửa màu: ảnh gốc dùng vàng kim, manifest chốt bạc lam.
+  { dir: "suaMau", src: "ma-sieu-bac-lam-v1.png", out: "art/generals/ma-sieu.webp", width: 1280, maxKb: 220 },
   { dir: "sach", src: "lu-bo-v1.png", out: "art/generals/lu-bo.webp", width: 1280, maxKb: 220 },
 
   { dir: "cuaAi", src: "trial-01-dao-vien-v1.png", out: "art/trials/trial-01-dao-vien.webp", width: 1280, maxKb: 280 },

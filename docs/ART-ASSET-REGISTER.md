@@ -33,11 +33,11 @@ bị loại ở vòng duyệt đầu và đã sinh lại: cửa 2 có ký tự c
 cửa 4 vẽ nhầm cổng torii Nhật Bản thay vì cổng thành Trung Hoa. Bản thay thế
 đã kiểm tra lại bằng mắt.
 
-### Một việc còn nợ
+### Không còn việc nợ
 
-| Việc | Lý do |
-|---|---|
-| Mã Siêu sai accent | Ảnh gốc dùng vàng kim, manifest chốt **bạc lam**. Cần sinh lại; hiện tạm dùng vì bố cục và chất lượng vẫn đạt |
+Trương Phi và Mã Siêu đều đã có bản đúng accent. Cả hai ảnh gốc dùng vàng kim
+trong khi manifest chốt chu sa và bạc lam; bản thay thế giữ nguyên bố cục,
+nhân vật và nét mực, chỉ đổi màu năng lượng.
 
 ## Quy tắc bắt buộc
 
@@ -73,7 +73,7 @@ cửa 4 vẽ nhầm cổng torii Nhật Bản thay vì cổng thành Trung Hoa. 
 | `generalTruongPhi` | `art/generals/truong-phi.webp` | Chu sa | Trương Phi | chủ dự án | 04/08/2026 | 2 |
 | `generalQuanVu` | `art/generals/quan-vu.webp` | Lục ngọc | Quan Vũ | chủ dự án | 04/08/2026 | 1 |
 | `generalHoangTrung` | `art/generals/hoang-trung.webp` | Kim đồng | Hoàng Trung | chủ dự án | 04/08/2026 | 1 |
-| `generalMaSieu` | `art/generals/ma-sieu.webp` | ⚠ vàng kim, phải là bạc lam | Mã Siêu | tạm dùng | 04/08/2026 | 1 |
+| `generalMaSieu` | `art/generals/ma-sieu.webp` | Bạc lam | Mã Siêu | chủ dự án | 05/08/2026 | 2 |
 | `generalLuBo` | `art/generals/lu-bo.webp` | Hỏa cam | Lữ Bố | chủ dự án | 04/08/2026 | 1 |
 | `trialDaoVien` | `art/trials/trial-01-dao-vien.webp` | Chu sa | Trương Phi, Quan Vũ | sinh mới | 04/08/2026 | 1 |
 | `trialHoangCan` | `art/trials/trial-02-hoang-can.webp` | Kim đồng | Trương Phi | sinh lại lần 2 | 04/08/2026 | 2 |
