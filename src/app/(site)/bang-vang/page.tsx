@@ -7,7 +7,7 @@ import { PageHero, NoteBox } from "@/components/ui";
 export const metadata = {
   title: "Bảng Vàng Nguyệt Thí",
   description:
-    "Kết quả các kỳ Nguyệt Thí của STOIC-IELTS — công bố sau khi đã rà soát.",
+    "Kết quả các kỳ Nguyệt Thí của HỔ PHÙ · IELTS — công bố sau khi đã rà soát.",
 };
 export const dynamic = "force-dynamic";
 

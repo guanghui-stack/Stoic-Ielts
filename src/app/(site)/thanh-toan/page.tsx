@@ -16,7 +16,7 @@ import { ErrorBanner, NoteBox, SectionHeading } from "@/components/ui";
 export const metadata = {
   title: "Bảng giá",
   description:
-    "Mở khóa bài luyện Reading và quy trình chữa bài Feynman của STOIC-IELTS.",
+    "Mở khóa bài luyện Reading và quy trình chữa bài Feynman của HỔ PHÙ · IELTS.",
 };
 export const dynamic = "force-dynamic";
 

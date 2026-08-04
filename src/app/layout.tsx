@@ -23,11 +23,11 @@ const beVietnam = Be_Vietnam_Pro({
 
 export const metadata: Metadata = {
   title: {
-    default: "STOIC-IELTS — Luyện IELTS Reading bằng kỷ luật",
-    template: "%s | STOIC-IELTS",
+    default: "HỔ PHÙ · IELTS — Chiến trận · Phục bàn · Luyện binh",
+    template: "%s | HỔ PHÙ · IELTS",
   },
   description:
-    "STOIC-IELTS — kho đề IELTS Reading Academic và General tách biệt, quy đổi band ngay khi nộp, hệ danh hiệu dành cho người kiên trì và cuộc thi Nguyệt Thí hằng tháng.",
+    "HỔ PHÙ · IELTS — kho đề IELTS Reading Academic và General tách biệt, quy đổi band ngay khi nộp, hệ cấp bậc và danh hiệu dành cho người kiên trì, cùng ba tầng đại thí Nguyệt Thí, Dương Thí và Thiên Thí.",
 };
 
 export default function RootLayout({

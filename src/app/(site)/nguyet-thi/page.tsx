@@ -12,7 +12,7 @@ import { ErrorBanner, NoteBox, PageHero, SubmitButton } from "@/components/ui";
 export const metadata = {
   title: "Nguyệt Thí",
   description:
-    "Cuộc thi IELTS Reading hàng tháng của STOIC-IELTS — ba đề trong bảy ngày, giải thưởng tiền mặt, và huy hiệu chỉ dành cho ba người đứng đầu.",
+    "Cuộc thi IELTS Reading hàng tháng của HỔ PHÙ · IELTS — ba đề trong bảy ngày, giải thưởng tiền mặt, và huy hiệu chỉ dành cho ba người đứng đầu.",
 };
 export const dynamic = "force-dynamic";
 

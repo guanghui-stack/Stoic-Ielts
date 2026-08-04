@@ -92,7 +92,10 @@ export function buildSePayCheckout(order: {
     order_invoice_number: order.invoiceNumber,
     order_amount: order.amount,
     currency: order.currency,
-    order_description: `STOIC-IELTS - ${label}`,
+    // Không dấu là cố ý: nội dung chuyển khoản đi qua hệ thống ngân hàng,
+    // nơi ký tự tiếng Việt có dấu hay bị cắt hoặc biến dạng. Tên hiển thị
+    // cho người dùng ở mọi nơi khác vẫn là "HỔ PHÙ · IELTS".
+    order_description: `HO PHU IELTS - ${label}`,
     customer_id: order.userId,
     // Ba đường quay về này CHỈ để hiển thị giao diện. Việc mở quyền hoàn toàn
     // dựa vào IPN máy chủ-tới-máy chủ, nên tự mở success_url không ăn thua.
