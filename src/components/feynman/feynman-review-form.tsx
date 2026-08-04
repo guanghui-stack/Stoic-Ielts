@@ -1,5 +1,6 @@
 "use client";
 
+import { QUESTION_TYPE_LABELS } from "@/lib/exercise-content";
 import { useActionState, useState } from "react";
 import {
   Eye,
@@ -46,16 +47,6 @@ export type FeynmanMistakeView = {
   modelParaphrases?: Array<{ question: string; passage: string }>;
 };
 
-const QUESTION_TYPE_LABELS: Record<string, string> = {
-  TFNG: "True / False / Not Given",
-  MC: "Multiple Choice",
-  MC_MULTI: "Multiple Choice (nhiều đáp án)",
-  GAP: "Gap Filling",
-  MATCH_HEADINGS: "Matching Headings",
-  MATCH_INFO: "Matching Information",
-  MATCH_FEATURES: "Matching Features",
-  MATCH_ENDINGS: "Matching Sentence Endings",
-};
 
 /* ===================== Khối dùng chung ===================== */
 

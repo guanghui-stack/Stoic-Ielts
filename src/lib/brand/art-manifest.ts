@@ -22,9 +22,15 @@ import type { GeneralCode } from "@/lib/story/generals";
  *     thấy ảnh vẫn hình dung được cảnh. Ảnh thuần trang trí thì để chuỗi
  *     rỗng — mô tả một hình nền vô nghĩa chỉ làm ồn trình đọc màn hình.
  *
- * Trạng thái hiện tại: CHƯA CÓ FILE ẢNH NÀO trong repo. Toàn bộ mục dưới
- * đây là hợp đồng đã chốt trước, chờ art đi qua pipeline duyệt thủ công.
- * Giao diện vì vậy phải chạy đúng khi không có ảnh — xem `InkWashHero`.
+ * Trạng thái: hero trang chủ và sáu chân dung Lục tướng ĐÃ CÓ FILE (04/08/2026).
+ * Nền bản đồ và tám ảnh cửa ải vẫn là hợp đồng chốt trước, chưa có file. Giao
+ * diện vì vậy vẫn phải chạy đúng khi thiếu ảnh — xem `InkWashHero`.
+ *
+ * Chân dung Lục tướng để 16:9 chứ không phải 4:5 như bản đặc tả: ảnh gốc do chủ
+ * dự án cung cấp là cảnh hành động ngang, nhân vật lệch phải và chừa sẵn khoảng
+ * trống bên trái. Trường `ratio` chỉ là siêu dữ liệu — `InkWashArt` dựng bằng
+ * `fill` + `object-cover` nên khung do container quyết định, đổi số này không
+ * làm dịch bố cục.
  */
 
 export type ArtRatio = "16:9" | "21:9" | "4:5" | "1:1";
@@ -70,8 +76,8 @@ export const ART_ASSETS = {
   generalTruongPhi: {
     src: "/art/generals/truong-phi.webp",
     alt: "Trương Phi cầm xà mâu, thế đứng mở trận, mực chu sa nơi mũi giáo",
-    ratio: "4:5",
-    focal: { x: 50, y: 40 },
+    ratio: "16:9",
+    focal: { x: 58, y: 46 },
     accent: "VERMILION",
     featuredGeneralCode: "TRUONG_PHI",
     containsText: false,
@@ -80,8 +86,8 @@ export const ART_ASSETS = {
   generalQuanVu: {
     src: "/art/generals/quan-vu.webp",
     alt: "Quan Vũ đứng thẳng với thanh long đao, ánh lục ngọc dọc lưỡi đao",
-    ratio: "4:5",
-    focal: { x: 50, y: 40 },
+    ratio: "16:9",
+    focal: { x: 58, y: 46 },
     accent: "JADE",
     featuredGeneralCode: "QUAN_VU",
     containsText: false,
@@ -90,8 +96,8 @@ export const ART_ASSETS = {
   generalTrieuVan: {
     src: "/art/generals/trieu-van.webp",
     alt: "Triệu Vân trên ngựa trắng, giáo ánh lam điện, nét mực tĩnh giữa trận",
-    ratio: "4:5",
-    focal: { x: 50, y: 40 },
+    ratio: "16:9",
+    focal: { x: 58, y: 46 },
     accent: "BLUE",
     featuredGeneralCode: "TRIEU_VAN",
     containsText: false,
@@ -100,8 +106,8 @@ export const ART_ASSETS = {
   generalHoangTrung: {
     src: "/art/generals/hoang-trung.webp",
     alt: "Hoàng Trung giương cung trên chiến mã, ánh kim đồng nơi dây cung",
-    ratio: "4:5",
-    focal: { x: 50, y: 40 },
+    ratio: "16:9",
+    focal: { x: 58, y: 46 },
     accent: "GOLD",
     featuredGeneralCode: "HOANG_TRUNG",
     containsText: false,
@@ -110,8 +116,8 @@ export const ART_ASSETS = {
   generalMaSieu: {
     src: "/art/generals/ma-sieu.webp",
     alt: "Mã Siêu đột kích, ngọn thương tạo vòng sáng bạc lam",
-    ratio: "4:5",
-    focal: { x: 50, y: 40 },
+    ratio: "16:9",
+    focal: { x: 58, y: 46 },
     accent: "SILVER_BLUE",
     featuredGeneralCode: "MA_SIEU",
     containsText: false,
@@ -120,8 +126,8 @@ export const ART_ASSETS = {
   generalLuBo: {
     src: "/art/generals/lu-bo.webp",
     alt: "Lữ Bố trên chiến mã, phương thiên họa kích phát sáng hỏa cam",
-    ratio: "4:5",
-    focal: { x: 50, y: 40 },
+    ratio: "16:9",
+    focal: { x: 58, y: 46 },
     accent: "FIRE",
     featuredGeneralCode: "LU_BO",
     containsText: false,
