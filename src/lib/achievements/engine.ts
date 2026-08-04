@@ -2,6 +2,8 @@ import "server-only";
 import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { TITLE_SEEDS } from "@/lib/achievements/catalog";
+import { features } from "@/lib/features";
+import { processRankEvent } from "@/lib/ranks/engine";
 import {
   dateKeyOf,
   evalActiveTimeWindow,
@@ -161,6 +163,23 @@ export async function processAchievementEvent(eventId: string): Promise<void> {
       ruleKeys: RULES_FOR_EVENT[event.type as AchievementEventType] ?? [],
       sourceEventId: event.id,
     });
+
+    // Cấp bậc dùng chung hàng đợi này thay vì có hàng đợi riêng, nhưng vẫn là
+    // hai hệ độc lập ở tầng nghiệp vụ: Danh hiệu không thăng cấp, Cấp bậc
+    // không trao danh hiệu. Lỗi bên cấp bậc KHÔNG được làm hỏng việc trao
+    // danh hiệu đã tính xong ở trên, nên nó có try/catch riêng.
+    if (features.ranks) {
+      try {
+        await processRankEvent({
+          id: event.id,
+          userId: event.userId,
+          type: event.type,
+        });
+      } catch (rankError) {
+        console.error("[wobridges] Xét cấp bậc thất bại:", rankError);
+      }
+    }
+
     await db.achievementEvent.update({
       where: { id: event.id },
       data: { status: "PROCESSED", processedAt: new Date() },
