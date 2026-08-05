@@ -60,12 +60,18 @@ const unknownColumns: string[] = [];
 let indexCount = 0;
 let widest = { name: "", bytes: 0 };
 
+/** Kiểu cột theo "Bảng.cột", dùng lại cho phần CREATE INDEX rời bên dưới. */
+const tableColumnTypes = new Map<string, string>();
+
 for (const [, tableName, body] of tables) {
   // Kiểu dữ liệu của từng cột trong bảng này
   const columnTypes = new Map<string, string>();
   for (const line of body.split("\n")) {
     const column = line.match(/^\s*\\`(\w+)\\`\s+([A-Z]+(\(\d+\))?)/);
-    if (column) columnTypes.set(column[1], column[2]);
+    if (column) {
+      columnTypes.set(column[1], column[2]);
+      tableColumnTypes.set(`${tableName}.${column[1]}`, column[2]);
+    }
   }
 
   // Mọi index, kể cả UNIQUE và PRIMARY KEY
@@ -98,8 +104,58 @@ for (const [, tableName, body] of tables) {
   }
 }
 
+/*
+ * Index tạo bằng lệnh CREATE INDEX rời trong MIGRATIONS.
+ *
+ * Trước đây bộ kiểm tra này chỉ đọc khối CREATE TABLE, nên một index thêm sau
+ * bằng migration sẽ lọt lưới hoàn toàn — đúng loại lỗi mà file này sinh ra để
+ * chặn. Kiểu cột lấy từ chính bảng đích đã khai ở CREATE TABLE, cộng thêm cột
+ * do migration ADD COLUMN thêm vào.
+ */
+const migrationColumns = new Map<string, string>();
+for (const [, table, column, type] of source.matchAll(
+  /ALTER TABLE \\`(\w+)\\` ADD COLUMN \\`(\w+)\\`\s+([A-Z]+(\(\d+\))?)/g,
+)) {
+  migrationColumns.set(`${table}.${column}`, type);
+}
+
+const standaloneIndexes = [
+  ...source.matchAll(
+    /CREATE\s+(?:(UNIQUE)\s+)?INDEX \\`(\w+)\\` ON \\`(\w+)\\`\s*\(([^)]*)\)/g,
+  ),
+];
+
+for (const [, , indexName, tableName, columnList] of standaloneIndexes) {
+  const columns = [...columnList.matchAll(/\\`(\w+)\\`/g)].map((m) => m[1]);
+  if (columns.length === 0) continue;
+  indexCount += 1;
+
+  let bytes = 0;
+  for (const column of columns) {
+    const type =
+      tableColumnTypes.get(`${tableName}.${column}`) ??
+      migrationColumns.get(`${tableName}.${column}`);
+    if (!type) {
+      unknownColumns.push(`${tableName}.${column}`);
+      continue;
+    }
+    bytes += columnBytes(type);
+  }
+
+  const label = `${tableName}.${indexName}`;
+  if (bytes > widest.bytes) widest = { name: label, bytes };
+  if (bytes > MAX_INDEX_BYTES) {
+    offenders.push(`${label} = ${bytes} byte (${columns.join(", ")})`);
+  }
+}
+
 check("mọi cột trong index đều khai báo được kiểu", unknownColumns, []);
 check("KHÔNG index nào vượt 3072 byte", offenders, []);
+check(
+  "có quét cả index tạo bằng CREATE INDEX rời trong MIGRATIONS",
+  standaloneIndexes.length > 0,
+  true,
+);
 console.log(
   `  ℹ đã kiểm ${indexCount} index · dài nhất: ${widest.name} = ${widest.bytes} byte`
 );

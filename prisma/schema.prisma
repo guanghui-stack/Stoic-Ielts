@@ -36,15 +36,16 @@ model User {
   paymentOrders  PaymentOrder[]
   accessGrants   AccessGrant[]
 
-  assemblies         ReadingAssembly[]
-  competitionEntries CompetitionEntry[]
-  badges             UserBadge[]
-  integrityFlags     IntegrityFlag[]
-  titleAwards        UserTitle[]
-  titleProgress      TitleProgress[]
-  achievementEvents  AchievementEvent[]
-  rewardGrants       RewardGrant[]
-  studyDays          StudyDay[]
+  assemblies                ReadingAssembly[]
+  competitionEntries        CompetitionEntry[]
+  competitionQualifications CompetitionQualification[]
+  badges                    UserBadge[]
+  integrityFlags            IntegrityFlag[]
+  titleAwards               UserTitle[]
+  titleProgress             TitleProgress[]
+  achievementEvents         AchievementEvent[]
+  rewardGrants              RewardGrant[]
+  studyDays                 StudyDay[]
 
   // Liêm chính Nguyệt Thí
   identityProfile    IdentityProfile?
@@ -609,10 +610,88 @@ model Competition {
   /// SANDBOX | PRODUCTION — môi trường Exam Vault phát gói đề.
   examVaultEnvironment   String  @default("SANDBOX") @db.VarChar(16)
 
+  // MONTHLY | QUARTERLY | ANNUAL. Ba tầng dùng chung engine này, khác nhau ở
+  // chu kỳ, nguồn thí sinh, ngưỡng tuyển chọn và thời hạn huy hiệu.
+  tier String @default("MONTHLY") @db.VarChar(16)
+
+  // "2026-08" cho tháng, "2026-Q3" cho quý, "2026" cho năm. Ba dạng khác nhau
+  // nên khóa mùa của ba tầng không bao giờ đụng nhau.
+  seasonKey String @default("") @db.VarChar(16)
+
+  featuredGeneralCode String? @db.VarChar(24)
+  badgeDurationDays   Int     @default(30)
+
   exercises     CompetitionExercise[]
   entries       CompetitionEntry[]
   badges        UserBadge[]
   identityLocks IdentityCompetitionLock[]
+
+  sources        CompetitionSource[]        @relation("TargetSources")
+  sourceFor      CompetitionSource[]        @relation("SourceCompetitions")
+  qualifications CompetitionQualification[]
+
+  @@index([tier, seasonKey])
+}
+
+/**
+ * Kỳ nguồn cấp thí sinh cho một kỳ đích.
+ * Dương Thí lấy từ đúng ba Nguyệt Thí trong quý, Thiên Thí lấy từ đúng bốn
+ * Dương Thí trong năm. Quan hệ này là dữ liệu chứ không suy ra từ ngày tháng:
+ * quản trị viên phải chọn tường minh kỳ nào là nguồn, và mọi vé sinh ra đều
+ * truy ngược được về đúng kỳ đó.
+ */
+model CompetitionSource {
+  id                  String @id @default(cuid())
+  targetCompetitionId String
+  sourceCompetitionId String
+
+  // Thứ tự chia ghế. Ghế trùng được nhường xuống trong CÙNG một kỳ nguồn,
+  // nên thứ tự này quyết định kỳ nào được xét trước.
+  orderIndex Int
+
+  createdAt DateTime @default(now())
+
+  target Competition @relation("TargetSources", fields: [targetCompetitionId], references: [id], onDelete: Cascade)
+  // Restrict chứ không Cascade: xóa một Nguyệt Thí đã dùng làm nguồn sẽ làm
+  // mất dấu vết vì sao một người có vé Dương Thí.
+  source Competition @relation("SourceCompetitions", fields: [sourceCompetitionId], references: [id], onDelete: Restrict)
+
+  @@unique([targetCompetitionId, sourceCompetitionId])
+  @@unique([targetCompetitionId, orderIndex])
+}
+
+/**
+ * Vé mời dự thi tầng trên, sinh từ kết quả tầng dưới.
+ * Khóa duy nhất trên (targetCompetitionId, userId) là chốt chặn quan trọng
+ * nhất: một người chỉ có một ghế ở kỳ đích, kể cả khi lọt top ở cả ba kỳ
+ * nguồn. Không có nút thêm thí sinh tùy ý — mọi ghế đều phải truy ngược được
+ * về một entry có thật ở một kỳ nguồn đã chốt.
+ */
+model CompetitionQualification {
+  id                  String @id @default(cuid())
+  targetCompetitionId String
+  sourceCompetitionId String @db.VarChar(191)
+  sourceEntryId       String @db.VarChar(191)
+  userId              String
+
+  sourceRank Int
+
+  // DIRECT là suất top gốc; CASCADE là ghế được nhường xuống.
+  route String @default("DIRECT") @db.VarChar(16)
+
+  // OFFERED | ACCEPTED | DECLINED | EXPIRED | REVOKED
+  status String @default("OFFERED") @db.VarChar(24)
+
+  offeredAt  DateTime  @default(now())
+  expiresAt  DateTime
+  acceptedAt DateTime?
+
+  target Competition @relation(fields: [targetCompetitionId], references: [id], onDelete: Cascade)
+  user   User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([targetCompetitionId, userId])
+  @@unique([targetCompetitionId, sourceEntryId])
+  @@index([targetCompetitionId, status, sourceRank])
 }
 
 /// Ba đề của một kỳ thi.
@@ -686,6 +765,11 @@ model CompetitionEntry {
   confirmedByAdminId      String?   @db.VarChar(191)
   /// Đã rà soát thủ công chưa — top 10 bắt buộc có mốc này trước khi chốt giải.
   manualReviewCompletedAt DateTime?
+
+  // OPEN là đăng ký mở của Nguyệt Thí; QUALIFIED là vào bằng vé tuyển chọn.
+  // Dương Thí và Thiên Thí chỉ chấp nhận QUALIFIED.
+  entrySource     String  @default("OPEN") @db.VarChar(16)
+  qualificationId String? @unique @db.VarChar(191)
 
   competition Competition          @relation(fields: [competitionId], references: [id], onDelete: Cascade)
   user        User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -1094,18 +1178,18 @@ model Config {
   value String @db.Text
 }
 
-/* ============================================================
-   Hệ cấp bậc và thí luyện
-
-   Toàn bộ nhóm bảng này là bổ sung thuần túy: không sửa và không xóa cột
-   nào của bảng cũ. Nhờ vậy khi cần rút lui chỉ việc tắt cờ tính năng và
-   revert mã nguồn — dữ liệu ở lại nguyên vẹn để điều tra, không có bảng
-   nào bị drop trong lúc khẩn cấp.
-
-   Catalog TypeScript vẫn là nguồn sự thật cho nội dung và ngưỡng. Hai bảng
-   định nghĩa dưới đây chỉ là bản đã seed để truy vấn, hiển thị trong khu
-   quản trị và chụp lại cấu hình tại thời điểm học viên bắt đầu thí luyện.
-   ============================================================ */
+/**
+ * ============================================================
+ * Hệ cấp bậc và thí luyện
+ * Toàn bộ nhóm bảng này là bổ sung thuần túy: không sửa và không xóa cột
+ * nào của bảng cũ. Nhờ vậy khi cần rút lui chỉ việc tắt cờ tính năng và
+ * revert mã nguồn — dữ liệu ở lại nguyên vẹn để điều tra, không có bảng
+ * nào bị drop trong lúc khẩn cấp.
+ * Catalog TypeScript vẫn là nguồn sự thật cho nội dung và ngưỡng. Hai bảng
+ * định nghĩa dưới đây chỉ là bản đã seed để truy vấn, hiển thị trong khu
+ * quản trị và chụp lại cấu hình tại thời điểm học viên bắt đầu thí luyện.
+ * ============================================================
+ */
 
 model RankDefinition {
   id          String   @id @default(cuid())
@@ -1122,18 +1206,18 @@ model RankDefinition {
 }
 
 model TrialDefinition {
-  id                  String   @id @default(cuid())
-  code                String   @unique
-  slug                String   @unique
+  id                  String  @id @default(cuid())
+  code                String  @unique
+  slug                String  @unique
   name                String
-  featuredGeneralCode String   @db.VarChar(32)
+  featuredGeneralCode String  @db.VarChar(32)
   fromLevel           Int
   toLevel             Int
   skill               String
-  rationale           String   @db.Text
-  narrative           String   @db.Text
+  rationale           String  @db.Text
+  narrative           String  @db.Text
   quoteSource         String?
-  quoteSourceUrl      String?  @db.Text
+  quoteSourceUrl      String? @db.Text
 
   // Gate quyết định "cửa đã hiện ra chưa"; success quyết định "đã vượt chưa".
   // Hai luật tách rời vì gate được phép nhìn dữ liệu quá khứ, còn success
