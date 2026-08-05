@@ -16,6 +16,7 @@ const TABS = [
   { href: "/quan-tri/phan-thuong", label: "Phần thưởng" },
   { href: "/quan-tri/bo-de", label: "Bộ đề" },
   { href: "/quan-tri/cuoc-thi", label: "Nguyệt Thí" },
+  ...(features.ranks ? [{ href: "/quan-tri/cap-bac", label: "Cấp bậc" }] : []),
   ...(features.competitionTiers
     ? [{ href: "/quan-tri/tuyen-chon", label: "Tuyển chọn" }]
     : []),
