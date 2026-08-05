@@ -16,6 +16,16 @@ import { tierPolicy, type CompetitionTier } from "@/lib/competition/tiers";
  * không, trang này chỉ là một cánh cửa đóng không lời giải thích.
  */
 
+/**
+ * Band luôn viết một chữ số thập phân: 8 hiển thị thành "8.0".
+ *
+ * Không phải chuyện thẩm mỹ — trong IELTS, 8 và 8.0 đọc giống nhau nhưng
+ * "band 8" trông như một con số làm tròn, còn ngưỡng ở đây là chính xác.
+ */
+function bandLabel(band: number | null): string {
+  return band === null ? "—" : band.toFixed(1);
+}
+
 function formatDate(date: Date): string {
   return date.toLocaleDateString("vi-VN", {
     day: "2-digit",
@@ -86,7 +96,7 @@ export async function TierCompetitionView({ tier }: { tier: CompetitionTier }) {
         <NoteBox className="mt-8" title="Bạn chưa có vé cho kỳ này">
           Con đường vào {policy.name} đi qua {sourceName}: lọt top{" "}
           {policy.topPerSource} của một kỳ {sourceName}, đạt band thấp nhất từ{" "}
-          <strong>{policy.minLowestBand}</strong> ở cả ba đề, và kết quả không
+          <strong>{bandLabel(policy.minLowestBand)}</strong> ở cả ba đề, và kết quả không
           còn đang rà soát.
           <div className="mt-5">
             <ButtonLink href="/nguyet-thi" variant="primary">
@@ -115,7 +125,7 @@ export async function TierCompetitionView({ tier }: { tier: CompetitionTier }) {
           <div>
             <dt className="font-ui text-xs uppercase tracking-wide text-muted">Band thấp nhất</dt>
             <dd className="mt-0.5 font-ui text-sm text-ink-soft">
-              Từ {policy.minLowestBand} ở cả ba đề
+              Từ {bandLabel(policy.minLowestBand)} ở cả ba đề
             </dd>
           </div>
           <div>
