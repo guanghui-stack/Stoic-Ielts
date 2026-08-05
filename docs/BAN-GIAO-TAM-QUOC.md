@@ -24,13 +24,15 @@ Cập nhật: 06/08/2026
 
 ## 2. Việc còn lại, theo thứ tự nên làm
 
-1. **Trang quản trị cấp bậc** theo §11.1 — chỉ đọc catalog đã seed, xem timeline
-   một `UserTrial`, nút reset một `TrialRun` lỗi kỹ thuật (không đổi rank).
-   KHÔNG cho sửa `ruleConfig` bằng form production.
-2. **Trang preview asset** theo §11.2 — lưới toàn bộ `ART_ASSETS`, kiểm crop
+1. **Trang preview asset** theo §11.2 — lưới toàn bộ `ART_ASSETS`, kiểm crop
    desktop/mobile, alt text, dung lượng.
+2. **Timeline một `UserTrial`** trong trang quản trị cấp bậc — hiện đã có phân
+   bố và thống kê, còn thiếu phần xem chi tiết hành trình một học viên.
 3. **Kiểm thử tích hợp** cho Sổ Sơ Hở và Nhật Khóa với dữ liệu thật.
 4. **PR-09** khi chủ dự án đã quyết định về consent.
+
+Trang quản trị cấp bậc (§11.1) đã có ở `/quan-tri/cap-bac`, chỉ đọc, không có
+form sửa `ruleConfig` và không có nút tăng cấp nhanh.
 
 ## 3. Phần CHƯA được nhìn tận mắt
 
