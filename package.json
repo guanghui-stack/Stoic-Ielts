@@ -25,7 +25,8 @@
     "test:rank-rules": "node --experimental-strip-types scripts/test-rank-rules.ts",
     "test:campaign": "node --experimental-strip-types scripts/test-campaign-view.ts",
     "test:weakness": "node --experimental-strip-types scripts/test-weakness.ts",
-    "test:qualification": "node --experimental-strip-types scripts/test-competition-qualification.ts"
+    "test:qualification": "node --experimental-strip-types scripts/test-competition-qualification.ts",
+    "check:db": "node scripts/check-db-parity.mjs"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
