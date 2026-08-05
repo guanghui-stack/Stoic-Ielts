@@ -2,7 +2,12 @@ import Link from "next/link";
 import { LogOut } from "lucide-react";
 import { requireAdmin } from "@/lib/session";
 import { logoutAction } from "@/lib/actions/auth";
+import { features } from "@/lib/features";
 
+/**
+ * Tab "Tuyển chọn" chỉ hiện khi cờ ba tầng đại thí được bật. Hiện một tab dẫn
+ * tới trang trả 404 thì tệ hơn là không hiện gì.
+ */
 const TABS = [
   { href: "/quan-tri", label: "Tổng quan" },
   { href: "/quan-tri/bai-tap", label: "Bài tập" },
@@ -11,6 +16,9 @@ const TABS = [
   { href: "/quan-tri/phan-thuong", label: "Phần thưởng" },
   { href: "/quan-tri/bo-de", label: "Bộ đề" },
   { href: "/quan-tri/cuoc-thi", label: "Nguyệt Thí" },
+  ...(features.competitionTiers
+    ? [{ href: "/quan-tri/tuyen-chon", label: "Tuyển chọn" }]
+    : []),
   { href: "/doi-mat-khau", label: "Đổi mật khẩu" },
 ];
 

@@ -97,6 +97,35 @@ async function loadSources(targetCompetitionId: string): Promise<SourceCompetiti
   }));
 }
 
+/**
+ * Tính thử kết quả tuyển chọn mà KHÔNG ghi gì.
+ *
+ * Quản trị viên phải thấy được ai sẽ nhận vé, ai bị loại và vì sao, TRƯỚC khi
+ * bấm nút. Sinh vé rồi mới phát hiện gắn nhầm kỳ nguồn nghĩa là đã gửi lời
+ * mời sai cho người thật.
+ */
+export async function previewQualifications(targetCompetitionId: string) {
+  const target = await db.competition.findUnique({
+    where: { id: targetCompetitionId },
+    select: { tier: true },
+  });
+  if (!target) return null;
+
+  const policy = tierPolicy(target.tier as CompetitionTier);
+  const sources = await loadSources(targetCompetitionId);
+  const gate = canBuildOffers(sources, policy);
+
+  return {
+    policy,
+    sourceCount: sources.length,
+    ready: gate.ok,
+    blockedReason: gate.ok ? null : gate.reason,
+    // Vẫn tính thử ngay cả khi chưa đủ điều kiện: quản trị viên cần thấy
+    // danh sách đang hình thành thế nào để biết còn thiếu gì.
+    result: buildQualificationOffers(sources, policy),
+  };
+}
+
 export type GenerateResult =
   | { ok: false; error: string }
   | {

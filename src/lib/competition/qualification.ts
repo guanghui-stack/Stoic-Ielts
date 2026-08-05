@@ -75,9 +75,11 @@ export function isEligible(
     return { ok: false, reason: "Còn khiếu nại chưa khép lại." };
   }
   if (policy.minLowestBand !== null && entry.lowestBand < policy.minLowestBand) {
+    // Band luôn viết một chữ số thập phân: "band 7" trông như số làm tròn,
+    // còn ngưỡng ở đây là chính xác và người bị loại có quyền biết rõ.
     return {
       ok: false,
-      reason: `Band thấp nhất ${entry.lowestBand} chưa đạt ngưỡng ${policy.minLowestBand}.`,
+      reason: `Band thấp nhất ${entry.lowestBand.toFixed(1)} chưa đạt ngưỡng ${policy.minLowestBand.toFixed(1)}.`,
     };
   }
   return { ok: true };
