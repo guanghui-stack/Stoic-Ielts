@@ -887,6 +887,45 @@ const DDL = [
     PRIMARY KEY (\`userId\`),
     CONSTRAINT \`UserGraceState_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
   ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  // ===== Tam tầng đại thí: Nguyệt Thí → Dương Thí → Thiên Thí =====
+  //
+  // Đã cộng byte index trước khi viết: mỗi VARCHAR(191) utf8mb4 chiếm 764
+  // byte, giới hạn InnoDB là 3072. Index lớn nhất ở đây là 1528 byte
+  // (hai cột VARCHAR(191)), còn dư gấp đôi.
+
+  `CREATE TABLE IF NOT EXISTS \`CompetitionSource\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`targetCompetitionId\` VARCHAR(191) NOT NULL,
+    \`sourceCompetitionId\` VARCHAR(191) NOT NULL,
+    \`orderIndex\` INTEGER NOT NULL,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`CompetitionSource_target_source_key\` (\`targetCompetitionId\`, \`sourceCompetitionId\`),
+    UNIQUE INDEX \`CompetitionSource_target_order_key\` (\`targetCompetitionId\`, \`orderIndex\`),
+    CONSTRAINT \`CompetitionSource_target_fkey\` FOREIGN KEY (\`targetCompetitionId\`) REFERENCES \`Competition\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`CompetitionSource_source_fkey\` FOREIGN KEY (\`sourceCompetitionId\`) REFERENCES \`Competition\` (\`id\`) ON DELETE RESTRICT ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`CompetitionQualification\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`targetCompetitionId\` VARCHAR(191) NOT NULL,
+    \`sourceCompetitionId\` VARCHAR(191) NOT NULL,
+    \`sourceEntryId\` VARCHAR(191) NOT NULL,
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`sourceRank\` INTEGER NOT NULL,
+    \`route\` VARCHAR(16) NOT NULL DEFAULT 'DIRECT',
+    \`status\` VARCHAR(24) NOT NULL DEFAULT 'OFFERED',
+    \`offeredAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`expiresAt\` DATETIME(3) NOT NULL,
+    \`acceptedAt\` DATETIME(3) NULL,
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`CompetitionQualification_target_user_key\` (\`targetCompetitionId\`, \`userId\`),
+    UNIQUE INDEX \`CompetitionQualification_target_entry_key\` (\`targetCompetitionId\`, \`sourceEntryId\`),
+    INDEX \`CompetitionQualification_target_status_rank_idx\` (\`targetCompetitionId\`, \`status\`, \`sourceRank\`),
+    CONSTRAINT \`CompetitionQualification_target_fkey\` FOREIGN KEY (\`targetCompetitionId\`) REFERENCES \`Competition\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`CompetitionQualification_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
 ];
 
 /**
@@ -950,6 +989,18 @@ const MIGRATIONS = [
 
   `ALTER TABLE \`IntegrityFlag\` ADD COLUMN \`sessionId\` VARCHAR(191) NULL`,
   `ALTER TABLE \`IntegrityFlag\` ADD COLUMN \`sourceEventId\` VARCHAR(191) NULL`,
+
+  // Tam tầng đại thí. Kỳ đang chạy đều là Nguyệt Thí nên giá trị mặc định
+  // giữ nguyên hành vi cũ: tier MONTHLY, huy hiệu 30 ngày, vào bằng đăng ký mở.
+  `ALTER TABLE \`Competition\` ADD COLUMN \`tier\` VARCHAR(16) NOT NULL DEFAULT 'MONTHLY'`,
+  `ALTER TABLE \`Competition\` ADD COLUMN \`seasonKey\` VARCHAR(16) NOT NULL DEFAULT ''`,
+  `ALTER TABLE \`Competition\` ADD COLUMN \`featuredGeneralCode\` VARCHAR(24) NULL`,
+  `ALTER TABLE \`Competition\` ADD COLUMN \`badgeDurationDays\` INTEGER NOT NULL DEFAULT 30`,
+  `CREATE INDEX \`Competition_tier_seasonKey_idx\` ON \`Competition\` (\`tier\`, \`seasonKey\`)`,
+
+  `ALTER TABLE \`CompetitionEntry\` ADD COLUMN \`entrySource\` VARCHAR(16) NOT NULL DEFAULT 'OPEN'`,
+  `ALTER TABLE \`CompetitionEntry\` ADD COLUMN \`qualificationId\` VARCHAR(191) NULL`,
+  `CREATE UNIQUE INDEX \`CompetitionEntry_qualificationId_key\` ON \`CompetitionEntry\` (\`qualificationId\`)`,
 ];
 
 export async function initDatabase() {

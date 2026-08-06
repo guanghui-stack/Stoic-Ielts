@@ -1,8 +1,10 @@
+import Link from "next/link";
 import { Crown, Medal, Trophy } from "lucide-react";
 import { db } from "@/lib/db";
 import { honorBoard } from "@/lib/competition/service";
 import { formatVnd } from "@/lib/payments/catalog";
 import { PageHero, NoteBox } from "@/components/ui";
+import { features } from "@/lib/features";
 
 export const metadata = {
   title: "Bảng Vàng Nguyệt Thí",
@@ -13,11 +15,35 @@ export const dynamic = "force-dynamic";
 
 const RANK_ICON = [Crown, Trophy, Medal];
 
-export default async function HonorBoardPage() {
+/**
+ * Ba tab tương ứng ba tầng. Trạng thái nằm ở URL chứ không ở React state:
+ * trang vẫn render hoàn toàn ở máy chủ, và người học chia sẻ được đường dẫn
+ * tới đúng tầng mình muốn khoe.
+ */
+const TABS = [
+  { key: "nguyet", tier: "MONTHLY", label: "Nguyệt Thí" },
+  { key: "duong", tier: "QUARTERLY", label: "Dương Thí" },
+  { key: "thien", tier: "ANNUAL", label: "Thiên Thí" },
+] as const;
+
+export default async function HonorBoardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tang?: string }>;
+}) {
+  const { tang } = await searchParams;
+  const showTabs = features.competitionTiers;
+  const active = TABS.find((t) => t.key === tang) ?? TABS[0];
+
   // Chỉ hiện kỳ ĐÃ CHỐT. Kỳ đang chạy không bao giờ lộ kết quả — đó là toàn bộ
   // lý do không có bảng xếp hạng trực tiếp.
   const competitions = await db.competition.findMany({
-    where: { status: "FINALIZED" },
+    where: {
+      status: "FINALIZED",
+      // Cờ tắt thì giữ nguyên hành vi cũ: chỉ Nguyệt Thí, không lọc theo tier
+      // để không giấu mất kỳ cũ chưa có cột tier.
+      ...(showTabs ? { tier: active.tier } : {}),
+    },
     orderBy: { finalizedAt: "desc" },
     take: 12,
   });
@@ -38,6 +64,31 @@ export default async function HonorBoardPage() {
       />
 
       <section className="mx-auto max-w-4xl px-6 py-14">
+        {showTabs && (
+          <nav aria-label="Ba tầng đại thí" className="mb-10 border-b border-line">
+            <ul className="m-0 flex list-none flex-wrap gap-6 p-0 pb-3">
+              {TABS.map((tab) => {
+                const isActive = tab.key === active.key;
+                return (
+                  <li key={tab.key}>
+                    <Link
+                      href={`/bang-vang?tang=${tab.key}`}
+                      aria-current={isActive ? "page" : undefined}
+                      className={`block border-b-2 pb-1 font-ui text-sm font-medium transition-colors ${
+                        isActive
+                          ? "border-gold text-navy-deep"
+                          : "border-transparent text-ink-soft hover:text-navy"
+                      }`}
+                    >
+                      {tab.label}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+        )}
+
         {boards.length === 0 ? (
           <NoteBox title="Chưa có kỳ thi nào khép lại">
             Nguyệt Thí đầu tiên đang được chuẩn bị. Điều kiện dự thi là danh hiệu{" "}
