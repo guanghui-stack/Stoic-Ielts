@@ -24,6 +24,7 @@ const ITEMS: Item[] = [
   { key: "titles", show: true },
   { key: "weakness", show: true },
   { key: "studyDays", show: true },
+  { key: "myData", show: true },
 ];
 
 export function StudentNav({ current }: { current?: UiLabelKey }) {

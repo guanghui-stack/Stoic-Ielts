@@ -888,6 +888,23 @@ const DDL = [
     CONSTRAINT \`UserGraceState_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
   ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
 
+  // Quyền dữ liệu của thí sinh. Index (userId, status) = 764 + 96 = 860 byte,
+  // dư xa so với giới hạn 3072 của InnoDB.
+  `CREATE TABLE IF NOT EXISTS \`DataRightsRequest\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`kind\` VARCHAR(24) NOT NULL,
+    \`status\` VARCHAR(24) NOT NULL DEFAULT 'PENDING',
+    \`scopeJson\` LONGTEXT NOT NULL,
+    \`note\` TEXT NULL,
+    \`requestedAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`resolvedAt\` DATETIME(3) NULL,
+    \`resolvedById\` VARCHAR(191) NULL,
+    PRIMARY KEY (\`id\`),
+    INDEX \`DataRightsRequest_userId_status_idx\` (\`userId\`, \`status\`),
+    CONSTRAINT \`DataRightsRequest_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
   // ===== Tam tầng đại thí: Nguyệt Thí → Dương Thí → Thiên Thí =====
   //
   // Đã cộng byte index trước khi viết: mỗi VARCHAR(191) utf8mb4 chiếm 764

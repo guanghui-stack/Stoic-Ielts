@@ -103,6 +103,11 @@ export const UI_LABELS = {
     themed: "Bảng Vàng",
     functional: "Kết quả kỳ thi đã chốt",
   },
+  myData: {
+    href: "/hoc-vien/du-lieu-cua-toi",
+    themed: "Hồ Sơ Riêng",
+    functional: "Dữ liệu cá nhân và quyền của bạn",
+  },
   hallOfFame: {
     href: "/dien-danh-vong",
     themed: "Điện Danh Vọng",
