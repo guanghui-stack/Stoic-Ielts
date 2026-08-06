@@ -1,13 +1,21 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Shield } from "lucide-react";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/session";
 import { features } from "@/lib/features";
-import { RANK_SEEDS, TRIAL_SEEDS, RANK_ERAS } from "@/lib/ranks/catalog";
+import { RANK_SEEDS, TRIAL_SEEDS, RANK_ERAS, trialByCode } from "@/lib/ranks/catalog";
 import { generalByCode } from "@/lib/story/generals";
 
 export const metadata = { title: "Cấp bậc và thí luyện" };
 export const dynamic = "force-dynamic";
+
+const STATUS_LABEL: Record<string, string> = {
+  LOCKED: "Chưa mở",
+  ELIGIBLE: "Đã mở",
+  ACTIVE: "Đang thí luyện",
+  PASSED: "Đã vượt",
+};
 
 /**
  * Trang quản trị cấp bậc — CHỈ ĐỌC, theo đúng đặc tả §11.1.
@@ -23,13 +31,27 @@ export default async function RankAdminPage() {
   if (!features.ranks) notFound();
   await requireAdmin();
 
-  const [rankCounts, trialRows, graceCount] = await Promise.all([
+  const [rankCounts, trialRows, graceCount, activeTrials] = await Promise.all([
     db.userRank.groupBy({ by: ["currentLevel"], _count: { _all: true } }),
     db.userTrial.groupBy({
       by: ["trialCode", "status"],
       _count: { _all: true },
     }),
     db.userGraceState.count({ where: { availableCount: { gt: 0 } } }),
+    // Hoạt động GẦN NHẤT chứ không chỉ ACTIVE: nếu lọc ACTIVE thì lúc không
+    // ai đang thí luyện sẽ không có đường nào tới trang hành trình, mà đó
+    // đúng là lúc bộ phận hỗ trợ cần tra "vì sao em chưa lên cấp".
+    // Giới hạn 50: trang này để tra cứu nhanh, không phải để duyệt toàn bộ.
+    db.userTrial.findMany({
+      orderBy: { updatedAt: "desc" },
+      take: 50,
+      select: {
+        userId: true,
+        trialCode: true,
+        status: true,
+        user: { select: { name: true, email: true } },
+      },
+    }),
   ]);
 
   const byLevel = new Map(rankCounts.map((r) => [r.currentLevel, r._count._all]));
@@ -145,6 +167,44 @@ export default async function RankAdminPage() {
             </tbody>
           </table>
         </div>
+      </section>
+
+      <section aria-label="Đang thí luyện" className="mt-6 border border-line bg-paper p-7">
+        <h2 className="font-display text-lg font-bold text-navy-deep">
+          Hoạt động cấp bậc gần nhất
+        </h2>
+        <p className="mt-1 font-ui text-sm text-muted">
+          Bấm vào tên để xem hành trình đầy đủ — dùng khi cần trả lời câu hỏi
+          &ldquo;vì sao em chưa lên cấp?&rdquo;
+        </p>
+
+        {activeTrials.length === 0 ? (
+          <p className="mt-4 font-ui text-sm text-muted">
+            Chưa có học viên nào bắt đầu hành trình cấp bậc.
+          </p>
+        ) : (
+          <ul className="mt-4 m-0 list-none space-y-2 p-0">
+            {activeTrials.map((row) => (
+              <li key={`${row.userId}-${row.trialCode}`}>
+                <Link
+                  href={`/quan-tri/cap-bac/${row.userId}`}
+                  className="flex flex-wrap items-center justify-between gap-3 border border-line bg-cream px-4 py-3 transition-colors hover:border-navy"
+                >
+                  <span className="font-ui text-sm font-medium text-navy-deep">
+                    {row.user.name}
+                    <span className="ml-2 text-xs font-normal text-muted">
+                      {row.user.email}
+                    </span>
+                  </span>
+                  <span className="font-ui text-xs text-ink-soft">
+                    {trialByCode(row.trialCode)?.name ?? row.trialCode} ·{" "}
+                    {STATUS_LABEL[row.status] ?? row.status}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       <p className="mt-6 border-l-4 border-gold bg-cream-deep px-6 py-5 text-sm leading-relaxed text-ink-soft">
