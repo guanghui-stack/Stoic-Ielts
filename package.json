@@ -30,7 +30,8 @@
     "test:rank-engine": "node --experimental-strip-types --import ./scripts/alias-loader.mjs scripts/test-rank-engine.ts",
     "test:qualification-db": "node --experimental-strip-types --import ./scripts/alias-loader.mjs scripts/test-qualification-db.ts",
     "test:no-secrets": "node scripts/check-no-secrets.mjs",
-    "seed:demo": "node --experimental-strip-types --import ./scripts/alias-loader.mjs scripts/seed-demo-tam-quoc.ts"
+    "seed:demo": "node --experimental-strip-types --import ./scripts/alias-loader.mjs scripts/seed-demo-tam-quoc.ts",
+    "test:student-pages": "node --experimental-strip-types --import ./scripts/alias-loader.mjs scripts/test-student-pages-db.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
