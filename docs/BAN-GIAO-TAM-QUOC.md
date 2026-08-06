@@ -1,8 +1,8 @@
 # Bản ghi bàn giao — hệ HỔ PHÙ · IELTS
 
-Nhánh: `feature/competition-tiers` (đã push lên origin)
+Nhánh: `feature/campaign-map-2-5d` (đã push). PR-01→09a đã ở `main`.
 Nguồn: Master System Specification v1.1 (`Ho_Phu_IELTS_Tam_Quoc_Master_System_Spec_v1_1.docx`)
-Cập nhật: 06/08/2026
+Cập nhật: 06/08/2026 — bản đồ 2.5D
 
 Đọc mục 1 và mục 3 trước, đó là hai mục quyết định bạn nên làm gì tiếp.
 
@@ -22,7 +22,29 @@ Cập nhật: 06/08/2026
 | PR-08 | Tài liệu QA | Một phần — chính là tài liệu này |
 | PR-09 | Liêm chính và consent | **Chặn** — xem mục 5 |
 
-## 2. Việc còn lại
+## 2. Bản đồ Chiến Dịch 2.5D (mới nhất)
+
+Chủ dự án gửi một file HTML mẫu và yêu cầu làm lại bản đồ theo phong cách đó.
+Đã xong trên nhánh `feature/campaign-map-2-5d`:
+
+- `components/campaign/campaign-map-2-5d.tsx` — mặt đất nghiêng 52 độ, nhãn và
+  cột cờ xoay ngược để đứng dậy, bóng đổ nằm bẹp trên đất, parallax theo chuột
+- `components/campaign/campaign-home-block.tsx` — bản đồ trên **trang chủ**,
+  khách chưa đăng nhập thấy bản giới thiệu, người đã đăng nhập thấy tiến độ thật
+- `lib/campaign/motion.ts` — quyết định chuyển động tách thành hàm thuần vì
+  `prefers-reduced-motion` không ép được từ công cụ kiểm thử trình duyệt
+
+**Còn thiếu 11 ảnh** theo `docs/ART-BRIEF-BAN-DO-2-5D.md`. Chưa có thì nhân vật
+là cờ hổ phù vẽ bằng CSS, bản đồ vẫn đọc được đầy đủ. Ảnh nền bản đồ cũ KHÔNG
+dùng lại được vì nó vẽ theo góc phong cảnh, nghiêng đi sẽ trông như tranh nằm
+bẹp trên sàn — cần ảnh vẽ nhìn thẳng từ trên xuống.
+
+**Phần chưa nhìn tận mắt:** parallax khi rê chuột thật. Sự kiện tổng hợp không
+kích hoạt được hệ sự kiện React, và công cụ trình duyệt không di chuột thật
+được. Đã xác nhận handler gắn đúng vào DOM qua React fiber, và toán học đằng
+sau có 19 phép thử. Nhưng đường nối từ chuột thật tới hàm đó thì chưa chạy thử.
+
+## 3. Việc còn lại
 
 **Chỉ còn PR-09** — liêm chính và consent, đang chặn vì cần quyết định pháp lý
 của chủ dự án. Xem mục 5.
