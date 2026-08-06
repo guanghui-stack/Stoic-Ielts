@@ -22,17 +22,22 @@ Cập nhật: 06/08/2026
 | PR-08 | Tài liệu QA | Một phần — chính là tài liệu này |
 | PR-09 | Liêm chính và consent | **Chặn** — xem mục 5 |
 
-## 2. Việc còn lại, theo thứ tự nên làm
+## 2. Việc còn lại
 
-1. **Trang preview asset** theo §11.2 — lưới toàn bộ `ART_ASSETS`, kiểm crop
-   desktop/mobile, alt text, dung lượng.
-2. **Timeline một `UserTrial`** trong trang quản trị cấp bậc — hiện đã có phân
-   bố và thống kê, còn thiếu phần xem chi tiết hành trình một học viên.
-3. **Kiểm thử tích hợp** cho Sổ Sơ Hở và Nhật Khóa với dữ liệu thật.
-4. **PR-09** khi chủ dự án đã quyết định về consent.
+**Chỉ còn PR-09** — liêm chính và consent, đang chặn vì cần quyết định pháp lý
+của chủ dự án. Xem mục 5.
 
-Trang quản trị cấp bậc (§11.1) đã có ở `/quan-tri/cap-bac`, chỉ đọc, không có
-form sửa `ruleConfig` và không có nút tăng cấp nhanh.
+Toàn bộ khu quản trị đã xong:
+
+| Trang | Nội dung |
+|---|---|
+| `/quan-tri/cap-bac` | §11.1 — phân bố cấp bậc, thống kê tám cửa ải, hoạt động gần nhất |
+| `/quan-tri/cap-bac/[userId]` | Hành trình đầy đủ một học viên, để trả lời "vì sao em chưa lên cấp" |
+| `/quan-tri/hinh-anh` | §11.2 — kiểm kho ảnh, bắt file thiếu và ảnh vượt trần |
+| `/quan-tri/tuyen-chon` | §11.4 — nguồn tuyển chọn, không có nút thêm thí sinh tuỳ ý |
+
+Việc nhỏ có thể làm sau: bảng Nguyệt Thí cũ chưa có `seasonKey` đúng định dạng
+nên nếu muốn dùng chúng làm kỳ nguồn thật thì phải điền tay ở trang Cuộc thi.
 
 ## 3. Phần CHƯA được nhìn tận mắt
 
@@ -49,13 +54,19 @@ form sửa `ruleConfig` và không có nút tăng cấp nhanh.
 - Tầng dữ liệu trang quản trị tuyển chọn: với dữ liệu mẫu cho ra 9 vé,
   6 ghế bỏ trống, 9 người bị loại kèm lý do theo từng ngưỡng band.
 
-**Chưa nhìn tận mắt:**
+- Sổ Sơ Hở và Nhật Khóa: 15 phép thử ở `npm run test:student-pages`, gồm cả
+  việc `loadRankFacts` chấm lại bài để suy ra thống kê theo dạng câu.
+- Kho ảnh: 16 ảnh khai báo, 0 thiếu file, 0 vượt trần, tổng 2249 KB.
 
-- **Giao diện trang quản trị tuyển chọn.** Nó đòi đăng nhập admin, và tôi
-  không nhập mật khẩu vào biểu mẫu — kể cả tài khoản demo cục bộ. Bạn tự đăng
-  nhập xem. Tầng dữ liệu đã kiểm bằng script nên rủi ro còn lại là bố cục.
-- Luồng bấm nút "Sinh vé tuyển chọn" từ giao diện thật.
-- Trang chi tiết cửa ải với dữ liệu thật.
+**Chưa nhìn tận mắt — toàn bộ khu quản trị:**
+
+Bốn trang quản trị đều đòi đăng nhập admin, và tôi không nhập mật khẩu vào
+biểu mẫu — kể cả tài khoản demo cục bộ. **Tầng dữ liệu của cả bốn trang đã
+kiểm bằng script với dữ liệu thật**, nên rủi ro còn lại chỉ là bố cục và cách
+trình bày. Bạn đăng nhập xem là đủ.
+
+Cũng chưa chạy thật: luồng bấm nút "Sinh vé tuyển chọn" từ giao diện, và trang
+chi tiết cửa ải với dữ liệu thật.
 
 ## 4. Cách xem hệ thống chạy trên máy
 
@@ -128,9 +139,11 @@ npm run build
 Cần MySQL cục bộ, chạy riêng:
 
 ```bash
-npm run check:db              # đối chiếu database sống với schema.prisma
-npm run test:rank-engine      # tích hợp: luồng cấp bậc
-npm run test:qualification-db # tích hợp: chốt chặn tuyển chọn
+npm run check:db               # đối chiếu database sống với schema.prisma
+npm run test:rank-engine       # tích hợp: luồng cấp bậc
+npm run test:qualification-db  # tích hợp: chốt chặn tuyển chọn
+npm run test:student-pages     # tích hợp: Sổ Sơ Hở và Nhật Khóa
+npm run seed:demo              # dựng dữ liệu mẫu để xem giao diện
 ```
 
 Muốn kiểm raw DDL đúng đường production: `npm run build` rồi `npx next start`,
