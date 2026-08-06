@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Check, Flag, Lock, Play } from "lucide-react";
 import { STATE_LABELS, type CampaignNodeView } from "@/lib/campaign/view";
+import { heroCutoutFor } from "@/lib/campaign/hero-cutouts";
 import {
   DEFAULT_TILT,
   heroTransition,
@@ -63,16 +64,7 @@ function heroNode(nodes: CampaignNodeView[]): CampaignNodeView | undefined {
   );
 }
 
-export function CampaignMap25D({
-  nodes,
-  heroSrc,
-  heroAlt,
-}: {
-  nodes: CampaignNodeView[];
-  /** Ảnh cắt rời nền trong suốt. Thiếu thì dùng cờ hổ phù bằng CSS. */
-  heroSrc?: string;
-  heroAlt?: string;
-}) {
+export function CampaignMap25D({ nodes }: { nodes: CampaignNodeView[] }) {
   const stageRef = useRef<HTMLDivElement>(null);
   const [tilt, setTilt] = useState({ x: DEFAULT_TILT, z: 0 });
   const [reduced, setReduced] = useState(false);
@@ -98,6 +90,10 @@ export function CampaignMap25D({
       }),
     );
   }
+
+  // Nhân vật là tướng của cửa ải đang tới. Tướng chưa có ảnh cắt rời thì rơi
+  // về cờ hổ phù — bản đồ vẫn đọc được, chỉ là chưa có hồn.
+  const cutout = heroCutoutFor(standing?.featuredGeneralCode);
 
   const motion = motionSettings(reduced);
   const worldTilt = reduced ? motion.tilt : tilt.x;
@@ -257,14 +253,25 @@ export function CampaignMap25D({
                 filter: "drop-shadow(0 6px 6px rgba(0,0,0,.3))",
               }}
             >
-              {heroSrc ? (
-                // Ảnh cắt rời: vó ngựa chạm cạnh dưới nên neo bằng bottom.
+              {cutout ? (
+                // Vó ngựa chạm đúng cạnh dưới ảnh nên neo bằng `bottom: 0`.
+                // Dùng thẻ img thường: next/image thêm wrapper và lazy-load,
+                // cả hai đều làm hỏng phép neo trong không gian 3D.
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={heroSrc}
-                  alt={heroAlt ?? ""}
+                  src={cutout.src}
+                  alt={cutout.alt}
                   className="absolute block"
-                  style={{ width: 150, marginLeft: -75, bottom: 0 }}
+                  style={{
+                    width: cutout.width,
+                    // BẮT BUỘC: CSS reset của Tailwind đặt `img { max-width: 100% }`.
+                    // Thẻ cha ở đây chỉ là điểm neo nên bề ngang bằng 0, khiến
+                    // max-width cũng thành 0 và bóp ảnh xuống 0x0 — ảnh vẫn tải
+                    // được nên lỗi này im lặng hoàn toàn.
+                    maxWidth: "none",
+                    marginLeft: -cutout.width / 2,
+                    bottom: 0,
+                  }}
                 />
               ) : (
                 // Chưa có ảnh: cờ hổ phù cắm tại vị trí. Bản đồ vẫn đọc được.

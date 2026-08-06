@@ -4,7 +4,7 @@ import { TrialGateCard } from "@/components/ranks/trial-gate-card";
 import { TrialProgress } from "@/components/ranks/trial-progress";
 import { CardinalTitlePicker } from "@/components/ranks/cardinal-title-picker";
 import { TrialReflectionForm } from "@/components/ranks/trial-reflection-form";
-import { CampaignMap } from "@/components/campaign/campaign-map";
+import { CampaignMap25D } from "@/components/campaign/campaign-map-2-5d";
 import { CampaignTimelineMobile } from "@/components/campaign/campaign-timeline-mobile";
 import { campaignView } from "@/lib/campaign/view";
 
@@ -53,6 +53,18 @@ export default function RankPreviewPage() {
     TRIAL_02_HOANG_CAN: { status: "PASSED" },
     TRIAL_03_HOA_HUNG: { status: "ACTIVE" },
     TRIAL_04_NGU_QUAN: { status: "LOCKED", hint: "Cần 2 bài đạt band 5.5 trong 30 ngày." },
+  });
+
+  // Bậc 8: cửa Hổ Lao của Lữ Bố — tướng duy nhất hiện đã có ảnh cắt rời.
+  const hoLaoNodes = campaignView(8, {
+    TRIAL_01_DAO_VIEN: { status: "PASSED" },
+    TRIAL_02_HOANG_CAN: { status: "PASSED" },
+    TRIAL_03_HOA_HUNG: { status: "PASSED" },
+    TRIAL_04_NGU_QUAN: { status: "PASSED" },
+    TRIAL_05_TRUONG_BAN: { status: "PASSED" },
+    TRIAL_06_LAO_TUONG: { status: "PASSED" },
+    TRIAL_07_TAY_LUONG: { status: "PASSED" },
+    TRIAL_08_HO_LAO: { status: "ELIGIBLE" },
   });
 
   const earlyNodes = campaignView(1, {
@@ -156,12 +168,17 @@ export default function RankPreviewPage() {
       </Block>
 
       <Block title="Bản đồ — đang ở bậc 3, đã vượt 2 cửa">
-        <CampaignMap nodes={mapNodes} />
+        <CampaignMap25D nodes={mapNodes} />
         <CampaignTimelineMobile nodes={mapNodes} />
       </Block>
 
+      <Block title="Bản đồ — bậc 8, cửa Hổ Lao (có ảnh cắt rời Lữ Bố)">
+        <CampaignMap25D nodes={hoLaoNodes} />
+        <CampaignTimelineMobile nodes={hoLaoNodes} />
+      </Block>
+
       <Block title="Bản đồ — người mới, chỉ cửa đầu đã mở">
-        <CampaignMap nodes={earlyNodes} />
+        <CampaignMap25D nodes={earlyNodes} />
         <CampaignTimelineMobile nodes={earlyNodes} />
       </Block>
     </section>
