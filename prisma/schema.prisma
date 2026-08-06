@@ -50,6 +50,7 @@ model User {
   // Liêm chính Nguyệt Thí
   identityProfile    IdentityProfile?
   consentRecords     ConsentRecord[]
+  dataRightsRequests DataRightsRequest[]
   identityLocks      IdentityCompetitionLock[]
   examSessions       ExamSession[]
   competitionAppeals CompetitionAppeal[]
@@ -925,6 +926,38 @@ model IdentityProfile {
 /// Tách lớp là bắt buộc: gộp mọi mục đích vào một ô tích thì sự đồng ý không còn
 /// là tự nguyện cho từng mục đích. `evidenceHash` chứng minh được người ta đã
 /// đồng ý với ĐÚNG BẢN VĂN NÀO — thiếu nó thì tranh chấp về sau không phân xử được.
+/**
+ * Yêu cầu thực hiện quyền dữ liệu của thí sinh.
+ * Vì sao cần bảng riêng thay vì xoá thẳng: xoá dữ liệu là thao tác không hoàn
+ * tác được, và một phần dữ liệu phải giữ lại theo nghĩa vụ tuân thủ. Ghi thành
+ * yêu cầu để nhân viên xem xét, và để chính thí sinh theo dõi được tiến độ —
+ * thay vì bấm nút rồi không biết chuyện gì đang xảy ra.
+ */
+model DataRightsRequest {
+  id     String @id @default(cuid())
+  userId String
+
+  // EXPORT | DELETE | WITHDRAW_CONSENT
+  kind String @db.VarChar(24)
+
+  // PENDING | IN_PROGRESS | COMPLETED | REJECTED
+  status String @default("PENDING") @db.VarChar(24)
+
+  /**
+   * Bản chụp phạm vi lúc gửi: xoá được gì, giữ gì và vì sao.
+   */
+  scopeJson String @db.LongText
+
+  note         String?   @db.Text
+  requestedAt  DateTime  @default(now())
+  resolvedAt   DateTime?
+  resolvedById String?   @db.VarChar(191)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+}
+
 model ConsentRecord {
   id            String @id @default(cuid())
   subjectUserId String

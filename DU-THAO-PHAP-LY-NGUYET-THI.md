@@ -180,9 +180,9 @@ hoàn nguyên được — để chặn cùng một người tạo tài khoản 
 | Quyền | Hiện trạng |
 |---|---|
 | Biết mình bị thu thập gì | Có — tài liệu này khi được duyệt |
-| Xem dữ liệu của mình | **Chưa có giao diện tự phục vụ** — yêu cầu qua trung tâm |
-| Yêu cầu xóa | **Chưa có nút bấm** — xử lý thủ công |
-| Rút đồng ý | Có ở mức mô hình dữ liệu; **giao diện chưa làm** |
+| Xem dữ liệu của mình | Có — `/hoc-vien/du-lieu-cua-toi` |
+| Yêu cầu xóa | Có — gửi yêu cầu, trung tâm xác nhận trước khi thực hiện |
+| Rút đồng ý | Có — cả mô hình dữ liệu lẫn giao diện |
 | Khiếu nại quyết định loại | Có — cửa sổ 24 giờ, đã thiết kế |
 | Không bị quyết định hoàn toàn tự động | **Có, và được ràng buộc bằng kiểm thử** |
 
@@ -191,25 +191,28 @@ hoàn nguyên được — để chặn cùng một người tạo tài khoản 
 một thí sinh cần **hai quản trị viên khác nhau**, và người đề xuất không được tự
 phê duyệt — có phép thử tự động chặn đúng tình huống đó.
 
-Ba dòng "chưa có" ở trên là việc thật còn thiếu, đã nằm trong kế hoạch.
+Ba dòng từng ghi "chưa có" nay đã làm xong (06/08/2026). Trang tự phục vụ
+lấy bảng kê từ `src/lib/identity/data-rights.ts` — cùng nguồn với tài liệu này,
+nên hai bên không trôi khỏi nhau. Có kiểm thử canh: `npm run test:data-rights`.
 
 ---
 
-## 8. Những câu hỏi cần bạn quyết
+## 8. Những câu hỏi đã được chủ dự án quyết
 
-1. **Vị trí máy chủ.** Hệ thống nay chỉ lưu văn bản và con số, không còn hình
-   ảnh — nhưng vẫn là dữ liệu cá nhân. Đặt tại Việt Nam thì không phát sinh
-   chuyển dữ liệu xuyên biên giới.
-2. **Thời hạn giữ `identityKey`** — vô thời hạn hay có hạn?
-3. **Rút đồng ý khi đang bị rà soát** — có được buộc xóa nhật ký không?
-4. **Người 16–17 tuổi** tự đồng ý được hay vẫn cần người đại diện? Hiện hệ thống
-   coi 16+ là tự đồng ý. Nếu sai, phải thêm luồng người đại diện cho nhóm này.
-5. **Giao diện tự phục vụ** cho quyền xem và xóa — bắt buộc có trước khi mở đăng
-   ký, hay chấp nhận xử lý thủ công giai đoạn đầu?
-6. **Đánh giá tác động xử lý dữ liệu** — với phạm vi đã thu hẹp, mức độ yêu cầu
-   có nhẹ đi không?
+Chốt ngày **06/08/2026**. Mã nguồn đã theo đúng các quyết định này, và có kiểm
+thử canh để không ai đổi ngầm.
 
----
+| # | Câu hỏi | Quyết định | Đã làm gì |
+|---|---|---|---|
+| 1 | Vị trí máy chủ | **Việt Nam** | Không phát sinh chuyển dữ liệu xuyên biên giới |
+| 2 | Thời hạn `identityKey` | **24 tháng** | `RETENTION_IDENTITY_KEY_MONTHS = 24` |
+| 3 | Rút đồng ý khi đang bị rà soát | **Không buộc xóa** | `planWithdrawal(underReview)` giữ nguyên nhật ký |
+| 4 | Người 16–17 tuổi | **Tự đồng ý được** | Giữ nguyên `MIN_COMPETITION_AGE = 16`, không cần luồng người đại diện |
+| 5 | Giao diện tự phục vụ | **Có, trước khi mở đăng ký** | `/hoc-vien/du-lieu-cua-toi` |
+| 6 | Đánh giá tác động xử lý dữ liệu | **Nhẹ đi** theo phạm vi đã thu hẹp | Cần luật sư xác nhận mức độ |
+
+Còn lại **một việc duy nhất**: đưa tài liệu này cho luật sư rà soát. Trạng thái
+ở đầu trang vẫn là DỰ THẢO KỸ THUẬT cho tới khi có ý kiến pháp lý.
 
 ## 9. Điều bắt buộc phải có trong thể lệ
 
