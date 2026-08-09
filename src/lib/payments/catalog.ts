@@ -10,55 +10,130 @@
  */
 
 /** Đổi bản này khi thay giá, để đơn cũ vẫn tra được mình đã bán theo giá nào. */
-export const PRICE_VERSION = "2026-08-01-v1";
+export const PRICE_VERSION = "2026-08-09-v2";
 
 export type AccessFeature = "READING" | "FEYNMAN";
-export type AccessScope = "ALL" | "EXERCISE";
+
+/**
+ * Phạm vi quyền.
+ *
+ * - `ALL`      — mọi bài đủ điều kiện, trong thời hạn
+ * - `EXERCISE` — quyền cũ, mở mọi lượt làm của một bài
+ * - `ATTEMPT`  — mô hình hiện tại, mở đúng một lượt làm bài
+ * - `NONE`     — gói không cấp quyền truy cập (gói nạp lượt AI)
+ *
+ * `NONE` tồn tại để `decideGrantAccess` có thứ để chặn: gói nạp lượt lẽ ra
+ * không bao giờ tạo `AccessGrant`, nhưng nếu lỗi ở đâu đó tạo nhầm thì grant
+ * mang scope này vẫn không mở được gì.
+ */
+export type AccessScope = "ALL" | "EXERCISE" | "ATTEMPT" | "NONE";
+
+/** `ACCESS` mở tính năng; `AI_TOPUP` chỉ cộng lượt AI vào ví, không mở gì cả. */
+export type OfferKind = "ACCESS" | "AI_TOPUP";
 
 export type Offer = {
+  kind: OfferKind;
   feature: AccessFeature;
   scope: AccessScope;
   amount: number;
   /** Giá ưu đãi lần đầu, chỉ có ở FEYNMAN_SINGLE. */
   introAmount?: number;
-  /** null = quyền vĩnh viễn với đúng bài đã mua. */
+  /** null = quyền vĩnh viễn với đúng phạm vi đã mua. */
   durationDays: number | null;
   label: string;
   /** Câu mô tả ngắn hiện trên nút và trang bảng giá. */
   blurb: string;
+  /**
+   * Số lượt AI chấm cộng vào ví CHUNG của tài khoản khi đơn được thanh toán.
+   * Ví không gắn với lượt làm bài nào — mua ở đề nào cũng tiêu được ở đề khác.
+   */
+  aiGradingCredits?: number;
+  /** Số câu được hỏi AI trong mỗi lượt chấm mở bởi gói này. */
+  aiChatLimit?: number;
+  /**
+   * Gói đã dừng bán. Không hiện ở trang bán nữa, nhưng KHÔNG xóa khỏi bảng giá:
+   * đơn cũ phải tra cứu được và `AccessGrant` cũ phải đọc quyền được bình
+   * thường cho tới khi hết hạn. Người đã trả tiền phải dùng hết thứ đã mua.
+   */
+  retired?: boolean;
 };
 
 export const OFFERS = {
+  /* --- Đang bán ------------------------------------------------------ */
+
+  FEYNMAN_ATTEMPT_FULL: {
+    kind: "ACCESS",
+    feature: "FEYNMAN",
+    scope: "ATTEMPT",
+    amount: 39_000,
+    durationDays: null,
+    aiGradingCredits: 10,
+    aiChatLimit: 10,
+    label: "Full Test — đáp án chi tiết + Feynman + AI",
+    blurb: "Mở đúng lượt làm bài này, giữ vĩnh viễn. Tặng 10 lượt AI chấm.",
+  },
+  FEYNMAN_ATTEMPT_SINGLE: {
+    kind: "ACCESS",
+    feature: "FEYNMAN",
+    scope: "ATTEMPT",
+    amount: 19_000,
+    durationDays: null,
+    aiGradingCredits: 10,
+    aiChatLimit: 5,
+    label: "Đề đơn — đáp án chi tiết + Feynman + AI",
+    blurb: "Mở đúng lượt làm bài này, giữ vĩnh viễn. Tặng 10 lượt AI chấm.",
+  },
+  FEYNMAN_AI_TOPUP: {
+    kind: "AI_TOPUP",
+    feature: "FEYNMAN",
+    scope: "NONE",
+    amount: 29_000,
+    durationDays: null,
+    aiGradingCredits: 10,
+    label: "Nạp thêm 10 lượt AI chấm",
+    blurb: "Cộng vào ví chung của tài khoản, dùng được cho mọi lượt làm bài.",
+  },
+
+  /* --- Đã dừng bán, giữ lại để đơn cũ và quyền cũ vẫn đọc được -------- */
+
   READING_ALL_30D: {
+    kind: "ACCESS",
     feature: "READING",
     scope: "ALL",
     amount: 99_000,
     durationDays: 30,
+    retired: true,
     label: "Reading — toàn bộ 30 ngày",
     blurb: "Làm mọi bài Reading cần mở khóa trong 30 ngày.",
   },
   READING_SINGLE: {
+    kind: "ACCESS",
     feature: "READING",
     scope: "EXERCISE",
     amount: 9_000,
     durationDays: null,
+    retired: true,
     label: "Reading — mở một bài",
     blurb: "Mở đúng một bài, giữ vĩnh viễn.",
   },
   FEYNMAN_ALL_30D: {
+    kind: "ACCESS",
     feature: "FEYNMAN",
     scope: "ALL",
     amount: 299_000,
     durationDays: 30,
+    retired: true,
     label: "Feynman — toàn bộ 30 ngày",
     blurb: "Chữa sâu mọi bài Reading đã hoàn thành, trong 30 ngày.",
   },
   FEYNMAN_SINGLE: {
+    kind: "ACCESS",
     feature: "FEYNMAN",
     scope: "EXERCISE",
     amount: 49_000,
     introAmount: 9_000,
     durationDays: null,
+    retired: true,
     label: "Feynman — mở một bài",
     blurb: "Chữa sâu đúng một bài, giữ vĩnh viễn.",
   },
@@ -68,6 +143,24 @@ export type OfferCode = keyof typeof OFFERS;
 
 export function isOfferCode(value: string): value is OfferCode {
   return Object.prototype.hasOwnProperty.call(OFFERS, value);
+}
+
+/**
+ * Các gói còn bán, dùng cho trang bảng giá.
+ *
+ * Gói `retired` bị lọc ở ĐÂY chứ không bị xóa khỏi `OFFERS` — mọi đường tra
+ * cứu đơn cũ và đọc quyền cũ vẫn phải tìm thấy chúng.
+ */
+export function listOffersForSale(): OfferCode[] {
+  return (Object.keys(OFFERS) as OfferCode[]).filter(
+    (code) => !("retired" in OFFERS[code] && OFFERS[code].retired)
+  );
+}
+
+/** Gói này có còn bán không. Đơn mới cho gói đã dừng bán phải bị từ chối. */
+export function isOfferOnSale(code: OfferCode): boolean {
+  const offer = OFFERS[code] as Offer;
+  return offer.retired !== true;
 }
 
 /** Định dạng tiền Việt cho giao diện: 99000 → "99.000đ". */
