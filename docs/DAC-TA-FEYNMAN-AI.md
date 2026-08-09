@@ -3,7 +3,7 @@
 **Dự án:** Stoic IELTS · `guanghui-stack/Stoic-Ielts`
 **Phiên bản:** `2026-08-feynman-ai-v2`
 **Thay thế:** bản đặc tả `2026-08-feynman-ai-v1`
-**Trạng thái:** đang chốt — mục 12 còn chờ quyết định
+**Trạng thái:** đã chốt — năm quyết định ở mục 12 đã có câu trả lời
 
 > Bản v1 được viết trước khi mô hình bán hàng đổi. Tài liệu này giữ lại phần
 > còn đúng của v1, sửa các chỗ mâu thuẫn với mã nguồn thật, và ghi lại mô hình
@@ -81,11 +81,20 @@ Gói 19K/39K bao gồm:
 1. **Đáp án sửa chi tiết** — lời giải giáo viên cho TẤT CẢ các câu, không chỉ
    câu sai. Vĩnh viễn, không giới hạn lượt xem. Chi phí API: 0đ.
 2. **Hệ thống Feynman** — luyện lại **không giới hạn số lần**. Chi phí API: 0đ.
-3. **AI chấm Feynman** — tối đa **10 lượt**, mỗi ngày **1 lượt**.
-4. **Hỏi AI** — **10 câu mỗi lượt chấm**, reset sau mỗi lần chấm.
+3. **AI chấm Feynman** — trừ vào **ví lượt chung của tài khoản**. Mỗi lượt làm
+   bài chấm tối đa **1 lần mỗi ngày**.
+4. **Hỏi AI** — reset sau mỗi lần chấm. Full Test **10 câu**, đề đơn **5 câu**.
 
-Hết 10 lượt AI chấm thì mua gói 29.000đ để nạp thêm 10 lượt. Phần đáp án chi
-tiết và Feynman vẫn dùng bình thường, không bị khóa lại.
+Mỗi lần mua gói 19K/39K cộng **10 lượt AI chấm** vào ví chung. Hết ví thì mua
+gói 29.000đ nạp thêm 10 lượt, cũng vào ví chung. Phần đáp án chi tiết và
+Feynman vẫn dùng bình thường, không bị khóa lại.
+
+**Ví chung, nhưng nhịp chấm tính theo lượt làm bài.** Ví không gắn với một
+lượt làm bài nào — mua ở đề nào cũng tiêu được ở đề khác. Riêng giới hạn
+1 lần/ngày thì đếm riêng cho từng lượt làm bài, nên học viên có nhiều lượt làm
+bài chưa chấm vẫn chấm được nhiều lượt trong cùng một ngày, miễn còn ví. Đây là
+hệ quả có chủ đích: giới hạn ngày để chặn cày lại một bài, không phải để chặn
+học viên chăm.
 
 ### 2.3. Câu chữ phải in đúng trên website
 
@@ -95,11 +104,21 @@ tiết và Feynman vẫn dùng bình thường, không bị khóa lại.
 > AI chỉ kết luận điểm yếu khi đã đủ bằng chứng tích lũy — không phán xét bạn
 > dựa trên một lần làm bài.
 
-### 2.4. Hai sản phẩm cũ dừng lại
+### 2.4. Ba sản phẩm cũ dừng bán
 
-`READING_SINGLE` (9.000đ) và `READING_ALL_30D` (99.000đ) mất ý nghĩa khi đề
-miễn phí. Gỡ khỏi trang bán, giữ lại trong catalog để đơn cũ và quyền cũ vẫn
-tra cứu được.
+| Mã | Giá | Lý do dừng |
+|---|---|---|
+| `READING_SINGLE` | 9.000đ | Đề đã miễn phí, không còn gì để bán |
+| `READING_ALL_30D` | 99.000đ | Như trên |
+| `FEYNMAN_ALL_30D` | 299.000đ | Mô hình đổi sang bán theo lượt làm bài |
+
+Cả ba **gỡ khỏi trang bán nhưng giữ nguyên trong catalog**. Đơn hàng cũ và
+`AccessGrant` cũ vẫn phải tra cứu và đọc quyền được bình thường — người đã trả
+299.000đ cho `FEYNMAN_ALL_30D` phải dùng hết thời hạn đã mua. Không xóa dữ
+liệu, không chuyển đổi, không hoàn tiền tự động.
+
+Cách gỡ: đánh dấu `retired` trong catalog và lọc khỏi danh sách hiển thị, chứ
+không xóa khỏi mảng sản phẩm. `PRICE_VERSION` phải tăng.
 
 **Việc mở đề miễn phí không cần sửa mã nguồn:** chỉ cần đặt
 `Exercise.accessLevel = "PUBLIC"` cho mọi bài. Cơ chế khóa nằm ở cột đó
@@ -214,9 +233,14 @@ Attempt
           └─(0..1) FeynmanAiEvaluation                (tốn 1 lượt chấm)
                      └─(0..10) FeynmanAiMessage       (10 câu hỏi)
 
-FeynmanAiBudget    — ví lượt AI của học viên
-FeynmanAiAlert     — hàng đợi cảnh báo cho quản trị viên
+FeynmanAiBudget       — ví lượt AI, MỘT dòng cho MỖI TÀI KHOẢN
+FeynmanAiAttemptState — nhịp chấm, MỘT dòng cho MỖI LƯỢT LÀM BÀI
+FeynmanAiAlert        — hàng đợi cảnh báo cho quản trị viên
 ```
+
+Ví và nhịp chấm là **hai thứ tách rời**, vì quyết định Q1 và Q2 chọn hai phạm
+vi khác nhau: ví theo tài khoản, nhịp theo lượt làm bài. Nhét chung một bảng sẽ
+không biểu diễn được.
 
 **`FeynmanAiEvaluation`** — một lần AI chấm. Lưu đầy đủ để đo tiến độ và để
 quản trị viên phúc tra:
@@ -230,14 +254,30 @@ quản trị viên phúc tra:
 | Vận hành | `model` · `promptVersion` · `schemaVersion` · token vào/ra/cache · `estimatedCostMicroUsd` · `latencyMs` · `openaiRequestId` · `errorCode` |
 | Quota | `questionLimit` mặc định 10 · `questionUsed` |
 
-**`FeynmanAiBudget`** — ví lượt AI:
+**`FeynmanAiBudget`** — ví lượt AI, **một dòng cho mỗi tài khoản**:
 
 ```
-userId + attemptId (unique)
-gradingLimit    Int  @default(10)   // 10 lượt, +10 mỗi gói 29K
-gradingUsed     Int  @default(0)
-lastGradedOn    DateTime?           // chặn 1 lần/ngày
+userId       String   @unique
+grantedTotal Int      @default(0)   // +10 mỗi gói 19K/39K/29K đã thanh toán
+usedTotal    Int      @default(0)
 ```
+
+Còn lượt khi `usedTotal < grantedTotal`. Cộng ví chỉ xảy ra trong
+`fulfillPaidOrder()`, cùng transaction với việc tạo `AccessGrant`, để một đơn
+hàng không bao giờ cộng ví hai lần.
+
+**`FeynmanAiAttemptState`** — nhịp chấm, **một dòng cho mỗi lượt làm bài**:
+
+```
+attemptId    String    @unique
+lastGradedOn DateTime?               // chặn 1 lần/ngày cho riêng lượt này
+gradedCount  Int       @default(0)   // để thống kê, không phải để chặn
+```
+
+Hai hàng rào chạy độc lập: hết ví thì `QUOTA_EXHAUSTED`, chấm lần hai trong
+ngày trên cùng lượt làm bài thì `DAILY_LIMIT_REACHED`. Thông báo cho học viên
+phải phân biệt được hai lỗi này, vì cách xử lý khác nhau — một bên mua thêm,
+một bên chờ hôm sau.
 
 **`FeynmanAiAlert`** — nguồn `MODEL` (AI tự báo) hoặc `STUDENT` (học viên báo
 sai). Trạng thái `OPEN` / `RESOLVED` / `DISMISSED`.
@@ -308,23 +348,40 @@ chỉ lọc `exerciseId`, nên học viên mua lượt thứ hai sẽ bị đẩ
 |---|---|---|
 | Luyện Feynman | Không giới hạn | — |
 | Số câu tick mỗi phiên Feynman | 10 | Máy chủ, trước khi tạo phiên |
-| AI chấm — tổng | 10 lượt/gói | `FeynmanAiBudget.gradingUsed` |
-| AI chấm — mỗi ngày | 1 lượt | `FeynmanAiBudget.lastGradedOn` |
-| Hỏi AI | 10 câu mỗi lượt chấm | `FeynmanAiEvaluation.questionUsed` |
+| AI chấm — ví | +10 mỗi gói, dùng chung cả tài khoản | `FeynmanAiBudget` |
+| AI chấm — nhịp | 1 lần/ngày cho **mỗi lượt làm bài** | `FeynmanAiAttemptState.lastGradedOn` |
+| Hỏi AI | Full Test 10 câu · đề đơn 5 câu, mỗi lượt chấm | `FeynmanAiEvaluation.questionUsed` |
 | Câu hỏi không hợp lệ | 3 lần/giờ → HTTP 429 | Đếm trên database |
 | Request đang chạy | 1 cho mỗi học viên | Khóa ở database |
 
 ### 6.1. Giữ chỗ quota trước khi gọi API
 
+Phải giữ chỗ **hai thứ**, theo đúng thứ tự này:
+
 ```ts
+// 1. Nhịp chấm của lượt làm bài — chặn cày lại cùng một bài
 updateMany({
-  where: { id: budgetId, gradingUsed: { lt: gradingLimit } },
-  data:  { gradingUsed: { increment: 1 } }
+  where: { attemptId, OR: [{ lastGradedOn: null }, { lastGradedOn: { lt: dauNgayHomNay } }] },
+  data:  { lastGradedOn: now, gradedCount: { increment: 1 } }
 })
+// khong update duoc → DAILY_LIMIT_REACHED
+
+// 2. Ví lượt của tài khoản
+updateMany({
+  where: { userId, usedTotal: { lt: prisma.feynmanAiBudget.fields.grantedTotal } },
+  data:  { usedTotal: { increment: 1 } }
+})
+// khong update duoc → QUOTA_EXHAUSTED, va phai NHA LAI buoc 1
 ```
 
-Không update được → `QUOTA_EXHAUSTED`. **Không giữ transaction mở trong lúc
-gọi OpenAI.**
+Kiểm nhịp trước vì nó rẻ hơn và là lỗi hay gặp hơn. Nếu bước 2 trượt thì **phải
+trả `lastGradedOn` về giá trị cũ**, nếu không học viên hết ví sẽ mất luôn suất
+chấm của ngày hôm đó.
+
+`dauNgayHomNay` tính theo **giờ Việt Nam**, không phải UTC — nếu dùng UTC thì
+mốc reset rơi vào 7 giờ sáng và học viên sẽ thấy vô lý.
+
+**Không giữ transaction mở trong lúc gọi OpenAI.**
 
 Câu hỏi bị từ chối vì ngoài phạm vi hoặc không đọc được thì **hoàn lại quota**
 và không tính vào 10 câu.
@@ -419,9 +476,10 @@ OPENAI_FEYNMAN_ENABLED=false
 OPENAI_FEYNMAN_MODEL=gpt-5-mini
 OPENAI_FEYNMAN_TIMEOUT_MS=90000
 
-OPENAI_FEYNMAN_GRADING_LIMIT=10
+OPENAI_FEYNMAN_GRADING_PER_PURCHASE=10
 OPENAI_FEYNMAN_GRADING_PER_DAY=1
-OPENAI_FEYNMAN_CHAT_LIMIT=10
+OPENAI_FEYNMAN_CHAT_LIMIT_FULL=10
+OPENAI_FEYNMAN_CHAT_LIMIT_SINGLE=5
 OPENAI_FEYNMAN_MAX_QUESTIONS_PER_RUN=10
 
 OPENAI_FEYNMAN_EVAL_MAX_OUTPUT=4000
@@ -531,13 +589,16 @@ nộp bài · chấm bài · xem đáp án · thanh toán · Feynman · danh hi�
 
 ## 12. Các mục còn chờ quyết định
 
-| Mã | Vấn đề | Đề xuất |
+| Mã | Vấn đề | Đã chốt |
 |---|---|---|
-| Q1 | Gói 29K nạp lượt cho đúng một attempt hay dùng chung cả tài khoản | **Ví chung** — dễ bán và dễ hiểu hơn |
-| Q2 | Giới hạn 1 lần chấm/ngày tính theo attempt hay theo tài khoản | **Theo attempt** |
-| Q3 | Bỏ chế độ ghép đề MANUAL (học viên tự chọn passage) — làm trong PR này hay tách riêng | **Tách riêng** |
-| Q4 | 10 câu hỏi reset mỗi lần chấm = tối đa 100 câu/gói. Giá vốn cao | Xem mục 13 |
-| Q5 | `FEYNMAN_ALL_30D` 299.000đ còn bán không | Chờ trả lời |
+| Q1 | Gói 29K nạp lượt cho một lượt làm bài hay dùng chung tài khoản | **Ví chung cả tài khoản** |
+| Q2 | Giới hạn 1 lần chấm/ngày tính theo phạm vi nào | **Theo lượt làm bài** |
+| Q3 | Bỏ chế độ ghép đề MANUAL — làm trong PR này hay tách riêng | **Tách riêng**, làm sau |
+| Q4 | Số câu hỏi AI mỗi lượt chấm | **Full Test 10 · đề đơn 5** |
+| Q5 | `FEYNMAN_ALL_30D` 299.000đ | **Dừng bán**, giữ quyền cũ |
+
+Q1 và Q2 chọn hai phạm vi khác nhau nên ví và nhịp chấm phải tách thành hai
+bảng — xem mục 4.3. Q4 hạ giá vốn gói 19K từ 46% xuống 27% — xem mục 13.
 
 ---
 
@@ -548,18 +609,28 @@ Tính theo `gpt-5-mini` (0,25 USD vào / 2,00 USD ra mỗi triệu token), tỷ 
 
 | | Full Test 39K | Đề đơn 19K |
 |---|---|---|
+| Số câu hỏi mỗi lượt chấm | 10 | **5** |
 | Một lần AI chấm | ~215đ | ~156đ |
 | Một câu hỏi AI | ~100đ | ~72đ |
 | 10 lần chấm | 2.150đ | 1.560đ |
-| 100 câu hỏi | 10.000đ | 7.200đ |
-| **Tổng tối đa** | **~12.150đ** | **~8.760đ** |
-| **Tỷ lệ giá vốn** | **31%** | **46%** |
+| Toàn bộ câu hỏi | 100 câu · 10.000đ | 50 câu · 3.600đ |
+| **Tổng tối đa** | **~12.150đ** | **~5.160đ** |
+| **Tỷ lệ giá vốn** | **31%** | **27%** |
 
-Phần hỏi đáp chiếm hơn 80% chi phí, không phải phần chấm.
+Quyết định Q4 kéo giá vốn gói 19K từ 46% xuống 27%, ngang ngửa gói Full Test.
+Hai gói giờ có biên tương đương nhau, không còn gói nào lỗ ẩn.
 
-**Lưu ý:** đây là mức dùng kịch trần. Thực tế phần lớn học viên dùng 30–50%
-ngân sách. Nhưng gói 19K có biên mỏng — nếu muốn rộng hơn, giảm số câu hỏi mỗi
-lần chấm từ 10 xuống 5 sẽ hạ giá vốn gói 19K về khoảng 25%.
+Phần hỏi đáp vẫn chiếm phần lớn chi phí (82% ở gói 39K, 70% ở gói 19K), không
+phải phần chấm. Nếu sau này cần siết thêm, siết số câu hỏi có tác dụng hơn siết
+số lần chấm.
+
+**Lưu ý:** đây là mức dùng kịch trần, giả định học viên tiêu hết ví và hỏi hết
+số câu. Thực tế phần lớn học viên dùng 30–50% ngân sách.
+
+**Rủi ro của ví chung (Q1):** ví cộng dồn theo số gói đã mua, nên học viên mua
+10 lượt làm bài sẽ có 100 lượt chấm trong ví. Con số này vẫn nằm trong dự tính
+vì mỗi gói đã tự trả cho 10 lượt của nó. Nhưng phải theo dõi ở trang quản trị:
+nếu thấy tài khoản nào tiêu ví lệch hẳn so với số gói đã mua thì xem lại.
 
 Bảng giá lưu trong `src/lib/feynman-ai/cost.ts` có đánh phiên bản. Model không
 có trong bảng giá thì vẫn chạy, vẫn lưu token, `estimatedCostMicroUsd = 0`, và
@@ -616,7 +687,10 @@ Nối `"test:feynman-ai"` vào chuỗi `npm test`.
 | Cách ly điểm | AI trả đáp án khác hẳn → `scoreRaw`, `scoreTotal`, `band`, `gradedAt`, `validForAchievements`, `CompetitionAttempt` **không đổi một chữ số** |
 | Nguyệt Thí | Trước `endsAt`: không đáp án, không Feynman, không AI, không gọi API |
 | Quyền | ALL mở được · ATTEMPT chỉ đúng attempt đó · EXERCISE legacy vẫn chạy · Reading không bị ảnh hưởng |
-| Quota | Câu thứ 11 bị chặn · hai request đồng thời không vượt trần · chấm lần 2 trong ngày bị chặn · thất bại thì hoàn lượt · bấm hai lần chỉ gọi API một lần |
+| Ví chung | Mua ở đề A tiêu được ở đề B · mỗi gói cộng đúng 10 · một đơn hàng không cộng ví hai lần · hết ví trả `QUOTA_EXHAUSTED` |
+| Nhịp chấm | Chấm lần 2 cùng ngày trên **cùng** lượt làm bài bị chặn · chấm hai lượt làm bài **khác nhau** trong cùng ngày vẫn chạy · hết ví thì `lastGradedOn` được nhả lại, hôm sau vẫn chấm được · mốc reset theo giờ Việt Nam |
+| Quota | Full Test câu thứ 11 bị chặn · đề đơn câu thứ 6 bị chặn · hai request đồng thời không vượt trần · thất bại thì hoàn lượt · bấm hai lần chỉ gọi API một lần |
+| Sản phẩm dừng bán | `FEYNMAN_ALL_30D` không hiện ở trang bán · `AccessGrant` cũ của gói này vẫn mở được Feynman tới hết hạn |
 | Ưu tiên giáo viên | Passage mâu thuẫn → đầu ra theo giáo viên, cảnh báo vào hàng đợi admin, không lọt xuống học viên |
 | Chọn câu | Tick quá 10 câu bị chặn · tick câu đúng vẫn hợp lệ |
 | Riêng tư | Payload không chứa email, tên, passwordHash, candidateCode, thanh toán, integrity, webcam, userId, attemptId |
