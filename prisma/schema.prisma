@@ -36,6 +36,10 @@ model User {
   paymentOrders  PaymentOrder[]
   accessGrants   AccessGrant[]
 
+  feynmanAiEvaluations FeynmanAiEvaluation[]
+  feynmanAiMessages    FeynmanAiMessage[]
+  feynmanAiBudget      FeynmanAiBudget?
+
   assemblies                ReadingAssembly[]
   competitionEntries        CompetitionEntry[]
   competitionQualifications CompetitionQualification[]
@@ -153,7 +157,11 @@ model Attempt {
 
   user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   exercise           Exercise            @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
-  feynmanReview      FeynmanReview?
+  /// Nhieu phien: luyen lai khong gioi han so lan.
+  feynmanReviews     FeynmanReview[]
+  feynmanAiState     FeynmanAiAttemptState?
+  accessGrants       AccessGrant[]
+  paymentOrders      PaymentOrder[]
   assembly           ReadingAssembly?    @relation(fields: [assemblyId], references: [id], onDelete: SetNull)
   competitionAttempt CompetitionAttempt?
 
@@ -237,10 +245,16 @@ model ExerciseCollectionItem {
 
 /// Một phiên chữa bài theo phương pháp Feynman, gắn 1-1 với một lượt làm bài.
 model FeynmanReview {
-  id               String    @id @default(cuid())
-  userId           String
-  attemptId        String    @unique
-  mode             String // QUICK | DEEP
+  id     String @id @default(cuid())
+  userId String
+  /// KHÔNG còn @unique: một lượt làm bài luyện lại được nhiều lần, không giới
+  /// hạn. Ràng buộc thật nằm ở @@unique([attemptId, runNumber]) bên dưới.
+  attemptId String
+  /// Lần luyện thứ mấy của lượt làm bài này, đếm từ 1.
+  runNumber Int    @default(1)
+  /// QUICK | DEEP là chế độ tự động cũ. Phiên mới ghi CUSTOM vì học viên tự
+  /// tick câu muốn chữa. Giữ lại giá trị cũ để dữ liệu lịch sử vẫn đọc được.
+  mode String // QUICK | DEEP | CUSTOM
   status           String    @default("DRAFT") // DRAFT | REVEALED | COMPLETED
   passageSummary   String?   @db.Text
   paragraphMap     String?   @db.Text
@@ -254,12 +268,167 @@ model FeynmanReview {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
-  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  attempt  Attempt          @relation(fields: [attemptId], references: [id], onDelete: Cascade)
-  mistakes FeynmanMistake[]
+  user       User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  attempt    Attempt              @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  mistakes   FeynmanMistake[]
+  aiEvaluation FeynmanAiEvaluation?
 
+  @@unique([attemptId, runNumber])
   @@index([userId, status])
   @@index([userId, completedAt])
+  @@index([attemptId, createdAt])
+}
+
+/// Một lần AI chấm phần tự giảng lại. KHÔNG phải chấm điểm Reading — điểm số
+/// vẫn hoàn toàn do gradeReading() quyết định và không có đường nào từ bảng này
+/// ghi ngược về Attempt.
+model FeynmanAiEvaluation {
+  id       String @id @default(cuid())
+  userId   String
+  /// Một phiên Feynman chỉ được chấm đúng một lần.
+  reviewId String @unique
+  status   String @default("PENDING") @db.VarChar(16) // PENDING | COMPLETED | FAILED
+
+  /// DAT | KHONG_DAT. Ngưỡng 70% nằm ở rules.ts chứ không nằm trong prompt,
+  /// nên đổi ngưỡng không phải sửa prompt và kết quả cũ tính lại được.
+  verdict           String? @db.VarChar(16)
+  similarityPercent Int?
+  confidence        Int?
+
+  /// Lý do + trích dẫn từng câu. Đây là thứ quản trị viên dùng để phúc tra
+  /// khiếu nại, nên bắt buộc lưu chứ không chỉ lưu kết luận.
+  reasonJson        String? @db.Text
+  overallAdviceJson String? @db.Text
+
+  /// Ảnh chụp bối cảnh lúc chấm, để về sau đối chiếu được mà không phụ thuộc
+  /// dữ liệu hiện tại đã đổi.
+  currentBandSnapshot   Float?
+  targetBandSnapshot    Float?
+  attemptNumberSnapshot Int?
+  weaknessSnapshotJson  String? @db.Text
+
+  /// Vận hành và đo chi phí.
+  model                 String? @db.VarChar(64)
+  promptVersion         String? @db.VarChar(32)
+  schemaVersion         String? @db.VarChar(32)
+  inputTokens           Int?
+  outputTokens          Int?
+  cachedInputTokens     Int?
+  estimatedCostMicroUsd Int?
+  latencyMs             Int?
+  openaiRequestId       String? @db.VarChar(191)
+  errorCode             String? @db.VarChar(64)
+
+  /// Số câu được hỏi về lượt chấm này: Full Test 10, đề đơn 5.
+  questionLimit Int @default(10)
+  questionUsed  Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  review   FeynmanReview       @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  messages FeynmanAiMessage[]
+
+  @@index([userId, createdAt])
+  @@index([status, createdAt])
+}
+
+/// Một câu hỏi của học viên và câu trả lời của AI, gắn với một lần chấm.
+model FeynmanAiMessage {
+  id           String @id @default(cuid())
+  evaluationId String
+  userId       String
+  /// Chống bấm hai lần: một cú bấm chỉ gọi API đúng một lần. Client sinh UUID.
+  requestKey   String @unique @db.VarChar(64)
+  status       String @default("PENDING") @db.VarChar(16) // PENDING | COMPLETED | FAILED | REJECTED
+
+  question String  @db.Text
+  answer   String? @db.Text
+  /// Câu ngoài phạm vi bị từ chối thì KHÔNG trừ quota, và lưu lý do ở đây.
+  rejectReason String? @db.VarChar(64)
+
+  model                 String? @db.VarChar(64)
+  promptVersion         String? @db.VarChar(32)
+  inputTokens           Int?
+  outputTokens          Int?
+  cachedInputTokens     Int?
+  estimatedCostMicroUsd Int?
+  latencyMs             Int?
+  openaiRequestId       String? @db.VarChar(191)
+  errorCode             String? @db.VarChar(64)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  evaluation FeynmanAiEvaluation @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
+  user       User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([evaluationId, createdAt])
+  @@index([userId, createdAt])
+}
+
+/// Ví lượt AI — MỘT dòng cho MỖI TÀI KHOẢN (quyết định Q1).
+/// Ví không gắn với lượt làm bài nào: mua ở đề nào cũng tiêu được ở đề khác.
+model FeynmanAiBudget {
+  id           String @id @default(cuid())
+  userId       String @unique
+  /// +10 mỗi gói 19K/39K/29K đã thanh toán. Chỉ cộng trong fulfillPaidOrder(),
+  /// cùng transaction với việc tạo AccessGrant, để một đơn không cộng hai lần.
+  grantedTotal Int    @default(0)
+  usedTotal    Int    @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+/// Nhịp chấm — MỘT dòng cho MỖI LƯỢT LÀM BÀI (quyết định Q2).
+/// Tách khỏi ví vì Q1 và Q2 chọn hai phạm vi khác nhau; nhét chung một bảng thì
+/// không biểu diễn được "ví theo tài khoản, nhịp theo lượt làm bài".
+model FeynmanAiAttemptState {
+  id        String @id @default(cuid())
+  attemptId String @unique
+  /// Mốc so sánh 1 lần/ngày. So theo NGÀY LỊCH VIỆT NAM, không phải UTC.
+  lastGradedOn DateTime?
+  /// Chỉ để thống kê, không dùng để chặn.
+  gradedCount  Int       @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  attempt Attempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+}
+
+/// Hàng đợi cảnh báo cho quản trị viên.
+/// Khi AI ngờ passage mâu thuẫn với đáp án chuẩn, nó VẪN trả lời học viên theo
+/// đáp án chuẩn và đẩy nghi vấn vào đây. Học viên không bao giờ được nghe rằng
+/// đáp án chuẩn có thể sai.
+model FeynmanAiAlert {
+  id       String  @id @default(cuid())
+  /// MODEL = AI tự báo, STUDENT = học viên bấm báo sai.
+  source   String  @db.VarChar(16)
+  severity String  @default("LOW") @db.VarChar(16) // LOW | MEDIUM | HIGH
+  status   String  @default("OPEN") @db.VarChar(16) // OPEN | RESOLVED | DISMISSED
+  kind     String  @db.VarChar(32)
+
+  exerciseId   String?
+  attemptId    String?
+  evaluationId String?
+  /// Mã câu dạng "p2:q14" — vị trí câu trong đề, không phải định danh người dùng.
+  questionCode String? @db.VarChar(32)
+
+  detail      String? @db.Text
+  adminNote   String? @db.Text
+  resolvedAt  DateTime?
+  resolvedBy  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, severity, createdAt])
+  @@index([exerciseId, createdAt])
 }
 
 /// Ảnh chụp một câu cần chữa sâu + phần tự giải thích của học viên.
@@ -309,9 +478,13 @@ model PaymentOrder {
   /// Đường dẫn quay về sau khi trả tiền — do máy chủ tự dựng, không nhận từ
   /// biểu mẫu, để tránh lỗ hổng chuyển hướng tùy ý (open redirect).
   returnPath    String  @db.Text
+  /// Don mua goi 19K/39K bat buoc co cot nay. May chu tu doc database de xac
+  /// minh luot lam bai thuoc dung user, da GRADED, la Reading, va khong thuoc
+  /// Nguyet Thi con trong khung gio. Khong tin ID nao tu trinh duyet.
+  attemptId     String?
   offerCode     String
   feature       String // READING | FEYNMAN
-  scope         String // ALL | EXERCISE
+  scope         String // ALL | EXERCISE | ATTEMPT | NONE
   amount        Int // đơn vị VND, luôn là số nguyên
   currency      String  @default("VND")
   priceVersion  String
@@ -341,11 +514,15 @@ model PaymentOrder {
 
   user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   exercise Exercise?      @relation(fields: [exerciseId], references: [id], onDelete: SetNull)
+  attempt  Attempt?       @relation(fields: [attemptId], references: [id], onDelete: SetNull)
   events   PaymentEvent[]
   grants   AccessGrant[]
 
   @@index([userId, status, createdAt])
   @@index([exerciseId, status])
+  /// Truy van tim don PENDING tai su dung PHAI loc them attemptId, neu khong
+  /// hoc vien mua luot thu hai se bi day ve don cu cua luot thu nhat.
+  @@index([userId, attemptId, status])
 }
 
 /// Nhật ký mọi thông báo IPN đã nhận. `eventKey` duy nhất chính là cơ chế chống
@@ -381,8 +558,13 @@ model AccessGrant {
   /// ORDER:<orderId> cho quyền đã mua, ADMIN:<feature>:<scope>:<userId> cho
   /// quyền admin cấp tay, LEGACY:<id> cho dữ liệu chuyển từ ExerciseAccess.
   grantKey   String  @unique
+  /// Quyen theo LUOT LAM BAI (mo hinh hien tai). Grant scope ATTEMPT ma thieu
+  /// cot nay la du lieu hong -> decideAiAccess chan, khong doan.
+  attemptId  String?
   feature    String // READING | FEYNMAN
-  scope      String // ALL | EXERCISE
+  /// ALL va EXERCISE la quyen cu, van phai chay. ATTEMPT la mo hinh hien tai.
+  /// NONE danh cho goi nap luot AI: khong mo gi ca.
+  scope      String // ALL | EXERCISE | ATTEMPT | NONE
   source     String // PURCHASE | ADMIN | LEGACY | REWARD
   status     String  @default("ACTIVE") // ACTIVE | REVOKED
 
@@ -396,6 +578,7 @@ model AccessGrant {
 
   user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   exercise Exercise?     @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  attempt  Attempt?      @relation(fields: [attemptId], references: [id], onDelete: SetNull)
   order    PaymentOrder? @relation(fields: [orderId], references: [id], onDelete: SetNull)
 
   // Chỉ MỘT index tổng hợp: năm cột VARCHAR(191) utf8mb4 vượt giới hạn 3072

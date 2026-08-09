@@ -943,6 +943,119 @@ const DDL = [
     CONSTRAINT \`CompetitionQualification_target_fkey\` FOREIGN KEY (\`targetCompetitionId\`) REFERENCES \`Competition\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT \`CompetitionQualification_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
   ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+  // ---- Feynman AI Tutor ------------------------------------------------
+  // Kich thuoc VARCHAR o cac cot trang thai la CO Y: mac dinh 191 x 4 byte
+  // (utf8mb4) lam khoa index vuot gioi han 3072 byte cua InnoDB. Production
+  // da tung sap vi loi nay. Chay `npm run test:indexes` truoc khi commit.
+
+  `CREATE TABLE IF NOT EXISTS \`FeynmanAiEvaluation\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`reviewId\` VARCHAR(191) NOT NULL,
+    \`status\` VARCHAR(16) NOT NULL DEFAULT 'PENDING',
+    \`verdict\` VARCHAR(16) NULL,
+    \`similarityPercent\` INTEGER NULL,
+    \`confidence\` INTEGER NULL,
+    \`reasonJson\` TEXT NULL,
+    \`overallAdviceJson\` TEXT NULL,
+    \`currentBandSnapshot\` DOUBLE NULL,
+    \`targetBandSnapshot\` DOUBLE NULL,
+    \`attemptNumberSnapshot\` INTEGER NULL,
+    \`weaknessSnapshotJson\` TEXT NULL,
+    \`model\` VARCHAR(64) NULL,
+    \`promptVersion\` VARCHAR(32) NULL,
+    \`schemaVersion\` VARCHAR(32) NULL,
+    \`inputTokens\` INTEGER NULL,
+    \`outputTokens\` INTEGER NULL,
+    \`cachedInputTokens\` INTEGER NULL,
+    \`estimatedCostMicroUsd\` INTEGER NULL,
+    \`latencyMs\` INTEGER NULL,
+    \`openaiRequestId\` VARCHAR(191) NULL,
+    \`errorCode\` VARCHAR(64) NULL,
+    \`questionLimit\` INTEGER NOT NULL DEFAULT 10,
+    \`questionUsed\` INTEGER NOT NULL DEFAULT 0,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`updatedAt\` DATETIME(3) NOT NULL,
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`FeynmanAiEvaluation_reviewId_key\` (\`reviewId\`),
+    INDEX \`FeynmanAiEvaluation_userId_createdAt_idx\` (\`userId\`, \`createdAt\`),
+    INDEX \`FeynmanAiEvaluation_status_createdAt_idx\` (\`status\`, \`createdAt\`),
+    CONSTRAINT \`FeynmanAiEvaluation_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`FeynmanAiEvaluation_reviewId_fkey\` FOREIGN KEY (\`reviewId\`) REFERENCES \`FeynmanReview\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`FeynmanAiMessage\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`evaluationId\` VARCHAR(191) NOT NULL,
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`requestKey\` VARCHAR(64) NOT NULL,
+    \`status\` VARCHAR(16) NOT NULL DEFAULT 'PENDING',
+    \`question\` TEXT NOT NULL,
+    \`answer\` TEXT NULL,
+    \`rejectReason\` VARCHAR(64) NULL,
+    \`model\` VARCHAR(64) NULL,
+    \`promptVersion\` VARCHAR(32) NULL,
+    \`inputTokens\` INTEGER NULL,
+    \`outputTokens\` INTEGER NULL,
+    \`cachedInputTokens\` INTEGER NULL,
+    \`estimatedCostMicroUsd\` INTEGER NULL,
+    \`latencyMs\` INTEGER NULL,
+    \`openaiRequestId\` VARCHAR(191) NULL,
+    \`errorCode\` VARCHAR(64) NULL,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`updatedAt\` DATETIME(3) NOT NULL,
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`FeynmanAiMessage_requestKey_key\` (\`requestKey\`),
+    INDEX \`FeynmanAiMessage_evaluationId_createdAt_idx\` (\`evaluationId\`, \`createdAt\`),
+    INDEX \`FeynmanAiMessage_userId_createdAt_idx\` (\`userId\`, \`createdAt\`),
+    CONSTRAINT \`FeynmanAiMessage_evaluationId_fkey\` FOREIGN KEY (\`evaluationId\`) REFERENCES \`FeynmanAiEvaluation\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`FeynmanAiMessage_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`FeynmanAiBudget\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`grantedTotal\` INTEGER NOT NULL DEFAULT 0,
+    \`usedTotal\` INTEGER NOT NULL DEFAULT 0,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`updatedAt\` DATETIME(3) NOT NULL,
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`FeynmanAiBudget_userId_key\` (\`userId\`),
+    CONSTRAINT \`FeynmanAiBudget_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`FeynmanAiAttemptState\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`attemptId\` VARCHAR(191) NOT NULL,
+    \`lastGradedOn\` DATETIME(3) NULL,
+    \`gradedCount\` INTEGER NOT NULL DEFAULT 0,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`updatedAt\` DATETIME(3) NOT NULL,
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`FeynmanAiAttemptState_attemptId_key\` (\`attemptId\`),
+    CONSTRAINT \`FeynmanAiAttemptState_attemptId_fkey\` FOREIGN KEY (\`attemptId\`) REFERENCES \`Attempt\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`FeynmanAiAlert\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`source\` VARCHAR(16) NOT NULL,
+    \`severity\` VARCHAR(16) NOT NULL DEFAULT 'LOW',
+    \`status\` VARCHAR(16) NOT NULL DEFAULT 'OPEN',
+    \`kind\` VARCHAR(32) NOT NULL,
+    \`exerciseId\` VARCHAR(191) NULL,
+    \`attemptId\` VARCHAR(191) NULL,
+    \`evaluationId\` VARCHAR(191) NULL,
+    \`questionCode\` VARCHAR(32) NULL,
+    \`detail\` TEXT NULL,
+    \`adminNote\` TEXT NULL,
+    \`resolvedAt\` DATETIME(3) NULL,
+    \`resolvedBy\` VARCHAR(191) NULL,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`updatedAt\` DATETIME(3) NOT NULL,
+    PRIMARY KEY (\`id\`),
+    INDEX \`FeynmanAiAlert_status_severity_createdAt_idx\` (\`status\`, \`severity\`, \`createdAt\`),
+    INDEX \`FeynmanAiAlert_exerciseId_createdAt_idx\` (\`exerciseId\`, \`createdAt\`)
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
 ];
 
 /**
@@ -1018,6 +1131,19 @@ const MIGRATIONS = [
   `ALTER TABLE \`CompetitionEntry\` ADD COLUMN \`entrySource\` VARCHAR(16) NOT NULL DEFAULT 'OPEN'`,
   `ALTER TABLE \`CompetitionEntry\` ADD COLUMN \`qualificationId\` VARCHAR(191) NULL`,
   `CREATE UNIQUE INDEX \`CompetitionEntry_qualificationId_key\` ON \`CompetitionEntry\` (\`qualificationId\`)`,
+
+  // ---- Feynman AI Tutor ------------------------------------------------
+  // Mot luot lam bai luyen lai duoc nhieu lan, nen FeynmanReview can runNumber.
+  // Rang buoc unique cu tren attemptId duoc go RIENG trong applyOnce ben duoi,
+  // vi do la thao tac PHA HUY va chi duoc chay dung mot lan.
+  `ALTER TABLE \`FeynmanReview\` ADD COLUMN \`runNumber\` INTEGER NOT NULL DEFAULT 1`,
+  `CREATE INDEX \`FeynmanReview_attemptId_createdAt_idx\` ON \`FeynmanReview\` (\`attemptId\`, \`createdAt\`)`,
+
+  // Quyen va don hang gan theo LUOT LAM BAI thay vi theo bai.
+  `ALTER TABLE \`AccessGrant\` ADD COLUMN \`attemptId\` VARCHAR(191) NULL`,
+  `ALTER TABLE \`PaymentOrder\` ADD COLUMN \`attemptId\` VARCHAR(191) NULL`,
+  // Thieu index nay thi truy van tim don PENDING tai su dung se quet toan bang.
+  `CREATE INDEX \`PaymentOrder_userId_attemptId_status_idx\` ON \`PaymentOrder\` (\`userId\`, \`attemptId\`, \`status\`)`,
 ];
 
 export async function initDatabase() {
@@ -1110,6 +1236,30 @@ export async function initDatabase() {
   // Bổ sung lời giải mẫu Feynman (question.learning) cho các bài đã tồn tại.
   // Chỉ chạy một lần VÀ chỉ khi bản trên máy chủ chưa có lời giải nào —
   // không bao giờ ghi đè nội dung giáo viên đã tự soạn.
+  // Go rang buoc "mot luot lam bai chi mot phien Feynman".
+  //
+  // Day la thao tac PHA HUY nen phai boc applyOnce: chay lai lan hai tren
+  // database da go roi se nem loi va lam ban log moi lan khoi dong. Unique moi
+  // (attemptId, runNumber) duoc tao trong CUNG mot lan chay, vi neu go duoc
+  // khoa cu ma khong tao duoc khoa moi thi bang mat hoan toan rang buoc.
+  await applyOnce("FEYNMAN_REVIEW_MULTI_RUN_v1", async () => {
+    try {
+      await db.$executeRawUnsafe(
+        "ALTER TABLE `FeynmanReview` DROP INDEX `FeynmanReview_attemptId_key`"
+      );
+    } catch {
+      /* database moi tao tu schema hien tai thi khoa nay khong ton tai */
+    }
+    try {
+      await db.$executeRawUnsafe(
+        "CREATE UNIQUE INDEX `FeynmanReview_attemptId_runNumber_key` " +
+          "ON `FeynmanReview` (`attemptId`, `runNumber`)"
+      );
+    } catch {
+      /* da tao roi */
+    }
+  });
+
   await applyOnce("SEED_FEYNMAN_LEARNING_v1", async () => {
     for (const ex of exercises) {
       const seedContent = JSON.stringify(ex.content);
