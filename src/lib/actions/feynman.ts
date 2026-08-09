@@ -1,5 +1,6 @@
 "use server";
 
+import { Prisma } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
@@ -14,6 +15,10 @@ import {
   recordAchievementEvent,
 } from "@/lib/achievements/engine";
 import { readingContentForAttempt } from "@/lib/attempt-content";
+import {
+  decideQuestionPick,
+  MAX_QUESTIONS_PER_RUN,
+} from "@/lib/feynman-ai/rules";
 
 export type FeynmanFormState = { error?: string } | undefined;
 
@@ -42,22 +47,35 @@ function confidenceValue(formData: FormData, name: string): number | null {
 
 /**
  * Bước 0 → 1: tạo phiên Feynman cho một lượt Reading đã chấm.
- * Idempotent nhờ ràng buộc duy nhất theo attemptId — bấm hai lần không tạo hai phiên.
+ *
+ * Một lượt làm bài luyện lại được nhiều lần, nên `attemptId` không còn là khóa
+ * duy nhất. Idempotency giờ dựa vào: đang có phiên DỞ DANG thì vào tiếp phiên
+ * đó, chỉ khi phiên gần nhất đã xong (hoặc chưa có phiên nào) mới mở phiên mới.
+ * Nhờ vậy bấm hai lần vẫn không tạo hai phiên.
  */
 export async function startFeynmanReviewAction(attemptId: string) {
   const user = await requireUser();
 
   const attempt = await db.attempt.findUnique({
     where: { id: attemptId },
-    include: { exercise: true, feynmanReview: { select: { id: true } } },
+    include: {
+      exercise: true,
+      feynmanReviews: {
+        orderBy: { runNumber: "desc" },
+        take: 1,
+        select: { id: true, runNumber: true, status: true },
+      },
+    },
   });
   if (!attempt || attempt.userId !== user.id) redirect("/hoc-vien");
   if (attempt.exercise.skill !== "READING" || attempt.status !== "GRADED") {
     redirect(`/hoc-vien/bai-lam/${attemptId}`);
   }
-  // Phiên đã tạo thì luôn vào được — kể cả khi gói Feynman đã hết hạn. Việc
+
+  const latest = attempt.feynmanReviews[0] ?? null;
+  // Phiên dở dang thì luôn vào được — kể cả khi gói Feynman đã hết hạn. Việc
   // học dở dang không được phép biến mất vì lý do thương mại.
-  if (attempt.feynmanReview) {
+  if (latest && latest.status !== "COMPLETED") {
     redirect(`/hoc-vien/bai-lam/${attemptId}/feynman`);
   }
 
@@ -68,6 +86,7 @@ export async function startFeynmanReviewAction(attemptId: string) {
       userId: user.id,
       feature: "FEYNMAN",
       exerciseId: attempt.exerciseId,
+      attemptId: attempt.id,
     }));
   if (!canStart) {
     redirect(`/hoc-vien/bai-lam/${attemptId}?mua=feynman`);
@@ -86,42 +105,168 @@ export async function startFeynmanReviewAction(attemptId: string) {
     taskType: attempt.exercise.taskType,
     imperfectCount,
   });
-  const selected = selectPriorityMistakes(graded.detail, mode);
-  const learning = buildFeynmanLearningLookup(content);
 
-  await db.feynmanReview.upsert({
-    where: { attemptId },
-    update: {},
-    create: {
-      userId: user.id,
-      attemptId,
-      mode,
-      mistakes: {
-        create: selected.map((item, index) => {
-          const note = learning.get(item.id);
-          return {
-            questionId: item.id,
-            numberLabel: item.numberLabel,
-            questionType: item.type,
-            partNumber: item.part,
-            sortOrder: index,
-            prompt: item.prompt,
-            userAnswer: item.userAnswer,
-            correctAnswer: item.correctAnswer,
-            modelEvidenceParagraph: note?.learning?.evidenceParagraph ?? null,
-            modelEvidence: note?.learning?.evidenceText ?? null,
-            modelExplanation: note?.learning?.explanation ?? null,
-            modelTrap: note?.learning?.trap ?? null,
-            modelParaphrasesJson: note?.learning?.paraphrases
-              ? JSON.stringify(note.learning.paraphrases)
-              : null,
-          };
-        }),
-      },
-    },
+  await createReviewRun({
+    userId: user.id,
+    attemptId,
+    runNumber: (latest?.runNumber ?? 0) + 1,
+    mode,
+    selected: selectPriorityMistakes(graded.detail, mode),
+    learning: buildFeynmanLearningLookup(content),
   });
 
   redirect(`/hoc-vien/bai-lam/${attemptId}/feynman`);
+}
+
+/**
+ * Mở phiên luyện với đúng những câu học viên tự tick.
+ *
+ * Khác `startFeynmanReviewAction` ở chỗ danh sách câu do học viên chọn chứ
+ * không do hệ thống ưu tiên. Tick câu ĐÚNG vẫn hợp lệ — nhiều người đoán trúng
+ * và muốn hiểu vì sao, đó chính là việc Feynman sinh ra để làm.
+ */
+export async function startCustomFeynmanReviewAction(
+  attemptId: string,
+  pickedIds: string[]
+): Promise<FeynmanFormState> {
+  const user = await requireUser();
+
+  const attempt = await db.attempt.findUnique({
+    where: { id: attemptId },
+    include: {
+      exercise: true,
+      feynmanReviews: {
+        orderBy: { runNumber: "desc" },
+        take: 1,
+        select: { id: true, runNumber: true, status: true },
+      },
+    },
+  });
+  if (!attempt || attempt.userId !== user.id) redirect("/hoc-vien");
+  if (attempt.exercise.skill !== "READING" || attempt.status !== "GRADED") {
+    redirect(`/hoc-vien/bai-lam/${attemptId}`);
+  }
+
+  const latest = attempt.feynmanReviews[0] ?? null;
+  if (latest && latest.status !== "COMPLETED") {
+    redirect(`/hoc-vien/bai-lam/${attemptId}/feynman`);
+  }
+
+  const canStart =
+    user.role === "ADMIN" ||
+    (await hasActiveAccess({
+      userId: user.id,
+      feature: "FEYNMAN",
+      exerciseId: attempt.exerciseId,
+      attemptId: attempt.id,
+    }));
+  if (!canStart) {
+    redirect(`/hoc-vien/bai-lam/${attemptId}?mua=feynman`);
+  }
+
+  const content = await readingContentForAttempt(attempt);
+  const answers = JSON.parse(attempt.answers || "{}");
+  const graded = gradeReading(content, answers);
+
+  // Danh sách câu do trình duyệt gửi lên nên phải xác minh lại toàn bộ ở đây.
+  const pick = decideQuestionPick({
+    picked: pickedIds,
+    availableIds: graded.detail.map((item) => item.id),
+  });
+  if (!pick.allowed) {
+    return { error: PICK_ERRORS[pick.reason] };
+  }
+
+  const order = new Map(pick.picked.map((id, index) => [id, index]));
+  const selected = graded.detail
+    .filter((item) => order.has(item.id))
+    .sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
+
+  await createReviewRun({
+    userId: user.id,
+    attemptId,
+    runNumber: (latest?.runNumber ?? 0) + 1,
+    mode: "CUSTOM",
+    selected,
+    learning: buildFeynmanLearningLookup(content),
+  });
+
+  redirect(`/hoc-vien/bai-lam/${attemptId}/feynman`);
+}
+
+const PICK_ERRORS: Record<string, string> = {
+  EMPTY_SELECTION: "Bạn cần chọn ít nhất một câu để chữa.",
+  TOO_MANY_QUESTIONS: `Mỗi lượt luyện chọn tối đa ${MAX_QUESTIONS_PER_RUN} câu.`,
+  DUPLICATE_QUESTION: "Có câu bị chọn trùng. Bạn chọn lại giúp nhé.",
+  UNKNOWN_QUESTION: "Có câu không thuộc đề này. Bạn tải lại trang rồi chọn lại.",
+};
+
+/**
+ * Ghi một phiên luyện xuống database.
+ *
+ * Tách ra vì hai đường vào (hệ thống ưu tiên và học viên tự chọn) khác nhau
+ * đúng ở danh sách câu; chép đôi phần ghi sẽ dẫn tới hai phiên bản snapshot lời
+ * giải khác nhau sau vài lần sửa.
+ */
+async function createReviewRun(input: {
+  userId: string;
+  attemptId: string;
+  runNumber: number;
+  mode: string;
+  selected: Array<{
+    id: string;
+    numberLabel: string;
+    type: string;
+    part: number;
+    prompt: string;
+    userAnswer: string;
+    correctAnswer: string;
+  }>;
+  learning: ReturnType<typeof buildFeynmanLearningLookup>;
+}): Promise<void> {
+  try {
+    await db.feynmanReview.create({
+      data: {
+        userId: input.userId,
+        attemptId: input.attemptId,
+        // Ràng buộc @@unique([attemptId, runNumber]) là thứ chặn hai tab cùng
+        // bấm: cái thua đụng P2002 và đi tiếp vào phiên cái thắng vừa tạo.
+        runNumber: input.runNumber,
+        mode: input.mode,
+        mistakes: {
+          create: input.selected.map((item, index) => {
+            const note = input.learning.get(item.id);
+            return {
+              questionId: item.id,
+              numberLabel: item.numberLabel,
+              questionType: item.type,
+              partNumber: item.part,
+              sortOrder: index,
+              prompt: item.prompt,
+              userAnswer: item.userAnswer,
+              correctAnswer: item.correctAnswer,
+              modelEvidenceParagraph: note?.learning?.evidenceParagraph ?? null,
+              modelEvidence: note?.learning?.evidenceText ?? null,
+              modelExplanation: note?.learning?.explanation ?? null,
+              modelTrap: note?.learning?.trap ?? null,
+              modelParaphrasesJson: note?.learning?.paraphrases
+                ? JSON.stringify(note.learning.paraphrases)
+                : null,
+            };
+          }),
+        },
+      },
+    });
+  } catch (error) {
+    // Hai tab cùng bấm: phiên đã được tab kia tạo với đúng số này. Đi tiếp vào
+    // phiên đó thay vì báo lỗi cho học viên về một việc đã thành công.
+    if (
+      !(error instanceof Prisma.PrismaClientKnownRequestError) ||
+      error.code !== "P2002"
+    ) {
+      throw error;
+    }
+  }
 }
 
 /**

@@ -15,6 +15,11 @@ import {
   type FeynmanErrorType,
 } from "@/lib/feynman-constants";
 import { StudyHeartbeat } from "@/components/study/study-heartbeat";
+import { FeynmanAiPanel } from "@/components/feynman/feynman-ai-panel";
+import type { AiEvaluationView } from "@/components/feynman/feynman-ai-evaluation";
+import type { ChatTurn } from "@/components/feynman/feynman-ai-chat";
+import { readFeynmanAiConfig } from "@/lib/feynman-ai/config";
+import { walletRemaining } from "@/lib/feynman-ai/rules";
 
 export const metadata = { title: "Chữa bài theo phương pháp Feynman" };
 
@@ -26,8 +31,11 @@ export default async function FeynmanPage({
   const { attemptId } = await params;
   const user = await requireUser();
 
-  const review = await db.feynmanReview.findUnique({
+  // Một lượt làm bài có thể có nhiều phiên luyện; trang này luôn mở phiên MỚI
+  // NHẤT. Các phiên cũ vẫn nằm nguyên trong database để tra lại lịch sử.
+  const review = await db.feynmanReview.findFirst({
     where: { attemptId },
+    orderBy: { runNumber: "desc" },
     include: {
       attempt: { include: { exercise: { select: { title: true } } } },
       mistakes: { orderBy: { sortOrder: "asc" } },
@@ -83,6 +91,12 @@ export default async function FeynmanPage({
   });
 
   const isCompleted = review.status === "COMPLETED";
+  const aiPanel = await loadAiPanel({
+    userId: user.id,
+    reviewId: review.id,
+    attemptId,
+    mistakes: review.mistakes,
+  });
 
   return (
     <section className="mx-auto max-w-4xl px-6 py-12 md:py-14">
@@ -127,8 +141,115 @@ export default async function FeynmanPage({
           <FeynmanDraftForm reviewId={review.id} mistakes={mistakes} />
         )}
       </div>
+
+      {/* Khối AI nằm SAU phần tự giảng, không nằm trước: học viên phải tự viết
+          xong đã. Đặt trước thì cái nút sẽ trở thành lối tắt bỏ qua việc học. */}
+      {aiPanel && (
+        <FeynmanAiPanel
+          reviewId={review.id}
+          evaluation={aiPanel.evaluation}
+          turns={aiPanel.turns}
+          questionLimit={aiPanel.questionLimit}
+          questionUsed={aiPanel.questionUsed}
+          walletRemaining={aiPanel.walletRemaining}
+          reviewCompleted={isCompleted}
+          topUpHref={aiPanel.topUpHref}
+        />
+      )}
     </section>
   );
+}
+
+/* ===================== Khối AI ===================== */
+
+type AiPanelData = {
+  evaluation: AiEvaluationView | null;
+  turns: ChatTurn[];
+  questionLimit: number;
+  questionUsed: number;
+  walletRemaining: number;
+  topUpHref: string;
+};
+
+/**
+ * Gom dữ liệu cho khối AI. Trả về null khi tính năng đang tắt — khi đó trang
+ * chữa bài vẫn chạy đầy đủ, chỉ không có khối AI.
+ *
+ * Đọc `reasonJson` ở ĐÂY chứ không ở thành phần client: chuỗi JSON thô của
+ * model không nên đi vào payload gửi xuống trình duyệt.
+ */
+async function loadAiPanel(input: {
+  userId: string;
+  reviewId: string;
+  attemptId: string;
+  mistakes: Array<{ questionId: string; numberLabel: string }>;
+}): Promise<AiPanelData | null> {
+  if (!readFeynmanAiConfig().enabled) return null;
+
+  const [evaluation, budget] = await Promise.all([
+    db.feynmanAiEvaluation.findUnique({
+      where: { reviewId: input.reviewId },
+      include: {
+        messages: {
+          where: { status: "COMPLETED" },
+          orderBy: { createdAt: "asc" },
+          select: { id: true, question: true, answer: true },
+        },
+      },
+    }),
+    db.feynmanAiBudget.findUnique({ where: { userId: input.userId } }),
+  ]);
+
+  const labels: Record<string, string> = {};
+  for (const mistake of input.mistakes) {
+    labels[mistake.questionId] = `Câu ${mistake.numberLabel}`;
+  }
+
+  let view: AiEvaluationView | null = null;
+  if (evaluation && evaluation.status === "COMPLETED") {
+    view = {
+      id: evaluation.id,
+      verdict: evaluation.verdict ?? "KHONG_DAT",
+      similarityPercent: evaluation.similarityPercent ?? 0,
+      perQuestion: safeJsonArray(evaluation.reasonJson),
+      advice: safeJsonObject(evaluation.overallAdviceJson),
+      labels,
+    };
+  }
+
+  return {
+    evaluation: view,
+    turns: (evaluation?.messages ?? []).map((m) => ({
+      id: m.id,
+      question: m.question,
+      answer: m.answer ?? "",
+    })),
+    questionLimit: evaluation?.questionLimit ?? 0,
+    questionUsed: evaluation?.questionUsed ?? 0,
+    walletRemaining: walletRemaining(budget ?? { grantedTotal: 0, usedTotal: 0 }),
+    topUpHref: `/thanh-toan?goi=FEYNMAN_AI_TOPUP&luot=${input.attemptId}`,
+  };
+}
+
+/** JSON hỏng thì trả về rỗng: một bản chấm thiếu chi tiết vẫn hơn một trang trắng. */
+function safeJsonArray(text: string | null): AiEvaluationView["perQuestion"] {
+  if (!text) return [];
+  try {
+    const parsed = JSON.parse(text);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function safeJsonObject(text: string | null): AiEvaluationView["advice"] {
+  if (!text) return null;
+  try {
+    const parsed = JSON.parse(text);
+    return parsed && typeof parsed === "object" ? parsed : null;
+  } catch {
+    return null;
+  }
 }
 
 /* ===================== Xem lại sau khi hoàn thành ===================== */

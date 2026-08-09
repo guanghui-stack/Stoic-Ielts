@@ -38,6 +38,18 @@ import {
   weaknessRowsForAi,
   type AiGrantLike,
 } from "../src/lib/feynman-ai/rules.ts";
+import {
+  decideGrantAccess,
+  type GrantLike,
+} from "../src/lib/payments/payment-rules.ts";
+import {
+  parseChatOutput,
+  parseEvaluationOutput,
+} from "../src/lib/feynman-ai/prompts.ts";
+import {
+  assertPayloadClean,
+  buildEvaluationPayload,
+} from "../src/lib/feynman-ai/context.ts";
 
 let failures = 0;
 function check(label: string, actual: unknown, expected: unknown) {
@@ -532,6 +544,232 @@ check(
   INSUFFICIENT_WEAKNESS_DATA_NOTE.includes("Chưa đủ dữ liệu"),
   true
 );
+
+/* ---------------------------------------------------------------- */
+console.log("\nQUYỀN THẬT — decideGrantAccess phải hiểu cả ba phạm vi");
+
+const realGrant = (o: Partial<GrantLike>): GrantLike => ({
+  feature: "FEYNMAN",
+  scope: "ATTEMPT",
+  exerciseId: null,
+  attemptId: "att-1",
+  status: "ACTIVE",
+  startsAt: at(-1),
+  expiresAt: null,
+  ...o,
+});
+
+check(
+  "Gói theo lượt mở đúng lượt đã mua",
+  decideGrantAccess({
+    grants: [realGrant({})],
+    feature: "FEYNMAN",
+    attemptId: "att-1",
+    at: NOW,
+  }),
+  true
+);
+check(
+  "Gói theo lượt KHÔNG mở lượt khác",
+  decideGrantAccess({
+    grants: [realGrant({})],
+    feature: "FEYNMAN",
+    attemptId: "att-2",
+    at: NOW,
+  }),
+  false
+);
+check(
+  "Không truyền attemptId thì gói theo lượt không khớp",
+  decideGrantAccess({ grants: [realGrant({})], feature: "FEYNMAN", at: NOW }),
+  false
+);
+check(
+  "Grant ATTEMPT thiếu attemptId là dữ liệu hỏng → chặn",
+  decideGrantAccess({
+    grants: [realGrant({ attemptId: null })],
+    feature: "FEYNMAN",
+    attemptId: "att-1",
+    at: NOW,
+  }),
+  false
+);
+check(
+  "Gói EXERCISE cũ vẫn mở mọi lượt của bài đó",
+  decideGrantAccess({
+    grants: [
+      realGrant({ scope: "EXERCISE", exerciseId: "ex-1", attemptId: null }),
+    ],
+    feature: "FEYNMAN",
+    exerciseId: "ex-1",
+    attemptId: "att-99",
+    at: NOW,
+  }),
+  true
+);
+check(
+  "Gói ALL phủ mọi thứ",
+  decideGrantAccess({
+    grants: [realGrant({ scope: "ALL", attemptId: null })],
+    feature: "FEYNMAN",
+    attemptId: "att-7",
+    at: NOW,
+  }),
+  true
+);
+check(
+  "Gói nạp lượt (scope NONE) KHÔNG mở gì cả",
+  decideGrantAccess({
+    grants: [realGrant({ scope: "NONE", attemptId: null })],
+    feature: "FEYNMAN",
+    attemptId: "att-1",
+    at: NOW,
+  }),
+  false
+);
+check(
+  "Quyền Reading không rò sang Feynman",
+  decideGrantAccess({
+    grants: [realGrant({ feature: "READING", scope: "ALL" })],
+    feature: "FEYNMAN",
+    attemptId: "att-1",
+    at: NOW,
+  }),
+  false
+);
+
+/* ---------------------------------------------------------------- */
+console.log("\nKẾT QUẢ MODEL TRẢ VỀ — sai cấu trúc thì từ chối, không đoán");
+
+const goodEval = {
+  diemTuongDong: 82,
+  doTinCay: 90,
+  tungCau: [
+    { maCau: "p1:q1", diem: 80, datY: "a", thieuY: "b", trichDan: "c" },
+  ],
+  nhanXetChung: { diemManh: "x", canSua: "y", buocTiepTheo: "z" },
+};
+
+check(
+  "Kết quả đúng cấu trúc thì nhận",
+  parseEvaluationOutput(goodEval)?.diemTuongDong,
+  82
+);
+check(
+  "Điểm ngoài dải 0-100 bị từ chối, KHÔNG quy về biên",
+  parseEvaluationOutput({ ...goodEval, diemTuongDong: 130 }),
+  null
+);
+check(
+  "Điểm âm bị từ chối",
+  parseEvaluationOutput({ ...goodEval, diemTuongDong: -5 }),
+  null
+);
+check(
+  "Điểm dạng chuỗi bị từ chối",
+  parseEvaluationOutput({ ...goodEval, diemTuongDong: "82" }),
+  null
+);
+check("Thiếu nhanXetChung bị từ chối", parseEvaluationOutput({
+  ...goodEval,
+  nhanXetChung: undefined,
+}), null);
+check(
+  "Câu thiếu mã bị từ chối",
+  parseEvaluationOutput({
+    ...goodEval,
+    tungCau: [{ maCau: "  ", diem: 50, datY: "", thieuY: "", trichDan: "" }],
+  }),
+  null
+);
+check("Không phải object thì từ chối", parseEvaluationOutput("82"), null);
+check("null thì từ chối", parseEvaluationOutput(null), null);
+
+check(
+  "Câu trả lời trong phạm vi thì nhận",
+  parseChatOutput({ trongPhamVi: true, traLoi: "Vì...", lyDoTuChoi: "" })?.traLoi,
+  "Vì..."
+);
+check(
+  "Nói trong phạm vi mà trả lời rỗng là hỏng — học viên sẽ mất lượt cho ô trống",
+  parseChatOutput({ trongPhamVi: true, traLoi: "   ", lyDoTuChoi: "" }),
+  null
+);
+check(
+  "Ngoài phạm vi thì không cần câu trả lời",
+  parseChatOutput({ trongPhamVi: false, traLoi: "", lyDoTuChoi: "Hỏi bài khác" })
+    ?.trongPhamVi,
+  false
+);
+check(
+  "trongPhamVi không phải boolean thì từ chối",
+  parseChatOutput({ trongPhamVi: "true", traLoi: "a", lyDoTuChoi: "" }),
+  null
+);
+
+/* ---------------------------------------------------------------- */
+console.log("\nPAYLOAD GỬI ĐI — dựng từ danh sách trắng, không lọt dữ liệu cá nhân");
+
+const payload = buildEvaluationPayload({
+  exerciseTitle: "Cambridge 19 Test 1",
+  passages: [{ partNumber: 1, title: "Bees", paragraphs: ["A. Bees are..."] }],
+  mistakes: [
+    {
+      questionId: "p1:q3",
+      numberLabel: "3",
+      questionType: "TFNG",
+      partNumber: 1,
+      prompt: "Bees can see red.",
+      userAnswer: "TRUE",
+      correctAnswer: "FALSE",
+      modelExplanation: "Loi giai giao vien",
+      liveExplanation: null,
+      evidenceParagraph: "B",
+      revisedExplanation: "Em nghi la...",
+      lessonRule: null,
+    },
+  ],
+  finalTeachBack: "Tong ket",
+  finalRule: null,
+  confusingPoint: null,
+  currentBand: 6.5,
+  targetBand: 7.5,
+  weaknessRows: [
+    { questionType: "TFNG", samples: 40, accuracyPercent: 55 },
+    { questionType: "MATCHING", samples: 3, accuracyPercent: 10 },
+  ],
+});
+
+check("Payload sạch, không có khóa cấm", findForbiddenKeys(payload), []);
+check("Mã câu vẫn đi kèm để ghép kết quả", payload.cacCau[0].maCau, "p1:q3");
+check(
+  "Có lời giải giáo viên thì đánh dấu đúng nguồn",
+  payload.cacCau[0].nguonLoiGiai,
+  "TEACHER_APPROVED"
+);
+check(
+  "Dòng Sổ Sơ Hở chưa đủ mẫu bị BỎ HẲN khỏi payload",
+  payload.hocLuc.soHo.length,
+  1
+);
+check(
+  "Còn dòng đủ mẫu thì không kèm ghi chú thiếu dữ liệu",
+  payload.hocLuc.ghiChu,
+  null
+);
+check(
+  "Phần tự giảng của học viên có mặt — đó là thứ chính cần chấm",
+  payload.cacCau[0].hocVienTuGiang,
+  "Em nghi la..."
+);
+
+let threw = false;
+try {
+  assertPayloadClean({ cacCau: [{ maCau: "p1:q3", email: "a@b.com" }] });
+} catch {
+  threw = true;
+}
+check("Lỡ để email lọt vào payload thì NÉM LỖI, không lặng lẽ lọc bỏ", threw, true);
 
 /* ---------------------------------------------------------------- */
 console.log(

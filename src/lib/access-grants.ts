@@ -19,6 +19,7 @@ const GRANT_FIELDS = {
   feature: true,
   scope: true,
   exerciseId: true,
+  attemptId: true,
   status: true,
   startsAt: true,
   expiresAt: true,
@@ -34,11 +35,18 @@ async function liveGrants(
   });
 }
 
-/** Học viên có quyền dùng tính năng này cho bài này không. */
+/**
+ * Học viên có quyền dùng tính năng này cho lượt làm bài này không.
+ *
+ * Truyền `attemptId` bất cứ khi nào biết. Bỏ trống thì grant mua theo lượt
+ * (scope ATTEMPT) sẽ không khớp, và học viên đã trả tiền bị chặn nhầm — nên
+ * chỉ được bỏ trống ở chỗ thật sự không gắn với lượt làm bài nào.
+ */
 export async function hasActiveAccess(input: {
   userId: string;
   feature: AccessFeature;
   exerciseId?: string | null;
+  attemptId?: string | null;
   at?: Date;
 }): Promise<boolean> {
   const at = input.at ?? new Date();
@@ -47,6 +55,7 @@ export async function hasActiveAccess(input: {
     grants,
     feature: input.feature,
     exerciseId: input.exerciseId ?? null,
+    attemptId: input.attemptId ?? null,
     at,
   });
 }
@@ -54,8 +63,10 @@ export async function hasActiveAccess(input: {
 export type AccessSnapshot = {
   /** Đang có gói phủ mọi bài. */
   hasAll: boolean;
-  /** Các bài đã mua lẻ. */
+  /** Các bài đã mua lẻ theo mô hình cũ (scope EXERCISE). */
   exerciseIds: Set<string>;
+  /** Các lượt làm bài đã mua theo mô hình hiện tại (scope ATTEMPT). */
+  attemptIds: Set<string>;
   /** Ngày hết hạn gói (xa nhất), null nếu không có gói. */
   allExpiresAt: Date | null;
 };
@@ -82,6 +93,11 @@ export async function getAccessSnapshot(
       live
         .filter((row) => row.scope === "EXERCISE" && row.exerciseId)
         .map((row) => row.exerciseId as string)
+    ),
+    attemptIds: new Set(
+      live
+        .filter((row) => row.scope === "ATTEMPT" && row.attemptId)
+        .map((row) => row.attemptId as string)
     ),
     // Gói vĩnh viễn (null) thì không có ngày hết hạn để hiển thị
     allExpiresAt: allExpiries.some((d) => d === null)

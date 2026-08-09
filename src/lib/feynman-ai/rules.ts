@@ -28,7 +28,6 @@ import { OFFERS, type Offer, type OfferCode } from "../payments/catalog.ts";
  * báo "hôm nay đã chấm rồi" dù hôm qua mới là lần chấm đó.
  */
 const VN_OFFSET_MS = 7 * 60 * 60 * 1000;
-const DAY_MS = 24 * 60 * 60 * 1000;
 
 /** Ngày theo lịch Việt Nam, dạng "YYYY-MM-DD". */
 export function vietnamDayKey(at: Date): string {

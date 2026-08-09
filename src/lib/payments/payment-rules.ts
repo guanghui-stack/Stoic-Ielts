@@ -24,6 +24,14 @@ export type GrantLike = {
   feature: string;
   scope: string;
   exerciseId: string | null;
+  /**
+   * Lượt làm bài được mở. Chỉ có nghĩa với scope ATTEMPT.
+   *
+   * Để tùy chọn vì các grant cũ (mua trước khi đổi mô hình) không có cột này
+   * khi đọc từ những truy vấn chưa cập nhật select — thiếu thì coi như null,
+   * và grant ATTEMPT thiếu attemptId sẽ bị chặn ở dưới.
+   */
+  attemptId?: string | null;
   status: string;
   startsAt: Date;
   /** null = vĩnh viễn */
@@ -41,28 +49,44 @@ export function isGrantLive(grant: GrantLike, at: Date): boolean {
 }
 
 /**
- * Học viên có quyền dùng `feature` cho bài `exerciseId` không.
+ * Học viên có quyền dùng `feature` cho lượt làm bài này không.
  *
- * Quyền gói (scope ALL) phủ mọi bài, kể cả bài được tạo sau khi mua — đó là
- * lý do không lưu sẵn danh sách bài mà tính lại mỗi lần hỏi.
+ * Ba tầng, xét theo thứ tự rộng dần xuống hẹp:
+ *
+ * 1. `ALL`      — gói phủ mọi bài, kể cả bài tạo sau khi mua. Đó là lý do
+ *                 không lưu sẵn danh sách bài mà tính lại mỗi lần hỏi.
+ * 2. `ATTEMPT`  — mô hình đang bán: mở đúng một lượt làm bài.
+ * 3. `EXERCISE` — mô hình cũ: mở mọi lượt làm của một bài. Vẫn phải đọc được
+ *                 vì có học viên đã trả tiền theo mô hình này.
+ *
+ * Tầng 3 nằm lại vĩnh viễn chứ không phải mã tạm. Xóa nó đi là tước quyền của
+ * người đã mua, và họ sẽ phát hiện ra ngay ngày hôm sau.
  */
 export function decideGrantAccess(input: {
   grants: GrantLike[];
   feature: string;
   exerciseId?: string | null;
+  attemptId?: string | null;
   at: Date;
 }): boolean {
   return input.grants.some((grant) => {
     if (grant.feature !== input.feature) return false;
     if (!isGrantLive(grant, input.at)) return false;
     if (grant.scope === "ALL") return true;
+    if (grant.scope === "ATTEMPT") {
+      // Grant mở một lượt mà thiếu attemptId là dữ liệu hỏng → không mở quyền
+      return Boolean(
+        input.attemptId && (grant.attemptId ?? null) === input.attemptId
+      );
+    }
     if (grant.scope === "EXERCISE") {
       // Grant mở lẻ mà thiếu exerciseId là dữ liệu hỏng → không mở quyền
       return Boolean(
         input.exerciseId && grant.exerciseId === input.exerciseId
       );
     }
-    return false; // scope lạ → chặn
+    // scope lạ, và cả "NONE" của gói nạp lượt → chặn
+    return false;
   });
 }
 

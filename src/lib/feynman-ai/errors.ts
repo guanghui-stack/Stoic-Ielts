@@ -28,12 +28,16 @@ export type FeynmanAiErrorCode =
   | "INTERNAL_ERROR";
 
 export class FeynmanAiError extends Error {
-  constructor(
-    readonly code: FeynmanAiErrorCode,
-    message?: string
-  ) {
+  // Khai báo và gán tường minh, KHÔNG dùng "parameter property" (readonly ngay
+  // trong tham số constructor): bộ kiểm thử chạy bằng `node
+  // --experimental-strip-types`, chế độ này chỉ xóa chú thích kiểu chứ không
+  // sinh mã, nên cú pháp đó làm cả bộ kiểm thử không khởi động được.
+  readonly code: FeynmanAiErrorCode;
+
+  constructor(code: FeynmanAiErrorCode, message?: string) {
     super(message ?? code);
     this.name = "FeynmanAiError";
+    this.code = code;
   }
 }
 

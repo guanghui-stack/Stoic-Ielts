@@ -44,7 +44,13 @@ export default async function AttemptResultPage({
     where: { id: attemptId },
     include: {
       exercise: true,
-      feynmanReview: { select: { id: true, status: true, mode: true } },
+      // Phiên luyện mới nhất. Trang này chỉ cần biết tình trạng hiện tại, còn
+      // các phiên cũ thuộc về lịch sử.
+      feynmanReviews: {
+        orderBy: { runNumber: "desc" },
+        take: 1,
+        select: { id: true, status: true, mode: true },
+      },
     },
   });
   if (!attempt || (attempt.userId !== user.id && user.role !== "ADMIN")) {
@@ -54,6 +60,7 @@ export default async function AttemptResultPage({
   if (attempt.status === "IN_PROGRESS") redirect(`/lam-bai/${attempt.id}`);
 
   const isOwner = attempt.userId === user.id;
+  const feynmanReview = attempt.feynmanReviews[0] ?? null;
 
   /**
    * ĐÁP ÁN CƠ BẢN LÀ MIỄN PHÍ. Học viên chỉ cần bấm một lần để mở — cú bấm đó
@@ -63,7 +70,7 @@ export default async function AttemptResultPage({
   const answersUnlocked =
     user.role === "ADMIN" ||
     attempt.answersRevealedAt !== null ||
-    attempt.feynmanReview?.status === "COMPLETED";
+    feynmanReview?.status === "COMPLETED";
 
   // Quyền Feynman chỉ cần hỏi khi thật sự sắp hiển thị lời mời chữa bài
   const showFeynman = isOwner && attempt.status === "GRADED";
@@ -73,6 +80,7 @@ export default async function AttemptResultPage({
           userId: user.id,
           feature: "FEYNMAN",
           exerciseId: attempt.exerciseId,
+          attemptId: attempt.id,
         }),
         feynmanSinglePrice(user.id),
       ])
@@ -116,8 +124,8 @@ export default async function AttemptResultPage({
         <FeynmanCta
           attemptId={attempt.id}
           exerciseId={attempt.exerciseId}
-          status={attempt.feynmanReview?.status ?? null}
-          mode={attempt.feynmanReview?.mode ?? null}
+          status={feynmanReview?.status ?? null}
+          mode={feynmanReview?.mode ?? null}
           hasAccess={feynmanAccess}
           price={feynmanPrice}
           canBuy={isSePayConfigured()}

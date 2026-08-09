@@ -23,4 +23,13 @@ export const features = {
   themedLabels: process.env.ENABLE_TAM_QUOC_UI_LABELS === "true",
   /** Ba tầng đại thí Nguyệt - Dương - Thiên. */
   competitionTiers: process.env.ENABLE_COMPETITION_TIERS === "true",
+  /**
+   * Trang quản trị Feynman AI.
+   *
+   * Tách khỏi `OPENAI_FEYNMAN_ENABLED`: cờ kia bật/tắt việc GỌI API cho học
+   * viên, cờ này bật/tắt trang theo dõi của quản trị viên. Cần xem lại chi phí
+   * và hàng đợi cảnh báo của giai đoạn vừa rồi ngay cả khi đã tắt tính năng —
+   * đặc biệt là ngay sau khi vừa tắt vì một sự cố.
+   */
+  feynmanAi: process.env.ENABLE_FEYNMAN_AI_ADMIN === "true",
 } as const;

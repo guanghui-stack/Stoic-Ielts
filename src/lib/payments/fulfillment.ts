@@ -1,7 +1,7 @@
 import "server-only";
 import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
-import { OFFERS, isOfferCode } from "@/lib/payments/catalog";
+import { OFFERS, isOfferCode, type Offer } from "@/lib/payments/catalog";
 import {
   canTransitionToPaid,
   computeGrantWindow,
@@ -58,9 +58,10 @@ export async function fulfillPaidOrder(input: {
           return { ok: false as const, reason: "TRANSACTION_ALREADY_USED" };
         }
 
-        const durationDays = isOfferCode(order.offerCode)
-          ? OFFERS[order.offerCode].durationDays
+        const offer = isOfferCode(order.offerCode)
+          ? (OFFERS[order.offerCode] as Offer)
           : null;
+        const durationDays = offer?.durationDays ?? null;
 
         // Gia hạn khi gói cũ còn hạn thì nối tiếp, không đè mất ngày còn lại.
         const current =
@@ -84,20 +85,48 @@ export async function fulfillPaidOrder(input: {
           currentExpiresAt: current?.expiresAt ?? null,
         });
 
-        await tx.accessGrant.create({
-          data: {
-            userId: order.userId,
-            exerciseId: order.scope === "EXERCISE" ? order.exerciseId : null,
-            orderId: order.id,
-            grantKey: `ORDER:${order.id}`,
-            feature: order.feature,
-            scope: order.scope,
-            source: "PURCHASE",
-            status: "ACTIVE",
-            startsAt: window.startsAt,
-            expiresAt: window.expiresAt,
-          },
-        });
+        // Gói nạp lượt AI không mở quyền gì, nên KHÔNG tạo grant. Tạo một grant
+        // scope NONE chỉ để "cho có" sẽ làm bảng quyền đầy những dòng không mở
+        // gì cả, và trang quản trị đếm quyền sẽ sai.
+        if (offer?.kind !== "AI_TOPUP") {
+          await tx.accessGrant.create({
+            data: {
+              userId: order.userId,
+              exerciseId: order.scope === "EXERCISE" ? order.exerciseId : null,
+              attemptId: order.scope === "ATTEMPT" ? order.attemptId : null,
+              orderId: order.id,
+              grantKey: `ORDER:${order.id}`,
+              feature: order.feature,
+              scope: order.scope,
+              source: "PURCHASE",
+              status: "ACTIVE",
+              startsAt: window.startsAt,
+              expiresAt: window.expiresAt,
+            },
+          });
+        }
+
+        // Cộng lượt AI vào ví CHUNG của tài khoản.
+        //
+        // Nằm trong cùng transaction Serializable với việc cấp quyền là bắt
+        // buộc: tách ra ngoài thì một lần treo mạng giữa hai bước sẽ để lại
+        // học viên đã trả tiền, đã có quyền, nhưng ví trống — và không có dấu
+        // vết nào cho biết phải cộng bù bao nhiêu.
+        //
+        // Dùng upsert với `increment` thay vì đọc-rồi-ghi: hai IPN song song
+        // đọc cùng một số dư rồi ghi đè nhau sẽ nuốt mất một lần nạp.
+        const credits = offer?.aiGradingCredits ?? 0;
+        if (credits > 0) {
+          await tx.feynmanAiBudget.upsert({
+            where: { userId: order.userId },
+            create: {
+              userId: order.userId,
+              grantedTotal: credits,
+              usedTotal: 0,
+            },
+            update: { grantedTotal: { increment: credits } },
+          });
+        }
 
         await tx.paymentOrder.update({
           where: { id: order.id },
