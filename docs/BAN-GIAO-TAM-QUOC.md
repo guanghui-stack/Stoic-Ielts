@@ -208,3 +208,110 @@ gian đã có sẵn (`facts.now`).
 - **Không hạ ngưỡng để lấp đủ ghế.** Thiếu người đạt chuẩn thì kỳ thi ít người
   hơn — tấm vé giữ nguyên giá trị.
 - Repo là **PUBLIC**. `npm run test:no-secrets` chặn khoá lọt vào commit.
+
+---
+
+# 10. Feynman AI Tutor — bàn giao phiên 11/08/2026
+
+## 10.1. Trạng thái: giai đoạn 1 XONG, giai đoạn 2–3 chờ chủ dự án
+
+Toàn bộ mã Feynman AI đã nằm trên `main` và đã đẩy lên GitHub.
+**Tính năng đang TẮT hoàn toàn** và sẽ tự tắt cho tới khi có đủ hai biến môi
+trường. Không cần làm gì để giữ nó tắt.
+
+```
+enabled = OPENAI_FEYNMAN_ENABLED === "true"  VÀ  có OPENAI_API_KEY
+```
+
+Thiếu một trong hai là tắt. Đây là lý do merge được mà không sợ ảnh hưởng
+học viên đang dùng.
+
+## 10.2. Việc CHỈ chủ dự án làm được (giai đoạn 2)
+
+Claude không đụng vào khóa API. Vào hPanel → Biến môi trường, thêm ba biến.
+Ô **Khóa** và ô **Giá trị** điền tách nhau, giá trị **không có dấu `=`**, chữ
+thường:
+
+| Khóa | Giá trị |
+|---|---|
+| `OPENAI_API_KEY` | khóa lấy từ platform.openai.com |
+| `OPENAI_FEYNMAN_ENABLED` | `true` |
+| `ENABLE_FEYNMAN_AI_ADMIN` | `true` |
+
+Rồi bấm **Tải triển khai**. Sau đó tab **AI Feynman** sẽ hiện trong khu quản
+trị — đó là nơi duy nhất xem được tiền đã tiêu cho OpenAI.
+
+**Giai đoạn 2 là tự mình chấm thử vài bài rồi nhìn con số chi phí thật.**
+Chỉ khi thấy con số đó ổn mới mở cho học viên (giai đoạn 3).
+
+## 10.3. Tiền bị chặn ở đâu
+
+Không có trần chi tiêu toàn hệ thống. Nhưng chi phí bị chặn tự nhiên: mỗi lần
+chấm tiêu một lượt trong ví, mà ví chỉ được nạp khi có thanh toán thành công.
+Học viên không thể tiêu nếu chưa trả tiền.
+
+Chỗ cần canh là **quản trị viên tự cộng lượt**. Nếu sau này thấy lo, thêm trần
+chi tiêu theo ngày là việc nhỏ — nhưng đó là quyết định của chủ dự án, chưa làm.
+
+## 10.4. Hai lỗi đã sửa trong phiên này
+
+Cả hai đều thuộc loại **hỏng âm thầm**: không có thông báo lỗi, chỉ âm thầm
+chạy sai.
+
+**Một lần chấm hỏng khóa vĩnh viễn cả phiên.** `FeynmanAiEvaluation.reviewId`
+là `@unique`, và luồng cũ chỉ dựa vào ràng buộc đó để chặn trùng. Khi OpenAI
+trục trặc, hàng `FAILED` vẫn nằm lại; lần chấm sau đụng P2002 và bị báo *"đã
+chấm rồi"* — trong khi học viên chưa từng nhận được kết quả nào. Thông điệp lỗi
+còn nói *"lượt của bạn chưa bị trừ, mời bạn thử lại"*, nhưng thử lại là bất khả.
+Đây là đường **phổ biến** chứ không hiếm: mọi mã lỗi hệ thống đều hoàn lượt.
+
+**Tiến trình chết giữa lúc gọi API thì lượt bốc hơi.** Nhánh hoàn lượt không
+bao giờ chạy, hàng kẹt `PENDING` vĩnh viễn, ví đã bị trừ và không ai hoàn.
+Hostinger khởi động lại mỗi lần triển khai nên chuyện này chắc chắn sẽ xảy ra.
+
+Cách sửa: `planReservation()` trong `src/lib/feynman-ai/rules.ts` — hàm thuần,
+có 7 phép thử trong `scripts/test-feynman-ai.ts`. Hai nguyên tắc:
+
+- Ví **không bao giờ** bị trừ hai lần cho cùng một kết quả.
+- Học viên **không bao giờ** bị kẹt cứng không chấm lại được.
+
+`PENDING` mồ côi được dọn **lười** — lúc người dùng bấm chấm lại, không cần
+cron. Quá 10 phút (`STALE_PENDING_MS`) thì coi như chết.
+
+## 10.5. Đã kiểm chứng những gì
+
+- 6 patch áp sạch lên `main` mới, không xung đột với PR #11/#12
+- `prisma validate` hợp lệ · 53 model = 53 bảng DDL
+- 167 chỉ mục, không cái nào vượt trần 3072 byte của InnoDB
+- `test:no-secrets` sạch — không có khóa OpenAI trong mã
+- `tsc --noEmit` · `lint` · `npm test` (21 bước) · `npm run build` đều sạch
+- **Migration phá huỷ đã chạy thật trên MySQL:** chỉ mục cũ
+  `FeynmanReview_attemptId_key` biến mất, `..._attemptId_runNumber_key` xuất
+  hiện. Chỉ đổi chỉ mục, không đụng dữ liệu hàng.
+
+**Chưa kiểm chứng:** giao diện trên production. Xem 10.6.
+
+## 10.6. Claude KHÔNG tự xem được website nữa
+
+Mọi công cụ mạng của Claude đều không vào được `stoic-ielts.online` — gói tin bị
+nuốt im lặng, treo ~21 giây rồi hết giờ, kể cả khi ép IPv4. Nguyên nhân gần như
+chắc chắn là lớp **CDN + chống phần mềm độc hại** của Hostinger chặn dải IP
+trung tâm dữ liệu.
+
+**`curl` thất bại KHÔNG có nghĩa là website sập.** Ngày 10/08 tôi đã kết luận
+nhầm đúng như vậy và đưa ra cả một danh sách việc sai hướng. Bằng chứng ngược
+lại nằm ở hPanel: Đang chạy, 0 lỗi, bài quét tốc độ của chính Hostinger chấm 94
+điểm.
+
+Muốn biết site sống hay chết: xem ảnh chụp hPanel, hoặc nhờ chủ dự án mở bằng
+4G. So sánh với `wobridgeacademy.com` là vô nghĩa — hệ thống khác, trên VPS
+khác, không bật lớp bảo vệ này.
+
+## 10.7. Việc còn nợ
+
+1. **Chủ dự án đặt ba biến ở 10.2** rồi báo lại — đây là thứ chặn giai đoạn 2.
+2. Xác nhận triển khai sau merge chạy ổn (cần ảnh chụp hPanel hoặc lời xác nhận).
+3. Xóa nhánh `feature/feynman-ai` sau khi chắc chắn `main` ổn định.
+4. PR-09: nhờ luật sư rà `DU-THAO-PHAP-LY-NGUYET-THI.md`.
+5. Ba biến cũ `ENABLE_*` từng bị điền sai thành `=TRUE`; kiểm lại phải là
+   `true` chữ thường, không dấu `=`.
