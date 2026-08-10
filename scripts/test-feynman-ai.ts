@@ -844,6 +844,53 @@ check(
   "REUSE"
 );
 
+// Ví đã bị trừ bởi bản ghi mồ côi nên còn 0 lượt. Xét ví lúc lấy lại là chặn
+// nhầm chính lần chấm mà học viên đã trả tiền.
+const canGrade = (over: Record<string, unknown>) =>
+  decideCanGrade({
+    featureEnabled: true,
+    hasAccess: true,
+    competitionLocked: false,
+    reviewStatus: "COMPLETED",
+    alreadyGraded: false,
+    wallet: { grantedTotal: 1, usedTotal: 1 },
+    lastGradedAt: null,
+    at: RES_NOW,
+    ...over,
+  } as Parameters<typeof decideCanGrade>[0]);
+
+check(
+  "Ví cạn thì chặn khi lần chấm này CÓ trừ lượt",
+  canGrade({ requiresCredit: true }),
+  { allowed: false, reason: "QUOTA_EXHAUSTED" }
+);
+check(
+  "Ví cạn nhưng KHÔNG trừ lượt (lấy lại bản mồ côi) thì vẫn cho chấm",
+  canGrade({ requiresCredit: false }),
+  { allowed: true }
+);
+check(
+  "Không khai requiresCredit thì mặc định vẫn xét ví — không nới lỏng ngầm",
+  canGrade({}),
+  { allowed: false, reason: "QUOTA_EXHAUSTED" }
+);
+
+// Tiến trình chết giữa chừng để lại lastGradedOn của hôm nay. Nếu vẫn tính vào
+// nhịp ngày thì học viên bị khóa tới hôm sau, mà lượt đã mất rồi.
+check(
+  "Lần chấm hỏng không được tính vào nhịp một lần mỗi ngày",
+  canGrade({ requiresCredit: false, lastGradedAt: null }),
+  { allowed: true }
+);
+check(
+  "Còn lần chấm THÀNH CÔNG hôm nay thì vẫn chặn đúng",
+  canGrade({
+    requiresCredit: false,
+    lastGradedAt: new Date(RES_NOW.getTime() - 60_000),
+  }),
+  { allowed: false, reason: "DAILY_LIMIT_REACHED" }
+);
+
 /* ---------------------------------------------------------------- */
 console.log(
   failures === 0

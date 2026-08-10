@@ -288,6 +288,14 @@ export function decideCanGrade(input: {
   wallet: WalletLike;
   /** Lần chấm gần nhất của CHÍNH lượt làm bài này, null nếu chưa từng chấm. */
   lastGradedAt: Date | null;
+  /**
+   * Lần chấm này có phải trừ thêm một lượt không.
+   *
+   * `false` khi đang lấy lại một lần chấm hỏng mà lượt cũ vẫn đang bị giữ. Xét
+   * ví trong trường hợp đó là chặn nhầm: lượt đã trừ rồi, ví về 0, và học viên
+   * bị khóa khỏi chính lần chấm mà họ đã trả tiền.
+   */
+  requiresCredit?: boolean;
   at: Date;
 }): GradingDecision {
   if (!input.featureEnabled) {
@@ -311,7 +319,7 @@ export function decideCanGrade(input: {
   ) {
     return { allowed: false, reason: "DAILY_LIMIT_REACHED" };
   }
-  if (walletRemaining(input.wallet) <= 0) {
+  if (input.requiresCredit !== false && walletRemaining(input.wallet) <= 0) {
     return { allowed: false, reason: "QUOTA_EXHAUSTED" };
   }
   return { allowed: true };

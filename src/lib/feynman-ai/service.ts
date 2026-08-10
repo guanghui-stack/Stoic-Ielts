@@ -131,7 +131,11 @@ export async function gradeFeynmanReview(input: {
     where: { id: input.reviewId },
     include: {
       mistakes: { orderBy: { sortOrder: "asc" } },
-      aiEvaluation: { select: { id: true } },
+      // Cần cả trạng thái chứ không chỉ id: "đã có hàng" khác hẳn "đã chấm
+      // xong". Hàng FAILED vẫn phải cho chấm lại.
+      aiEvaluation: {
+        select: { id: true, status: true, errorCode: true, updatedAt: true },
+      },
       attempt: {
         select: {
           id: true,
@@ -173,14 +177,37 @@ export async function gradeFeynmanReview(input: {
     db.feynmanAiAttemptState.findUnique({ where: { attemptId: attempt.id } }),
   ]);
 
+  // Tính kế hoạch giữ chỗ TRƯỚC khi xét quyền. Trước đây `alreadyGraded` chỉ
+  // hỏi "có hàng nào không", nên một hàng FAILED cũng chặn luôn — và chặn ngay
+  // tại đây, khiến nhánh chấm lại trong reserveGradingSlot không bao giờ chạy
+  // tới. Bản vá cũ là mã chết cho tới khi sửa chỗ này.
+  const plan = planReservation({
+    existing: review.aiEvaluation,
+    wasRefunded: (code) =>
+      code === null || shouldRefundQuota(code as FeynmanAiErrorCode),
+    at,
+  });
+
+  if (plan.action === "BLOCK" && plan.reason === "EVALUATION_IN_PROGRESS") {
+    return {
+      ok: false,
+      code: "EVALUATION_IN_PROGRESS",
+      message: userMessageFor("EVALUATION_IN_PROGRESS"),
+    };
+  }
+
   const decision = decideCanGrade({
     featureEnabled: config.enabled,
     hasAccess: access,
     competitionLocked: lock.locked,
     reviewStatus: review.status,
-    alreadyGraded: Boolean(review.aiEvaluation),
+    alreadyGraded: plan.action === "BLOCK",
     wallet: wallet ?? { grantedTotal: 0, usedTotal: 0 },
-    lastGradedAt: state?.lastGradedOn ?? null,
+    // Lần chấm hỏng không cho ra kết quả nào nên không được tính vào nhịp một
+    // lần mỗi ngày. Nếu vẫn tính, tiến trình chết giữa chừng sẽ khóa học viên
+    // tới tận hôm sau — mà lượt thì đã bị trừ mất rồi.
+    lastGradedAt: plan.action === "REUSE" ? null : (state?.lastGradedOn ?? null),
+    requiresCredit: plan.action === "REUSE" ? plan.chargeWallet : true,
     at,
   });
   if (!decision.allowed) {
