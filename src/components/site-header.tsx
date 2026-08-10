@@ -3,6 +3,7 @@ import { UserRound } from "lucide-react";
 import { getCurrentUser } from "@/lib/session";
 import { BrandLockup } from "@/components/brand";
 import { DesktopNav, MobileNav } from "@/components/site-nav";
+import { features } from "@/lib/features";
 
 export async function SiteHeader() {
   const user = await getCurrentUser();
@@ -44,11 +45,15 @@ export async function SiteHeader() {
               </div>
             )}
           </div>
-          <MobileNav isLoggedIn={isLoggedIn} isAdmin={isAdmin} />
+          <MobileNav
+            isLoggedIn={isLoggedIn}
+            isAdmin={isAdmin}
+            showTiers={features.competitionTiers}
+          />
         </div>
       </div>
 
-      <DesktopNav />
+      <DesktopNav showTiers={features.competitionTiers} />
       <div className="border-t border-line" />
     </header>
   );

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { BookOpen, Library, Menu, X, UserRound } from "lucide-react";
-import { MAIN_NAV, READING_NAV } from "@/lib/nav";
+import { READING_NAV, mainNavItems } from "@/lib/nav";
 
 const READING_ICONS = {
   ACADEMIC: BookOpen,
@@ -22,14 +22,15 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(href + "/");
 }
 
-export function DesktopNav() {
+export function DesktopNav({ showTiers }: { showTiers: boolean }) {
   const pathname = usePathname();
+  const mainNav = mainNavItems(showTiers);
   return (
     <div className="hidden lg:block">
       {/* Tầng 1: menu chính nằm ngang */}
       <nav aria-label="Điều hướng chính" className="border-t border-line">
         <ul className="mx-auto flex max-w-6xl items-stretch justify-center divide-x divide-line">
-          {MAIN_NAV.map((item) => {
+          {mainNav.map((item) => {
             const active = isActive(pathname, item.href);
             return (
               <li key={item.href} className="flex">
@@ -91,12 +92,15 @@ export function DesktopNav() {
 export function MobileNav({
   isLoggedIn,
   isAdmin,
+  showTiers,
 }: {
   isLoggedIn: boolean;
   isAdmin: boolean;
+  showTiers: boolean;
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const mainNav = mainNavItems(showTiers);
 
   return (
     <div className="lg:hidden">
@@ -114,7 +118,7 @@ export function MobileNav({
         <div className="absolute inset-x-0 top-full z-50 border-b border-line bg-paper shadow-lift">
           <nav aria-label="Điều hướng chính" className="px-6 py-4">
             <ul className="divide-y divide-line">
-              {MAIN_NAV.map((item) => (
+              {mainNav.map((item) => (
                 <li key={item.href}>
                   <Link
                     href={item.href}

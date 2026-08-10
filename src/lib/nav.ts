@@ -13,6 +13,38 @@ export const MAIN_NAV = [
 ] as const;
 
 /**
+ * Hai tầng trên của đại thí. Tách khỏi `MAIN_NAV` vì chỉ hiện khi cờ
+ * `ENABLE_COMPETITION_TIERS` bật.
+ */
+export const TIER_NAV = [
+  { href: "/duong-thi", label: "Dương Thí" },
+  { href: "/thien-thi", label: "Thiên Thí" },
+] as const;
+
+/**
+ * Menu chính, có kèm hai tầng trên hay không.
+ *
+ * Vì sao cần hàm này: `/duong-thi` và `/thien-thi` đã có trang, có nhãn trong
+ * `ui-labels.ts` và có khu quản trị tuyển chọn — nhưng KHÔNG có liên kết nào
+ * dẫn tới. Học viên không có cách nào biết chúng tồn tại ngoài việc tự gõ URL.
+ *
+ * Chèn ngay sau Nguyệt Thí để menu đọc theo đúng thứ tự leo thang: tháng → quý
+ * → năm, rồi mới tới các trang tra cứu.
+ */
+export function mainNavItems(
+  showTiers: boolean
+): ReadonlyArray<{ href: string; label: string }> {
+  if (!showTiers) return MAIN_NAV;
+
+  const items: Array<{ href: string; label: string }> = [];
+  for (const item of MAIN_NAV) {
+    items.push(item);
+    if (item.href === "/nguyet-thi") items.push(...TIER_NAV);
+  }
+  return items;
+}
+
+/**
  * Hai kho đề Reading.
  *
  * Academic và General là hai kỳ thi khác nhau: luyện nhầm dạng nghĩa là đang
