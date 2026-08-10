@@ -21,6 +21,9 @@ const TABS = [
   ...(features.competitionTiers
     ? [{ href: "/quan-tri/tuyen-chon", label: "Tuyển chọn" }]
     : []),
+  // Đây là trang duy nhất xem được tiền đã tiêu cho OpenAI. Không có tab thì
+  // phải nhớ URL mới vào được — đúng cái trang cần liếc hằng ngày.
+  ...(features.feynmanAi ? [{ href: "/quan-tri/ai-feynman", label: "AI Feynman" }] : []),
   { href: "/doi-mat-khau", label: "Đổi mật khẩu" },
 ];
 
