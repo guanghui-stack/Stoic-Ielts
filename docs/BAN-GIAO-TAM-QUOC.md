@@ -315,3 +315,44 @@ khác, không bật lớp bảo vệ này.
 4. PR-09: nhờ luật sư rà `DU-THAO-PHAP-LY-NGUYET-THI.md`.
 5. Ba biến cũ `ENABLE_*` từng bị điền sai thành `=TRUE`; kiểm lại phải là
    `true` chữ thường, không dấu `=`.
+
+## 10.8. Phiên 11/08/2026 (tiếp) — mạng đã thông, và một lỗi lối vào
+
+**Claude đã tự xem được website trở lại.** Mục 10.6 không còn đúng: trang chủ
+trả 200 qua IPv6, đọc được nội dung, không lỗi console. Cách kiểm tra nhanh:
+
+```
+curl -s -o /dev/null -w "%{http_code}\n" https://stoic-ielts.online
+```
+
+Vẫn giữ nguyên cảnh báo cũ ở một điểm: nếu sau này lại không vào được, **đừng
+kết luận site sập** — đối chiếu hPanel trước.
+
+### Dương Thí và Thiên Thí: không phải thiếu biến, mà là thiếu lối vào
+
+Chủ dự án nhiều lần báo không thấy hai tầng này trên website. Nguyên nhân thật
+không phải biến môi trường:
+
+- `/duong-thi` và `/thien-thi` trả **200** — trang có thật, cờ đã bật
+- `ui-labels.ts` đã có nhãn và đường dẫn cho cả hai
+- Khu quản trị tuyển chọn đã chạy
+- Nhưng `MAIN_NAV` trong `src/lib/nav.ts` **không hề chứa chúng**, và không có
+  chỗ nào khác trong giao diện trỏ tới
+
+Nghĩa là học viên chỉ tới được bằng cách tự gõ URL. Đã sửa: `mainNavItems()`
+chèn hai tầng ngay sau Nguyệt Thí, ẩn/hiện theo `ENABLE_COMPETITION_TIERS`.
+
+**Bài học để không lặp lại:** cờ tính năng bật không có nghĩa là người dùng
+thấy được. Mỗi lần bật một cờ, phải hỏi thêm "có lối vào nào dẫn tới nó chưa?".
+Cùng lỗi này đã xảy ra hai lần trong dự án — lần trước là trang
+`/quan-tri/ai-feynman` không có tab (mục 10.4).
+
+### Còn nợ: chưa xác minh được ba biến Feynman AI
+
+Chủ dự án báo đã thêm `OPENAI_API_KEY`, `OPENAI_FEYNMAN_ENABLED`,
+`ENABLE_FEYNMAN_AI_ADMIN`. Claude **không kiểm chứng được** vì mọi dấu hiệu đều
+nằm sau đăng nhập, và Claude không được phép nhập mật khẩu để đăng nhập.
+
+Cách chủ dự án tự kiểm trong một phút: đăng nhập quản trị, xem thanh tab có
+chữ **AI Feynman** không. Có tức là `ENABLE_FEYNMAN_AI_ADMIN` đã ăn. Vào trang
+đó xem được số tiền đã tiêu tức là cả ba biến đều ổn.
