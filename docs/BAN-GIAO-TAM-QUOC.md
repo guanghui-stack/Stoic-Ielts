@@ -1,6 +1,6 @@
 # Bản ghi bàn giao — hệ HỔ PHÙ · IELTS
 
-Nhánh: `feature/competition-tiers` (đã push lên origin)
+Nhánh: `feature/campaign-map-home` (đã push). PR-01→09a đã ở `main`.
 Nguồn: Master System Specification v1.1 (`Ho_Phu_IELTS_Tam_Quoc_Master_System_Spec_v1_1.docx`)
 Cập nhật: 06/08/2026
 
@@ -22,7 +22,25 @@ Cập nhật: 06/08/2026
 | PR-08 | Tài liệu QA | Một phần — chính là tài liệu này |
 | PR-09 | Liêm chính và consent | **Chặn** — xem mục 5 |
 
-## 2. Việc còn lại
+## 2. Bản đồ Chiến Dịch trên trang chủ
+
+`components/campaign/campaign-home-block.tsx` đưa bản đồ ra trang chủ. Khách
+chưa đăng nhập thấy bản giới thiệu với cửa đầu mở sẵn — cố ý KHÔNG bịa ra cửa
+nào "đã vượt" cho đẹp, vì người mới sẽ hụt hẫng khi đăng ký xong thấy khác.
+Người đã đăng nhập thấy tiến độ thật.
+
+### Đã thử 2.5D rồi bỏ (06/08/2026)
+
+Có một nhánh thử dựng bản đồ theo phong cách 2.5D: mặt đất nghiêng 52 độ bằng
+CSS perspective, nhân vật là ảnh cắt rời xoay ngược để đứng dậy, parallax theo
+chuột. **Chủ dự án đã quyết định bỏ hướng đó** và quay về 2D phẳng cho hợp
+phong cách thủy mặc.
+
+Ghi lại để phiên sau không đề xuất lại: vấn đề không phải kỹ thuật — nó chạy
+được và đã kiểm chứng. Vấn đề là 2.5D kéo thiết kế về phía game, trong khi
+toàn bộ hệ hình ảnh của dự án là tranh thủy mặc phẳng. Toàn bộ mã 2.5D đã gỡ.
+
+## 3. Việc còn lại
 
 **Chỉ còn PR-09** — liêm chính và consent, đang chặn vì cần quyết định pháp lý
 của chủ dự án. Xem mục 5.
