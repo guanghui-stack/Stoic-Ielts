@@ -356,3 +356,70 @@ nằm sau đăng nhập, và Claude không được phép nhập mật khẩu đ
 Cách chủ dự án tự kiểm trong một phút: đăng nhập quản trị, xem thanh tab có
 chữ **AI Feynman** không. Có tức là `ENABLE_FEYNMAN_AI_ADMIN` đã ăn. Vào trang
 đó xem được số tiền đã tiêu tức là cả ba biến đều ổn.
+
+## 10.9. Phiên 11/08/2026 (03:27) — bản vá trước là mã chết
+
+### Điều quan trọng nhất: tôi đã báo "đã sửa" khi chưa sửa
+
+Mục 10.4 nói `planReservation()` đã khắc phục việc một lần chấm hỏng khóa vĩnh
+viễn phiên Feynman. **Sai.** Hàm viết đúng, kiểm thử xanh, và không ai gọi tới
+nó — chốt chặn phía trên chặn trước.
+
+Ba ngõ cụt xếp chồng nhau, phải gỡ cả ba thì đường chấm lại mới thông:
+
+1. `alreadyGraded: Boolean(review.aiEvaluation)` chỉ hỏi *"có hàng nào không"*.
+   Hàng `FAILED` cũng tính là đã chấm, nên bị từ chối ngay ở `decideCanGrade` —
+   `reserveGradingSlot` không bao giờ chạy tới.
+2. Tiến trình chết giữa chừng để lại `lastGradedOn` của hôm nay. Nhịp *một lần
+   mỗi ngày* khóa học viên tới tận hôm sau, mà lượt thì đã bị trừ mất.
+3. Lượt đã bị trừ bởi bản ghi mồ côi nên ví về 0. Xét ví lúc lấy lại là chặn
+   nhầm chính lần chấm mà học viên đã trả tiền.
+
+Cách sửa: tính `planReservation` **trước** khi xét quyền, rồi truyền kết quả vào
+`decideCanGrade` qua `alreadyGraded`, `lastGradedAt` và tham số mới
+`requiresCredit`. Thêm 5 phép thử, tổng 12 phép thử cho nhánh này.
+
+**Bài học, áp dụng cho mọi lần sau:** sửa một hàm thuần rồi chấm điểm "đã xong"
+mà không lần lại đường gọi thì rất dễ tự lừa mình. Hàm đúng, kiểm thử xanh, và
+không ai gọi tới. Kiểm thử hàm thuần **không** chứng minh được đường đi thật đã
+thông — phải đọc ngược từ chỗ gọi lên.
+
+### Phép thử tìm trang mồ côi: đã viết rồi xóa
+
+Định biến việc "cờ bật nhưng không có lối vào" thành phép thử tự động. Viết
+xong, chạy, báo sạch — rồi thử ngược lại trên mã **chưa vá** thì nó **vẫn báo
+sạch**. Vô dụng.
+
+Nguyên nhân: `ui-labels.ts` có sẵn chuỗi `href: "/duong-thi"` trong một bảng dữ
+liệu mà không ai kết xuất. *"Có chuỗi href đâu đó trong mã"* không đồng nghĩa
+*"người dùng tới được"*. Đã xóa file thay vì để lại một phép thử luôn xanh —
+phép thử rỗng còn tệ hơn không có, vì nó tạo cảm giác an toàn giả.
+
+Ai muốn làm lại: phải phân tích khả năng tới được thật (bò trên HTML site trả
+về), không so chuỗi tĩnh.
+
+### Rà lối vào bằng tay: sạch
+
+Bò từ trang chủ được 11 route công khai, gồm cả Dương Thí và Thiên Thí. Đối
+chiếu 34 route tĩnh: mọi trang còn lại đều nằm sau đăng nhập và **đều có lối
+vào** từ trong khu của nó — `StudentNav` kết xuất đủ Sổ Sơ Hở, Nhật Khóa, Hồ Sơ
+Riêng; khu quản trị có tab cho từng trang; trang ghép đề được dẫn qua chuỗi mẫu
+có tham số. Không còn trang mồ côi.
+
+### Đã dọn
+
+Nhánh `feature/feynman-ai` đã xóa cả cục bộ lẫn trên GitHub; `git log
+main..feature/feynman-ai` trả 0 commit trước khi xóa nên không mất gì.
+
+Còn bốn nhánh cũ chưa dọn, **chưa kiểm tra đã gộp hết chưa**:
+`feature/campaign-map-home`, `feature/competition-tiers`, `feature/rank-engine`,
+`feature/integrity-consent-alignment`.
+
+### Việc còn nợ (thay cho 10.7)
+
+1. **Ba biến Feynman AI vẫn chưa xác minh được.** Chủ dự án đăng nhập quản trị,
+   nhìn thanh tab có chữ **AI Feynman** không. Đây vẫn là thứ chặn giai đoạn 2.
+2. Rà nốt các phần chưa soi của Feynman AI: `openai-client.ts` (hủy và hết giờ),
+   `admin-stats.ts`, luồng `feedback`.
+3. PR-09: nhờ luật sư rà `DU-THAO-PHAP-LY-NGUYET-THI.md`.
+4. Cân nhắc dọn bốn nhánh cũ ở trên.
