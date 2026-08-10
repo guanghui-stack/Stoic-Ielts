@@ -6,7 +6,12 @@ import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
 import { hasActiveAccess } from "@/lib/access-grants";
-import { OFFERS, isOfferCode, type OfferCode } from "@/lib/payments/catalog";
+import {
+  OFFERS,
+  isOfferCode,
+  isOfferOnSale,
+  type OfferCode,
+} from "@/lib/payments/catalog";
 import { quoteOffer } from "@/lib/payments/quote";
 import { introTokenStillHeld } from "@/lib/payments/payment-rules";
 import { sePayEnvironment, isSePayConfigured } from "@/lib/payments/sepay";
@@ -45,23 +50,35 @@ export async function createPaymentOrderAction(formData: FormData) {
   const exerciseId = String(formData.get("exerciseId") ?? "").trim() || null;
   const attemptId = String(formData.get("attemptId") ?? "").trim() || null;
 
-  const returnPath = await resolveReturnPath({
+  // Gói đã dừng bán không được tạo đơn mới. Đơn cũ và quyền cũ vẫn đọc bình
+  // thường; chặn ở đây chỉ ngăn người dùng gửi tay mã gói cũ để mua giá cũ.
+  if (!isOfferOnSale(offerCode)) redirect("/thanh-toan?loi=ngung-ban");
+
+  const resolved = await resolveReturnTarget({
     userId: user.id,
     offerCode,
     exerciseId,
     attemptId,
   });
 
-  // Đã có quyền rồi thì đừng bán thêm — đưa thẳng về chỗ học.
-  if (
-    await hasActiveAccess({
-      userId: user.id,
-      feature: offer.feature,
-      exerciseId,
-    })
-  ) {
-    redirect(returnPath);
+  // Gói nạp lượt AI luôn mua được: nó không mở quyền gì, chỉ cộng vào ví. Chặn
+  // theo quyền ở đây sẽ khóa mất đường mua thêm lượt của người đã có quyền —
+  // tức là đúng nhóm khách duy nhất cần gói này.
+  if (offer.kind === "ACCESS") {
+    // Đã có quyền rồi thì đừng bán thêm — đưa thẳng về chỗ học.
+    if (
+      await hasActiveAccess({
+        userId: user.id,
+        feature: offer.feature,
+        exerciseId,
+        attemptId: resolved.attemptId,
+      })
+    ) {
+      redirect(resolved.path);
+    }
   }
+
+  const returnPath = resolved.path;
 
   const quote = await quoteOffer({ userId: user.id, offerCode });
 
@@ -72,6 +89,9 @@ export async function createPaymentOrderAction(formData: FormData) {
       userId: user.id,
       offerCode,
       exerciseId,
+      // Phải khớp cả lượt làm bài: mua Feynman cho lượt A rồi bấm mua cho lượt
+      // B mà dùng lại đơn của A thì học viên trả tiền cho thứ mình không xin.
+      attemptId: resolved.attemptId,
       status: "PENDING",
       amount: quote.amount,
       priceVersion: quote.priceVersion,
@@ -96,6 +116,7 @@ export async function createPaymentOrderAction(formData: FormData) {
   const invoiceNumber = await createOrder({
     userId: user.id,
     exerciseId,
+    attemptId: resolved.attemptId,
     returnPath,
     offerCode,
     feature: offer.feature,
@@ -106,20 +127,54 @@ export async function createPaymentOrderAction(formData: FormData) {
   redirect(`/thanh-toan/${invoiceNumber}`);
 }
 
+type ReturnTarget = {
+  /** Đường dẫn quay về sau khi trả tiền. */
+  path: string;
+  /** Lượt làm bài mà đơn này gắn vào, null nếu gói không gắn lượt nào. */
+  attemptId: string | null;
+};
+
 /**
- * Dựng đường dẫn quay về sau khi trả tiền — luôn ở phía máy chủ và luôn là
- * đường dẫn nội bộ, nên không thể bị lợi dụng để chuyển hướng ra ngoài.
- * Đồng thời đây cũng là chỗ kiểm tra bài/lượt làm có thật và có đúng chủ không.
+ * Xác minh bài/lượt làm rồi dựng đường quay về sau khi trả tiền.
+ *
+ * Đường dẫn luôn do máy chủ dựng và luôn là đường nội bộ, nên không thể bị lợi
+ * dụng để chuyển hướng ra ngoài. Đây cũng là chỗ DUY NHẤT xác minh lượt làm bài
+ * có thật và có đúng chủ không — `attemptId` trả về từ đây đã qua kiểm tra, nên
+ * các bước sau được phép tin nó và ghi thẳng vào đơn.
  */
-async function resolveReturnPath(input: {
+async function resolveReturnTarget(input: {
   userId: string;
   offerCode: OfferCode;
   exerciseId: string | null;
   attemptId: string | null;
-}): Promise<string> {
+}): Promise<ReturnTarget> {
   const offer = OFFERS[input.offerCode];
+
+  // Gói nạp lượt không mở quyền gì nên không cần bài cũng không cần lượt. Vẫn
+  // cố đưa học viên về đúng chỗ họ đang đứng khi bấm mua, nhưng lượt không hợp
+  // lệ thì lặng lẽ bỏ qua thay vì chặn — họ chỉ đang nạp tiền vào ví.
+  if (offer.kind === "AI_TOPUP") {
+    const attempt = input.attemptId
+      ? await db.attempt.findUnique({
+          where: { id: input.attemptId },
+          select: { id: true, userId: true, status: true },
+        })
+      : null;
+    const mine =
+      attempt && attempt.userId === input.userId && attempt.status === "GRADED";
+    return {
+      path: mine ? `/hoc-vien/bai-lam/${attempt.id}/feynman` : "/hoc-vien",
+      // Ví là của tài khoản, không của lượt nào. Ghi attemptId vào đơn nạp lượt
+      // sẽ khiến truy vấn "đơn dùng lại được" gom nhầm các đơn nạp khác nhau.
+      attemptId: null,
+    };
+  }
+
   if (offer.scope === "ALL") {
-    return offer.feature === "READING" ? "/luyen-tap/reading" : "/hoc-vien";
+    return {
+      path: offer.feature === "READING" ? "/luyen-tap/reading" : "/hoc-vien",
+      attemptId: null,
+    };
   }
 
   if (!input.exerciseId) redirect("/thanh-toan?loi=thieu-bai");
@@ -131,7 +186,9 @@ async function resolveReturnPath(input: {
     redirect("/luyen-tap/reading");
   }
 
-  if (offer.feature === "READING") return "/luyen-tap/reading";
+  if (offer.feature === "READING") {
+    return { path: "/luyen-tap/reading", attemptId: null };
+  }
 
   // Feynman gắn với một lượt làm bài ĐÃ CHẤM của chính học viên đó — chưa làm
   // bài thì chưa có gì để chữa.
@@ -158,7 +215,13 @@ async function resolveReturnPath(input: {
   ) {
     redirect("/hoc-vien");
   }
-  return `/hoc-vien/bai-lam/${attempt.id}`;
+
+  return {
+    path: `/hoc-vien/bai-lam/${attempt.id}`,
+    // Chỉ gói bán theo lượt mới ghim lượt vào đơn. Gói cũ scope EXERCISE giữ
+    // nguyên null để quyền của nó vẫn phủ mọi lượt của bài như đã bán.
+    attemptId: offer.scope === "ATTEMPT" ? attempt.id : null,
+  };
 }
 
 /**
@@ -171,6 +234,7 @@ async function resolveReturnPath(input: {
 async function createOrder(input: {
   userId: string;
   exerciseId: string | null;
+  attemptId: string | null;
   returnPath: string;
   offerCode: OfferCode;
   feature: string;
@@ -181,6 +245,7 @@ async function createOrder(input: {
     invoiceNumber: newInvoiceNumber(),
     userId: input.userId,
     exerciseId: input.exerciseId,
+    attemptId: input.attemptId,
     returnPath: input.returnPath,
     offerCode: input.offerCode,
     feature: input.feature,

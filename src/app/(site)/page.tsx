@@ -13,6 +13,7 @@ import { BADGE_INFO } from "@/components/competition/badges";
 import { SectionHeading, NoteBox, ButtonLink } from "@/components/ui";
 import { InkWashHero } from "@/components/brand/ink-wash-hero";
 import { ART_ASSETS } from "@/lib/brand/art-manifest";
+import { CampaignHomeBlock } from "@/components/campaign/campaign-home-block";
 
 /**
  * Ba trụ — cũng chính là ba khấc răng cưa trên binh phù.
@@ -42,7 +43,7 @@ const PILLARS = [
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
   return (
     <>
       {/* ===== Hero ===== */}
@@ -73,6 +74,9 @@ export default function HomePage() {
           </ButtonLink>
         </div>
       </InkWashHero>
+
+      {/* ===== Bản đồ Chiến Dịch — tự ẩn khi cờ ENABLE_CAMPAIGN_MAP tắt ===== */}
+      <CampaignHomeBlock />
 
       {/* ===== Hai dạng đề ===== */}
       <section className="mx-auto max-w-6xl px-6 py-16 md:py-20">
