@@ -13,6 +13,7 @@ import "server-only";
 import { readFeynmanAiConfig } from "./config.ts";
 import {
   FeynmanAiError,
+  classifyBodyReadError,
   classifyUpstreamError,
   sanitizeErrorMessage,
 } from "./errors.ts";
@@ -157,6 +158,11 @@ export async function callResponses(
       }),
     });
   } catch (error) {
+    // `apiKey()` được gọi khi dựng tham số cho fetch, tức là NẰM TRONG try này.
+    // Không chừa đường cho FeynmanAiError đi qua nguyên vẹn thì "chưa cấu hình
+    // khóa API" bị dán nhãn thành UPSTREAM_ERROR — trang quản trị sẽ báo OpenAI
+    // hỏng trong khi thật ra là thiếu cấu hình.
+    if (error instanceof FeynmanAiError) throw error;
     throw new FeynmanAiError(
       classifyUpstreamError(error),
       sanitizeErrorMessage(error)
@@ -187,7 +193,10 @@ export async function callResponses(
   try {
     body = await response.json();
   } catch (error) {
-    throw new FeynmanAiError("MALFORMED_OUTPUT", sanitizeErrorMessage(error));
+    throw new FeynmanAiError(
+      classifyBodyReadError(error),
+      sanitizeErrorMessage(error)
+    );
   }
 
   const text = extractText(body);

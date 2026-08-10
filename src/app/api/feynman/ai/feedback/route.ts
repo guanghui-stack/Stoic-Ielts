@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
 
@@ -62,34 +63,39 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, code: "INVALID_REQUEST" }, { status: 404 });
   }
 
-  const existing = await db.feynmanAiAlert.findFirst({
-    where: { evaluationId, source: "STUDENT", status: "OPEN" },
-    select: { id: true },
-  });
-  if (existing) {
-    return NextResponse.json(
-      { ok: true, alreadyReported: true },
-      { headers: { "Cache-Control": "no-store" } }
-    );
-  }
+  // Đọc rồi ghi ở hai lệnh tách rời là để hở đúng khoảng cho hai cú bấm nhanh
+  // cùng thấy "chưa có" rồi cùng tạo. FeynmanAiAlert không có ràng buộc unique
+  // nào đỡ cho, nên phải khóa bằng transaction. Hàng đợi cảnh báo là chỗ quản
+  // trị viên dò lỗi chất lượng AI — nhân đôi ở đó chỉ làm loãng tín hiệu.
+  const alreadyReported = await db.$transaction(
+    async (tx) => {
+      const existing = await tx.feynmanAiAlert.findFirst({
+        where: { evaluationId, source: "STUDENT", status: "OPEN" },
+        select: { id: true },
+      });
+      if (existing) return true;
 
-  await db.feynmanAiAlert.create({
-    data: {
-      source: "STUDENT",
-      // Học viên báo thì luôn MEDIUM: đủ để lọt vào danh sách cần xem, không đủ
-      // để đẩy lên trên những cảnh báo do chính hệ thống phát hiện.
-      severity: "MEDIUM",
-      status: "OPEN",
-      kind,
-      evaluationId,
-      attemptId: evaluation.review.attemptId,
-      exerciseId: evaluation.review.attempt.exerciseId,
-      detail: note || null,
+      await tx.feynmanAiAlert.create({
+        data: {
+          source: "STUDENT",
+          // Học viên báo thì luôn MEDIUM: đủ để lọt vào danh sách cần xem,
+          // không đủ để đẩy lên trên cảnh báo do chính hệ thống phát hiện.
+          severity: "MEDIUM",
+          status: "OPEN",
+          kind,
+          evaluationId,
+          attemptId: evaluation.review.attemptId,
+          exerciseId: evaluation.review.attempt.exerciseId,
+          detail: note || null,
+        },
+      });
+      return false;
     },
-  });
+    { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
+  );
 
   return NextResponse.json(
-    { ok: true },
+    alreadyReported ? { ok: true, alreadyReported: true } : { ok: true },
     { headers: { "Cache-Control": "no-store" } }
   );
 }

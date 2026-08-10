@@ -18,7 +18,10 @@ import {
   STALE_PENDING_MS,
   planReservation,
 } from "../src/lib/feynman-ai/rules.ts";
-import { shouldRefundQuota } from "../src/lib/feynman-ai/errors.ts";
+import {
+  classifyBodyReadError,
+  shouldRefundQuota,
+} from "../src/lib/feynman-ai/errors.ts";
 import {
   FORBIDDEN_PAYLOAD_KEYS,
   INSUFFICIENT_WEAKNESS_DATA_NOTE,
@@ -882,6 +885,37 @@ check(
   canGrade({ requiresCredit: false, lastGradedAt: null }),
   { allowed: true }
 );
+// Hạn giờ vẫn hiệu lực khi đang đọc thân phản hồi. Gộp hết vào MALFORMED_OUTPUT
+// thì trang quản trị chỉ sang model, trong khi việc cần làm là nới hạn giờ.
+const timeoutErr = Object.assign(new Error("The operation was aborted"), {
+  name: "TimeoutError",
+});
+check(
+  "Đứt vì hết giờ lúc đọc thân phản hồi là HẾT GIỜ, không phải JSON hỏng",
+  classifyBodyReadError(timeoutErr),
+  "UPSTREAM_TIMEOUT"
+);
+check(
+  "Hủy giữa chừng cũng xếp vào hết giờ",
+  classifyBodyReadError(
+    Object.assign(new Error("aborted"), { name: "AbortError" })
+  ),
+  "UPSTREAM_TIMEOUT"
+);
+check(
+  "JSON hỏng thật thì vẫn là MALFORMED_OUTPUT",
+  classifyBodyReadError(new SyntaxError("Unexpected token < in JSON")),
+  "MALFORMED_OUTPUT"
+);
+check(
+  "Cả hai nhóm đều hoàn lượt cho học viên",
+  [
+    shouldRefundQuota(classifyBodyReadError(timeoutErr)),
+    shouldRefundQuota(classifyBodyReadError(new SyntaxError("x"))),
+  ],
+  [true, true]
+);
+
 check(
   "Còn lần chấm THÀNH CÔNG hôm nay thì vẫn chặn đúng",
   canGrade({

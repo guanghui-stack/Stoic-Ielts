@@ -91,6 +91,20 @@ export function classifyUpstreamError(err: unknown): FeynmanAiErrorCode {
 }
 
 /**
+ * Đứt khi đang ĐỌC THÂN phản hồi: hết giờ, hay JSON hỏng thật?
+ *
+ * Hạn giờ của `AbortSignal.timeout()` vẫn còn hiệu lực trong lúc đọc thân, nên
+ * `response.json()` có thể ném ra lỗi hủy chứ không phải lỗi cú pháp. Xếp tất
+ * cả vào MALFORMED_OUTPUT thì trang quản trị báo "model trả sai cấu trúc",
+ * trong khi việc cần làm là nới `OPENAI_FEYNMAN_TIMEOUT_MS`. Hai kết luận dẫn
+ * tới hai hành động khác hẳn nhau.
+ */
+export function classifyBodyReadError(err: unknown): FeynmanAiErrorCode {
+  const upstream = classifyUpstreamError(err);
+  return upstream === "UPSTREAM_TIMEOUT" ? upstream : "MALFORMED_OUTPUT";
+}
+
+/**
  * Lỗi nào thì HOÀN LẠI lượt đã giữ chỗ.
  *
  * Nguyên tắc: học viên chỉ mất lượt khi thật sự nhận được kết quả dùng được.
