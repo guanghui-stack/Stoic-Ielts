@@ -1,8 +1,8 @@
 # Bản ghi bàn giao — hệ HỔ PHÙ · IELTS
 
-Nhánh: `feature/campaign-map-2-5d` (đã push). PR-01→09a đã ở `main`.
+Nhánh: `feature/campaign-map-home` (đã push). PR-01→09a đã ở `main`.
 Nguồn: Master System Specification v1.1 (`Ho_Phu_IELTS_Tam_Quoc_Master_System_Spec_v1_1.docx`)
-Cập nhật: 06/08/2026 — bản đồ 2.5D
+Cập nhật: 06/08/2026
 
 Đọc mục 1 và mục 3 trước, đó là hai mục quyết định bạn nên làm gì tiếp.
 
@@ -22,27 +22,23 @@ Cập nhật: 06/08/2026 — bản đồ 2.5D
 | PR-08 | Tài liệu QA | Một phần — chính là tài liệu này |
 | PR-09 | Liêm chính và consent | **Chặn** — xem mục 5 |
 
-## 2. Bản đồ Chiến Dịch 2.5D (mới nhất)
+## 2. Bản đồ Chiến Dịch trên trang chủ
 
-Chủ dự án gửi một file HTML mẫu và yêu cầu làm lại bản đồ theo phong cách đó.
-Đã xong trên nhánh `feature/campaign-map-2-5d`:
+`components/campaign/campaign-home-block.tsx` đưa bản đồ ra trang chủ. Khách
+chưa đăng nhập thấy bản giới thiệu với cửa đầu mở sẵn — cố ý KHÔNG bịa ra cửa
+nào "đã vượt" cho đẹp, vì người mới sẽ hụt hẫng khi đăng ký xong thấy khác.
+Người đã đăng nhập thấy tiến độ thật.
 
-- `components/campaign/campaign-map-2-5d.tsx` — mặt đất nghiêng 52 độ, nhãn và
-  cột cờ xoay ngược để đứng dậy, bóng đổ nằm bẹp trên đất, parallax theo chuột
-- `components/campaign/campaign-home-block.tsx` — bản đồ trên **trang chủ**,
-  khách chưa đăng nhập thấy bản giới thiệu, người đã đăng nhập thấy tiến độ thật
-- `lib/campaign/motion.ts` — quyết định chuyển động tách thành hàm thuần vì
-  `prefers-reduced-motion` không ép được từ công cụ kiểm thử trình duyệt
+### Đã thử 2.5D rồi bỏ (06/08/2026)
 
-**Còn thiếu 11 ảnh** theo `docs/ART-BRIEF-BAN-DO-2-5D.md`. Chưa có thì nhân vật
-là cờ hổ phù vẽ bằng CSS, bản đồ vẫn đọc được đầy đủ. Ảnh nền bản đồ cũ KHÔNG
-dùng lại được vì nó vẽ theo góc phong cảnh, nghiêng đi sẽ trông như tranh nằm
-bẹp trên sàn — cần ảnh vẽ nhìn thẳng từ trên xuống.
+Có một nhánh thử dựng bản đồ theo phong cách 2.5D: mặt đất nghiêng 52 độ bằng
+CSS perspective, nhân vật là ảnh cắt rời xoay ngược để đứng dậy, parallax theo
+chuột. **Chủ dự án đã quyết định bỏ hướng đó** và quay về 2D phẳng cho hợp
+phong cách thủy mặc.
 
-**Phần chưa nhìn tận mắt:** parallax khi rê chuột thật. Sự kiện tổng hợp không
-kích hoạt được hệ sự kiện React, và công cụ trình duyệt không di chuột thật
-được. Đã xác nhận handler gắn đúng vào DOM qua React fiber, và toán học đằng
-sau có 19 phép thử. Nhưng đường nối từ chuột thật tới hàm đó thì chưa chạy thử.
+Ghi lại để phiên sau không đề xuất lại: vấn đề không phải kỹ thuật — nó chạy
+được và đã kiểm chứng. Vấn đề là 2.5D kéo thiết kế về phía game, trong khi
+toàn bộ hệ hình ảnh của dự án là tranh thủy mặc phẳng. Toàn bộ mã 2.5D đã gỡ.
 
 ## 3. Việc còn lại
 

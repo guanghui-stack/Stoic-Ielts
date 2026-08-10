@@ -3,7 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { db } from "@/lib/db";
 import { features } from "@/lib/features";
 import { getCurrentUser } from "@/lib/session";
-import { CampaignMap25D } from "@/components/campaign/campaign-map-2-5d";
+import { CampaignMap } from "@/components/campaign/campaign-map";
 import { CampaignTimelineMobile } from "@/components/campaign/campaign-timeline-mobile";
 import { campaignView, type TrialStatusMap } from "@/lib/campaign/view";
 import { ensureUserRank, syncTrialEligibility } from "@/lib/ranks/engine";
@@ -94,7 +94,7 @@ function Section({
         </p>
 
         <div className="mt-8">
-          <CampaignMap25D nodes={nodes} />
+          <CampaignMap nodes={nodes} />
           <CampaignTimelineMobile nodes={nodes} />
         </div>
 

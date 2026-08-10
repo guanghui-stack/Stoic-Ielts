@@ -39,16 +39,6 @@ Trương Phi và Mã Siêu đều đã có bản đúng accent. Cả hai ảnh g
 trong khi manifest chốt chu sa và bạc lam; bản thay thế giữ nguyên bố cục,
 nhân vật và nét mực, chỉ đổi màu năng lượng.
 
-## Ảnh cắt rời cho bản đồ 2.5D
-
-Loại ảnh này có ràng buộc KHÁC hẳn tranh nền, ghi ở `src/lib/campaign/hero-cutouts.ts`:
-nền phải TRONG SUỐT, chân hoặc vó chạm đúng cạnh dưới, và KHÔNG có bóng đổ nung
-sẵn — bóng do CSS vẽ và phải nằm bẹp trên mặt đất nghiêng.
-
-Ảnh nền trắng biến thành nền trong suốt bằng `node scripts/cutout-hero.mjs`.
-Script lan từ MÉP ảnh vào chứ không xoá theo màu, nên mảng sáng gần trắng trong
-giáp trụ và lõi ngọn lửa không bị đục thủng.
-
 ## Quy tắc bắt buộc
 
 1. Tạo bốn phương án cho cùng một prompt. Không chọn ảnh chỉ vì đẹp — phải
@@ -93,7 +83,6 @@ giáp trụ và lõi ngọn lửa không bị đục thủng.
 | `trialLaoTuong` | `art/trials/trial-06-hoang-trung.webp` | Kim đồng | Hoàng Trung | sinh mới | 04/08/2026 | 1 |
 | `trialTayLuong` | `art/trials/trial-07-ma-sieu.webp` | Bạc lam | Mã Siêu | sinh mới | 04/08/2026 | 1 |
 | `trialHoLao` | `art/trials/trial-08-lu-bo.webp` | Hỏa cam | Lữ Bố | sinh mới | 04/08/2026 | 1 |
-| `HERO_CUTOUTS.LU_BO` | `art/heroes/hero-lu-bo.webp` | Hỏa cam | Lữ Bố | chủ dự án | 06/08/2026 | 1 |
 | `campaignMap` | `art/campaign/map-loan-the-quan-hung-tam-phan.webp` | Mực navy | — | sinh mới | 04/08/2026 | 1 |
 
 ## Prompt khung

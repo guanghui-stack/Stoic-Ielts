@@ -4,7 +4,7 @@ import { requireUser } from "@/lib/session";
 import { features } from "@/lib/features";
 import { SectionHeading, NoteBox } from "@/components/ui";
 import { StudentNav } from "@/components/student/student-nav";
-import { CampaignMap25D } from "@/components/campaign/campaign-map-2-5d";
+import { CampaignMap } from "@/components/campaign/campaign-map";
 import { CampaignTimelineMobile } from "@/components/campaign/campaign-timeline-mobile";
 import { campaignView, type TrialStatusMap } from "@/lib/campaign/view";
 import { ensureUserRank, syncTrialEligibility } from "@/lib/ranks/engine";
@@ -69,7 +69,7 @@ export default async function CampaignPage() {
         {rank && <> · thời {RANK_ERAS[rank.era].name}</>} · đã vượt {passed}/8 cửa ải.
       </p>
 
-      <CampaignMap25D nodes={nodes} />
+      <CampaignMap nodes={nodes} />
       <CampaignTimelineMobile nodes={nodes} />
 
       <NoteBox className="mt-6">

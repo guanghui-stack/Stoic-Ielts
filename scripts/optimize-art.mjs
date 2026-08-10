@@ -24,8 +24,6 @@ const DIR = {
   cuaAi: "C:/Users/LENOVO/Downloads/ho-phu-art/cua-ai",
   /** Ảnh sinh lại vì bản gốc sai màu accent. */
   suaMau: process.env.TEMP + "/ho-phu-art-candidates",
-  /** Ảnh cắt rời nền trong suốt cho bản đồ 2.5D. */
-  cutout: "C:/Users/LENOVO/Downloads/ho-phu-art/2-5d",
 };
 
 /** width: bề ngang đầu ra. maxKb: trần dung lượng theo §8.5. */
@@ -48,9 +46,6 @@ const JOBS = [
   { dir: "cuaAi", src: "trial-06-hoang-trung-v1.png", out: "art/trials/trial-06-hoang-trung.webp", width: 1280, maxKb: 280 },
   { dir: "cuaAi", src: "trial-07-ma-sieu-v1.png", out: "art/trials/trial-07-ma-sieu.webp", width: 1280, maxKb: 280 },
   { dir: "cuaAi", src: "trial-08-lu-bo-v1.png", out: "art/trials/trial-08-lu-bo.webp", width: 1280, maxKb: 280 },
-  // Ảnh cắt rời giữ kênh alpha. WebP có alpha nên vẫn dùng được, nhẹ hơn PNG.
-  { dir: "cutout", src: "hero-lu-bo.png", out: "art/heroes/hero-lu-bo.webp", width: 900, maxKb: 200 },
-
   {
     dir: "cuaAi",
     src: "map-loan-the-quan-hung-tam-phan-v1.png",
