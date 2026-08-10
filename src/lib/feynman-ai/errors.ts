@@ -16,6 +16,8 @@ export type FeynmanAiErrorCode =
   | "CHAT_LIMIT_REACHED"
   | "REVIEW_NOT_COMPLETED"
   | "ALREADY_GRADED"
+  /** Một request khác đang chấm chính phiên này — khác hẳn "đã chấm xong". */
+  | "EVALUATION_IN_PROGRESS"
   | "EVALUATION_NOT_READY"
   | "QUESTION_TOO_SHORT"
   | "QUESTION_TOO_LONG"

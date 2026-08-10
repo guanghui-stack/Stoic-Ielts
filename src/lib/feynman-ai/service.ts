@@ -52,6 +52,7 @@ import {
   decideCanAsk,
   decideCanGrade,
   messageForDenial,
+  planReservation,
   verdictFor,
   type GradingDenial,
 } from "./rules.ts";
@@ -202,15 +203,26 @@ export async function gradeFeynmanReview(input: {
       at,
     });
   } catch (error) {
-    // Ràng buộc unique nổ nghĩa là một request song song đã giữ trước.
+    // Ràng buộc unique nổ nghĩa là một request song song vừa tạo hàng trước ta
+    // trong tích tắc. Đó là "đang chấm", không phải "đã chấm xong" — báo nhầm
+    // thành ALREADY_GRADED sẽ khiến học viên tưởng mất lượt.
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === "P2002"
     ) {
       return {
         ok: false,
-        code: "ALREADY_GRADED",
-        message: messageForDenial("ALREADY_GRADED"),
+        code: "EVALUATION_IN_PROGRESS",
+        message: userMessageFor("EVALUATION_IN_PROGRESS"),
+      };
+    }
+    // Giữ chỗ có thể từ chối hợp lệ (hết lượt, đang chấm dở). Trước đây các mã
+    // này lọt ra ngoài thành lỗi 500 thay vì một câu tiếng Việt.
+    if (error instanceof FeynmanAiError) {
+      return {
+        ok: false,
+        code: error.code,
+        message: userMessageFor(error.code),
       };
     }
     throw error;
@@ -330,18 +342,39 @@ async function reserveGradingSlot(input: {
 }): Promise<string> {
   return db.$transaction(
     async (tx) => {
-      // So một cột với một cột khác cần "field reference" của Prisma. Viết
-      // `usedTotal: { lt: 999 }` rồi tự kiểm trong mã sẽ mở lại đúng lỗ hổng
-      // race mà transaction này sinh ra để bịt.
-      const spent = await tx.feynmanAiBudget.updateMany({
-        where: {
-          userId: input.userId,
-          usedTotal: { lt: db.feynmanAiBudget.fields.grantedTotal },
-        },
-        data: { usedTotal: { increment: 1 } },
+      // Hàng cũ quyết định được phép chấm lại hay không, và có trừ ví nữa
+      // không. Xem `planReservation` để biết vì sao không thể chỉ dựa vào ràng
+      // buộc unique của reviewId.
+      const existing = await tx.feynmanAiEvaluation.findUnique({
+        where: { reviewId: input.reviewId },
+        select: { id: true, status: true, errorCode: true, updatedAt: true },
       });
-      if (spent.count === 0) {
-        throw new FeynmanAiError("QUOTA_EXHAUSTED", messageForDenial("QUOTA_EXHAUSTED"));
+
+      const plan = planReservation({
+        existing,
+        wasRefunded: (code) =>
+          code === null || shouldRefundQuota(code as FeynmanAiErrorCode),
+        at: input.at,
+      });
+
+      if (plan.action === "BLOCK") {
+        throw new FeynmanAiError(plan.reason, userMessageFor(plan.reason));
+      }
+
+      if (plan.chargeWallet) {
+        // So một cột với một cột khác cần "field reference" của Prisma. Viết
+        // `usedTotal: { lt: 999 }` rồi tự kiểm trong mã sẽ mở lại đúng lỗ hổng
+        // race mà transaction này sinh ra để bịt.
+        const spent = await tx.feynmanAiBudget.updateMany({
+          where: {
+            userId: input.userId,
+            usedTotal: { lt: db.feynmanAiBudget.fields.grantedTotal },
+          },
+          data: { usedTotal: { increment: 1 } },
+        });
+        if (spent.count === 0) {
+          throw new FeynmanAiError("QUOTA_EXHAUSTED", messageForDenial("QUOTA_EXHAUSTED"));
+        }
       }
 
       await tx.feynmanAiAttemptState.upsert({
@@ -356,6 +389,25 @@ async function reserveGradingSlot(input: {
           gradedCount: { increment: 1 },
         },
       });
+
+      if (plan.action === "REUSE") {
+        // Xóa sạch dấu vết lần hỏng trước, nếu không trang kết quả sẽ trộn
+        // errorCode cũ với kết quả mới.
+        await tx.feynmanAiEvaluation.update({
+          where: { id: plan.evaluationId },
+          data: {
+            status: "PENDING",
+            errorCode: null,
+            verdict: null,
+            similarityPercent: null,
+            confidence: null,
+            reasonJson: null,
+            overallAdviceJson: null,
+            questionLimit: input.questionLimit,
+          },
+        });
+        return plan.evaluationId;
+      }
 
       // reviewId là @unique: request thứ hai đụng P2002 và bị chặn ở đây.
       const evaluation = await tx.feynmanAiEvaluation.create({
@@ -684,6 +736,8 @@ export function userMessageFor(code: string): string {
       return "Bạn đã dùng hết số câu hỏi của lượt chấm này.";
     case "EVALUATION_NOT_READY":
       return "Bản chấm chưa sẵn sàng. Bạn cần nhờ AI chấm trước khi hỏi.";
+    case "EVALUATION_IN_PROGRESS":
+      return "Bài của bạn đang được chấm. Bạn chờ một chút rồi tải lại trang nhé.";
     case "QUESTION_TOO_SHORT":
       return "Câu hỏi quá ngắn. Bạn viết rõ hơn một chút nhé.";
     case "QUESTION_TOO_LONG":

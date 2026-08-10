@@ -142,6 +142,78 @@ export function competitionLock(input: {
 }
 
 /* ------------------------------------------------------------------ */
+/* 3b. Giữ chỗ lại sau khi hỏng                                         */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Sau bao lâu thì một bản ghi PENDING bị coi là chết.
+ *
+ * Tiến trình có thể bị giết giữa lúc gọi OpenAI — Hostinger khởi động lại khi
+ * triển khai, và lệnh gọi dài nhất cũng chỉ tính bằng chục giây. Quá mốc này mà
+ * vẫn PENDING thì không còn ai đang chạy nó nữa.
+ */
+export const STALE_PENDING_MS = 10 * 60 * 1000;
+
+export type ExistingEvaluationLike = {
+  id: string;
+  /** PENDING | COMPLETED | FAILED */
+  status: string;
+  errorCode: string | null;
+  updatedAt: Date;
+};
+
+export type ReservationPlan =
+  | { action: "CREATE"; chargeWallet: boolean }
+  | { action: "REUSE"; evaluationId: string; chargeWallet: boolean }
+  | { action: "BLOCK"; reason: "ALREADY_GRADED" | "EVALUATION_IN_PROGRESS" };
+
+/**
+ * `FeynmanAiEvaluation.reviewId` là `@unique`, nên mỗi phiên Feynman chỉ có
+ * đúng một hàng. Nếu chỉ dựa vào ràng buộc đó để chặn trùng thì một lần hỏng là
+ * khóa vĩnh viễn: hàng FAILED vẫn nằm đấy, lần chấm sau đụng P2002 và bị báo
+ * "đã chấm rồi" — trong khi học viên chưa từng nhận được kết quả nào.
+ *
+ * Hàm này quyết định dùng lại hàng cũ hay tạo hàng mới, và quan trọng hơn: có
+ * trừ ví lần nữa hay không. Nguyên tắc là ví không bao giờ bị trừ hai lần cho
+ * cùng một kết quả:
+ *
+ * - FAILED đã được hoàn lượt  → trừ lại, vì lượt đã trả về ví
+ * - FAILED chưa được hoàn     → không trừ, lượt cũ vẫn đang bị giữ
+ * - PENDING chết (mồ côi)     → không trừ, lượt đã trừ mà chẳng ai hoàn
+ * - PENDING còn sống          → chặn, có request khác đang chạy thật
+ * - COMPLETED                 → chặn, đây mới đúng nghĩa "đã chấm rồi"
+ */
+export function planReservation(input: {
+  existing: ExistingEvaluationLike | null;
+  /** Cùng luật với `shouldRefundQuota`, truyền vào để rules.ts không phụ thuộc errors.ts. */
+  wasRefunded: (errorCode: string | null) => boolean;
+  at: Date;
+}): ReservationPlan {
+  const { existing } = input;
+  if (!existing) return { action: "CREATE", chargeWallet: true };
+
+  if (existing.status === "COMPLETED") {
+    return { action: "BLOCK", reason: "ALREADY_GRADED" };
+  }
+
+  if (existing.status === "PENDING") {
+    const age = input.at.getTime() - existing.updatedAt.getTime();
+    if (age < STALE_PENDING_MS) {
+      return { action: "BLOCK", reason: "EVALUATION_IN_PROGRESS" };
+    }
+    // Mồ côi: lượt đã bị trừ lúc giữ chỗ và không có ai chạy nhánh hoàn lại.
+    return { action: "REUSE", evaluationId: existing.id, chargeWallet: false };
+  }
+
+  // FAILED — và mọi trạng thái lạ, coi như hỏng để học viên còn chấm lại được.
+  return {
+    action: "REUSE",
+    evaluationId: existing.id,
+    chargeWallet: input.wasRefunded(existing.errorCode),
+  };
+}
+
+/* ------------------------------------------------------------------ */
 /* 4. Ví lượt AI — theo TÀI KHOẢN                                       */
 /* ------------------------------------------------------------------ */
 

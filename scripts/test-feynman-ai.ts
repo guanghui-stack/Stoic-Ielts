@@ -15,6 +15,11 @@ import {
   listOffersForSale,
 } from "../src/lib/payments/catalog.ts";
 import {
+  STALE_PENDING_MS,
+  planReservation,
+} from "../src/lib/feynman-ai/rules.ts";
+import { shouldRefundQuota } from "../src/lib/feynman-ai/errors.ts";
+import {
   FORBIDDEN_PAYLOAD_KEYS,
   INSUFFICIENT_WEAKNESS_DATA_NOTE,
   MAX_QUESTIONS_PER_RUN,
@@ -770,6 +775,74 @@ try {
   threw = true;
 }
 check("Lỡ để email lọt vào payload thì NÉM LỖI, không lặng lẽ lọc bỏ", threw, true);
+
+/* ---------------------------------------------------------------- */
+/* Giữ chỗ lại sau khi hỏng — chấm lại được, và ví không lệch          */
+/* ---------------------------------------------------------------- */
+
+const RES_NOW = new Date("2026-08-10T14:00:00.000Z");
+const resRefunded = (code: string | null) =>
+  code === null || shouldRefundQuota(code as never);
+const resPlan = (existing: Parameters<typeof planReservation>[0]["existing"]) =>
+  planReservation({ existing, wasRefunded: resRefunded, at: RES_NOW });
+
+const resRow = (over: Record<string, unknown>) =>
+  ({
+    id: "eval1",
+    status: "FAILED",
+    errorCode: "UPSTREAM_ERROR",
+    updatedAt: new Date(RES_NOW.getTime() - 60_000),
+    ...over,
+  }) as NonNullable<Parameters<typeof planReservation>[0]["existing"]>;
+
+check("Chưa từng chấm thì tạo mới và trừ ví", resPlan(null), {
+  action: "CREATE",
+  chargeWallet: true,
+});
+
+check(
+  "Đã chấm xong thì chặn — đây mới đúng nghĩa đã chấm rồi",
+  (resPlan(resRow({ status: "COMPLETED" })) as { reason?: string }).reason,
+  "ALREADY_GRADED"
+);
+
+// Đây là lỗi khiến một lần OpenAI trục trặc là khóa vĩnh viễn phiên đó.
+check(
+  "Hỏng do hệ thống (đã hoàn lượt) thì CHẤM LẠI ĐƯỢC và trừ ví lần nữa",
+  resPlan(resRow({ status: "FAILED", errorCode: "UPSTREAM_ERROR" })),
+  { action: "REUSE", evaluationId: "eval1", chargeWallet: true }
+);
+
+check(
+  "Hỏng mà KHÔNG được hoàn lượt thì chấm lại nhưng KHÔNG trừ ví lần hai",
+  resPlan(resRow({ status: "FAILED", errorCode: "NO_ACCESS" })),
+  { action: "REUSE", evaluationId: "eval1", chargeWallet: false }
+);
+
+check(
+  "Đang chấm thật (PENDING còn mới) thì chặn, không trừ ví chồng",
+  (resPlan(resRow({ status: "PENDING" })) as { reason?: string }).reason,
+  "EVALUATION_IN_PROGRESS"
+);
+
+// Tiến trình bị giết giữa chừng: nhánh hoàn lượt không bao giờ chạy, nên lượt
+// đã trừ vẫn đang bị giữ. Chấm lại mà trừ tiếp là thu tiền hai lần.
+check(
+  "PENDING mồ côi quá hạn thì chấm lại được và KHÔNG trừ ví lần nữa",
+  resPlan(
+    resRow({
+      status: "PENDING",
+      updatedAt: new Date(RES_NOW.getTime() - STALE_PENDING_MS - 1000),
+    })
+  ),
+  { action: "REUSE", evaluationId: "eval1", chargeWallet: false }
+);
+
+check(
+  "Trạng thái lạ cũng cho chấm lại, không để học viên kẹt cứng",
+  resPlan(resRow({ status: "???", errorCode: null })).action,
+  "REUSE"
+);
 
 /* ---------------------------------------------------------------- */
 console.log(
