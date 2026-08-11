@@ -1,14 +1,15 @@
 import Link from "next/link";
-import { BookOpenCheck, Brain, Check, Sparkles } from "lucide-react";
+import { BookOpenCheck, Brain, Check, Coins, Sparkles } from "lucide-react";
+import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
-import { getAccessSnapshot } from "@/lib/access-grants";
-import { feynmanSinglePrice } from "@/lib/payments/quote";
+import { walletRemaining } from "@/lib/feynman-ai/rules";
 import { isSePayConfigured } from "@/lib/payments/sepay";
 import {
   OFFERS,
   formatVnd,
-  INTRO_PROMO_NOTICE,
-  type OfferCode,
+  FREE_PRACTICE_NOTICE,
+  AI_EVIDENCE_NOTICE,
+  type AttemptOfferCode,
 } from "@/lib/payments/catalog";
 import { PurchaseButton } from "@/components/payments/purchase-button";
 import { ErrorBanner, NoteBox, SectionHeading } from "@/components/ui";
@@ -16,7 +17,7 @@ import { ErrorBanner, NoteBox, SectionHeading } from "@/components/ui";
 export const metadata = {
   title: "Bảng giá",
   description:
-    "Mở khóa bài luyện Reading và quy trình chữa bài Feynman của HỔ PHÙ · IELTS.",
+    "Đề thi Reading miễn phí. Trả phí ở lớp chữa sâu Feynman và lượt AI chấm.",
 };
 export const dynamic = "force-dynamic";
 
@@ -27,116 +28,86 @@ const ERROR_MESSAGES: Record<string, string> = {
   "thieu-bai": "Chưa rõ bạn muốn mở bài nào. Hãy chọn bài từ danh sách luyện tập.",
   "qua-nhieu-don":
     "Bạn đang có quá nhiều đơn chờ thanh toán. Hãy hoàn tất hoặc hủy bớt rồi thử lại.",
+  // Thiếu dòng này thì người dùng bị đá về đây kèm một dải báo lỗi RỖNG: họ bấm
+  // mua, màn hình đổi trang, và không câu nào nói vì sao. Đã xảy ra thật với ba
+  // gói cũ còn sót nút mua.
+  "ngung-ban":
+    "Gói bạn chọn đã dừng bán. Các gói đang áp dụng nằm ngay bên dưới.",
 };
 
 export default async function PricingPage({
   searchParams,
 }: {
-  searchParams: Promise<{ loi?: string }>;
+  searchParams: Promise<{ loi?: string; goi?: string; luot?: string }>;
 }) {
-  const { loi } = await searchParams;
+  const { loi, goi, luot } = await searchParams;
   const user = await getCurrentUser();
 
-  // Học viên đã có quyền thì hiện "Đã mở" thay vì mời mua tiếp.
-  const [readingAccess, feynmanAccess, feynmanPrice] = user
-    ? await Promise.all([
-        getAccessSnapshot(user.id, "READING"),
-        getAccessSnapshot(user.id, "FEYNMAN"),
-        feynmanSinglePrice(user.id),
-      ])
-    : [null, null, null];
+  // Ví lượt AI là con số duy nhất trang này mua thẳng được, nên nó phải hiện
+  // đúng số dư — mời nạp khi người ta còn đầy ví là cách nhanh nhất mất niềm tin.
+  const budget = user
+    ? await db.feynmanAiBudget.findUnique({ where: { userId: user.id } })
+    : null;
+  const credits = user
+    ? walletRemaining(budget ?? { grantedTotal: 0, usedTotal: 0 })
+    : null;
 
   const configured = isSePayConfigured();
+  // Từ khối "hết lượt" trong phòng Feynman đá sang: giữ lại mã lượt làm bài để
+  // mua xong quay đúng chỗ đang chữa dở, thay vì thả về trang chủ.
+  const highlightTopUp = goi === "FEYNMAN_AI_TOPUP";
+  const backToAttempt = typeof luot === "string" && luot.trim() ? luot.trim() : undefined;
 
   return (
     <section className="mx-auto max-w-5xl px-6 py-12 md:py-16">
       <SectionHeading
         label="Học phí trực tuyến"
-        title="Mở khóa đúng thứ bạn cần, không mua cả gói lớn"
+        title="Đề thi miễn phí. Trả tiền cho phần chữa bài."
         align="center"
       />
       <p className="mx-auto mt-6 max-w-2xl text-center text-[0.98rem] leading-relaxed text-ink-soft">
-        Quyền làm bài Reading và quyền chữa bài Feynman là hai thứ tách rời. Bạn
-        có thể chỉ mua bài mình cần, hoặc mua gói 30 ngày nếu đang luyện đều.
+        Toàn bộ đề Reading, chấm điểm, quy đổi band và đáp án đúng/sai đều miễn
+        phí. Bạn chỉ trả tiền khi muốn mở lời giải chi tiết của giáo viên và lớp
+        chữa sâu Feynman cho đúng lượt làm bài của mình.
       </p>
 
-      {loi && <div className="mx-auto mt-8 max-w-2xl"><ErrorBanner message={ERROR_MESSAGES[loi]} /></div>}
-
-      {!configured && (
-        <NoteBox className="mt-8" title="Thanh toán trực tuyến đang tạm đóng">
-          Trung tâm chưa bật cổng thanh toán. Bạn vẫn có thể liên hệ để được mở
-          khóa bài học thủ công.
-        </NoteBox>
-      )}
-
-      {feynmanPrice?.isIntro && (
-        <div className="mt-8 flex items-start gap-3 border border-gold bg-gold-pale px-6 py-5">
-          <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-gold" aria-hidden="true" />
-          <p className="font-ui text-sm leading-relaxed text-ink">
-            {INTRO_PROMO_NOTICE}
-          </p>
+      {loi && (
+        <div className="mx-auto mt-8 max-w-2xl">
+          <ErrorBanner message={ERROR_MESSAGES[loi]} />
         </div>
       )}
 
-      <div className="mt-12 grid gap-8 md:grid-cols-2">
-        <PlanCard
-          icon="reading"
-          title="Reading"
-          intro="Làm bài theo đúng giao diện phòng thi máy tính, chấm điểm ngay khi nộp."
-          bullets={[
-            "Đáp án cơ bản luôn miễn phí sau khi nộp bài",
-            "Bài công khai không cần mua gì",
-            "Gói 30 ngày phủ cả bài đăng thêm trong thời hạn",
-          ]}
-          packageOffer="READING_ALL_30D"
-          singleOffer="READING_SINGLE"
-          singleHref="/luyen-tap/reading"
-          singleHint="Chọn bài trong danh sách rồi bấm mở bài đó."
-          owned={
-            readingAccess?.hasAll
-              ? `Bạn đang có gói Reading${
-                  readingAccess.allExpiresAt
-                    ? ` tới ${readingAccess.allExpiresAt.toLocaleDateString("vi-VN")}`
-                    : ""
-                }`
-              : null
-          }
-          signedIn={Boolean(user)}
-          configured={configured}
-        />
+      <div className="mt-8 flex items-start gap-3 border border-gold bg-gold-pale px-6 py-5">
+        <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-gold" aria-hidden="true" />
+        <p className="font-ui text-sm leading-relaxed text-ink">
+          {FREE_PRACTICE_NOTICE}
+        </p>
+      </div>
 
-        <PlanCard
+      <div className="mt-12 grid gap-8 md:grid-cols-2">
+        <AttemptPlanCard
+          offerCode="FEYNMAN_ATTEMPT_FULL"
           icon="feynman"
-          title="Feynman"
-          intro="Lớp chữa sâu: tự giảng lại, tìm bằng chứng trong bài, nhận diện bẫy và rút quy tắc dùng cho bài sau."
-          bullets={[
-            "Có lời giải mẫu của giáo viên cho từng câu sai",
-            "Chỉ mở được sau khi đã hoàn thành bài Reading",
-            "Bản chữa bài đã tạo được giữ vĩnh viễn, kể cả khi hết gói",
-          ]}
-          packageOffer="FEYNMAN_ALL_30D"
-          singleOffer="FEYNMAN_SINGLE"
-          singleHref="/hoc-vien"
-          singleHint="Mở từ trang kết quả của bài bạn vừa làm."
-          singlePriceOverride={feynmanPrice?.amount}
-          singleStrikethrough={feynmanPrice?.isIntro ? OFFERS.FEYNMAN_SINGLE.amount : undefined}
-          owned={
-            feynmanAccess?.hasAll
-              ? `Bạn đang có gói Feynman${
-                  feynmanAccess.allExpiresAt
-                    ? ` tới ${feynmanAccess.allExpiresAt.toLocaleDateString("vi-VN")}`
-                    : ""
-                }`
-              : null
-          }
-          signedIn={Boolean(user)}
-          configured={configured}
+          note="Dành cho đề ghép ba passage và đề Full Test 40 câu."
+        />
+        <AttemptPlanCard
+          offerCode="FEYNMAN_ATTEMPT_SINGLE"
+          icon="reading"
+          note="Dành cho một passage lẻ trong kho luyện tập."
         />
       </div>
 
+      <TopUpCard
+        credits={credits}
+        signedIn={Boolean(user)}
+        configured={configured}
+        highlight={highlightTopUp}
+        attemptId={backToAttempt}
+      />
+
       {!user && (
         <NoteBox className="mt-10" title="Cần đăng nhập">
-          Quyền học gắn với tài khoản của bạn.{" "}
+          Quyền học và ví lượt AI gắn với tài khoản của bạn.{" "}
           <Link href="/dang-nhap" className="font-semibold text-navy underline underline-offset-4">
             Đăng nhập
           </Link>{" "}
@@ -148,59 +119,60 @@ export default async function PricingPage({
         </NoteBox>
       )}
 
-      <NoteBox className="mt-6" title="Về thời hạn">
-        Gói 30 ngày tính đúng 30 ngày kể từ lúc thanh toán. Nếu bạn gia hạn khi
-        gói cũ còn hạn, thời gian mới được cộng nối tiếp — không mất ngày nào.
-        Bài mua lẻ thuộc về bạn vĩnh viễn.
+      <NoteBox className="mt-6" title="Ví lượt AI dùng chung">
+        Lượt AI chấm nằm ở ví chung của tài khoản: mua ở đề nào cũng tiêu được ở
+        đề khác. Riêng nhịp chấm thì tính theo từng lượt làm bài — mỗi lượt chấm
+        tối đa một lần mỗi ngày. {AI_EVIDENCE_NOTICE}
+      </NoteBox>
+
+      <NoteBox className="mt-6" title="Về quyền đã mua trước đây">
+        Ba gói cũ (Reading mở lẻ, Reading 30 ngày, Feynman 30 ngày) đã dừng bán.
+        Quyền bạn đã trả tiền vẫn còn nguyên và dùng hết thời hạn như cũ — không
+        có gì bị xóa hay đổi.
       </NoteBox>
     </section>
   );
 }
 
-function PlanCard({
+/**
+ * Gói bán theo LƯỢT LÀM BÀI nên không mua thẳng ở đây được: máy chủ phải biết
+ * mở cho lượt nào. Thẻ này chỉ in giá và chỉ đường về trang kết quả bài làm —
+ * đặt một nút mua ở đây sẽ tạo đơn không gắn lượt nào và mở nhầm chỗ.
+ */
+function AttemptPlanCard({
+  offerCode,
   icon,
-  title,
-  intro,
-  bullets,
-  packageOffer,
-  singleOffer,
-  singleHref,
-  singleHint,
-  singlePriceOverride,
-  singleStrikethrough,
-  owned,
-  signedIn,
-  configured,
+  note,
 }: {
+  offerCode: AttemptOfferCode;
   icon: "reading" | "feynman";
-  title: string;
-  intro: string;
-  bullets: string[];
-  packageOffer: OfferCode;
-  singleOffer: OfferCode;
-  singleHref: string;
-  singleHint: string;
-  singlePriceOverride?: number;
-  singleStrikethrough?: number;
-  owned: string | null;
-  signedIn: boolean;
-  configured: boolean;
+  note: string;
 }) {
-  const pkg = OFFERS[packageOffer];
-  const single = OFFERS[singleOffer];
-  const singleAmount = singlePriceOverride ?? single.amount;
+  const offer = OFFERS[offerCode];
   const Icon = icon === "reading" ? BookOpenCheck : Brain;
 
   return (
     <article className="flex flex-col border border-line bg-paper p-8 shadow-card">
       <p className="label-caps flex items-center gap-2">
         <Icon className="h-3.5 w-3.5" aria-hidden="true" />
-        {title}
+        {offer.label.split("—")[0].trim()}
       </p>
-      <p className="mt-4 text-[0.95rem] leading-relaxed text-ink-soft">{intro}</p>
+
+      <p className="mt-4 font-display text-3xl font-bold text-navy-deep">
+        {formatVnd(offer.amount)}
+        <span className="ml-2 font-ui text-sm font-normal text-muted">
+          / một lượt làm bài
+        </span>
+      </p>
+      <p className="mt-1.5 font-ui text-xs text-muted">{note}</p>
 
       <ul className="mt-6 space-y-2.5">
-        {bullets.map((b) => (
+        {[
+          "Lời giải chi tiết của giáo viên cho tất cả các câu, giữ vĩnh viễn",
+          "Luyện Feynman lại không giới hạn số lần",
+          `Tặng ${offer.aiGradingCredits} lượt AI chấm vào ví chung`,
+          `Hỏi AI tối đa ${offer.aiChatLimit} câu mỗi lần chấm`,
+        ].map((b) => (
           <li key={b} className="flex gap-2.5 font-ui text-sm leading-relaxed text-ink-soft">
             <Check className="mt-0.5 h-4 w-4 shrink-0 text-success" aria-hidden="true" />
             {b}
@@ -208,57 +180,79 @@ function PlanCard({
         ))}
       </ul>
 
-      <div className="mt-8 border-t border-line pt-6">
-        <p className="font-display text-3xl font-bold text-navy-deep">
-          {formatVnd(pkg.amount)}
-          <span className="ml-2 font-ui text-sm font-normal text-muted">/ 30 ngày</span>
+      <p className="mt-auto pt-6 font-ui text-xs leading-relaxed text-muted">
+        Mở từ trang kết quả của bài bạn vừa làm — gói gắn với đúng lượt đó.{" "}
+        <Link href="/hoc-vien" className="font-semibold text-navy underline underline-offset-4">
+          Đi tới hồ sơ học tập
+        </Link>
+      </p>
+    </article>
+  );
+}
+
+/** Gói duy nhất mua thẳng được ở trang này: nó không gắn với lượt làm bài nào. */
+function TopUpCard({
+  credits,
+  signedIn,
+  configured,
+  highlight,
+  attemptId,
+}: {
+  credits: number | null;
+  signedIn: boolean;
+  configured: boolean;
+  highlight: boolean;
+  attemptId?: string;
+}) {
+  const offer = OFFERS.FEYNMAN_AI_TOPUP;
+
+  return (
+    <article
+      className={`mt-8 flex flex-col gap-6 border bg-paper p-8 shadow-card md:flex-row md:items-center md:justify-between ${
+        highlight ? "border-gold" : "border-line"
+      }`}
+    >
+      <div className="min-w-0">
+        <p className="label-caps flex items-center gap-2">
+          <Coins className="h-3.5 w-3.5" aria-hidden="true" />
+          Ví lượt AI
         </p>
-        <p className="mt-1.5 font-ui text-xs text-muted">{pkg.blurb}</p>
-        <div className="mt-4">
-          {owned ? (
-            <p className="inline-flex items-center gap-2 border border-success bg-success-pale px-5 py-2.5 font-ui text-[0.75rem] font-semibold uppercase tracking-[0.1em] text-success">
-              <Check className="h-4 w-4" aria-hidden="true" />
-              {owned}
-            </p>
-          ) : !signedIn ? (
-            // Chưa đăng nhập không phải là "hết hàng" — chỉ ra đúng việc cần làm
-            <Link
-              href="/dang-nhap"
-              className="inline-flex items-center gap-2 border border-navy px-7 py-3 font-ui text-[0.8rem] font-semibold uppercase tracking-[0.12em] text-navy transition-colors hover:bg-navy hover:text-paper"
-            >
-              Đăng nhập để mua
-            </Link>
-          ) : !configured ? (
-            <span className="inline-flex cursor-not-allowed items-center border border-line-strong bg-cream-deep px-7 py-3 font-ui text-[0.8rem] font-semibold uppercase tracking-[0.12em] text-muted">
-              Tạm chưa mua được
-            </span>
-          ) : (
-            <PurchaseButton offerCode={packageOffer}>
-              Mở toàn bộ 30 ngày · {formatVnd(pkg.amount)}
-            </PurchaseButton>
-          )}
-        </div>
+        <h2 className="mt-2.5 font-display text-xl font-bold text-navy-deep">
+          {offer.label} · {formatVnd(offer.amount)}
+        </h2>
+        <p className="mt-2 max-w-xl font-ui text-sm leading-relaxed text-ink-soft">
+          {offer.blurb} Không mở thêm quyền nào, chỉ cộng lượt — nên mua được bất
+          cứ lúc nào, kể cả khi bạn chưa có gói chữa bài.
+        </p>
+        {credits !== null && (
+          <p className="mt-3 font-ui text-sm text-ink">
+            Ví của bạn còn <strong className="tabular-nums">{credits}</strong> lượt.
+          </p>
+        )}
       </div>
 
-      <div className="mt-6 border-t border-line pt-6">
-        <p className="font-ui text-sm text-ink">
-          Hoặc mua lẻ từng bài:{" "}
-          {singleStrikethrough && (
-            <span className="mr-1.5 text-muted line-through">
-              {formatVnd(singleStrikethrough)}
-            </span>
-          )}
-          <strong className="tabular-nums text-navy-deep">
-            {formatVnd(singleAmount)}
-          </strong>
-          <span className="text-muted"> / bài</span>
-        </p>
-        <p className="mt-1.5 font-ui text-xs leading-relaxed text-muted">
-          {singleHint}{" "}
-          <Link href={singleHref} className="font-semibold text-navy underline underline-offset-4">
-            Đi tới đó
+      <div className="shrink-0">
+        {!signedIn ? (
+          <Link
+            href="/dang-nhap"
+            className="inline-flex items-center gap-2 border border-navy px-7 py-3 font-ui text-[0.8rem] font-semibold uppercase tracking-[0.12em] text-navy transition-colors hover:bg-navy hover:text-paper"
+          >
+            Đăng nhập để nạp
           </Link>
-        </p>
+        ) : !configured ? (
+          <span className="inline-flex cursor-not-allowed items-center border border-line-strong bg-cream-deep px-7 py-3 font-ui text-[0.8rem] font-semibold uppercase tracking-[0.12em] text-muted">
+            Tạm chưa mua được
+          </span>
+        ) : (
+          <PurchaseButton
+            offerCode="FEYNMAN_AI_TOPUP"
+            attemptId={attemptId}
+            variant="gold"
+          >
+            <Coins className="h-4 w-4" aria-hidden="true" />
+            Nạp {offer.aiGradingCredits} lượt · {formatVnd(offer.amount)}
+          </PurchaseButton>
+        )}
       </div>
     </article>
   );

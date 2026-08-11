@@ -19,9 +19,13 @@ import { NoteBox, SubmitButton } from "@/components/ui";
 import { startFeynmanReviewAction } from "@/lib/actions/feynman";
 import { revealBasicAnswersAction } from "@/lib/actions/attempts";
 import { hasActiveAccess } from "@/lib/access-grants";
-import { feynmanSinglePrice } from "@/lib/payments/quote";
 import { isSePayConfigured } from "@/lib/payments/sepay";
-import { OFFERS, formatVnd, INTRO_PROMO_NOTICE } from "@/lib/payments/catalog";
+import {
+  OFFERS,
+  formatVnd,
+  FREE_PRACTICE_NOTICE,
+  type AttemptOfferCode,
+} from "@/lib/payments/catalog";
 import { PurchaseButton } from "@/components/payments/purchase-button";
 import { assemblyTitle, readingContentForAttempt } from "@/lib/attempt-content";
 
@@ -74,17 +78,25 @@ export default async function AttemptResultPage({
 
   // Quyền Feynman chỉ cần hỏi khi thật sự sắp hiển thị lời mời chữa bài
   const showFeynman = isOwner && attempt.status === "GRADED";
-  const [feynmanAccess, feynmanPrice] = showFeynman
-    ? await Promise.all([
-        hasActiveAccess({
-          userId: user.id,
-          feature: "FEYNMAN",
-          exerciseId: attempt.exerciseId,
-          attemptId: attempt.id,
-        }),
-        feynmanSinglePrice(user.id),
-      ])
-    : [false, null];
+  const feynmanAccess = showFeynman
+    ? await hasActiveAccess({
+        userId: user.id,
+        feature: "FEYNMAN",
+        exerciseId: attempt.exerciseId,
+        attemptId: attempt.id,
+      })
+    : false;
+
+  /**
+   * Gói bán cho ĐÚNG lượt làm bài này. Đề ghép và đề Full Test dựng sẵn đều là
+   * bài 40 câu nên ăn giá Full Test; một passage lẻ ăn giá đề đơn. Hai gói khác
+   * nhau ở số câu được hỏi AI (10 với 5), không khác ở lượt chấm.
+   */
+  const isFullTest =
+    attempt.assemblyId !== null || attempt.exercise.taskType === "READING_FULL";
+  const feynmanOffer: AttemptOfferCode = isFullTest
+    ? "FEYNMAN_ATTEMPT_FULL"
+    : "FEYNMAN_ATTEMPT_SINGLE";
 
   return (
     <section className="mx-auto max-w-4xl px-6 py-12 md:py-16">
@@ -127,7 +139,7 @@ export default async function AttemptResultPage({
           status={feynmanReview?.status ?? null}
           mode={feynmanReview?.mode ?? null}
           hasAccess={feynmanAccess}
-          price={feynmanPrice}
+          offerCode={feynmanOffer}
           canBuy={isSePayConfigured()}
         />
       )}
@@ -143,9 +155,8 @@ export default async function AttemptResultPage({
 }
 
 /**
- * Khối Feynman ở đầu trang kết quả, có năm hình thái:
- * đang chữa dở · đã chữa xong · có quyền chưa bắt đầu · chưa có quyền (còn ưu
- * đãi lần đầu) · chưa có quyền (đã dùng ưu đãi).
+ * Khối Feynman ở đầu trang kết quả, có bốn hình thái:
+ * đang chữa dở · đã chữa xong · có quyền chưa bắt đầu · chưa có quyền.
  */
 function FeynmanCta({
   attemptId,
@@ -153,7 +164,7 @@ function FeynmanCta({
   status,
   mode,
   hasAccess,
-  price,
+  offerCode,
   canBuy,
 }: {
   attemptId: string;
@@ -161,7 +172,7 @@ function FeynmanCta({
   status: string | null;
   mode: string | null;
   hasAccess: boolean;
-  price: { amount: number; isIntro: boolean } | null;
+  offerCode: AttemptOfferCode;
   canBuy: boolean;
 }) {
   const href = `/hoc-vien/bai-lam/${attemptId}/feynman`;
@@ -172,7 +183,7 @@ function FeynmanCta({
       <FeynmanPurchaseCta
         exerciseId={exerciseId}
         attemptId={attemptId}
-        price={price}
+        offerCode={offerCode}
         canBuy={canBuy}
       />
     );
@@ -240,18 +251,25 @@ function FeynmanCta({
   );
 }
 
-/** Mời mua lớp chữa sâu Feynman, hiển thị đúng giá của tài khoản này. */
+/**
+ * Mời mua lớp chữa sâu cho ĐÚNG lượt làm bài này.
+ *
+ * Đây là lối vào DUY NHẤT của hai gói 39.000đ / 19.000đ: chúng bán theo lượt
+ * làm bài nên trang bảng giá không mua thẳng được — phải đứng ở một lượt cụ
+ * thể. Gỡ khối này đi là gỡ luôn đường doanh thu.
+ */
 function FeynmanPurchaseCta({
   exerciseId,
   attemptId,
-  price,
+  offerCode,
   canBuy,
 }: {
   exerciseId: string;
   attemptId: string;
-  price: { amount: number; isIntro: boolean } | null;
+  offerCode: AttemptOfferCode;
   canBuy: boolean;
 }) {
+  const offer = OFFERS[offerCode];
   return (
     <div className="mt-8 border border-gold bg-gold-pale p-7">
       <p className="label-caps flex items-center gap-2">
@@ -266,27 +284,38 @@ function FeynmanPurchaseCta({
         Kèm lời giải mẫu của giáo viên cho từng câu bạn làm sai.
       </p>
 
-      {price?.isIntro && (
-        <p className="mt-4 flex items-start gap-2 font-ui text-sm leading-relaxed text-ink">
-          <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-gold" aria-hidden="true" />
-          {INTRO_PROMO_NOTICE}
-        </p>
-      )}
+      <ul className="mt-4 space-y-2 font-ui text-sm leading-relaxed text-ink-soft">
+        <li className="flex gap-2.5">
+          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" aria-hidden="true" />
+          Lời giải chi tiết của giáo viên cho <strong>tất cả</strong> các câu,
+          giữ vĩnh viễn.
+        </li>
+        <li className="flex gap-2.5">
+          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" aria-hidden="true" />
+          Luyện Feynman lại <strong>không giới hạn số lần</strong>.
+        </li>
+        <li className="flex gap-2.5">
+          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" aria-hidden="true" />
+          Tặng {offer.aiGradingCredits} lượt AI chấm vào ví chung, hỏi AI tối đa{" "}
+          {offer.aiChatLimit} câu mỗi lần chấm.
+        </li>
+      </ul>
+
+      <p className="mt-4 flex items-start gap-2 font-ui text-sm leading-relaxed text-ink">
+        <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-gold" aria-hidden="true" />
+        {FREE_PRACTICE_NOTICE}
+      </p>
 
       {canBuy ? (
-        <div className="mt-5 flex flex-wrap items-center gap-3">
+        <div className="mt-5">
           <PurchaseButton
-            offerCode="FEYNMAN_SINGLE"
+            offerCode={offerCode}
             exerciseId={exerciseId}
             attemptId={attemptId}
             variant="gold"
           >
             <Brain className="h-4 w-4" aria-hidden="true" />
-            {price?.isIntro ? "Mở bài Feynman đầu tiên" : "Mở Feynman bài này"} ·{" "}
-            {formatVnd(price?.amount ?? OFFERS.FEYNMAN_SINGLE.amount)}
-          </PurchaseButton>
-          <PurchaseButton offerCode="FEYNMAN_ALL_30D" variant="outline">
-            Mở toàn bộ 30 ngày · {formatVnd(OFFERS.FEYNMAN_ALL_30D.amount)}
+            Mở lượt làm bài này · {formatVnd(offer.amount)}
           </PurchaseButton>
         </div>
       ) : (
@@ -297,8 +326,8 @@ function FeynmanPurchaseCta({
       )}
 
       <p className="mt-4 font-ui text-xs leading-relaxed text-muted">
-        Đáp án đúng của bài Reading luôn miễn phí — bạn xem được ngay bên dưới
-        mà không cần mua gì.
+        Đề thi và đáp án đúng của bài Reading luôn miễn phí — bạn xem được ngay
+        bên dưới mà không cần mua gì.
       </p>
     </div>
   );

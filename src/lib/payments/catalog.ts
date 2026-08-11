@@ -141,6 +141,15 @@ export const OFFERS = {
 
 export type OfferCode = keyof typeof OFFERS;
 
+/**
+ * Hai gói bán theo lượt làm bài. Khai riêng để chỗ nào mời mua "cho lượt này"
+ * không lỡ tay nhận vào một gói Reading cũ hay gói nạp ví — TypeScript chặn
+ * trước, thay vì để lộ ra lúc học viên đã bấm nút.
+ */
+export type AttemptOfferCode =
+  | "FEYNMAN_ATTEMPT_FULL"
+  | "FEYNMAN_ATTEMPT_SINGLE";
+
 export function isOfferCode(value: string): value is OfferCode {
   return Object.prototype.hasOwnProperty.call(OFFERS, value);
 }
@@ -168,6 +177,15 @@ export function formatVnd(amount: number): string {
   return `${amount.toLocaleString("vi-VN")}đ`;
 }
 
-export const INTRO_PROMO_NOTICE =
-  "Ưu đãi trải nghiệm: Bài Feynman đầu tiên của bạn chỉ 9.000đ " +
-  "(giá thường 49.000đ). Ưu đãi áp dụng một lần cho mỗi tài khoản.";
+/**
+ * Hai câu dưới đây là CAM KẾT với học viên, không phải câu quảng cáo tuỳ nghi.
+ * `docs/DAC-TA-FEYNMAN-AI.md` §2.3 buộc in đúng chữ này trên website — đổi chữ
+ * thì phải đổi đặc tả trước, vì chúng mô tả đúng thứ hệ thống thật sự làm.
+ */
+export const FREE_PRACTICE_NOTICE =
+  "Luyện Feynman không giới hạn và không tốn phí. Chỉ phần AI chấm và hỏi đáp " +
+  "AI mới tính lượt, vì mỗi lần gọi AI là một chi phí thật.";
+
+export const AI_EVIDENCE_NOTICE =
+  "AI chỉ kết luận điểm yếu khi đã đủ bằng chứng tích lũy — không phán xét bạn " +
+  "dựa trên một lần làm bài.";

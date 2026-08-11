@@ -649,3 +649,143 @@ ffmpeg -i public/art/home/trieu-van-hero.mp4 -an -vf scale=1280:-2 \
 ```
 
 File hiện tại vẫn 2,5 MB.
+
+## 10.14. Đăng nhập Google và giới hạn một thiết bị (bổ sung cho 10.13)
+
+Hai commit `ef65658` và `41812e9` chưa từng được ghi vào bản bàn giao này.
+
+### Bốn quyết định bảo mật, đừng đảo ngược
+
+1. **`state` chống CSRF là bắt buộc.** Một chuỗi ngẫu nhiên vừa gửi cho Google
+   vừa cất vào cookie `wb_oauth_state`; lúc quay về phải khớp. Bỏ bước này thì
+   kẻ khác dựng được một liên kết khiến nạn nhân **đăng nhập vào tài khoản của
+   kẻ đó** — và mọi bài làm sau đó nằm trong tay chúng.
+2. **Chỉ nhận email đã xác minh** (`email_verified`). Nhận email chưa xác minh
+   là mở đường chiếm tài khoản cũ chỉ bằng cách khai email nạn nhân.
+3. **Email trùng thì gộp vào tài khoản cũ**, giữ nguyên lịch sử làm bài và cấp
+   bậc — theo lựa chọn của chủ dự án.
+4. **`GOOGLE_CLIENT_SECRET` chỉ đọc ở `src/lib/google-oauth.ts`**, không đi qua
+   giá trị trả về nào, không vào log, không vào database. Cùng khuôn với
+   `OPENAI_API_KEY` ở `openai-client.ts`.
+
+### Giới hạn một thiết bị: vì sao phải thêm một cột
+
+JWT **không thu hồi được**. Nên nguồn sự thật về "ai đang đăng nhập" nằm ở cột
+mới `User.activeSessionId`: mỗi lần đăng nhập sinh một `sid` mới ghi đè `sid`
+cũ, mỗi request đối chiếu `sid` trong cookie với `sid` trong database, lệch thì
+coi như chưa đăng nhập. Máy cũ tự văng ra.
+
+**Thứ tự bắt buộc: ghi database TRƯỚC khi phát cookie.** Ngược lại, nếu bước ghi
+hỏng thì máy đó cầm một cookie không bao giờ khớp và bị khóa ngoài vĩnh viễn.
+
+### `passwordHash` thành nullable — hai chỗ phải xử riêng
+
+- **Đăng nhập:** tài khoản Google chưa có mật khẩu → bảo họ bấm nút Google, chứ
+  đừng để họ gõ lại một mật khẩu không tồn tại.
+- **Đổi mật khẩu:** không có mật khẩu cũ thì bỏ qua bước xác nhận, nếu không họ
+  bị khóa vĩnh viễn khỏi việc đặt mật khẩu.
+
+### Ba biến môi trường cần đặt trên hPanel
+
+| Khóa | Giá trị |
+|---|---|
+| `GOOGLE_CLIENT_ID` | lấy ở Google Cloud Console |
+| `GOOGLE_CLIENT_SECRET` | như trên |
+| `APP_URL` | `https://stoic-ielts.online` (không có dấu `/` cuối) |
+
+`APP_URL` dựng ra địa chỉ gọi ngược `…/api/auth/google/callback`, và địa chỉ đó
+phải khớp **từng ký tự** với ô "Authorized redirect URIs" trong Google Cloud
+Console. Lệch một ký tự là Google trả `redirect_uri_mismatch`. Thiếu hai biến
+Google thì nút đăng nhập Google tự ẩn, phần còn lại của website không đổi.
+
+**CHƯA KIỂM CHỨNG:** migration trên MySQL thật, và luồng đăng nhập Google thật
+(cần khóa trên production).
+
+## 10.15. Phiên 11/08/2026 (tối) — vì sao vẫn thấy tường 9.000đ
+
+### Đối chiếu `FEYNMANAIFULLCODE.md` với `main`: mã đã vào đủ
+
+28 file trong tài liệu, **không file nào thiếu**. 19 file giống hệt từng dòng;
+9 file đã đi xa hơn tài liệu, và mọi khác biệt đều là bản vá về sau đã ghi ở
+10.9–10.11 (`planReservation`, `classifyBodyReadError`, transaction cho luồng
+feedback, 10 phép thử `cost.ts`) cộng phần Google ở 10.14. **Không có chỗ nào
+lùi lại.** Cách đối chiếu: tách từng khối mã trong tài liệu rồi diff với file
+thật, không đọc lướt.
+
+### Lỗi thật: mô hình mới đã dựng xong nhưng không có lối vào
+
+Đây là **lần thứ ba** cùng một loại lỗi trong dự án (xem 10.8: Dương Thí/Thiên
+Thí; 10.4: trang `ai-feynman` không có tab). Lần này nó ăn vào doanh thu:
+
+- Ba gói đang bán — `FEYNMAN_ATTEMPT_FULL` 39k, `FEYNMAN_ATTEMPT_SINGLE` 19k,
+  `FEYNMAN_AI_TOPUP` 29k — **không có một nút mua nào** trên toàn bộ giao diện.
+- Mọi nút mua đang hiện đều trỏ vào bốn gói **đã `retired`**.
+- Bấm vào thì `createPaymentOrderAction` đá về `/thanh-toan?loi=ngung-ban`, mà
+  `ngung-ban` **không có trong bảng thông điệp lỗi** → `ErrorBanner` nhận
+  `undefined` và trả `null`. Học viên bấm mua, màn hình đổi trang, **không một
+  chữ nào** nói vì sao. Rồi ở trang đó lại gặp đúng bốn gói cũ ấy.
+- Liên kết nạp ví `/thanh-toan?goi=…&luot=…` cũng chết: trang chỉ đọc `loi`.
+
+Bài học lặp lại lần thứ ba, nói thẳng ra: **`retired: true` chỉ gỡ gói khỏi
+danh sách bán, nó không gỡ nút mua ai đó đã đặt tay ở nơi khác.** Mỗi lần đánh
+dấu một gói dừng bán, phải `grep offerCode="MÃ_GÓI"` xem còn nút nào không.
+
+### Đề Reading: dữ liệu chưa bao giờ khớp đặc tả đã chốt
+
+`docs/DAC-TA-FEYNMAN-AI.md` §2.1 chốt đề Reading **miễn phí**, và §2.4 dừng bán
+`READING_SINGLE` với lý do "đề đã miễn phí, không còn gì để bán". Nhưng 5 đề
+Practice 03–07 vẫn nằm ở `accessLevel = "RESTRICTED"` trong database — đúng cái
+tường 9.000đ chủ dự án gặp. Đặc tả đã ghi sẵn ở §2.4: *"việc mở đề miễn phí
+không cần sửa mã nguồn, chỉ cần đặt `accessLevel = PUBLIC`"* — chỉ là chưa ai
+làm.
+
+Chủ dự án chốt (11/08/2026): **miễn phí hết, theo đặc tả**, và đổi bằng
+migration chứ không bấm tay.
+
+### Đã sửa những gì
+
+| Chỗ | Trước | Sau |
+|---|---|---|
+| `prisma/reading-*.json` | 5 đề `RESTRICTED` | `PUBLIC` |
+| `init-db.ts` | — | `applyOnce("PUBLIC_READING_ALL_v1")` mở mọi đề Reading |
+| `exercise-list.tsx` | bán `READING_SINGLE` 9k | chỉ báo "liên hệ trung tâm" |
+| `ghep-de/page.tsx` | bán `READING_SINGLE` 9k | như trên |
+| `bai-lam/[attemptId]` | bán `FEYNMAN_SINGLE` 49k | bán 39k/19k cho **đúng lượt** |
+| `thanh-toan/page.tsx` | bốn gói đã dừng bán | ba gói đang bán + số dư ví |
+| `catalog.ts` | `INTRO_PROMO_NOTICE` 9k | hai câu cam kết ở đặc tả §2.3 |
+
+Hai chi tiết đáng nhớ:
+
+- **`FeynmanPurchaseCta` trên trang kết quả bài làm là lối vào DUY NHẤT của hai
+  gói 39k/19k.** Chúng bán theo lượt làm bài nên trang bảng giá không mua thẳng
+  được — máy chủ phải biết mở cho lượt nào. Gỡ khối đó là gỡ luôn đường doanh
+  thu. Trang bảng giá chỉ in giá và chỉ đường về hồ sơ học tập.
+- Chọn gói theo `attempt.assemblyId !== null || taskType === "READING_FULL"` →
+  Full Test, còn lại → đề đơn. Khai kiểu riêng `AttemptOfferCode` để TypeScript
+  chặn trước việc lỡ tay truyền vào một gói Reading cũ.
+
+### Đã kiểm chứng thật, không đoán
+
+- `tsc --noEmit` · `lint` · `npm test` · `npm run build` đều sạch
+- **Chạy `next start` thật trên database local** (init-db chỉ chạy khi
+  `NODE_ENV=production`): log in `Da mo mien phi 5 de Reading`, sau đó 9/9 đề
+  Reading là `PUBLIC`, dấu `PUBLIC_READING_ALL_v1` đã ghi vào bảng `Config`
+- **Khởi động lần hai: không chạy lại** — applyOnce giữ đúng lời hứa
+- Trang `/thanh-toan` trên máy chủ chạy thật: hiện đủ 39k/19k/29k, và
+  `?loi=ngung-ban` giờ in ra câu giải thích thay vì dải rỗng
+- `grep` xác nhận không còn `offerCode` nào trỏ vào gói đã dừng bán
+
+**Chưa kiểm chứng:** khối mua 39k/19k trên trang kết quả bài làm — nó nằm sau
+đăng nhập, và Claude không được phép nhập mật khẩu. Cần chủ dự án làm thử một
+bài rồi xem nút hiện đúng giá nào.
+
+### Việc còn nợ (thay cho 10.12)
+
+1. **Chấm thử một bài Feynman thật** để xác minh `OPENAI_API_KEY` và
+   `OPENAI_FEYNMAN_ENABLED`. Vẫn là thứ duy nhất chặn giai đoạn 2. Giờ đường đi
+   đã thông: làm một bài → trang kết quả → mua 19k → chữa Feynman → nhờ AI chấm.
+2. Đặt ba biến Google ở 10.14 nếu muốn bật đăng nhập Google trên production.
+3. Nén video hero nếu trang chủ chậm — cần ffmpeg.
+4. Quyết định số phận nhánh `feature/integrity-consent-alignment`.
+5. PR-09: nhờ luật sư rà `DU-THAO-PHAP-LY-NGUYET-THI.md`.
+6. Chưa soi: `context.ts`, `prompts.ts`, ba route API ở mức chi tiết.

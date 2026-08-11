@@ -7,22 +7,28 @@ chỗ trong hPanel và trên trang SePay.
 
 ## Website đang bán những gì
 
-| Sản phẩm | Giá | Thời hạn |
+| Sản phẩm | Giá | Mở cho |
 |---|---|---|
-| Reading — mở một bài | 9.000đ | Vĩnh viễn với đúng bài đó |
-| Reading — toàn bộ | 99.000đ | 30 ngày |
-| Feynman — mở một bài | 49.000đ | Vĩnh viễn với đúng bài đó |
-| Feynman — mở bài **đầu tiên** | 9.000đ | Vĩnh viễn · mỗi tài khoản một lần |
-| Feynman — toàn bộ | 299.000đ | 30 ngày |
+| Full Test — đáp án chi tiết + Feynman + AI | 39.000đ | Đúng một lượt làm bài, vĩnh viễn |
+| Đề đơn — đáp án chi tiết + Feynman + AI | 19.000đ | Đúng một lượt làm bài, vĩnh viễn |
+| Nạp thêm 10 lượt AI chấm | 29.000đ | Ví chung của tài khoản |
 
-Hai loại quyền **tách rời nhau**: mua Reading không tự có Feynman và ngược lại.
+**Đề thi Reading hoàn toàn miễn phí**, kể cả chấm điểm, quy đổi band và đáp án
+đúng/sai. Trung tâm bán lớp chữa sâu: lời giải mẫu của giáo viên cho từng câu,
+phân tích bẫy, quy trình bắt học viên tự giảng lại bài, và phần AI chấm.
 
-**Đáp án bài Reading luôn miễn phí.** Học viên làm xong, bấm một nút là xem
-được mình sai câu nào. Feynman bán lớp chữa sâu — lời giải mẫu của giáo viên,
-phân tích bẫy, và quy trình bốn bước bắt học viên tự giảng lại bài.
+Gói 39k/19k gắn với **một lượt làm bài cụ thể**, nên chỉ mua được từ trang kết
+quả của bài vừa làm. Mỗi lần mua tặng 10 lượt AI chấm vào **ví chung** — mua ở
+đề nào cũng tiêu được ở đề khác. Hết ví thì nạp gói 29.000đ; phần đáp án chi
+tiết và Feynman vẫn dùng bình thường, không bị khóa lại.
 
-Chỉ những bài đặt mức **Cần mở khóa** mới bán được. Bài **Ai cũng làm được** thì
-học viên nào cũng làm miễn phí. Đổi mức này ở **Quản trị → Bài tập → cột Truy cập**.
+> **Ba gói cũ đã dừng bán** (Reading mở lẻ 9.000đ, Reading 30 ngày 99.000đ,
+> Feynman 30 ngày 299.000đ). Quyền học viên đã trả tiền vẫn còn nguyên và dùng
+> hết thời hạn như cũ.
+
+Mức truy cập của từng bài đổi ở **Quản trị → Bài tập → cột Truy cập**. Mặc định
+mọi bài là **Ai cũng làm được**; đặt **Cần mở khóa** thì bài đó chỉ mở cho học
+viên được trung tâm cấp quyền tay — **không bán online nữa**.
 
 ---
 
@@ -86,17 +92,19 @@ Làm đúng như một học viên thật:
 
 1. Đăng nhập bằng một tài khoản học viên (đừng dùng tài khoản quản trị —
    quản trị viên vốn đã có mọi quyền nên không thử được).
-2. Vào **Luyện tập → Reading**, tìm một bài **Cần mở khóa**.
-3. Bấm **Mở bài này · 9.000đ**.
+2. Vào **Luyện tập → Reading**, làm xong một bài và nộp.
+3. Ở trang kết quả, bấm nút **Mở lượt làm bài này** trong khối Feynman. Bài một
+   passage phải hiện **19.000đ**; đề ghép hoặc Full Test phải hiện **39.000đ**.
 4. Trang sẽ tự chuyển sang SePay. Thanh toán thử theo hướng dẫn của Sandbox.
 5. Quay về, trang kết quả tự đổi sang **Thanh toán thành công**.
-6. Bấm **Vào học ngay** — phải làm được bài đó.
+6. Bấm **Vào học ngay** — phải vào được lớp chữa bài Feynman của đúng lượt đó.
 
 Sau đó thử thêm ba tình huống hay hỏng:
 
 - **Tự gõ địa chỉ trang thành công** mà không trả tiền → quyền **không** được mở.
-- **Mua bài thứ hai**: bài đầu vẫn mở, bài mới cũng mở, các bài khác vẫn khóa.
-- **Mua Feynman lần đầu** phải hiện 9.000đ; lần thứ hai phải hiện 49.000đ.
+- **Làm lại bài đó lần nữa**: lượt mới là một lượt khác, phải mời mua lại; lượt
+  đã mua vẫn mở nguyên.
+- **Nạp ví 29.000đ**: số lượt trên trang bảng giá phải tăng đúng 10.
 
 ---
 
@@ -113,8 +121,8 @@ Chỉ làm khi bốn việc trên đã chạy đúng.
    - `SEPAY_MERCHANT_ID` và `SEPAY_SECRET_KEY` thành giá trị Production
 4. Khai báo lại địa chỉ IPN trong môi trường Production.
 5. Bấm **Tái triển khai**.
-6. Tự mua một bài 9.000đ bằng tiền thật của mình. Kiểm tra tiền có vào tài khoản
-   ngân hàng không, và quyền có mở không.
+6. Tự mua một gói 19.000đ bằng tiền thật của mình. Kiểm tra tiền có vào tài
+   khoản ngân hàng không, và quyền có mở không.
 
 ---
 

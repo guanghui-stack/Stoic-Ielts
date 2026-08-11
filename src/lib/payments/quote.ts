@@ -32,12 +32,3 @@ export async function quoteOffer(input: {
     hasPaidFeynmanSingleBefore: Boolean(paidBefore),
   });
 }
-
-/** Giá sẽ hiển thị trên nút mua Feynman lẻ cho học viên này. */
-export async function feynmanSinglePrice(userId: string): Promise<{
-  amount: number;
-  isIntro: boolean;
-}> {
-  const quote = await quoteOffer({ userId, offerCode: "FEYNMAN_SINGLE" });
-  return { amount: quote.amount, isIntro: quote.priceRule === "FIRST_FEYNMAN_9K" };
-}

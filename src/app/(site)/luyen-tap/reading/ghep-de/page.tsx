@@ -13,8 +13,6 @@ import {
   FULL_TEST_MINUTES,
 } from "@/lib/reading-assembly";
 import { MODULE_LABELS } from "@/lib/nav";
-import { OFFERS, formatVnd } from "@/lib/payments/catalog";
-import { PurchaseButton } from "@/components/payments/purchase-button";
 import { ErrorBanner, NoteBox, SectionHeading, SubmitButton } from "@/components/ui";
 import { ManualAssemblyPicker } from "@/components/exam/manual-assembly-picker";
 
@@ -137,26 +135,17 @@ export default async function AssemblyPage({
             </p>
 
             {autoPlan.missingAccess.length > 0 ? (
-              <div className="mt-6">
-                <p className="font-ui text-sm text-ink-soft">
-                  Còn {autoPlan.missingAccess.length} bài chưa mở khóa. Bạn cần mở
-                  đủ cả ba bài mới bắt đầu được:
-                </p>
-                <div className="mt-4 flex flex-wrap gap-2.5">
-                  {autoPlan.missingAccess.map((part) => (
-                    <PurchaseButton
-                      key={part.exerciseId}
-                      offerCode="READING_SINGLE"
-                      exerciseId={part.exerciseId}
-                    >
-                      Mở &ldquo;{part.title}&rdquo; · {formatVnd(OFFERS.READING_SINGLE.amount)}
-                    </PurchaseButton>
-                  ))}
-                  <PurchaseButton offerCode="READING_ALL_30D" variant="outline">
-                    Mở toàn bộ 30 ngày · {formatVnd(OFFERS.READING_ALL_30D.amount)}
-                  </PurchaseButton>
-                </div>
-              </div>
+              // Đề Reading đã miễn phí (đặc tả §2.1), nên bài còn khóa ở đây là
+              // bài quản trị viên chủ động khóa — không mời mua, chỉ nói rõ phải
+              // xin cấp quyền. Chỗ này trước đây bán READING_SINGLE 9.000đ đã
+              // dừng bán, bấm vào chỉ bị đá về trang bảng giá không kèm lỗi.
+              <NoteBox className="mt-6" title="Còn bài chưa mở khóa">
+                Còn {autoPlan.missingAccess.length} bài chưa mở khóa nên chưa ghép
+                được đề này:{" "}
+                {autoPlan.missingAccess.map((part) => part.title).join(" · ")}.
+                Liên hệ trung tâm để được cấp quyền, hoặc chuyển sang chế độ tự
+                chọn bên dưới.
+              </NoteBox>
             ) : (
               <form action={createAssemblyAction} className="mt-6">
                 <input type="hidden" name="mode" value="AUTO" />

@@ -1297,6 +1297,27 @@ export async function initDatabase() {
     }
   });
 
+  // Mở toàn bộ đề Reading thành miễn phí — theo mô hình kinh doanh đã chốt ở
+  // docs/DAC-TA-FEYNMAN-AI.md §2.1: đề thi miễn phí, tiền chỉ thu ở lớp chữa
+  // sâu (39k/19k) và ví lượt AI (29k). Ba gói Reading cũ đã `retired` từ trước,
+  // nhưng dữ liệu thì chưa ai đổi, nên học viên vẫn đụng tường 9.000đ.
+  //
+  // applyOnce chứ không phải mỗi lần khởi động: quản trị viên vẫn phải khoá lại
+  // được một đề cụ thể sau này (nút ở /quan-tri/bai-tap) mà không bị lần triển
+  // khai kế tiếp mở toang ra.
+  //
+  // Quyền đã mua KHÔNG bị đụng tới: AccessGrant cũ nằm nguyên, người đã trả
+  // 9.000đ hay 99.000đ không mất gì — chỉ là thứ họ mua nay ai cũng có.
+  await applyOnce("PUBLIC_READING_ALL_v1", async () => {
+    const res = await db.exercise.updateMany({
+      where: { skill: "READING", accessLevel: "RESTRICTED" },
+      data: { accessLevel: "PUBLIC" },
+    });
+    if (res.count > 0) {
+      console.log(`[wobridges] Da mo mien phi ${res.count} de Reading.`);
+    }
+  });
+
   // Chuyển quyền đã cấp ở bảng cũ ExerciseAccess sang sổ cái AccessGrant.
   // Quyền cũ đều là Reading mở lẻ và vĩnh viễn (expiresAt = null) nên học viên
   // không mất gì. INSERT IGNORE + grantKey duy nhất khiến chạy lại vô hại.
