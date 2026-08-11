@@ -106,9 +106,18 @@ export default async function AdminFeynmanAiPage() {
       <p className="mt-4 font-ui text-[0.8rem] leading-relaxed text-muted">
         Chi phí là ƯỚC TÍNH theo bảng giá công khai của OpenAI, không phải hóa
         đơn. Hóa đơn thật vẫn là thứ OpenAI gửi. Model đang dùng:{" "}
-        <strong className="text-ink">{config.model}</strong>. Trung bình{" "}
-        {stats.avgLatencyMs}ms mỗi lượt, mức tương đồng trung bình{" "}
-        {stats.avgSimilarityPercent}%.
+        <strong className="text-ink">{config.model}</strong>.{" "}
+        {/* Chưa có lượt nào mà hiện "0ms, tương đồng 0%" thì đọc như hệ thống
+            đang chạy và mọi học viên đều trượt. Không có dữ liệu phải nói là
+            không có dữ liệu. */}
+        {stats.completedCount > 0 ? (
+          <>
+            Trung bình {stats.avgLatencyMs}ms mỗi lượt, mức tương đồng trung
+            bình {stats.avgSimilarityPercent}%.
+          </>
+        ) : (
+          <>Chưa có lượt chấm nào nên chưa có số liệu trung bình.</>
+        )}
       </p>
 
       {/* ---- Hàng đợi cảnh báo ---- */}

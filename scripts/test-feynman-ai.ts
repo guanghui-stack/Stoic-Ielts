@@ -23,6 +23,12 @@ import {
   shouldRefundQuota,
 } from "../src/lib/feynman-ai/errors.ts";
 import {
+  VND_PER_USD,
+  estimateCostMicroUsd,
+  hasPricing,
+  microUsdToVnd,
+} from "../src/lib/feynman-ai/cost.ts";
+import {
   FORBIDDEN_PAYLOAD_KEYS,
   INSUFFICIENT_WEAKNESS_DATA_NOTE,
   MAX_QUESTIONS_PER_RUN,
@@ -914,6 +920,80 @@ check(
     shouldRefundQuota(classifyBodyReadError(new SyntaxError("x"))),
   ],
   [true, true]
+);
+
+/* ---------------------------------------------------------------- */
+/* Bảng giá token — sai ở đây thì im lặng tuyệt đối                    */
+/* ---------------------------------------------------------------- */
+
+// Chủ dự án dựa vào đúng con số này để quyết có mở AI cho học viên không.
+// Không có gì báo khi nó sai: trang quản trị vẫn hiện một con số trông hợp lý.
+const M = 1_000_000;
+
+check(
+  "Một triệu token đầu vào = 250.000 micro-USD (0,25 USD)",
+  estimateCostMicroUsd("gpt-5-mini", { inputTokens: M, outputTokens: 0 }),
+  250_000
+);
+check(
+  "Một triệu token đầu ra = 2.000.000 micro-USD (2 USD)",
+  estimateCostMicroUsd("gpt-5-mini", { inputTokens: 0, outputTokens: M }),
+  2_000_000
+);
+check(
+  "Một triệu token đã cache = 25.000 micro-USD, rẻ hơn 10 lần",
+  estimateCostMicroUsd("gpt-5-mini", {
+    inputTokens: M,
+    outputTokens: 0,
+    cachedInputTokens: M,
+  }),
+  25_000
+);
+
+// OpenAI trả input_tokens là TỔNG, cached_tokens là tập con. Không trừ ra thì
+// phần đã cache bị tính cả giá thường lẫn giá cache.
+check(
+  "Token đã cache được TRỪ khỏi input thường, không tính tiền hai lần",
+  estimateCostMicroUsd("gpt-5-mini", {
+    inputTokens: M,
+    outputTokens: 0,
+    cachedInputTokens: M / 2,
+  }),
+  125_000 + 12_500
+);
+check(
+  "Dữ liệu lệch (cache nhiều hơn input) không cho ra số âm",
+  estimateCostMicroUsd("gpt-5-mini", {
+    inputTokens: 100,
+    outputTokens: 0,
+    cachedInputTokens: 5_000,
+  }) >= 0,
+  true
+);
+
+// Một lượt chấm thật: khoảng 3000 token vào, 1500 token ra.
+check(
+  "Một lượt chấm điển hình tốn 3.750 micro-USD (~0,004 USD)",
+  estimateCostMicroUsd("gpt-5-mini", {
+    inputTokens: 3_000,
+    outputTokens: 1_500,
+  }),
+  3_750
+);
+
+check(
+  "Model lạ trả 0 chứ không bịa số",
+  estimateCostMicroUsd("model-khong-co-that", {
+    inputTokens: M,
+    outputTokens: M,
+  }),
+  0
+);
+check("hasPricing khớp với bảng giá", [hasPricing("gpt-5-mini"), hasPricing("x")], [true, false]);
+check(
+  "Quy đổi VND chỉ để hiển thị: 1 USD = 26.000đ",
+  microUsdToVnd(M),
+  VND_PER_USD
 );
 
 check(
