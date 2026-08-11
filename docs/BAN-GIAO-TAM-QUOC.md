@@ -423,3 +423,64 @@ Còn bốn nhánh cũ chưa dọn, **chưa kiểm tra đã gộp hết chưa**:
    `admin-stats.ts`, luồng `feedback`.
 3. PR-09: nhờ luật sư rà `DU-THAO-PHAP-LY-NGUYET-THI.md`.
 4. Cân nhắc dọn bốn nhánh cũ ở trên.
+
+## 10.10. Phiên 11/08/2026 (06:38) — rà nốt Feynman AI, dọn nhánh
+
+### Ba lỗi dán nhãn sai và một đua tranh
+
+Không lỗi nào làm mất tiền hay mất dữ liệu. Cả bốn đều thuộc loại **dẫn người
+sửa đi sai hướng** — thứ chỉ lộ ra lúc đang cuống vì sự cố.
+
+**`openai-client.ts` — "chưa cấu hình khóa API" hiện thành "OpenAI hỏng".**
+`apiKey()` được gọi lúc dựng tham số cho `fetch`, tức là **nằm trong khối
+`try`**. `FeynmanAiError` bị bắt lại rồi dán nhãn thành `UPSTREAM_ERROR`. Đã
+cho `FeynmanAiError` đi qua nguyên vẹn.
+
+**`openai-client.ts` — hết giờ bị xếp thành "model trả sai cấu trúc".** Hạn giờ
+của `AbortSignal.timeout()` vẫn còn hiệu lực khi đang đọc thân phản hồi, nên
+`response.json()` có thể ném lỗi **hủy** chứ không phải lỗi cú pháp. Gộp hết
+vào `MALFORMED_OUTPUT` thì trang quản trị chỉ sang model, trong khi việc cần
+làm là nới `OPENAI_FEYNMAN_TIMEOUT_MS`.
+
+Quyết định này đã tách thành `classifyBodyReadError()` trong `errors.ts` để kiểm
+thử được — `openai-client.ts` nhập `server-only` nên không chạy dưới node.
+
+**Luồng feedback — hai cú bấm nhanh tạo hai cảnh báo trùng.** `findFirst` rồi
+`create` ở hai lệnh tách rời, mà `FeynmanAiAlert` **không có ràng buộc unique
+nào** đỡ cho. Đã bọc vào transaction Serializable, cùng khuôn với
+`reserveGradingSlot`.
+
+### Đã theo đúng kỷ luật kiểm chứng
+
+4 phép thử mới. Trước khi tin chúng, tôi **làm hỏng lại hàm** và chạy: 2 phép
+thử BÁO LỖI đúng như phải thế, rồi xanh lại sau khi khôi phục. Đây là bước mà
+phiên trước tôi bỏ qua và trả giá.
+
+Phần chưa kiểm chứng được bằng phép thử, nói thẳng: nhánh cho `FeynmanAiError`
+đi qua nguyên vẹn chỉ được xác nhận **bằng cách đọc mã**, vì nó nằm trong
+`openai-client.ts` không chạy được dưới node.
+
+### `admin-stats.ts` sạch
+
+Mọi truy vấn đều có `take` hoặc `aggregate`, không có truy vấn vô hạn. Không
+sửa gì.
+
+### Dọn nhánh
+
+Đã xóa: `feature/campaign-map-home`, `feature/competition-tiers`,
+`feature/rank-engine` — cả ba trả 0 commit ngoài `main`.
+
+**Còn `feature/integrity-consent-alignment`, CHƯA xóa.** Nó có đúng một commit
+chưa vào `main`: `6503b18 docs: bộ đặt hàng ảnh cho bản đồ Chiến Dịch 2.5D`.
+Hướng 2.5D đã bị chủ dự án bỏ, nên tài liệu này gần như chắc chắn là rác — 
+nhưng xóa nhánh sẽ mất hẳn commit đó, nên để chủ dự án quyết.
+
+### Việc còn nợ (thay cho 10.9)
+
+1. **Ba biến Feynman AI vẫn chưa xác minh được** — vẫn là thứ chặn giai đoạn 2.
+   Chủ dự án đăng nhập quản trị, nhìn thanh tab có chữ **AI Feynman** không.
+2. Quyết định số phận nhánh `feature/integrity-consent-alignment`.
+3. PR-09: nhờ luật sư rà `DU-THAO-PHAP-LY-NGUYET-THI.md`.
+4. Chưa soi: `context.ts`, `cost.ts`, `prompts.ts`, và ba route API ở mức chi
+   tiết. Bảng giá token trong `cost.ts` đáng soi trước — sai ở đó thì mọi con
+   số chi phí trên trang quản trị đều lệch mà không có gì báo.
