@@ -606,3 +606,46 @@ quyết bằng cách trả tranh tĩnh về — chủ dự án đã bỏ có ch�
 3. Quyết định số phận nhánh `feature/integrity-consent-alignment`.
 4. PR-09: nhờ luật sư rà `DU-THAO-PHAP-LY-NGUYET-THI.md`.
 5. Chưa soi: `context.ts`, `prompts.ts`, ba route API ở mức chi tiết.
+
+## 10.13. Hero: video gọn bên phải, nền trắng xoá bằng CSS
+
+### Xoá nền trắng không cần xử lý video
+
+`mix-blend-mode: multiply` nhân từng điểm ảnh với nền phía sau. Trắng (giá trị
+1) trả lại đúng màu nền nên **biến mất**; nét mực đen giữ nguyên. Không cần
+tách nền, không cần kênh alpha, không cần ffmpeg.
+
+Hệ quả quan trọng: dùng được `object-fit: contain`. Hai dải trắng thừa khi
+video không khớp tỷ lệ khung cũng tan theo, nên không phải cắt mất nhân vật
+như `cover`.
+
+**Đừng đặt lại `blur` cho `.hero-motion`.** Nhoè cộng với multiply làm nét mực
+loang thành vệt xám bẩn.
+
+### Chặn chữ bằng padding, không phải max-width
+
+Khi chuyển video sang phải, đo thật thì chữ tiêu đề kết thúc ở x=711 còn video
+bắt đầu ở x=607 — chồng nhau 104px, mà cả hai đều là mực sẫm.
+
+Sửa bằng `md:pr-[48%]` trên khối nội dung, không phải `max-width` từng dòng —
+max-width hỏng ngay khi đổi cỡ chữ hoặc có câu dài hơn. Sau khi sửa: chữ xa
+nhất x=597, video bắt đầu x=708, còn 111px khoảng trống. Đã xác minh **trên
+production**, không chỉ ở máy.
+
+### Video ẩn dưới `md`
+
+Điện thoại không có chỗ cho cột phải. **Nhưng đã đo: trình duyệt VẪN tải video
+dù `display:none`** — đây là sửa bố cục, không tiết kiệm dữ liệu di động. Muốn
+tiết kiệm thật thì phải nén file.
+
+### Nén video (chưa làm, cần ffmpeg)
+
+Cài: `winget install Gyan.FFmpeg`, rồi mở lại PowerShell.
+
+```
+ffmpeg -i public/art/home/trieu-van-hero.mp4 -an -vf scale=1280:-2 \
+  -c:v libx264 -crf 30 -preset slow -movflags +faststart \
+  public/art/home/trieu-van-hero-nen.mp4
+```
+
+File hiện tại vẫn 2,5 MB.
