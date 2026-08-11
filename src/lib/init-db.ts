@@ -19,7 +19,7 @@ const DDL = [
   `CREATE TABLE IF NOT EXISTS \`User\` (
     \`id\` VARCHAR(191) NOT NULL,
     \`email\` VARCHAR(191) NOT NULL,
-    \`passwordHash\` VARCHAR(191) NOT NULL,
+    \`passwordHash\` VARCHAR(191) NULL,
     \`name\` VARCHAR(191) NOT NULL,
     \`role\` VARCHAR(191) NOT NULL DEFAULT 'STUDENT',
     \`active\` BOOLEAN NOT NULL DEFAULT true,
@@ -1063,6 +1063,12 @@ const DDL = [
  * cột đã tồn tại nên từng lệnh được bọc try/catch ở nơi gọi.
  */
 const MIGRATIONS = [
+  // Dang nhap Google + gioi han mot thiet bi
+  `ALTER TABLE \`User\` MODIFY COLUMN \`passwordHash\` VARCHAR(191) NULL`,
+  `ALTER TABLE \`User\` ADD COLUMN \`googleId\` VARCHAR(191) NULL`,
+  `ALTER TABLE \`User\` ADD COLUMN \`activeSessionId\` VARCHAR(64) NULL`,
+  `CREATE UNIQUE INDEX \`User_googleId_key\` ON \`User\`(\`googleId\`)`,
+
   `ALTER TABLE \`User\` ADD COLUMN \`targetOverall\` DOUBLE NULL`,
   `ALTER TABLE \`User\` ADD COLUMN \`targetReading\` DOUBLE NULL`,
   `ALTER TABLE \`User\` ADD COLUMN \`targetListening\` DOUBLE NULL`,

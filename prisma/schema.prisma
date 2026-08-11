@@ -16,11 +16,20 @@ datasource db {
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
-  passwordHash String
+  /// Rong khi tai khoan chi dang nhap bang Google.
+  passwordHash String?
   name         String
   role         String   @default("STUDENT")
   active       Boolean  @default(true)
   createdAt    DateTime @default(now())
+
+  /// "sub" cua Google. Chi dat khi tai khoan da lien ket Google.
+  googleId String? @unique @db.VarChar(191)
+
+  /// Ma phien dang hop le DUY NHAT. Moi lan dang nhap ghi de ma cu, nen may
+  /// cu tu van ra. JWT khong thu hoi duoc, nen day la cho duy nhat giu su that
+  /// ve "ai dang dang nhap".
+  activeSessionId String? @db.VarChar(64)
 
   // Mục tiêu band điểm và lịch thi do học viên tự đặt
   targetOverall   Float?

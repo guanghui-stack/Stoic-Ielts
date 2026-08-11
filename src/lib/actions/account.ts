@@ -62,8 +62,13 @@ export async function changePasswordAction(
   const password = String(formData.get("password") ?? "");
   const confirm = String(formData.get("confirm") ?? "");
 
-  if (!(await bcrypt.compare(current, user.passwordHash))) {
-    return { error: "Mật khẩu hiện tại không đúng." };
+  // Tai khoan chi dang nhap bang Google thi CHUA co mat khau nao de doi. Bat
+  // nhap "mat khau hien tai" se khoa ho vinh vien khoi viec dat mat khau —
+  // ho khong bao gio go dung mot chuoi khong ton tai.
+  if (user.passwordHash !== null) {
+    if (!(await bcrypt.compare(current, user.passwordHash))) {
+      return { error: "Mật khẩu hiện tại không đúng." };
+    }
   }
   if (password.length < 8) {
     return { error: "Mật khẩu mới cần tối thiểu 8 ký tự." };

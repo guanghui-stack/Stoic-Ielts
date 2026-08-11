@@ -17,10 +17,25 @@ function secretKey() {
 export type SessionPayload = {
   userId: string;
   role: "STUDENT" | "ADMIN";
+  /**
+   * Ma phien. JWT khong thu hoi duoc, nen day la thu duy nhat cho phep gioi
+   * han "mot tai khoan mot thiet bi": moi lan dang nhap sinh ma moi va ghi de
+   * `User.activeSessionId`, khien moi cookie cu tro thanh khong khop.
+   */
+  sid: string;
 };
 
-export async function createSession(payload: SessionPayload) {
-  const token = await new SignJWT(payload)
+export async function createSession(payload: Omit<SessionPayload, "sid">) {
+  const sid = crypto.randomUUID();
+
+  // Ghi TRUOC khi phat cookie. Nguoc lai, neu ghi that bai thi may nay cam mot
+  // cookie khong bao gio khop va nguoi dung bi khoa ngoai ma khong hieu vi sao.
+  await db.user.update({
+    where: { id: payload.userId },
+    data: { activeSessionId: sid },
+  });
+
+  const token = await new SignJWT({ ...payload, sid })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime(`${SESSION_DAYS}d`)
@@ -47,8 +62,8 @@ export const getSession = cache(async (): Promise<SessionPayload | null> => {
   if (!token) return null;
   try {
     const { payload } = await jwtVerify<SessionPayload>(token, secretKey());
-    if (!payload.userId) return null;
-    return { userId: payload.userId, role: payload.role };
+    if (!payload.userId || !payload.sid) return null;
+    return { userId: payload.userId, role: payload.role, sid: payload.sid };
   } catch {
     return null;
   }
@@ -60,6 +75,10 @@ export const getCurrentUser = cache(async () => {
   if (!session) return null;
   const user = await db.user.findUnique({ where: { id: session.userId } });
   if (!user || !user.active) return null;
+
+  // Da dang nhap o may khac -> cookie nay khong con la phien hop le.
+  if (user.activeSessionId !== session.sid) return null;
+
   return user;
 });
 

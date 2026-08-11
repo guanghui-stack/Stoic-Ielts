@@ -43,7 +43,21 @@ export async function loginAction(
   const password = String(formData.get("password") ?? "");
 
   const user = await db.user.findUnique({ where: { email } });
-  if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
+
+  if (!user) {
+    return { error: "Email hoặc mật khẩu không đúng." };
+  }
+
+  // Tai khoan tao bang Google chua co mat khau. Noi thang de hoc vien biet
+  // duong nao dung, thay vi de ho go lai mot mat khau khong ton tai.
+  if (user.passwordHash === null) {
+    return {
+      error:
+        "Tài khoản này đăng nhập bằng Google. Bạn bấm nút Đăng nhập với Google bên dưới nhé.",
+    };
+  }
+
+  if (!(await bcrypt.compare(password, user.passwordHash))) {
     return { error: "Email hoặc mật khẩu không đúng." };
   }
   if (!user.active) {
