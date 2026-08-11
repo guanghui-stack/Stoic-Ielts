@@ -299,13 +299,15 @@ body {
      phía để khối đó tan vào nền kem, giống bức thủy mặc vẽ hụt ra rìa giấy
      chứ không phải một tấm ảnh dán lên. */
   -webkit-mask-image: radial-gradient(
-    ellipse 74% 76% at 50% 50%,
-    #000 52%,
-    transparent 100%
+    ellipse 68% 72% at 52% 50%,
+    #000 30%,
+    rgba(0, 0, 0, 0.55) 68%,
+    transparent 94%
   );
   mask-image: radial-gradient(
-    ellipse 74% 76% at 50% 50%,
-    #000 52%,
-    transparent 100%
+    ellipse 68% 72% at 52% 50%,
+    #000 30%,
+    rgba(0, 0, 0, 0.55) 68%,
+    transparent 94%
   );
 }

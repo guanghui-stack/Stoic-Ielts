@@ -71,13 +71,23 @@ export function InkWashHero({
           dòng, vì `padding` tính theo bề rộng khung chứa còn video lại neo
           theo bề rộng màn hình — hai mốc khác nhau nên không bao giờ khớp. */}
       <div
-        className={`relative mx-auto max-w-6xl px-6 py-16 md:py-24 ${
+        className={
           videoSrc
-            ? "md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,40%)] md:items-center md:gap-12 lg:gap-16"
-            : ""
-        }`}
+            ? "relative md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,42%)] md:items-center"
+            : "relative mx-auto max-w-6xl px-6 py-16 md:py-24"
+        }
       >
-        <div>
+        {/* Lưới trải hết bề ngang để video chạm được mép phải màn hình. Cột
+            chữ tự canh về đúng vị trí của khung 72rem bằng padding-left —
+            `max()` giữ lề 1.5rem khi màn hình hẹp hơn khung. Cách này thay cho
+            lề âm: lề âm vô hiệu khi ô lưới đã bị `w-full` khoá cứng bề rộng. */}
+        <div
+          className={
+            videoSrc
+              ? "px-6 py-16 md:py-24 md:pl-[max(1.5rem,calc((100vw-72rem)/2+1.5rem))] md:pr-8"
+              : ""
+          }
+        >
           <p className="label-caps">{eyebrow}</p>
           <h1 className="mt-4 max-w-3xl font-display text-4xl font-bold leading-[1.12] text-navy-deep md:text-6xl">
             {title}
