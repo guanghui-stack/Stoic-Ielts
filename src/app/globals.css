@@ -268,4 +268,20 @@ body {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+
+  /* Video nền không phải animation nên không dính luật ở trên — phải tắt
+     riêng. Ẩn đi thì tranh tĩnh phía dưới lộ ra, hero vẫn nguyên vẹn. */
+  .hero-motion {
+    display: none;
+  }
+}
+
+/* Lớp động của hero: là KẾT CẤU, không phải video để xem.
+   Mờ và nhòe tới mức chỉ còn cảm giác chuyển động sau lớp mực — chữ tiêu đề
+   vẫn là thứ mắt bắt trước tiên. Phóng to nhẹ vì blur làm nhòe mép ảnh ra
+   ngoài khung, để nguyên tỷ lệ sẽ lộ một viền sáng quanh hero. */
+.hero-motion {
+  opacity: 0.4;
+  filter: blur(9px) saturate(0.7);
+  transform: scale(1.07);
 }

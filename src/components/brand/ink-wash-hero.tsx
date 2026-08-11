@@ -26,6 +26,7 @@ export function InkWashHero({
   eyebrow,
   title,
   functionalLabel,
+  videoSrc,
   children,
 }: {
   asset: ArtAsset;
@@ -33,11 +34,35 @@ export function InkWashHero({
   /** Nhận ReactNode để tiêu đề dài xuống dòng được đúng chỗ mình muốn. */
   title: React.ReactNode;
   functionalLabel: string;
+  /**
+   * Bản động của CHÍNH bức tranh trong `asset`, không phải một cảnh khác.
+   * Bỏ trống thì hero giữ nguyên như cũ.
+   */
+  videoSrc?: string;
   children?: React.ReactNode;
 }) {
   return (
     <section className="ink-wash-fallback relative isolate overflow-hidden border-b border-line">
       <InkWashArt asset={asset} priority />
+
+      {/* Lớp động nằm TRÊN tranh tĩnh và dưới màn phủ chữ.
+          Tranh tĩnh vẫn phải vẽ ra: nó là thứ hiện khi video chưa tải xong,
+          khi trình duyệt chặn tự phát, và khi người dùng tắt hiệu ứng chuyển
+          động. Không có nó thì hero rỗng trong đúng những trường hợp đó. */}
+      {videoSrc ? (
+        <video
+          className="hero-motion absolute inset-0 h-full w-full object-cover"
+          src={videoSrc}
+          poster={asset.src}
+          autoPlay
+          muted
+          loop
+          playsInline
+          // Thuần trang trí: không mang thông tin nào mà chữ chưa nói.
+          aria-hidden="true"
+          tabIndex={-1}
+        />
+      ) : null}
 
       {/* Màn phủ giữ tương phản chữ. aria-hidden vì thuần trang trí. */}
       <div

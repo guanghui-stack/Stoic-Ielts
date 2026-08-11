@@ -49,6 +49,7 @@ export default async function HomePage() {
       {/* ===== Hero ===== */}
       <InkWashHero
         asset={ART_ASSETS.homeTrieuVan}
+        videoSrc="/art/home/trieu-van-hero.mp4"
         eyebrow="HỔ PHÙ · IELTS · Luyện Reading Academic và General"
         title={
           <>
