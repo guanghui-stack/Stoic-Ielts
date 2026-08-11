@@ -48,47 +48,60 @@ export function InkWashHero({
           section, nên hero không bao giờ trống trơn. */}
       {videoSrc ? null : <InkWashArt asset={asset} priority />}
 
-      {videoSrc ? (
-        <video
-          className="hero-motion absolute inset-y-0 right-0 hidden h-full md:block md:w-[46%] lg:w-[44%]"
-          src={videoSrc}
-          autoPlay
-          muted
-          loop
-          playsInline
-          // Thuần trang trí: không mang thông tin nào mà chữ chưa nói.
-          aria-hidden="true"
-          tabIndex={-1}
-        />
-      ) : null}
+      {/* Hai màn phủ chỉ có việc khi có tranh TRÀN NỀN phía sau chữ. Bố cục
+          video là hai cột tách bạch, chữ nằm trên nền kem sạch — thêm màn phủ
+          vào đây chỉ làm đục nền mà không bảo vệ gì. */}
+      {videoSrc ? null : (
+        <>
+          <div
+            className={`absolute inset-0 bg-gradient-to-r ${
+              ACCENT_WASH_CLASS[asset.accent]
+            } via-transparent to-transparent`}
+            aria-hidden="true"
+          />
+          <div
+            className="absolute inset-0 bg-gradient-to-r from-cream via-cream/85 to-transparent"
+            aria-hidden="true"
+          />
+        </>
+      )}
 
-      {/* Màn phủ giữ tương phản chữ. aria-hidden vì thuần trang trí. */}
-      <div
-        className={`absolute inset-0 bg-gradient-to-r ${
-          ACCENT_WASH_CLASS[asset.accent]
-        } via-transparent to-transparent`}
-        aria-hidden="true"
-      />
-      <div
-        className="absolute inset-0 bg-gradient-to-r from-cream via-cream/85 to-transparent"
-        aria-hidden="true"
-      />
-
-      {/* Có video thì chừa hẳn cột phải cho nó. Canh từng dòng chữ bằng
-          max-width sẽ hỏng ngay khi đổi cỡ chữ hay dịch sang câu dài hơn —
-          chặn bằng padding thì mọi con chữ bên trong đều tôn trọng ranh giới. */}
+      {/* Có video thì hero là LƯỚI HAI CỘT thật, không phải video thả nổi phía
+          sau rồi lấy padding đẩy chữ tránh ra. Cách cũ bóp cột chữ tới mức vỡ
+          dòng, vì `padding` tính theo bề rộng khung chứa còn video lại neo
+          theo bề rộng màn hình — hai mốc khác nhau nên không bao giờ khớp. */}
       <div
         className={`relative mx-auto max-w-6xl px-6 py-16 md:py-24 ${
-          videoSrc ? "md:pr-[48%]" : ""
+          videoSrc
+            ? "md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,40%)] md:items-center md:gap-12 lg:gap-16"
+            : ""
         }`}
       >
-        <p className="label-caps">{eyebrow}</p>
-        <h1 className="mt-4 max-w-3xl font-display text-4xl font-bold leading-[1.12] text-navy-deep md:text-6xl">
-          {title}
-        </h1>
-        <p className="dual-label__function mt-3 text-[0.95rem]">{functionalLabel}</p>
-        <div className="rule-gold mt-7" />
-        {children ? <div className="mt-6 max-w-2xl">{children}</div> : null}
+        <div>
+          <p className="label-caps">{eyebrow}</p>
+          <h1 className="mt-4 max-w-3xl font-display text-4xl font-bold leading-[1.12] text-navy-deep md:text-6xl">
+            {title}
+          </h1>
+          <p className="dual-label__function mt-3 text-[0.95rem]">
+            {functionalLabel}
+          </p>
+          <div className="rule-gold mt-7" />
+          {children ? <div className="mt-6 max-w-2xl">{children}</div> : null}
+        </div>
+
+        {videoSrc ? (
+          <video
+            className="hero-motion hidden h-auto w-full md:block"
+            src={videoSrc}
+            autoPlay
+            muted
+            loop
+            playsInline
+            // Thuần trang trí: không mang thông tin nào mà chữ chưa nói.
+            aria-hidden="true"
+            tabIndex={-1}
+          />
+        ) : null}
       </div>
     </section>
   );

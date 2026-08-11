@@ -290,9 +290,22 @@ body {
    Muốn chỉnh thì sửa `opacity` (0 = mất hẳn, 1 = rõ nhất). Không đặt lại
    `blur` ở đây: nhoè cộng với multiply làm nét mực loang ra thành vệt xám. */
 .hero-motion {
-  object-fit: contain;
-  object-position: center right;
   opacity: 1;
   mix-blend-mode: multiply;
   filter: saturate(0.9) contrast(1.04);
+
+  /* Nền video KHÔNG phải trắng tinh mà là giấy xám nhạt, nên `multiply` một
+     mình vẫn để lại một khối chữ nhật lộ mép. Mặt nạ này làm nhạt dần bốn
+     phía để khối đó tan vào nền kem, giống bức thủy mặc vẽ hụt ra rìa giấy
+     chứ không phải một tấm ảnh dán lên. */
+  -webkit-mask-image: radial-gradient(
+    ellipse 74% 76% at 50% 50%,
+    #000 52%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    ellipse 74% 76% at 50% 50%,
+    #000 52%,
+    transparent 100%
+  );
 }
