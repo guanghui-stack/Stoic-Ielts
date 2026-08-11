@@ -95,7 +95,6 @@ export function InkWashHero({
             src={videoSrc}
             autoPlay
             muted
-            loop
             playsInline
             // Thuần trang trí: không mang thông tin nào mà chữ chưa nói.
             aria-hidden="true"
