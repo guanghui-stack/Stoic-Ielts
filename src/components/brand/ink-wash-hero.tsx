@@ -43,17 +43,15 @@ export function InkWashHero({
 }) {
   return (
     <section className="ink-wash-fallback relative isolate overflow-hidden border-b border-line">
-      <InkWashArt asset={asset} priority />
+      {/* Có video thì KHÔNG vẽ tranh tĩnh nữa — quyết định của chủ dự án.
+          Nền lúc video chưa chạy là lớp mực CSS `.ink-wash-fallback` của
+          section, nên hero không bao giờ trống trơn. */}
+      {videoSrc ? null : <InkWashArt asset={asset} priority />}
 
-      {/* Lớp động nằm TRÊN tranh tĩnh và dưới màn phủ chữ.
-          Tranh tĩnh vẫn phải vẽ ra: nó là thứ hiện khi video chưa tải xong,
-          khi trình duyệt chặn tự phát, và khi người dùng tắt hiệu ứng chuyển
-          động. Không có nó thì hero rỗng trong đúng những trường hợp đó. */}
       {videoSrc ? (
         <video
           className="hero-motion absolute inset-0 h-full w-full object-cover"
           src={videoSrc}
-          poster={asset.src}
           autoPlay
           muted
           loop

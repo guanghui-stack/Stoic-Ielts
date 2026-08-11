@@ -270,18 +270,22 @@ body {
   }
 
   /* Video nền không phải animation nên không dính luật ở trên — phải tắt
-     riêng. Ẩn đi thì tranh tĩnh phía dưới lộ ra, hero vẫn nguyên vẹn. */
+     riêng. Ẩn rồi thì lộ ra lớp mực CSS `.ink-wash-fallback` của section,
+     nên hero vẫn có nền chứ không trống. */
   .hero-motion {
     display: none;
   }
 }
 
 /* Lớp động của hero: là KẾT CẤU, không phải video để xem.
-   Mờ và nhòe tới mức chỉ còn cảm giác chuyển động sau lớp mực — chữ tiêu đề
-   vẫn là thứ mắt bắt trước tiên. Phóng to nhẹ vì blur làm nhòe mép ảnh ra
-   ngoài khung, để nguyên tỷ lệ sẽ lộ một viền sáng quanh hero. */
+   Nhòe mạnh nên tuy độ mờ cao, mắt vẫn đọc nó là nền chứ không phải một đoạn
+   phim đang chạy — chữ tiêu đề vẫn là thứ bắt mắt trước tiên. Phóng to nhẹ vì
+   blur làm nhòe mép ảnh ra ngoài khung, để nguyên tỷ lệ sẽ lộ viền sáng.
+
+   Muốn chỉnh đậm nhạt thì sửa đúng hai số này: `opacity` (0 = mất hẳn,
+   1 = rõ nhất) và bán kính `blur` (càng lớn càng nhòe). */
 .hero-motion {
-  opacity: 0.4;
-  filter: blur(9px) saturate(0.7);
+  opacity: 0.78;
+  filter: blur(7px) saturate(0.72);
   transform: scale(1.07);
 }
