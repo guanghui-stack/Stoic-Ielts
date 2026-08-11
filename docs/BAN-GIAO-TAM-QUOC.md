@@ -484,3 +484,68 @@ nhưng xóa nhánh sẽ mất hẳn commit đó, nên để chủ dự án quy�
 4. Chưa soi: `context.ts`, `cost.ts`, `prompts.ts`, và ba route API ở mức chi
    tiết. Bảng giá token trong `cost.ts` đáng soi trước — sai ở đó thì mọi con
    số chi phí trên trang quản trị đều lệch mà không có gì báo.
+
+## 10.11. Phiên 11/08/2026 (10:04) — bảng giá token, và lớp động cho hero
+
+### Xác nhận: `ENABLE_FEYNMAN_AI_ADMIN` đã ăn
+
+Chủ dự án gửi ảnh chụp: tab **AI FEYNMAN** hiện trong khu quản trị, trang chạy,
+model đang dùng `gpt-5-mini`.
+
+**Nhưng đó mới là một trong ba biến.** Trang quản trị hiện ra bất kể
+`OPENAI_API_KEY` và `OPENAI_FEYNMAN_ENABLED` đúng hay sai — hai biến kia chỉ
+chứng minh được bằng cách **chấm thử một bài thật**. Đây vẫn là việc còn treo.
+
+### `cost.ts` đúng, nhưng trước giờ không có phép thử nào
+
+Đọc kỹ thì bảng giá khớp giá gpt-5-mini thật (0,25 / 0,025 / 2,00 USD mỗi triệu
+token), đơn vị micro-USD nhất quán, và token đã cache **được trừ khỏi input
+thường** nên không tính tiền hai lần.
+
+Đã bổ sung 10 phép thử. Kiểm chứng bằng cách làm hỏng có ý (bỏ bước trừ token
+cache) → 2 phép thử BÁO LỖI đúng như phải thế, rồi xanh lại.
+
+Sửa thêm một chỗ đọc sai: trang quản trị hiện *"Trung bình 0ms mỗi lượt, mức
+tương đồng trung bình 0%"* khi chưa có lượt chấm nào — đọc như hệ thống đang
+chạy và mọi học viên đều trượt. Giờ nói thẳng là chưa có dữ liệu.
+
+### Lớp động cho hero trang chủ
+
+Chủ dự án gửi một video sinh từ chính bức tranh hero, yêu cầu làm nền và **làm
+mờ cho phù hợp, đừng để rõ video**.
+
+Đã thêm prop `videoSrc` cho `InkWashHero`. Video là **kết cấu**, không phải video
+để xem: mờ 0.4, nhòe 9px, giảm bão hòa 0.7, phóng to 1.07.
+
+Ba điều bắt buộc giữ nguyên nếu sau này sửa:
+
+1. **Tranh tĩnh vẫn phải được vẽ ra** làm ảnh chờ. Nó là thứ hiện khi video chưa
+   tải xong, khi trình duyệt chặn tự phát, và khi người dùng tắt hiệu ứng
+   chuyển động. Bỏ nó đi thì hero rỗng trong đúng những trường hợp đó.
+2. **Hai màn phủ giữ tương phản chữ phải nằm TRÊN video.** Thứ tự lớp đúng là
+   `img → video → 2 màn phủ → chữ`.
+3. **`prefers-reduced-motion: reduce` phải ẩn hẳn video.** Luật chung ở
+   `globals.css` chỉ chạm tới `animation` và `transition`; video không dính,
+   phải tắt riêng.
+
+Phóng to 1.07 là vì blur làm nhòe mép ảnh ra ngoài khung — để nguyên tỷ lệ sẽ
+lộ một viền sáng quanh hero.
+
+Đã kiểm chứng trên máy chủ chạy thật, không đoán: video đang phát, `readyState`
+4, phủ kín 1354×729, thứ tự lớp đúng, và `h1` vẫn là phần tử trên cùng tại vị
+trí của nó.
+
+**Đánh đổi phải biết:** file 2,5 MB, gấp bảy lần ngân sách ảnh hero của art
+bible (350 KB). Máy này **không có ffmpeg** nên chưa nén được. Nếu thấy trang
+chủ chậm trên 3G, việc cần làm là nén video xuống ~800 KB (720p, bitrate thấp,
+bỏ tiếng) hoặc chỉ nạp trên màn hình lớn.
+
+### Việc còn nợ (thay cho 10.10)
+
+1. **Chấm thử một bài thật** để xác minh `OPENAI_API_KEY` và
+   `OPENAI_FEYNMAN_ENABLED`. Đây là thứ duy nhất còn chặn giai đoạn 2.
+2. Nén video hero nếu trang chủ chậm — cần cài ffmpeg.
+3. Quyết định số phận nhánh `feature/integrity-consent-alignment` (commit lẻ
+   duy nhất là tài liệu cho bản đồ 2.5D đã bỏ).
+4. PR-09: nhờ luật sư rà `DU-THAO-PHAP-LY-NGUYET-THI.md`.
+5. Chưa soi: `context.ts`, `prompts.ts`, ba route API ở mức chi tiết.
