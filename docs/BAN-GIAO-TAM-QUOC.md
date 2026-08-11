@@ -549,3 +549,60 @@ bỏ tiếng) hoặc chỉ nạp trên màn hình lớn.
    duy nhất là tài liệu cho bản đồ 2.5D đã bỏ).
 4. PR-09: nhờ luật sư rà `DU-THAO-PHAP-LY-NGUYET-THI.md`.
 5. Chưa soi: `context.ts`, `prompts.ts`, ba route API ở mức chi tiết.
+
+## 10.12. Phiên 11/08/2026 — hero trang chủ chỉ còn video
+
+### Quyết định của chủ dự án: bỏ hẳn tranh tĩnh
+
+Ban đầu tôi dựng hero hai lớp — tranh tĩnh làm nền, video mờ 0.4 chồng lên.
+Chủ dự án thấy hình bị đục (đúng: ảnh đặc ở dưới nhìn xuyên qua lớp video mờ)
+và yêu cầu **bỏ hẳn tranh tĩnh, chỉ dùng video**.
+
+Tôi đã nêu lo ngại về lớp dự phòng và chủ dự án vẫn chốt bỏ. **Đây là quyết
+định của họ, đừng tự ý khôi phục.** Đã gỡ ba thứ: lớp `<InkWashArt>` khi có
+`videoSrc`, thuộc tính `poster`, và toàn bộ quy ước `.hero-still`.
+
+### Hai con số đã đổi, và vì sao
+
+`opacity` 0.4 → **0.78**, `blur` 9px → **7px**.
+
+Con số cũ được chọn khi còn tranh tĩnh nằm dưới đỡ. Giữ nguyên sau khi bỏ ảnh
+thì hero nhợt nhạt vì không còn gì đỡ lưng. Muốn chỉnh đậm nhạt thì sửa đúng
+hai số này trong `globals.css`, khối `.hero-motion`.
+
+### Hero không bao giờ trống
+
+Nền lúc video chưa chạy là lớp mực CSS `.ink-wash-fallback` của chính
+`<section>` — một nền đã thiết kế, không phải khoảng trắng. Đây là lý do bỏ
+được ảnh chờ mà không để lại lỗ hổng.
+
+`prefers-reduced-motion: reduce` vẫn ẩn video, và lúc đó lộ ra đúng lớp mực
+đó. Luật chung ở `globals.css` chỉ chạm `animation` và `transition`; video
+không dính nên **phải giữ luật tắt riêng cho `.hero-motion`**.
+
+### Thứ tự lớp — đừng đảo
+
+`video → màn phủ accent → màn phủ kem → chữ`
+
+Hai màn phủ giữ tương phản **phải nằm trên video**. Đã kiểm chứng trên máy chủ
+chạy thật sau khi tải lại: 0 ảnh tĩnh trong hero, không còn `.hero-still`,
+video đang phát, và `h1` vẫn là phần tử trên cùng tại vị trí của nó.
+
+### Còn nợ về hiệu năng
+
+File vẫn **2,5 MB** và giờ không còn ảnh chờ, nên trên 3G học viên nhìn thấy
+nền mực CSS trong vài chục giây trước khi video hiện. Máy này **không có
+ffmpeg** nên chưa nén được.
+
+Nếu cần xử lý: nén xuống ~800 KB (720p, bitrate thấp, bỏ tiếng). Đừng giải
+quyết bằng cách trả tranh tĩnh về — chủ dự án đã bỏ có chủ đích.
+
+### Việc còn nợ (thay cho 10.11)
+
+1. **Chấm thử một bài Feynman thật** để xác minh `OPENAI_API_KEY` và
+   `OPENAI_FEYNMAN_ENABLED`. Ảnh chụp hPanel chỉ chứng minh được
+   `ENABLE_FEYNMAN_AI_ADMIN`. Đây vẫn là thứ duy nhất chặn giai đoạn 2.
+2. Nén video hero nếu trang chủ chậm — cần cài ffmpeg.
+3. Quyết định số phận nhánh `feature/integrity-consent-alignment`.
+4. PR-09: nhờ luật sư rà `DU-THAO-PHAP-LY-NGUYET-THI.md`.
+5. Chưa soi: `context.ts`, `prompts.ts`, ba route API ở mức chi tiết.
