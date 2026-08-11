@@ -277,15 +277,22 @@ body {
   }
 }
 
-/* Lớp động của hero: là KẾT CẤU, không phải video để xem.
-   Nhòe mạnh nên tuy độ mờ cao, mắt vẫn đọc nó là nền chứ không phải một đoạn
-   phim đang chạy — chữ tiêu đề vẫn là thứ bắt mắt trước tiên. Phóng to nhẹ vì
-   blur làm nhòe mép ảnh ra ngoài khung, để nguyên tỷ lệ sẽ lộ viền sáng.
+/* Lớp động của hero: nhân vật gọn ở nửa phải, KHÔNG có nền trắng.
 
-   Muốn chỉnh đậm nhạt thì sửa đúng hai số này: `opacity` (0 = mất hẳn,
-   1 = rõ nhất) và bán kính `blur` (càng lớn càng nhòe). */
+   `mix-blend-mode: multiply` là thứ xoá nền: nhân từng điểm ảnh với nền phía
+   sau, nên trắng (giá trị 1) trả lại đúng màu nền và biến mất, còn nét mực
+   đen giữ nguyên. Không cần xử lý video, không cần kênh alpha.
+
+   Nhờ vậy dùng được `object-fit: contain` — hai dải trắng thừa hai bên khi
+   video không khớp tỷ lệ khung cũng tan theo, thay vì phải cắt mất nhân vật
+   như `cover`.
+
+   Muốn chỉnh thì sửa `opacity` (0 = mất hẳn, 1 = rõ nhất). Không đặt lại
+   `blur` ở đây: nhoè cộng với multiply làm nét mực loang ra thành vệt xám. */
 .hero-motion {
-  opacity: 0.78;
-  filter: blur(7px) saturate(0.72);
-  transform: scale(1.07);
+  object-fit: contain;
+  object-position: center right;
+  opacity: 1;
+  mix-blend-mode: multiply;
+  filter: saturate(0.9) contrast(1.04);
 }

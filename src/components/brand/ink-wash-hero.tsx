@@ -50,7 +50,7 @@ export function InkWashHero({
 
       {videoSrc ? (
         <video
-          className="hero-motion absolute inset-0 h-full w-full object-cover"
+          className="hero-motion absolute inset-y-0 right-0 hidden h-full md:block md:w-[46%] lg:w-[44%]"
           src={videoSrc}
           autoPlay
           muted
@@ -74,7 +74,14 @@ export function InkWashHero({
         aria-hidden="true"
       />
 
-      <div className="relative mx-auto max-w-6xl px-6 py-16 md:py-24">
+      {/* Có video thì chừa hẳn cột phải cho nó. Canh từng dòng chữ bằng
+          max-width sẽ hỏng ngay khi đổi cỡ chữ hay dịch sang câu dài hơn —
+          chặn bằng padding thì mọi con chữ bên trong đều tôn trọng ranh giới. */}
+      <div
+        className={`relative mx-auto max-w-6xl px-6 py-16 md:py-24 ${
+          videoSrc ? "md:pr-[48%]" : ""
+        }`}
+      >
         <p className="label-caps">{eyebrow}</p>
         <h1 className="mt-4 max-w-3xl font-display text-4xl font-bold leading-[1.12] text-navy-deep md:text-6xl">
           {title}
