@@ -2,6 +2,8 @@ import "server-only";
 import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { OFFERS, isOfferCode, type Offer } from "@/lib/payments/catalog";
+import { orderCodeLabel } from "@/lib/payments/coins";
+import { creditCoinsForOrder } from "@/lib/payments/coin-service";
 import {
   canTransitionToPaid,
   computeGrantWindow,
@@ -56,6 +58,37 @@ export async function fulfillPaidOrder(input: {
         });
         if (reused) {
           return { ok: false as const, reason: "TRANSACTION_ALREADY_USED" };
+        }
+
+        // Đơn nạp ví rẽ ở ĐÂY, trước khi tra bảng giá: mã trên đơn nạp là mã
+        // mốc nạp chứ không phải mã gói, nên tra `OFFERS` sẽ ra null và mọi
+        // bước dưới đều xử lý sai một cách im lặng.
+        //
+        // Số xu lấy từ `order.coinsGranted` đã chốt lúc tạo đơn, KHÔNG tra lại
+        // bảng mốc nạp: đổi mức thưởng không được phép làm thay đổi số xu của
+        // một đơn học viên đã bấm mua theo tỉ lệ cũ.
+        if (order.orderKind === "TOPUP") {
+          await creditCoinsForOrder(tx, {
+            orderId: order.id,
+            userId: order.userId,
+            coins: order.coinsGranted,
+            note: orderCodeLabel(order.offerCode),
+          });
+
+          await tx.paymentOrder.update({
+            where: { id: order.id },
+            data: {
+              status: "PAID",
+              paidAt: input.paidAt,
+              providerOrderId: input.providerOrderId ?? null,
+              providerTransactionId: input.providerTransactionId,
+              paymentMethod: input.paymentMethod,
+              rawLastPayload: input.sanitizedPayload,
+              lastError: null,
+            },
+          });
+
+          return { ok: true as const, alreadyPaid: false };
         }
 
         const offer = isOfferCode(order.offerCode)

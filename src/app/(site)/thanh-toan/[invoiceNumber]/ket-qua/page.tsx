@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
-import { formatVnd, OFFERS, isOfferCode } from "@/lib/payments/catalog";
+import { formatVnd } from "@/lib/payments/catalog";
+import { orderCodeLabel } from "@/lib/payments/coins";
 import { PaymentStatusPoller } from "@/components/payments/payment-status-poller";
 
 export const metadata = { title: "Kết quả thanh toán" };
@@ -38,9 +39,9 @@ export default async function PaymentResultPage({
     redirect("/thanh-toan");
   }
 
-  const label = isOfferCode(order.offerCode)
-    ? OFFERS[order.offerCode].label
-    : order.offerCode;
+  // Đơn nạp ví mang mã mốc nạp chứ không phải mã gói, nên phải tra bằng
+  // `orderCodeLabel` — tra thẳng `OFFERS` sẽ in ra mã thô cho học viên đọc.
+  const label = orderCodeLabel(order.offerCode);
 
   return (
     <section className="mx-auto max-w-2xl px-6 py-12 md:py-16">

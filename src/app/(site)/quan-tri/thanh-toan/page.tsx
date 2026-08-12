@@ -1,8 +1,10 @@
 import Link from "next/link";
-import { CircleSlash } from "lucide-react";
+import { CircleSlash, Coins } from "lucide-react";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/session";
-import { formatVnd, OFFERS, isOfferCode } from "@/lib/payments/catalog";
+import { formatVnd } from "@/lib/payments/catalog";
+import { formatCoins, orderCodeLabel } from "@/lib/payments/coins";
+import { coinAdminStats } from "@/lib/payments/coin-service";
 import { isSePayConfigured, sePayEnvironment } from "@/lib/payments/sepay";
 import { closePendingOrderAction } from "@/lib/actions/admin-payments";
 import {
@@ -58,7 +60,7 @@ export default async function AdminPaymentsPage({
   const { loc } = await searchParams;
   const active = FILTERS.find((f) => f.key === loc) ?? FILTERS[0];
 
-  const [orders, totals, needReview] = await Promise.all([
+  const [orders, totals, needReview, coins] = await Promise.all([
     db.paymentOrder.findMany({
       where: active.status ? { status: active.status } : undefined,
       orderBy: { createdAt: "desc" },
@@ -75,6 +77,7 @@ export default async function AdminPaymentsPage({
       _count: { _all: true },
     }),
     db.paymentOrder.count({ where: { status: "REQUIRES_REVIEW" } }),
+    coinAdminStats(),
   ]);
 
   const configured = isSePayConfigured();
@@ -104,7 +107,7 @@ export default async function AdminPaymentsPage({
 
       <div className="mt-8 grid gap-px border border-line bg-line sm:grid-cols-3">
         <div className="bg-paper p-6 text-center">
-          <p className="label-caps">Đã thu</p>
+          <p className="label-caps">Đã thu (tiền thật)</p>
           <p className="mt-2.5 font-display text-3xl font-bold text-navy-deep">
             {formatVnd(totals._sum.amount ?? 0)}
           </p>
@@ -124,6 +127,58 @@ export default async function AdminPaymentsPage({
           >
             {needReview}
           </p>
+        </div>
+      </div>
+
+      {/*
+        Ví xu — CỐ Ý tách khỏi ô "Đã thu" ở trên.
+
+        "Đã thu" là tiền thật đã vào tài khoản ngân hàng. Xu tặng KHÔNG đối ứng
+        đồng nào, nên gộp hai thứ lại là báo cáo doanh thu phồng lên bằng đúng
+        phần trung tâm cho không — mà con số vẫn "đẹp" nên không ai nghi ngờ.
+      */}
+      <div className="mt-8 border border-line bg-paper p-6">
+        <p className="label-caps flex items-center gap-2">
+          <Coins className="h-3.5 w-3.5" aria-hidden="true" />
+          Ví xu
+        </p>
+        <div className="mt-4 grid gap-5 sm:grid-cols-4">
+          <div>
+            <p className="font-ui text-xs text-muted">Xu đã bán</p>
+            <p className="mt-1 font-display text-2xl font-bold text-navy-deep tabular-nums">
+              {formatCoins(coins.sold)}
+            </p>
+            <p className="mt-0.5 font-ui text-[0.7rem] text-muted">
+              Có tiền thật đối ứng
+            </p>
+          </div>
+          <div>
+            <p className="font-ui text-xs text-muted">Xu đã tặng</p>
+            <p className="mt-1 font-display text-2xl font-bold text-gold tabular-nums">
+              {formatCoins(coins.gifted)}
+            </p>
+            <p className="mt-0.5 font-ui text-[0.7rem] font-semibold text-gold">
+              KHÔNG phải doanh thu
+            </p>
+          </div>
+          <div>
+            <p className="font-ui text-xs text-muted">Xu đã tiêu</p>
+            <p className="mt-1 font-display text-2xl font-bold text-navy-deep tabular-nums">
+              {formatCoins(coins.spent)}
+            </p>
+            <p className="mt-0.5 font-ui text-[0.7rem] text-muted">
+              Đã thành quyền học
+            </p>
+          </div>
+          <div>
+            <p className="font-ui text-xs text-muted">Xu còn trong ví</p>
+            <p className="mt-1 font-display text-2xl font-bold text-navy-deep tabular-nums">
+              {formatCoins(coins.outstanding)}
+            </p>
+            <p className="mt-0.5 font-ui text-[0.7rem] text-muted">
+              Nghĩa vụ chưa thực hiện
+            </p>
+          </div>
         </div>
       </div>
 
@@ -172,9 +227,7 @@ export default async function AdminPaymentsPage({
             </thead>
             <tbody className="divide-y divide-line">
               {orders.map((o) => {
-                const label = isOfferCode(o.offerCode)
-                  ? OFFERS[o.offerCode].label
-                  : o.offerCode;
+                const label = orderCodeLabel(o.offerCode);
                 const liveGrant = o.grants.find((g) => g.status === "ACTIVE");
                 return (
                   <tr key={o.id} className="bg-paper align-top">

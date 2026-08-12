@@ -789,3 +789,222 @@ bài rồi xem nút hiện đúng giá nào.
 4. Quyết định số phận nhánh `feature/integrity-consent-alignment`.
 5. PR-09: nhờ luật sư rà `DU-THAO-PHAP-LY-NGUYET-THI.md`.
 6. Chưa soi: `context.ts`, `prompts.ts`, ba route API ở mức chi tiết.
+
+## 10.16. Ví xu — tiền hệ thống (12/08/2026)
+
+Từ nay tiền thật chỉ đi vào **một cửa duy nhất**: học viên nạp xu, rồi tiêu xu.
+Không còn đường trả VND thẳng cho một gói nào — `createPaymentOrderAction` đã bị
+gỡ hẳn, thay bằng `createTopUpOrderAction` và `buyWithCoinsAction`.
+
+### Bảng đã chốt với chủ dự án, đừng tự đổi
+
+| Nạp | Nhận | Thưởng |
+|---|---|---|
+| 50.000đ | 50 xu | — (cửa thử, cố ý không thưởng) |
+| 100.000đ | 100 xu | — |
+| 200.000đ | 210 xu | +5% |
+| 500.000đ | 550 xu | +10% |
+
+Gói: Full Test **39 xu** · Đề đơn **19 xu** · Nạp 10 lượt AI **29 xu**.
+
+**Xu không hoàn ra tiền mặt, không hết hạn, không chuyển nhượng.** Đây là quyết
+định của chủ dự án ngày 11/08/2026 sau khi cân nhắc góc pháp lý: giữ xu ở dạng
+tín dụng dịch vụ trả trước thì nó không chạm ranh giới trung gian thanh toán.
+
+Mốc 50.000đ được thêm vào theo đề xuất của Claude: bảng gốc chỉ có 100/200/500,
+mà gói rẻ nhất là 19 xu — học viên muốn chữa một passage sẽ phải nạp 100.000đ,
+gấp năm lần giá món hàng họ cần.
+
+### Năm bất biến, cài ở tầng dữ liệu chứ không chỉ ở mã
+
+1. **Số dư là hàm dẫn xuất**: `grantedTotal − spentTotal`, không có cột
+   `balance`. Một cột số dư ghi đè được là cách mất tiền âm thầm không dấu vết.
+2. **Trừ xu và cấp quyền nằm trong CÙNG một transaction Serializable.** Tách ra
+   thì một lần treo mạng ở giữa để lại học viên mất xu mà không có quyền.
+3. **Sổ cái `CoinLedger` chỉ ghi thêm.** Nó là thứ duy nhất trả lời được câu
+   "vì sao số dư của em thiếu 19 xu".
+4. **Mỗi biến động có một `ledgerKey` duy nhất.** `TOPUP:<orderId>` ·
+   `SPEND:<offerCode>:<attemptId>` · `SPEND:AI:<token>` · `REVOKE:<orderId>`.
+   Gói bán theo lượt có khóa **tự nhiên** nên hai cú bấm nhanh chỉ trừ một lần
+   mà không cần trình duyệt làm gì; gói nạp lượt AI mua lại nhiều lần là đúng ý
+   nên dùng token máy chủ sinh lúc dựng nút (cùng khuôn `introPromoToken`).
+5. **Thu hồi ghi vào `spentTotal`, không bóp `grantedTotal`.** Tổng đã nạp là
+   sự thật lịch sử; sửa nó làm mọi báo cáo doanh thu sau này sai mà không ai
+   lần ra vì sao.
+
+### Hai ví, KHÔNG được gộp
+
+- **Xu** (`CoinWallet`) — tiền hệ thống, mua gói.
+- **Lượt AI chấm** (`FeynmanAiBudget`) — quyền dùng, do gói **tặng**.
+
+Gộp lại thì học viên mua thẳng lượt AI bằng xu và trần chi phí OpenAI mô tả ở
+mục 10.3 biến mất. Không có đường nào đổi xu ra lượt AI ngoài việc mua gói.
+
+### Một lỗi thật do phép thử tìm ra
+
+`revokeCoinsOfOrder` ban đầu xét số dư **trước** khi hỏi "đã thu hồi chưa". Bấm
+hoàn tiền lần hai gặp ví đã bị trừ hết và báo nhầm thành *"học viên tiêu mất
+rồi"* — đẩy quản trị viên đi truy một khoản không hề bị tiêu. Ràng buộc unique
+không cứu được vì nhánh số dư trả về trước khi kịp ghi. Đã đảo thứ tự: hỏi sổ
+cái trước, xét ví sau.
+
+**Cùng một hình dạng lỗi với `decideCoinPurchase`** (chặn gói dừng bán trước khi
+xét số dư). Quy tắc chung rút ra: trong mọi hàm quyết định về tiền, **câu hỏi
+"việc này đã làm rồi chưa" và "thứ này có hợp lệ không" phải đứng trước câu hỏi
+"còn đủ tiền không"** — nếu không, thông báo lỗi sẽ đổ oan cho học viên.
+
+### Đã kiểm chứng thật, không đoán
+
+- `tsc --noEmit` · `lint` · `npm test` (22 bộ) · `npm run build` đều sạch
+- 49 phép thử thuần mới ở `scripts/test-coins.ts`
+- **Làm hỏng có ý hai lần** rồi chạy: bỏ chặn sàn 0 của `coinBalance` → 1 phép
+  thử BÁO LỖI; sửa mốc 200k thành 200 xu → 2 phép thử BÁO LỖI; khôi phục thì
+  xanh lại
+- **Chạy thật trên database MySQL local**, không phải giả lập: nạp 100k → đúng
+  100 xu · IPN lặp lần hai KHÔNG cộng đôi, sổ cái vẫn 1 dòng · nạp 500k → đúng
+  550 xu · mua gói trừ đúng 29 xu và cộng 10 lượt AI · **hai cú bấm cùng token
+  chỉ trừ một lần** · token mới thì mua tiếp được · ví cạn báo thiếu đúng số ·
+  gói mở quyền mà thiếu `attemptId` bị chặn TRƯỚC khi đụng tới ví · tổng sổ cái
+  khớp số dư
+- Hoàn tiền: thu lại đúng 100 xu, `grantedTotal` giữ nguyên, bấm hai lần không
+  trừ thêm, và xu đã tiêu mất thì TỪ CHỐI kèm đúng số còn lại
+
+**Chưa kiểm chứng:** luồng nạp qua SePay thật (cần khóa sandbox trên
+production), và khối mua trên trang kết quả bài làm — nó nằm sau đăng nhập.
+
+### Việc còn nợ (thay cho 10.15)
+
+1. **Chạy thử một lượt nạp trên SePay sandbox** theo Việc 4 của
+   `HUONG-DAN-THANH-TOAN.md`. Đây là mắt xích duy nhất chưa ai nhìn tận mắt.
+2. **Chấm thử một bài Feynman thật** — vẫn là thứ chặn giai đoạn 2.
+3. Trang quản trị chưa có chỗ xem ví xu và sổ cái của học viên, cũng chưa có
+   nút tặng xu. `giftCoins()` đã viết xong nhưng **CHƯA ai gọi** — đúng loại
+   "cờ bật mà không có lối vào" đã trả giá ba lần, nên đừng coi là đã xong.
+4. Báo cáo doanh thu phải loại `kind = GIFT` khi có nút tặng xu.
+5. Đặt ba biến Google ở 10.14 nếu muốn bật đăng nhập Google.
+6. Nén video hero nếu trang chủ chậm — cần ffmpeg.
+7. Quyết định số phận nhánh `feature/integrity-consent-alignment`.
+8. PR-09: nhờ luật sư rà `DU-THAO-PHAP-LY-NGUYET-THI.md`.
+9. Chưa soi: `context.ts`, `prompts.ts`, ba route API ở mức chi tiết.
+
+## 10.17. Khóa đề 9 xu, quà chào mừng 150 xu, xác minh email (12/08/2026)
+
+Chủ dự án đảo mô hình lần thứ hai trong hai ngày. Ghi rõ để không ai đọc nhầm
+thành lỗi: **đây là quyết định kinh doanh, không phải sửa lỗi.**
+
+| | 11/08 sáng | 11/08 tối | 12/08 |
+|---|---|---|---|
+| Đề Reading | khóa, 9.000đ (nút chết) | **miễn phí hết** | **khóa lại, 9 xu** |
+| Cách trả tiền | VND thẳng | ví xu | ví xu |
+| Quà chào mừng | — | — | **150 xu** |
+
+Lý do đảo lại: sắp có **300 đề thật** lên hệ thống. Miễn phí toàn bộ 300 đề là
+cho không thứ đắt nhất mà trung tâm có.
+
+### Ba con số và vì sao chúng khớp nhau
+
+150 xu ÷ 9 xu = **16 đề miễn phí**. Mở trọn vẹn một lượt (9 mở đề + 19 Feynman)
+= 28 xu, nên 150 xu đủ **5 lượt** được chữa sâu. Có phép thử ghim cả hai tỉ lệ
+này — đổi một số mà quên số kia thì `test:coins` báo lỗi ngay.
+
+### Tôi đã cảnh báo quá mức, và đã rút lại
+
+Ban đầu tôi cảnh báo quà chào mừng sẽ bị lạm dụng để đốt tiền OpenAI, ước tính
+"20 tài khoản ảo → 1.300 lượt AI chấm". **Con số đó sai.** Đọc lại
+`service.ts:170` và `rules.ts:79` thì lượt AI chấm KHÔNG tiêu được nếu chưa sở
+hữu gói Feynman của đúng lượt làm bài đó, và mỗi lượt chỉ chấm **1 lần/ngày**.
+
+Tính lại: 150 xu mở trọn vẹn 5 lượt → tối đa 5 lần chấm/ngày → cần **10 ngày**
+quay lại đều đặn mới đốt hết 50 lượt, tốn khoảng **12.500đ** chi phí OpenAI cho
+mỗi tài khoản ảo. ROI tệ cho kẻ phá.
+
+**Bài học:** trước khi cảnh báo về một lỗ hổng, phải lần hết các hàng rào đã có.
+Cảnh báo sai hướng làm chủ dự án cân nhắc một đánh đổi không tồn tại.
+
+### Xác minh email
+
+Chủ dự án chọn cách chặn tận gốc thay vì tách ví: **bắt xác minh email**.
+
+- `nodemailer` + `src/lib/mailer.ts` — NƠI DUY NHẤT đọc `SMTP_PASS`
+- Token **lưu băm SHA-256**, không lưu mã gốc: đọc được database cũng không
+  chiếm được tài khoản. Mã gốc chỉ tồn tại trong email đã gửi
+- Mã dùng MỘT LẦN, sống 24 giờ; hai tab cùng mở thì chỉ một tab qua được
+- **KHÔNG chặn đăng nhập.** Xác minh là hàng rào cho *tiền*, không phải cho
+  *cửa vào* — chặn đăng nhập biến một trục trặc SMTP thành sự cố "không ai vào
+  được website", cái giá đó lớn hơn nhiều thứ nó bảo vệ
+- Thiếu SMTP thì đăng ký vẫn chạy, nhưng **không ai nhận được xu**. Không có
+  mail thì không có tiền miễn phí — mặc định an toàn, không phải mặc định tiện
+
+Nói thẳng phần xác minh email KHÔNG làm được: dịch vụ mail tạm 10 phút vẫn qua
+được. Nó nâng chi phí phá từ bằng không lên "phải bỏ công", không phải một bức
+tường. Với con số 12.500đ ở trên thì thế là đủ.
+
+### Năm biến môi trường mới
+
+`SMTP_HOST` · `SMTP_PORT` · `SMTP_USER` · `SMTP_PASS` · `MAIL_FROM`.
+Chủ dự án đã đặt ngày 12/08/2026.
+
+### Ba migration chạy một lần, ĐỪNG xóa cái nào
+
+`applyOnce` đánh dấu theo khóa. Xóa một bước cũ đi thì database nào chưa chạy
+sẽ chạy sai thứ tự — `PUBLIC_READING_ALL_v1` mở hết đề rồi
+`RESTRICT_READING_ALL_v1` khóa lại là ĐÚNG như thiết kế, dù đọc thì thấy thừa.
+
+1. `RESTRICT_READING_ALL_v1` — khóa lại toàn bộ đề Reading
+2. `GRANDFATHER_EMAIL_VERIFIED_v1` — tài khoản cũ coi như đã xác minh
+3. `WELCOME_COINS_BACKFILL_v1` — tặng 150 xu cho tài khoản cũ
+
+### Xu tặng KHÔNG phải doanh thu
+
+Trang Quản trị → Thanh toán có bốn ô ví xu: **đã bán** (có tiền thật đối ứng),
+**đã tặng** (in màu vàng, ghi rõ "KHÔNG phải doanh thu"), **đã tiêu**, và **còn
+trong ví** (nghĩa vụ chưa thực hiện). Gộp "đã bán" với "đã tặng" là báo cáo
+doanh thu phồng lên bằng đúng phần cho không — mà con số vẫn đẹp nên không ai
+nghi ngờ.
+
+Nút **Tặng xu** ở Quản trị → Học viên bắt buộc ghi lý do và có trần 1.000 xu
+mỗi lần. Trần không phải vì ngờ vực ai: gõ nhầm một số 0 là chuyện có thật, và
+xu đã vào ví thì không rút lại được nếu học viên đã tiêu.
+
+### Một lỗi bắt được trước khi nó chạy
+
+`ledgerKeyFor()` ban đầu bắt buộc phải có `attemptId` cho MỌI gói mở quyền.
+Gói mở đề dùng `exerciseId` và học viên chưa làm bài thì lấy đâu ra lượt làm
+bài — nút mở đề sẽ hỏng 100% ngay lần bấm đầu. Đã sửa: khóa theo `scope`.
+
+Thêm cột `CoinLedger.exerciseId` vì thiếu nó sổ cái chỉ nói "đã tiêu 9 xu" mà
+không nói mở đề nào — vô dụng đúng lúc học viên hỏi.
+
+### Đã kiểm chứng thật trên MySQL
+
+```
+OK  CHUA xac minh email thi KHONG duoc tang xu · vi van rong
+OK  xac minh xong thi duoc tang · vi co 150 xu
+OK  goi lai lan hai KHONG tang doi
+OK  tru dung 9 xu · sau khi mua CO quyen lam de
+OK  bam mo hai lan: bi tu choi ALREADY_OWNED, KHONG tru them
+OK  de khac van mua duoc, de dau van con quyen
+OK  so cai ghi dung de nao (cot exerciseId)
+OK  migration: khoa 9 de, grandfather 20 tai khoan, tang 20/20 (3.000 xu)
+OK  khoi dong lan hai KHONG tang lai
+OK  tang xu: xu DA BAN khong doi — tang khong phai doanh thu
+```
+
+`tsc` · `lint` · `npm test` (22 bộ, 53 phép thử ví xu) · `build` đều sạch.
+
+**CHƯA kiểm chứng:** luồng nạp SePay thật, và luồng gửi/nhận thư xác minh thật
+(máy này không có SMTP). Cả hai chỉ chạy được trên production sau khi triển khai.
+
+### Việc còn nợ (thay cho 10.16)
+
+1. **Triển khai rồi test bằng Playwright** — chủ dự án đăng nhập, Claude lái.
+   Claude KHÔNG gõ mật khẩu và KHÔNG điền thông tin thẻ, kể cả sandbox: tới bước
+   SePay thì chủ dự án tự bấm, Claude kiểm phần sau khi tiền về.
+2. **300 đề sắp lên: mặc định `accessLevel` là `PUBLIC`** nên sẽ bị cho không.
+   Phải đặt `RESTRICTED` trong file seed hoặc bấm ở Quản trị → Bài tập. Đây
+   đúng loại lệch dữ liệu đã tạo ra bức tường 9.000đ.
+3. **Chấm thử một bài Feynman thật** — vẫn là thứ chặn giai đoạn 2.
+4. Nén video hero nếu trang chủ chậm — cần ffmpeg.
+5. Quyết định số phận nhánh `feature/integrity-consent-alignment`.
+6. PR-09: nhờ luật sư rà `DU-THAO-PHAP-LY-NGUYET-THI.md`.
+7. Chưa soi: `context.ts`, `prompts.ts`, ba route API ở mức chi tiết.

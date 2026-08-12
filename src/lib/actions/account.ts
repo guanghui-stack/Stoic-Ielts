@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
+import { sendVerificationEmail } from "@/lib/auth/email-verification";
 
 export type AccountFormState = { error?: string; success?: string } | undefined;
 
@@ -86,4 +87,37 @@ export async function changePasswordAction(
   });
 
   return { success: "Đã đổi mật khẩu thành công. Hãy dùng mật khẩu mới từ lần đăng nhập sau." };
+}
+
+/**
+ * Gửi lại thư xác minh.
+ *
+ * Chặn gửi dồn dập bằng chính bảng mã: mã mới nhất còn dưới hai phút thì bỏ
+ * qua. Không dùng bộ đếm trong bộ nhớ — Hostinger khởi động lại mỗi lần triển
+ * khai và bộ đếm đó sẽ về không, tức là chặn được đúng lúc không cần chặn.
+ */
+export async function resendVerificationAction(): Promise<void> {
+  const user = await requireUser();
+
+  const account = await db.user.findUnique({
+    where: { id: user.id },
+    select: { email: true, name: true, emailVerifiedAt: true },
+  });
+  if (!account || account.emailVerifiedAt) return;
+
+  const recent = await db.emailVerification.findFirst({
+    where: {
+      userId: user.id,
+      createdAt: { gt: new Date(Date.now() - 2 * 60 * 1000) },
+    },
+    select: { id: true },
+  });
+  if (recent) return;
+
+  await sendVerificationEmail({
+    userId: user.id,
+    email: account.email,
+    name: account.name,
+  });
+  revalidatePath("/hoc-vien");
 }

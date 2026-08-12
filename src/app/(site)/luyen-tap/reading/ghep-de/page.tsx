@@ -13,6 +13,10 @@ import {
   FULL_TEST_MINUTES,
 } from "@/lib/reading-assembly";
 import { MODULE_LABELS } from "@/lib/nav";
+import { getCoinWallet } from "@/lib/payments/coin-service";
+import { formatCoins } from "@/lib/payments/coins";
+import { OFFERS } from "@/lib/payments/catalog";
+import { CoinPurchaseButton } from "@/components/payments/purchase-button";
 import { ErrorBanner, NoteBox, SectionHeading, SubmitButton } from "@/components/ui";
 import { ManualAssemblyPicker } from "@/components/exam/manual-assembly-picker";
 
@@ -45,6 +49,8 @@ export default async function AssemblyPage({
 
   // Chỉ ghép trong một dạng đề. Mặc định Academic vì đa số học viên thi dạng này.
   const readingType = dang === "GENERAL" ? "GENERAL" : "ACADEMIC";
+  const wallet = await getCoinWallet(user.id);
+  const unlockCost = OFFERS.READING_UNLOCK.priceCoins;
   const moduleLabel = MODULE_LABELS[readingType];
   const otherType = readingType === "GENERAL" ? "ACADEMIC" : "GENERAL";
 
@@ -135,17 +141,43 @@ export default async function AssemblyPage({
             </p>
 
             {autoPlan.missingAccess.length > 0 ? (
-              // Đề Reading đã miễn phí (đặc tả §2.1), nên bài còn khóa ở đây là
-              // bài quản trị viên chủ động khóa — không mời mua, chỉ nói rõ phải
-              // xin cấp quyền. Chỗ này trước đây bán READING_SINGLE 9.000đ đã
-              // dừng bán, bấm vào chỉ bị đá về trang bảng giá không kèm lỗi.
-              <NoteBox className="mt-6" title="Còn bài chưa mở khóa">
-                Còn {autoPlan.missingAccess.length} bài chưa mở khóa nên chưa ghép
-                được đề này:{" "}
-                {autoPlan.missingAccess.map((part) => part.title).join(" · ")}.
-                Liên hệ trung tâm để được cấp quyền, hoặc chuyển sang chế độ tự
-                chọn bên dưới.
-              </NoteBox>
+              // Phải mở đủ CẢ BA bài mới ghép được. Hiện từng nút riêng thay vì
+              // một nút gộp: mỗi lần bấm là một giao dịch xu độc lập, và học
+              // viên có thể đã mở sẵn một hai bài từ trước.
+              <div className="mt-6">
+                <p className="font-ui text-sm text-ink-soft">
+                  Còn {autoPlan.missingAccess.length} bài chưa mở, tổng{" "}
+                  <strong className="tabular-nums text-ink">
+                    {formatCoins(autoPlan.missingAccess.length * unlockCost)}
+                  </strong>
+                  . Ví bạn còn{" "}
+                  <strong className="tabular-nums text-ink">
+                    {formatCoins(wallet.balance)}
+                  </strong>
+                  .
+                </p>
+                <div className="mt-4 flex flex-wrap gap-2.5">
+                  {autoPlan.missingAccess.map((part) =>
+                    wallet.balance >= unlockCost ? (
+                      <CoinPurchaseButton
+                        key={part.exerciseId}
+                        offerCode="READING_UNLOCK"
+                        exerciseId={part.exerciseId}
+                        variant="outline"
+                      >
+                        <Lock className="h-4 w-4" aria-hidden="true" />
+                        Mở &ldquo;{part.title}&rdquo; · {formatCoins(unlockCost)}
+                      </CoinPurchaseButton>
+                    ) : null
+                  )}
+                  <Link
+                    href="/thanh-toan"
+                    className="inline-flex items-center gap-2 border border-gold bg-gold px-6 py-2.5 font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-paper transition-colors hover:bg-[#9d7223]"
+                  >
+                    Nạp xu
+                  </Link>
+                </div>
+              </div>
             ) : (
               <form action={createAssemblyAction} className="mt-6">
                 <input type="hidden" name="mode" value="AUTO" />

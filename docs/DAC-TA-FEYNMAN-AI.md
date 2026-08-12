@@ -62,41 +62,68 @@ không commit. `scripts/check-no-secrets.mjs` là hàng rào tự động cho vi
 
 ## 2. Mô hình kinh doanh
 
-### 2.1. Miễn phí
+> **BẢN NÀY THAY CHO BẢN CŨ NGÀY 09/08/2026.** Bản cũ nói "toàn bộ đề Reading
+> miễn phí". Chủ dự án đổi mô hình ngày 12/08/2026: đề khóa lại, mở lẻ bằng xu,
+> mỗi tài khoản đã xác minh email được tặng 150 xu. Lịch sử của lần đổi này ghi
+> ở mục 10.17 của `BAN-GIAO-TAM-QUOC.md`.
 
-- Toàn bộ đề thi Reading — đề đơn và đề ghép
+### 2.1. Ví xu — tiền hệ thống
+
+Tiền thật đi vào hệ thống qua **một cửa duy nhất**: học viên nạp xu, rồi tiêu
+xu. Không còn đường trả VND thẳng cho một gói nào.
+
+**1 xu = 1.000đ.** Bốn mốc nạp:
+
+| Nạp | Nhận | Thưởng |
+|---|---|---|
+| 50.000đ | 50 xu | — |
+| 100.000đ | 100 xu | — |
+| 200.000đ | 210 xu | +5% |
+| 500.000đ | 550 xu | +10% |
+
+Xu **không đổi ngược ra tiền mặt, không chuyển nhượng, không hết hạn**. Nó là
+tín dụng dịch vụ trả trước, không phải tiền gửi — ranh giới này là có chủ ý.
+
+### 2.2. Quà chào mừng 150 xu
+
+Mỗi tài khoản được tặng **150 xu một lần trong đời**, với điều kiện cứng: **đã
+xác minh email**. 150 xu = 16 đề mở lẻ, hoặc 5 lượt làm bài được mở trọn vẹn.
+
+> **Điều kiện xác minh email là MỘT PHẦN của con số này, đừng tách rời.** Xu
+> tiêu được vào gói AI chấm, mà mỗi lượt chấm là một hóa đơn OpenAI thật. Tặng
+> xu cho tài khoản chưa xác minh là mở đường lập tài khoản ảo hàng loạt.
+
+Tài khoản đăng nhập bằng Google được coi là đã xác minh (Google đã kiểm
+`email_verified`). Tài khoản tạo trước 12/08/2026 được grandfather.
+
+### 2.3. Miễn phí
+
 - Chấm điểm tự động + band quy đổi
 - Đáp án đúng/sai cơ bản sau khi nộp bài
+- Luyện Feynman **không giới hạn số lần**
 
-### 2.2. Trả phí
+### 2.4. Trả bằng xu
 
 | Gói | Giá | Mở cho |
 |---|---|---|
-| Full Test (đề ghép 40 câu) | **39.000đ** | Một lượt làm bài |
-| Đề đơn (một passage) | **19.000đ** | Một lượt làm bài |
-| Nạp thêm lượt AI | **29.000đ** | 10 lượt AI chấm |
+| Mở một đề Reading | **9 xu** | Một đề, làm lại không giới hạn, vĩnh viễn |
+| Full Test (đề ghép 40 câu) | **39 xu** | Một lượt làm bài |
+| Đề đơn (một passage) | **19 xu** | Một lượt làm bài |
+| Nạp thêm lượt AI | **29 xu** | 10 lượt AI chấm |
 
-Gói 19K/39K bao gồm:
+Gói 19/39 xu bao gồm:
 
-1. **Đáp án sửa chi tiết** — lời giải giáo viên cho TẤT CẢ các câu, không chỉ
-   câu sai. Vĩnh viễn, không giới hạn lượt xem. Chi phí API: 0đ.
+1. **Đáp án sửa chi tiết** — lời giải giáo viên cho TẤT CẢ các câu. Vĩnh viễn.
 2. **Hệ thống Feynman** — luyện lại **không giới hạn số lần**. Chi phí API: 0đ.
-3. **AI chấm Feynman** — trừ vào **ví lượt chung của tài khoản**. Mỗi lượt làm
-   bài chấm tối đa **1 lần mỗi ngày**.
+3. **AI chấm Feynman** — trừ vào **ví lượt AI**. Mỗi lượt làm bài chấm tối đa
+   **1 lần mỗi ngày**.
 4. **Hỏi AI** — reset sau mỗi lần chấm. Full Test **10 câu**, đề đơn **5 câu**.
 
-Mỗi lần mua gói 19K/39K cộng **10 lượt AI chấm** vào ví chung. Hết ví thì mua
-gói 29.000đ nạp thêm 10 lượt, cũng vào ví chung. Phần đáp án chi tiết và
-Feynman vẫn dùng bình thường, không bị khóa lại.
+**Hai ví, KHÔNG được gộp.** Ví **xu** là tiền hệ thống, mua gói. Ví **lượt AI**
+(`FeynmanAiBudget`) là quyền dùng, do gói **tặng**. Không có đường nào đổi thẳng
+xu ra lượt AI ngoài việc mua gói — gộp lại là gỡ mất trần chi phí OpenAI.
 
-**Ví chung, nhưng nhịp chấm tính theo lượt làm bài.** Ví không gắn với một
-lượt làm bài nào — mua ở đề nào cũng tiêu được ở đề khác. Riêng giới hạn
-1 lần/ngày thì đếm riêng cho từng lượt làm bài, nên học viên có nhiều lượt làm
-bài chưa chấm vẫn chấm được nhiều lượt trong cùng một ngày, miễn còn ví. Đây là
-hệ quả có chủ đích: giới hạn ngày để chặn cày lại một bài, không phải để chặn
-học viên chăm.
-
-### 2.3. Câu chữ phải in đúng trên website
+### 2.5. Câu chữ phải in đúng trên website
 
 > Luyện Feynman không giới hạn và không tốn phí. Chỉ phần AI chấm và hỏi đáp
 > AI mới tính lượt, vì mỗi lần gọi AI là một chi phí thật.
@@ -104,25 +131,27 @@ học viên chăm.
 > AI chỉ kết luận điểm yếu khi đã đủ bằng chứng tích lũy — không phán xét bạn
 > dựa trên một lần làm bài.
 
-### 2.4. Ba sản phẩm cũ dừng bán
+### 2.6. Bốn sản phẩm cũ đã dừng bán
 
-| Mã | Giá | Lý do dừng |
+| Mã | Giá cũ | Lý do dừng |
 |---|---|---|
-| `READING_SINGLE` | 9.000đ | Đề đã miễn phí, không còn gì để bán |
-| `READING_ALL_30D` | 99.000đ | Như trên |
+| `READING_SINGLE` | 9.000đ | Thay bằng `READING_UNLOCK` 9 xu |
+| `READING_ALL_30D` | 99.000đ | Mô hình đổi sang mở lẻ bằng xu |
 | `FEYNMAN_ALL_30D` | 299.000đ | Mô hình đổi sang bán theo lượt làm bài |
+| `FEYNMAN_SINGLE` | 49.000đ | Như trên |
 
-Cả ba **gỡ khỏi trang bán nhưng giữ nguyên trong catalog**. Đơn hàng cũ và
-`AccessGrant` cũ vẫn phải tra cứu và đọc quyền được bình thường — người đã trả
-299.000đ cho `FEYNMAN_ALL_30D` phải dùng hết thời hạn đã mua. Không xóa dữ
-liệu, không chuyển đổi, không hoàn tiền tự động.
+Cả bốn **gỡ khỏi trang bán nhưng giữ nguyên trong catalog**. Đơn hàng cũ và
+`AccessGrant` cũ vẫn phải tra cứu và đọc quyền được bình thường. Không xóa dữ
+liệu, không quy đổi thành xu, không hoàn tiền tự động.
 
-Cách gỡ: đánh dấu `retired` trong catalog và lọc khỏi danh sách hiển thị, chứ
-không xóa khỏi mảng sản phẩm. `PRICE_VERSION` phải tăng.
+`READING_UNLOCK` dùng **mã mới** chứ không dùng lại `READING_SINGLE`: mã cũ
+mang giá VND và cả một lịch sử đơn hàng, trộn vào thì không còn phân biệt được
+ai đã trả tiền mặt và ai đã tiêu xu.
 
-**Việc mở đề miễn phí không cần sửa mã nguồn:** chỉ cần đặt
-`Exercise.accessLevel = "PUBLIC"` cho mọi bài. Cơ chế khóa nằm ở cột đó
-(`src/lib/access-rules.ts`), không nằm trong logic.
+**Mức truy cập của đề nằm ở dữ liệu, không ở mã nguồn:** cột
+`Exercise.accessLevel` (`src/lib/access-rules.ts`). Đề mới thêm vào mặc định là
+`PUBLIC` — muốn bán thì phải đặt `RESTRICTED`, ở file seed hoặc ở Quản trị →
+Bài tập. Quên bước này thì đề mới bị cho không mà không có cảnh báo nào.
 
 ---
 

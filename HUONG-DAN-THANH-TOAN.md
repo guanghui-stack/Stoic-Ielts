@@ -7,28 +7,69 @@ chỗ trong hPanel và trên trang SePay.
 
 ## Website đang bán những gì
 
-| Sản phẩm | Giá | Mở cho |
+Từ 11/08/2026 website chạy **ví xu**. Tiền thật chỉ đi vào một cửa duy nhất:
+học viên nạp xu, rồi tiêu xu để mở gói. Không còn đường trả tiền thẳng cho một
+gói nào.
+
+**Mốc nạp** — 1 xu = 1.000đ:
+
+| Nạp | Nhận | Thưởng |
 |---|---|---|
-| Full Test — đáp án chi tiết + Feynman + AI | 39.000đ | Đúng một lượt làm bài, vĩnh viễn |
-| Đề đơn — đáp án chi tiết + Feynman + AI | 19.000đ | Đúng một lượt làm bài, vĩnh viễn |
-| Nạp thêm 10 lượt AI chấm | 29.000đ | Ví chung của tài khoản |
+| 50.000đ | 50 xu | — |
+| 100.000đ | 100 xu | — |
+| 200.000đ | 210 xu | +10 xu |
+| 500.000đ | 550 xu | +50 xu |
 
-**Đề thi Reading hoàn toàn miễn phí**, kể cả chấm điểm, quy đổi band và đáp án
-đúng/sai. Trung tâm bán lớp chữa sâu: lời giải mẫu của giáo viên cho từng câu,
-phân tích bẫy, quy trình bắt học viên tự giảng lại bài, và phần AI chấm.
+**Gói tiêu xu:**
 
-Gói 39k/19k gắn với **một lượt làm bài cụ thể**, nên chỉ mua được từ trang kết
-quả của bài vừa làm. Mỗi lần mua tặng 10 lượt AI chấm vào **ví chung** — mua ở
-đề nào cũng tiêu được ở đề khác. Hết ví thì nạp gói 29.000đ; phần đáp án chi
-tiết và Feynman vẫn dùng bình thường, không bị khóa lại.
+| Gói | Giá | Mở cho |
+|---|---|---|
+| Mở một đề Reading | 9 xu | Một đề, làm lại không giới hạn, vĩnh viễn |
+| Full Test — đáp án chi tiết + Feynman + AI | 39 xu | Đúng một lượt làm bài |
+| Đề đơn — đáp án chi tiết + Feynman + AI | 19 xu | Đúng một lượt làm bài |
+| Nạp thêm 10 lượt AI chấm | 29 xu | Ví lượt AI của tài khoản |
 
-> **Ba gói cũ đã dừng bán** (Reading mở lẻ 9.000đ, Reading 30 ngày 99.000đ,
-> Feynman 30 ngày 299.000đ). Quyền học viên đã trả tiền vẫn còn nguyên và dùng
-> hết thời hạn như cũ.
+**Mỗi tài khoản được tặng 150 xu một lần**, sau khi xác minh email — đủ mở 16
+đề. Tài khoản đăng nhập bằng Google được tặng ngay (Google đã xác minh hộ).
 
-Mức truy cập của từng bài đổi ở **Quản trị → Bài tập → cột Truy cập**. Mặc định
-mọi bài là **Ai cũng làm được**; đặt **Cần mở khóa** thì bài đó chỉ mở cho học
-viên được trung tâm cấp quyền tay — **không bán online nữa**.
+Chấm điểm, quy đổi band và đáp án đúng/sai vẫn **miễn phí** với mọi đề đã mở.
+Luyện Feynman cũng miễn phí không giới hạn; chỉ phần AI chấm mới tính lượt.
+
+Gói 39/19 xu gắn với **một lượt làm bài cụ thể**, nên chỉ mua được từ trang kết
+quả của bài vừa làm. Mỗi lần mua tặng 10 lượt AI chấm vào **ví lượt** — thứ này
+khác ví xu, đếm riêng, và không mua thẳng bằng xu được.
+
+> **Xu không đổi ngược ra tiền mặt, không chuyển cho tài khoản khác, không hết
+> hạn.** Nó là tín dụng học phí trả trước. Chốt ngày 11/08/2026.
+
+> **Bốn gói cũ đã dừng bán** (Reading mở lẻ 9.000đ, Reading 30 ngày 99.000đ,
+> Feynman mở lẻ 49.000đ, Feynman 30 ngày 299.000đ). Quyền học viên đã trả tiền
+> vẫn còn nguyên và dùng hết thời hạn như cũ — không quy đổi thành xu.
+
+## Cần thêm biến môi trường để gửi thư xác minh
+
+Không có năm biến này thì website vẫn chạy bình thường, nhưng **không ai nhận
+được 150 xu** vì không xác minh email được.
+
+| Tên biến | Giá trị |
+|---|---|
+| `SMTP_HOST` | `smtp.hostinger.com` |
+| `SMTP_PORT` | `465` |
+| `SMTP_USER` | `no-reply@stoic-ielts.online` |
+| `SMTP_PASS` | mật khẩu hộp thư |
+| `MAIL_FROM` | `HỔ PHÙ · IELTS <no-reply@stoic-ielts.online>` |
+
+Tạo hộp thư ở hPanel → **Email** trước, rồi mới điền biến.
+
+## Đề mới thêm vào mặc định là MIỄN PHÍ
+
+Đây là chỗ dễ mất tiền nhất khi đăng đề mới. Cột mức truy cập mặc định là
+**Ai cũng làm được** — đề mới up lên sẽ cho không cho tới khi có người đổi.
+
+Đổi ở **Quản trị → Bài tập → cột Truy cập**, đặt thành **Cần mở khóa** thì đề
+đó mới bán 9 xu.
+
+
 
 ---
 
@@ -92,19 +133,24 @@ Làm đúng như một học viên thật:
 
 1. Đăng nhập bằng một tài khoản học viên (đừng dùng tài khoản quản trị —
    quản trị viên vốn đã có mọi quyền nên không thử được).
-2. Vào **Luyện tập → Reading**, làm xong một bài và nộp.
-3. Ở trang kết quả, bấm nút **Mở lượt làm bài này** trong khối Feynman. Bài một
-   passage phải hiện **19.000đ**; đề ghép hoặc Full Test phải hiện **39.000đ**.
-4. Trang sẽ tự chuyển sang SePay. Thanh toán thử theo hướng dẫn của Sandbox.
-5. Quay về, trang kết quả tự đổi sang **Thanh toán thành công**.
-6. Bấm **Vào học ngay** — phải vào được lớp chữa bài Feynman của đúng lượt đó.
+2. Vào **Bảng giá**, bấm **Nạp 50.000đ**.
+3. Trang sẽ tự chuyển sang SePay. Thanh toán thử theo hướng dẫn của Sandbox.
+4. Quay về — trang bảng giá phải hiện **Ví của bạn đang có 50 xu**.
+5. Vào **Luyện tập → Reading**, bấm **Mở đề này · 9 xu** ở một đề bất kỳ, rồi
+   làm xong và nộp.
+6. Ở trang kết quả, khối Feynman phải hiện **19 xu** cho bài một passage, hoặc
+   **39 xu** cho đề ghép và Full Test. Bấm **Mở lượt làm bài này**.
+7. Quyền mở **ngay lập tức**, không qua cổng thanh toán nữa. Số dư giảm đúng
+   19 (hoặc 39) xu.
 
-Sau đó thử thêm ba tình huống hay hỏng:
+Sau đó thử thêm bốn tình huống hay hỏng:
 
-- **Tự gõ địa chỉ trang thành công** mà không trả tiền → quyền **không** được mở.
+- **Tự gõ địa chỉ trang thành công** mà không trả tiền → xu **không** được cộng.
+- **Bấm mua khi ví không đủ** → bị đưa về bảng giá kèm câu "còn thiếu N xu",
+  không phải một trang trống.
 - **Làm lại bài đó lần nữa**: lượt mới là một lượt khác, phải mời mua lại; lượt
   đã mua vẫn mở nguyên.
-- **Nạp ví 29.000đ**: số lượt trên trang bảng giá phải tăng đúng 10.
+- **Nạp mốc 200.000đ** → phải nhận đúng **210 xu**, không phải 200.
 
 ---
 
@@ -121,8 +167,8 @@ Chỉ làm khi bốn việc trên đã chạy đúng.
    - `SEPAY_MERCHANT_ID` và `SEPAY_SECRET_KEY` thành giá trị Production
 4. Khai báo lại địa chỉ IPN trong môi trường Production.
 5. Bấm **Tái triển khai**.
-6. Tự mua một gói 19.000đ bằng tiền thật của mình. Kiểm tra tiền có vào tài
-   khoản ngân hàng không, và quyền có mở không.
+6. Tự nạp mốc 50.000đ bằng tiền thật của mình. Kiểm tra tiền có vào tài khoản
+   ngân hàng không, và ví có cộng đúng 50 xu không.
 
 ---
 
@@ -171,10 +217,15 @@ bước này cũng không sao: bạn vẫn đối soát tay bằng nút **Đối
 
 ## Tặng quyền không qua thanh toán
 
-Trang **Quản trị → Học viên** có hai nút tặng:
+Trang **Quản trị → Học viên** có ba nút tặng:
 
 - **Ổ khóa** — tặng quyền làm toàn bộ bài Reading
 - **Bộ não** — tặng quyền chữa bài Feynman cho toàn bộ bài
+- **Tặng xu** — cộng xu vào ví học viên, bắt buộc ghi lý do
+
+Xu tặng hiện ở trang **Quản trị → Thanh toán** trong ô **Xu đã tặng**, tách hẳn
+khỏi ô **Đã thu (tiền thật)**. Hai con số đó không bao giờ được cộng chung: xu
+tặng không có đồng tiền thật nào đối ứng.
 
 Bấm lần nữa là thu hồi. Hai nút này **chỉ gỡ đúng phần trung tâm tặng** — bài
 học viên đã tự bỏ tiền mua không bao giờ bị mất.
@@ -198,7 +249,9 @@ là lịch sử học tập của họ, và là bằng chứng nếu sau này c�
 
 | Hiện tượng | Nguyên nhân thường gặp |
 |---|---|
-| Không thấy nút mua ở đâu cả | Thiếu biến môi trường — xem `/api/health` phần `payment` |
+| Không thấy nút nạp ở đâu cả | Thiếu biến môi trường — xem `/api/health` phần `payment` |
+| Trả tiền xong ví không cộng xu | Địa chỉ IPN chưa khai hoặc khai sai trên SePay |
+| Học viên nói "em có xu mà không mua được" | Xem số dư ở **Quản trị → Học viên**; gói 39/19 xu chỉ mua được từ trang kết quả bài làm |
 | Trả tiền xong vẫn "Đang chờ" | Địa chỉ IPN chưa khai hoặc khai sai trên SePay |
 | Mọi biểu mẫu lỗi 500 sau khi đổi tên miền | Thiếu tên miền mới trong biến `ALLOWED_ORIGINS` |
 | Đơn treo ở "Cần đối soát" | Số tiền không khớp — bấm **Đối soát** để kiểm tra |

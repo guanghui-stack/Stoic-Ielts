@@ -10,6 +10,10 @@ import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
 import { startAttemptAction } from "@/lib/actions/attempts";
 import { readingAccessOf, isAdminRole } from "@/lib/exercise-access";
+import { getCoinWallet } from "@/lib/payments/coin-service";
+import { formatCoins } from "@/lib/payments/coins";
+import { OFFERS } from "@/lib/payments/catalog";
+import { CoinPurchaseButton } from "@/components/payments/purchase-button";
 import { SubmitButton } from "@/components/ui";
 
 /** Danh sách bài Reading của một kho, kèm trạng thái bài làm của học viên. */
@@ -50,6 +54,10 @@ export async function ExerciseList({
     (user
       ? isAdminRole(user.role) || access.hasAll || access.exerciseIds.has(ex.id)
       : false);
+
+  const wallet = user ? await getCoinWallet(user.id) : null;
+  const unlockCost = OFFERS.READING_UNLOCK.priceCoins;
+  const canAfford = (wallet?.balance ?? 0) >= unlockCost;
 
   if (exercises.length === 0) {
     return (
@@ -123,18 +131,30 @@ export async function ExerciseList({
                   Đăng nhập để làm bài
                 </Link>
               ) : !canDo(ex) ? (
-                // Đề Reading không còn bán (đặc tả §2.1: đề thi miễn phí). Bài
-                // nào còn ở mức "cần mở khóa" là do quản trị viên chủ động khóa,
-                // nên đường duy nhất là xin cấp quyền — KHÔNG mời mua ở đây.
-                // Trước đây chỗ này bán READING_SINGLE 9.000đ đã dừng bán, bấm
-                // vào chỉ bị đá về trang bảng giá mà không hiện lỗi gì.
-                <div className="text-right">
-                  <span className="inline-flex cursor-not-allowed items-center gap-2 border border-line-strong bg-cream-deep px-6 py-2.5 font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-muted">
-                    <Lock className="h-4 w-4" aria-hidden="true" />
-                    Chưa được mở khóa
-                  </span>
-                  <p className="mt-2 max-w-[15rem] font-ui text-xs leading-relaxed text-muted">
-                    Liên hệ trung tâm để được cấp quyền làm bài này.
+                // Mở đề bằng xu, giữ vĩnh viễn — làm lại bao nhiêu lượt cũng
+                // được. Thiếu xu thì dẫn thẳng tới chỗ nạp kèm số còn thiếu,
+                // KHÔNG để họ bấm rồi bị đá vòng về đúng trang này.
+                <div className="flex flex-col items-stretch gap-2 md:items-end">
+                  {canAfford ? (
+                    <CoinPurchaseButton
+                      offerCode="READING_UNLOCK"
+                      exerciseId={ex.id}
+                      className="w-full md:w-auto"
+                    >
+                      <Lock className="h-4 w-4" aria-hidden="true" />
+                      Mở đề này · {formatCoins(unlockCost)}
+                    </CoinPurchaseButton>
+                  ) : (
+                    <Link
+                      href="/thanh-toan"
+                      className="inline-flex items-center justify-center gap-2 border border-gold bg-gold px-6 py-2.5 font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-paper transition-colors hover:bg-[#9d7223]"
+                    >
+                      <Lock className="h-4 w-4" aria-hidden="true" />
+                      Nạp xu để mở · {formatCoins(unlockCost)}
+                    </Link>
+                  )}
+                  <p className="font-ui text-xs text-muted">
+                    Mở một lần, làm lại không giới hạn
                   </p>
                 </div>
               ) : (

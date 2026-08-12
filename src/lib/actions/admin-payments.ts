@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/session";
 import { revokeGrantsOfOrder } from "@/lib/payments/fulfillment";
+import { revokeCoinsOfOrder } from "@/lib/payments/coin-service";
 import { reconcileOneOrder } from "@/lib/payments/reconcile";
 
 export type AdminPaymentState = { error?: string; success?: string } | undefined;
@@ -67,6 +68,43 @@ export async function refundOrderAction(
   if (!order) return { error: "Không tìm thấy đơn này." };
   if (order.status !== "PAID") {
     return { error: `Chỉ hoàn tiền được đơn đã thanh toán (đơn này đang ở trạng thái ${order.status}).` };
+  }
+
+  // Đơn NẠP VÍ: phải thu lại xu TRƯỚC khi đánh dấu hoàn tiền. Làm ngược lại
+  // thì đơn đã mang nhãn REFUNDED trong khi xu vẫn nằm nguyên trong ví, và sổ
+  // sách nói một đằng còn thực tế một nẻo.
+  //
+  // Học viên đã tiêu mất thì TỪ CHỐI hẳn: xu đã tiêu là quyền học đã mở, thu
+  // ngược lại là lấy đi thứ họ đang dùng — quyết định đó thuộc về người, không
+  // thuộc về một hàm.
+  if (order.orderKind === "TOPUP") {
+    const revoked = await revokeCoinsOfOrder({
+      orderId: order.id,
+      userId: order.userId,
+      coins: order.coinsGranted,
+      reason: `REFUND:${reason}`,
+    });
+    if (!revoked.ok) {
+      return {
+        error:
+          `Không hoàn được: đơn này đã cộng ${revoked.coins} xu nhưng ví học viên ` +
+          `chỉ còn ${revoked.balance} xu — phần chênh đã tiêu thành quyền học rồi. ` +
+          `Hãy xử lý tay: hoặc thu hồi quyền tương ứng trước, hoặc chấp nhận ` +
+          `hoàn tiền mà không thu lại xu.`,
+      };
+    }
+
+    await db.paymentOrder.update({
+      where: { id: order.id },
+      data: { status: "REFUNDED", lastError: `REFUND:${reason}` },
+    });
+    revalidatePath(ADMIN_PATH);
+    return {
+      success:
+        `Đã ghi nhận hoàn tiền đơn ${invoiceNumber} và thu lại ${revoked.coins} xu ` +
+        `(ví còn ${revoked.balanceAfter} xu). Nhớ chuyển tiền lại cho học viên ` +
+        `trên hệ thống SePay hoặc ngân hàng.`,
+    };
   }
 
   await db.paymentOrder.update({

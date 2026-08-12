@@ -19,14 +19,15 @@ import { NoteBox, SubmitButton } from "@/components/ui";
 import { startFeynmanReviewAction } from "@/lib/actions/feynman";
 import { revealBasicAnswersAction } from "@/lib/actions/attempts";
 import { hasActiveAccess } from "@/lib/access-grants";
-import { isSePayConfigured } from "@/lib/payments/sepay";
+import { getCoinWallet } from "@/lib/payments/coin-service";
+import { formatCoins } from "@/lib/payments/coins";
 import {
   OFFERS,
   formatVnd,
   FREE_PRACTICE_NOTICE,
   type AttemptOfferCode,
 } from "@/lib/payments/catalog";
-import { PurchaseButton } from "@/components/payments/purchase-button";
+import { CoinPurchaseButton } from "@/components/payments/purchase-button";
 import { assemblyTitle, readingContentForAttempt } from "@/lib/attempt-content";
 
 export const metadata = { title: "Kết quả bài làm" };
@@ -78,14 +79,17 @@ export default async function AttemptResultPage({
 
   // Quyền Feynman chỉ cần hỏi khi thật sự sắp hiển thị lời mời chữa bài
   const showFeynman = isOwner && attempt.status === "GRADED";
-  const feynmanAccess = showFeynman
-    ? await hasActiveAccess({
-        userId: user.id,
-        feature: "FEYNMAN",
-        exerciseId: attempt.exerciseId,
-        attemptId: attempt.id,
-      })
-    : false;
+  const [feynmanAccess, wallet] = showFeynman
+    ? await Promise.all([
+        hasActiveAccess({
+          userId: user.id,
+          feature: "FEYNMAN",
+          exerciseId: attempt.exerciseId,
+          attemptId: attempt.id,
+        }),
+        getCoinWallet(user.id),
+      ])
+    : [false, null];
 
   /**
    * Gói bán cho ĐÚNG lượt làm bài này. Đề ghép và đề Full Test dựng sẵn đều là
@@ -140,7 +144,7 @@ export default async function AttemptResultPage({
           mode={feynmanReview?.mode ?? null}
           hasAccess={feynmanAccess}
           offerCode={feynmanOffer}
-          canBuy={isSePayConfigured()}
+          balance={wallet?.balance ?? 0}
         />
       )}
 
@@ -165,7 +169,7 @@ function FeynmanCta({
   mode,
   hasAccess,
   offerCode,
-  canBuy,
+  balance,
 }: {
   attemptId: string;
   exerciseId: string;
@@ -173,7 +177,7 @@ function FeynmanCta({
   mode: string | null;
   hasAccess: boolean;
   offerCode: AttemptOfferCode;
-  canBuy: boolean;
+  balance: number;
 }) {
   const href = `/hoc-vien/bai-lam/${attemptId}/feynman`;
 
@@ -184,7 +188,7 @@ function FeynmanCta({
         exerciseId={exerciseId}
         attemptId={attemptId}
         offerCode={offerCode}
-        canBuy={canBuy}
+        balance={balance}
       />
     );
   }
@@ -262,14 +266,15 @@ function FeynmanPurchaseCta({
   exerciseId,
   attemptId,
   offerCode,
-  canBuy,
+  balance,
 }: {
   exerciseId: string;
   attemptId: string;
   offerCode: AttemptOfferCode;
-  canBuy: boolean;
+  balance: number;
 }) {
   const offer = OFFERS[offerCode];
+  const enough = balance >= offer.priceCoins;
   return (
     <div className="mt-8 border border-gold bg-gold-pale p-7">
       <p className="label-caps flex items-center gap-2">
@@ -296,7 +301,7 @@ function FeynmanPurchaseCta({
         </li>
         <li className="flex gap-2.5">
           <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" aria-hidden="true" />
-          Tặng {offer.aiGradingCredits} lượt AI chấm vào ví chung, hỏi AI tối đa{" "}
+          Tặng {offer.aiGradingCredits} lượt AI chấm vào ví lượt, hỏi AI tối đa{" "}
           {offer.aiChatLimit} câu mỗi lần chấm.
         </li>
       </ul>
@@ -306,24 +311,32 @@ function FeynmanPurchaseCta({
         {FREE_PRACTICE_NOTICE}
       </p>
 
-      {canBuy ? (
-        <div className="mt-5">
-          <PurchaseButton
+      <div className="mt-5 flex flex-wrap items-center gap-4">
+        {enough ? (
+          <CoinPurchaseButton
             offerCode={offerCode}
             exerciseId={exerciseId}
             attemptId={attemptId}
-            variant="gold"
           >
             <Brain className="h-4 w-4" aria-hidden="true" />
-            Mở lượt làm bài này · {formatVnd(offer.amount)}
-          </PurchaseButton>
-        </div>
-      ) : (
-        <p className="mt-5 font-ui text-sm text-ink-soft">
-          Thanh toán trực tuyến đang tạm đóng — liên hệ trung tâm để được mở
-          khóa phần chữa bài này.
+            Mở lượt làm bài này · {formatCoins(offer.priceCoins)}
+          </CoinPurchaseButton>
+        ) : (
+          // Thiếu xu thì dẫn thẳng tới chỗ nạp, kèm mã lượt để nạp xong quay
+          // đúng về đây — chứ không để họ bấm rồi bị đá vòng.
+          <Link
+            href={`/thanh-toan?luot=${attemptId}`}
+            className="inline-flex items-center gap-2 border border-gold bg-gold px-7 py-3 font-ui text-[0.8rem] font-semibold uppercase tracking-[0.12em] text-paper transition-colors hover:bg-[#9d7223]"
+          >
+            <Brain className="h-4 w-4" aria-hidden="true" />
+            Nạp thêm {formatCoins(offer.priceCoins - balance)} để mở
+          </Link>
+        )}
+        <p className="font-ui text-sm text-ink-soft">
+          Giá {formatCoins(offer.priceCoins)} · tương đương {formatVnd(offer.amount)}.
+          Ví bạn còn <strong className="tabular-nums">{formatCoins(balance)}</strong>.
         </p>
-      )}
+      </div>
 
       <p className="mt-4 font-ui text-xs leading-relaxed text-muted">
         Đề thi và đáp án đúng của bài Reading luôn miễn phí — bạn xem được ngay

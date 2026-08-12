@@ -26,6 +26,11 @@ model User {
   /// "sub" cua Google. Chi dat khi tai khoan da lien ket Google.
   googleId String? @unique @db.VarChar(191)
 
+  /// Moc xac minh email. NULL = chua xac minh -> KHONG duoc tang xu chao mung.
+  /// Dang nhap Google dat luon vi Google da xac minh ho (email_verified).
+  /// Tai khoan tao truoc 12/08/2026 duoc grandfather trong migration.
+  emailVerifiedAt DateTime?
+
   /// Ma phien dang hop le DUY NHAT. Moi lan dang nhap ghi de ma cu, nen may
   /// cu tu van ra. JWT khong thu hoi duoc, nen day la cho duy nhat giu su that
   /// ve "ai dang dang nhap".
@@ -48,6 +53,11 @@ model User {
   feynmanAiEvaluations FeynmanAiEvaluation[]
   feynmanAiMessages    FeynmanAiMessage[]
   feynmanAiBudget      FeynmanAiBudget?
+
+  coinWallet CoinWallet?
+  coinLedger CoinLedger[]
+
+  emailVerifications EmailVerification[]
 
   assemblies                ReadingAssembly[]
   competitionEntries        CompetitionEntry[]
@@ -164,14 +174,14 @@ model Attempt {
   /// Nếu lượt này thuộc một đề ghép ba passage thì trỏ về đó.
   assemblyId           String?
 
-  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  exercise           Exercise            @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  user               User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercise           Exercise               @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
   /// Nhieu phien: luyen lai khong gioi han so lan.
   feynmanReviews     FeynmanReview[]
   feynmanAiState     FeynmanAiAttemptState?
   accessGrants       AccessGrant[]
   paymentOrders      PaymentOrder[]
-  assembly           ReadingAssembly?    @relation(fields: [assemblyId], references: [id], onDelete: SetNull)
+  assembly           ReadingAssembly?       @relation(fields: [assemblyId], references: [id], onDelete: SetNull)
   competitionAttempt CompetitionAttempt?
 
   @@index([userId, status])
@@ -254,16 +264,16 @@ model ExerciseCollectionItem {
 
 /// Một phiên chữa bài theo phương pháp Feynman, gắn 1-1 với một lượt làm bài.
 model FeynmanReview {
-  id     String @id @default(cuid())
-  userId String
+  id               String    @id @default(cuid())
+  userId           String
   /// KHÔNG còn @unique: một lượt làm bài luyện lại được nhiều lần, không giới
   /// hạn. Ràng buộc thật nằm ở @@unique([attemptId, runNumber]) bên dưới.
-  attemptId String
+  attemptId        String
   /// Lần luyện thứ mấy của lượt làm bài này, đếm từ 1.
-  runNumber Int    @default(1)
+  runNumber        Int       @default(1)
   /// QUICK | DEEP là chế độ tự động cũ. Phiên mới ghi CUSTOM vì học viên tự
   /// tick câu muốn chữa. Giữ lại giá trị cũ để dữ liệu lịch sử vẫn đọc được.
-  mode String // QUICK | DEEP | CUSTOM
+  mode             String // QUICK | DEEP | CUSTOM
   status           String    @default("DRAFT") // DRAFT | REVEALED | COMPLETED
   passageSummary   String?   @db.Text
   paragraphMap     String?   @db.Text
@@ -277,9 +287,9 @@ model FeynmanReview {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
-  user       User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-  attempt    Attempt              @relation(fields: [attemptId], references: [id], onDelete: Cascade)
-  mistakes   FeynmanMistake[]
+  user         User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  attempt      Attempt              @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  mistakes     FeynmanMistake[]
   aiEvaluation FeynmanAiEvaluation?
 
   @@unique([attemptId, runNumber])
@@ -335,8 +345,8 @@ model FeynmanAiEvaluation {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user     User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  review   FeynmanReview       @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  user     User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  review   FeynmanReview      @relation(fields: [reviewId], references: [id], onDelete: Cascade)
   messages FeynmanAiMessage[]
 
   @@index([userId, createdAt])
@@ -352,8 +362,8 @@ model FeynmanAiMessage {
   requestKey   String @unique @db.VarChar(64)
   status       String @default("PENDING") @db.VarChar(16) // PENDING | COMPLETED | FAILED | REJECTED
 
-  question String  @db.Text
-  answer   String? @db.Text
+  question     String  @db.Text
+  answer       String? @db.Text
   /// Câu ngoài phạm vi bị từ chối thì KHÔNG trừ quota, và lưu lý do ở đây.
   rejectReason String? @db.VarChar(64)
 
@@ -393,12 +403,73 @@ model FeynmanAiBudget {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+/// Vi XU — tien he thong. KHAC hoan toan `FeynmanAiBudget`: xu mua goi, con
+/// `FeynmanAiBudget` dem luot AI cham do goi TANG. Hai don vi khac nhau, dung
+/// gop lai (xem chu thich dau `src/lib/payments/coins.ts`).
+///
+/// So du = grantedTotal - spentTotal, KHONG co cot `balance`. Mot cot so du ghi
+/// de duoc la cach mat tien am tham ma khong con dau vet nao de lan lai.
+model CoinWallet {
+  id           String @id @default(cuid())
+  userId       String @unique
+  /// Tong xu da cong vao vi: nap that + xu trung tam tang.
+  grantedTotal Int    @default(0)
+  /// Tong xu da tieu. Chi tang trong `spendCoinsForOffer()`, cung transaction
+  /// Serializable voi viec tao AccessGrant.
+  spentTotal   Int    @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+/// So cai xu — CHI GHI THEM, khong sua, khong xoa.
+///
+/// Day la thu duy nhat tra loi duoc cau "vi sao so du cua em thieu 19 xu".
+/// Mat no thi so du van dung nhung khong ai giai thich noi, va tranh chap voi
+/// hoc vien tro thanh loi noi doi loi noi.
+model CoinLedger {
+  id           String @id @default(cuid())
+  userId       String
+  /// TOPUP = nap tien that · SPEND = mua goi · GIFT = trung tam tang ·
+  /// REVOKE = thu hoi. GIFT phai bi loai khoi moi con so doanh thu.
+  kind         String
+  /// LUON DUONG. Chieu tien nam o `kind`, khong o dau cua so — mot so am lot
+  /// vao phep cong se lam sai lech ca so cai ma khong ai thay.
+  amount       Int
+  /// So du ngay sau buoc nay. Thua so voi `grantedTotal - spentTotal`, va co y
+  /// thua: no cho phep doi chieu tung dong de tim ra chinh xac dong nao lech.
+  balanceAfter Int
+
+  /// Khoa chong ghi hai lan. TOPUP:<orderId> cho don nap;
+  /// SPEND:<offerCode>:<attemptId> cho goi ban theo luot (hai cu bam nhanh
+  /// dung cung khoa nen chi mot cai qua duoc); SPEND:AI:<token> cho goi nap
+  /// luot AI, token do may chu sinh luc dung nut.
+  ledgerKey String @unique
+
+  orderId    String?
+  offerCode  String?
+  /// De duoc mo (goi scope EXERCISE). Thieu cot nay thi so cai chi noi "da tieu
+  /// 9 xu" ma khong noi cho nao — vo dung dung luc hoc vien hoi.
+  exerciseId String?
+  attemptId  String?
+  note       String? @db.Text
+
+  createdAt DateTime @default(now())
+
+  user  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  order PaymentOrder? @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+}
+
 /// Nhịp chấm — MỘT dòng cho MỖI LƯỢT LÀM BÀI (quyết định Q2).
 /// Tách khỏi ví vì Q1 và Q2 chọn hai phạm vi khác nhau; nhét chung một bảng thì
 /// không biểu diễn được "ví theo tài khoản, nhịp theo lượt làm bài".
 model FeynmanAiAttemptState {
-  id        String @id @default(cuid())
-  attemptId String @unique
+  id           String    @id @default(cuid())
+  attemptId    String    @unique
   /// Mốc so sánh 1 lần/ngày. So theo NGÀY LỊCH VIỆT NAM, không phải UTC.
   lastGradedOn DateTime?
   /// Chỉ để thống kê, không dùng để chặn.
@@ -415,12 +486,12 @@ model FeynmanAiAttemptState {
 /// đáp án chuẩn và đẩy nghi vấn vào đây. Học viên không bao giờ được nghe rằng
 /// đáp án chuẩn có thể sai.
 model FeynmanAiAlert {
-  id       String  @id @default(cuid())
+  id       String @id @default(cuid())
   /// MODEL = AI tự báo, STUDENT = học viên bấm báo sai.
-  source   String  @db.VarChar(16)
-  severity String  @default("LOW") @db.VarChar(16) // LOW | MEDIUM | HIGH
-  status   String  @default("OPEN") @db.VarChar(16) // OPEN | RESOLVED | DISMISSED
-  kind     String  @db.VarChar(32)
+  source   String @db.VarChar(16)
+  severity String @default("LOW") @db.VarChar(16) // LOW | MEDIUM | HIGH
+  status   String @default("OPEN") @db.VarChar(16) // OPEN | RESOLVED | DISMISSED
+  kind     String @db.VarChar(32)
 
   exerciseId   String?
   attemptId    String?
@@ -428,10 +499,10 @@ model FeynmanAiAlert {
   /// Mã câu dạng "p2:q14" — vị trí câu trong đề, không phải định danh người dùng.
   questionCode String? @db.VarChar(32)
 
-  detail      String? @db.Text
-  adminNote   String? @db.Text
-  resolvedAt  DateTime?
-  resolvedBy  String?
+  detail     String?   @db.Text
+  adminNote  String?   @db.Text
+  resolvedAt DateTime?
+  resolvedBy String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -491,8 +562,18 @@ model PaymentOrder {
   /// minh luot lam bai thuoc dung user, da GRADED, la Reading, va khong thuoc
   /// Nguyet Thi con trong khung gio. Khong tin ID nao tu trinh duyet.
   attemptId     String?
+  /// Ma goi (OfferCode) voi don cu, hoac ma moc nap (TopUpTierCode) voi don
+  /// nap vi. Doc bang `orderCodeLabel()` de ra nhan dung cho ca hai.
   offerCode     String
-  feature       String // READING | FEYNMAN
+  /// PACKAGE = don mua goi bang tien that (CHI CON TRONG LICH SU, khong tao
+  /// moi nua). TOPUP = nap xu vao vi. Nhanh xu ly trong fulfillPaidOrder rẽ
+  /// theo cot nay TRUOC khi tra bang gia — don nap khong co goi nao de tra.
+  orderKind     String  @default("PACKAGE")
+  /// So xu se cong khi don duoc thanh toan. Chot vao don luc tao, khong tra
+  /// lai bang moc nap luc IPN ve: doi muc thuong khong duoc phep lam thay doi
+  /// so xu cua mot don hoc vien da bam mua theo gia cu.
+  coinsGranted  Int     @default(0)
+  feature       String // READING | FEYNMAN | COIN
   scope         String // ALL | EXERCISE | ATTEMPT | NONE
   amount        Int // đơn vị VND, luôn là số nguyên
   currency      String  @default("VND")
@@ -521,11 +602,12 @@ model PaymentOrder {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
-  user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  exercise Exercise?      @relation(fields: [exerciseId], references: [id], onDelete: SetNull)
-  attempt  Attempt?       @relation(fields: [attemptId], references: [id], onDelete: SetNull)
-  events   PaymentEvent[]
-  grants   AccessGrant[]
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercise   Exercise?      @relation(fields: [exerciseId], references: [id], onDelete: SetNull)
+  attempt    Attempt?       @relation(fields: [attemptId], references: [id], onDelete: SetNull)
+  events     PaymentEvent[]
+  grants     AccessGrant[]
+  coinLedger CoinLedger[]
 
   @@index([userId, status, createdAt])
   @@index([exerciseId, status])
@@ -1590,4 +1672,21 @@ model UserGraceState {
   updatedAt      DateTime  @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+/// Ma xac minh email. Luu BAM chu khong luu ma goc: log, ban sao luu, hay mot
+/// nguoi doc duoc database cung khong dung lai duoc ma de chiem tai khoan.
+model EmailVerification {
+  id         String    @id @default(cuid())
+  userId     String
+  /// SHA-256 cua ma gui trong email. Ma goc chi ton tai trong email do.
+  tokenHash  String    @unique @db.VarChar(64)
+  expiresAt  DateTime
+  /// Dat khi ma da dung. Ma da dung KHONG duoc dung lai.
+  consumedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
 }

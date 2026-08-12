@@ -10,7 +10,7 @@
  */
 
 /** Đổi bản này khi thay giá, để đơn cũ vẫn tra được mình đã bán theo giá nào. */
-export const PRICE_VERSION = "2026-08-09-v2";
+export const PRICE_VERSION = "2026-08-11-v3";
 
 export type AccessFeature = "READING" | "FEYNMAN";
 
@@ -35,7 +35,18 @@ export type Offer = {
   kind: OfferKind;
   feature: AccessFeature;
   scope: AccessScope;
+  /**
+   * Giá VND. Với gói đang bán đây chỉ là con số ĐỐI CHIẾU cho học viên hiểu
+   * "39 xu là bao nhiêu tiền" — không còn đường nào trả VND trực tiếp cho gói
+   * nữa, tiền thật chỉ đi qua mốc nạp ví. Với ba gói đã dừng bán thì đây là giá
+   * họ đã trả thật, phải giữ để tra cứu đơn cũ.
+   */
   amount: number;
+  /**
+   * Giá thật đang thu, tính bằng xu. Thiếu trường này nghĩa là gói không mua
+   * bằng xu được — xem `coinPriceOf()` trong `coins.ts`.
+   */
+  priceCoins?: number;
   /** Giá ưu đãi lần đầu, chỉ có ở FEYNMAN_SINGLE. */
   introAmount?: number;
   /** null = quyền vĩnh viễn với đúng phạm vi đã mua. */
@@ -61,11 +72,31 @@ export type Offer = {
 export const OFFERS = {
   /* --- Đang bán ------------------------------------------------------ */
 
+  /**
+   * Mở một đề Reading. Mã MỚI chứ không dùng lại `READING_SINGLE`: mã cũ mang
+   * giá 9.000đ và cả một lịch sử đơn hàng VND, trộn vào sẽ không còn phân biệt
+   * được ai đã trả tiền mặt và ai đã tiêu xu.
+   *
+   * Scope `EXERCISE` là cố ý — mở một lần rồi làm lại bao nhiêu lượt cũng được.
+   * Học viên đã trả tiền cho BÀI, không phải cho một lần bấm.
+   */
+  READING_UNLOCK: {
+    kind: "ACCESS",
+    feature: "READING",
+    scope: "EXERCISE",
+    amount: 9_000,
+    priceCoins: 9,
+    durationDays: null,
+    label: "Mở một đề Reading",
+    blurb: "Mở đúng một đề, làm lại không giới hạn, giữ vĩnh viễn.",
+  },
+
   FEYNMAN_ATTEMPT_FULL: {
     kind: "ACCESS",
     feature: "FEYNMAN",
     scope: "ATTEMPT",
     amount: 39_000,
+    priceCoins: 39,
     durationDays: null,
     aiGradingCredits: 10,
     aiChatLimit: 10,
@@ -77,6 +108,7 @@ export const OFFERS = {
     feature: "FEYNMAN",
     scope: "ATTEMPT",
     amount: 19_000,
+    priceCoins: 19,
     durationDays: null,
     aiGradingCredits: 10,
     aiChatLimit: 5,
@@ -88,6 +120,7 @@ export const OFFERS = {
     feature: "FEYNMAN",
     scope: "NONE",
     amount: 29_000,
+    priceCoins: 29,
     durationDays: null,
     aiGradingCredits: 10,
     label: "Nạp thêm 10 lượt AI chấm",

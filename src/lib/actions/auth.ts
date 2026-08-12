@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { createSession, destroySession } from "@/lib/session";
+import { sendVerificationEmail } from "@/lib/auth/email-verification";
 
 export type AuthState = { error?: string } | undefined;
 
@@ -30,6 +31,14 @@ export async function registerAction(
   const user = await db.user.create({
     data: { email, name, passwordHash, role: "STUDENT" },
   });
+
+  // Gửi thư xác minh rồi VẪN cho vào luôn. Xác minh là hàng rào cho quà chào
+  // mừng, không phải hàng rào đăng nhập — chặn đăng nhập sẽ biến một trục trặc
+  // SMTP thành sự cố "không ai vào được website".
+  //
+  // Không await kết quả gửi: SMTP có thể chậm vài giây, và không đáng để học
+  // viên ngồi nhìn màn hình trắng. Hàm này đã tự nuốt mọi lỗi.
+  await sendVerificationEmail({ userId: user.id, email, name });
 
   await createSession({ userId: user.id, role: "STUDENT" });
   redirect("/hoc-vien");

@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { cookies } from "next/headers";
 import { db } from "@/lib/db";
+import { markVerifiedByProvider } from "@/lib/auth/email-verification";
 import { createSession } from "@/lib/session";
 import {
   STATE_COOKIE,
@@ -70,6 +71,10 @@ export async function GET(request: NextRequest) {
   }
 
   if (!user.active) return back("tai-khoan-bi-khoa");
+
+  // Google đã kiểm `email_verified` ở trên nên không cần gửi thêm thư nào.
+  // Hàm này cũng tặng quà chào mừng, và tự chống tặng hai lần bằng khóa riêng.
+  await markVerifiedByProvider(user.id);
 
   await createSession({
     userId: user.id,

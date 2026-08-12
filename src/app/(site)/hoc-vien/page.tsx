@@ -6,11 +6,16 @@ import {
   LogOut,
   KeyRound,
   RotateCcw,
+  Coins,
+  MailWarning,
 } from "lucide-react";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
 import { logoutAction } from "@/lib/actions/auth";
-import { ButtonLink, NoteBox } from "@/components/ui";
+import { resendVerificationAction } from "@/lib/actions/account";
+import { getCoinWallet } from "@/lib/payments/coin-service";
+import { WELCOME_COINS, formatCoins } from "@/lib/payments/coins";
+import { ButtonLink, NoteBox, SubmitButton } from "@/components/ui";
 import { StudentNav } from "@/components/student/student-nav";
 import { GoalsCard } from "@/components/student/goals-card";
 import { StudyCalendar } from "@/components/student/study-calendar";
@@ -48,8 +53,22 @@ function fmt(d: Date | null) {
   });
 }
 
-export default async function StudentDashboard() {
+export default async function StudentDashboard({
+  searchParams,
+}: {
+  searchParams: Promise<{ "xac-minh"?: string; "vi-sao"?: string }>;
+}) {
   const user = await requireUser();
+  const { "xac-minh": verifyResult, "vi-sao": verifyReason } = await searchParams;
+
+  const [wallet, account] = await Promise.all([
+    getCoinWallet(user.id),
+    db.user.findUnique({
+      where: { id: user.id },
+      select: { emailVerifiedAt: true },
+    }),
+  ]);
+  const verified = Boolean(account?.emailVerifiedAt);
 
   const attempts = await db.attempt.findMany({
     where: { userId: user.id, exercise: { skill: "READING" } },
@@ -142,6 +161,10 @@ export default async function StudentDashboard() {
             </h1>
             <div className="rule-gold mt-5" />
             <p className="mt-4 font-ui text-sm text-muted">{user.email}</p>
+            <p className="mt-3 inline-flex items-center gap-2 border border-gold bg-gold-pale px-4 py-1.5 font-ui text-sm font-semibold text-ink">
+              <Coins className="h-4 w-4 text-gold" aria-hidden="true" />
+              Ví: <span className="tabular-nums">{formatCoins(wallet.balance)}</span>
+            </p>
           </div>
           <div className="flex items-center gap-2">
             <Link
@@ -163,6 +186,50 @@ export default async function StudentDashboard() {
           </div>
         </div>
       </section>
+
+      {verifyResult === "xong" && (
+        <div className="mx-auto max-w-6xl px-6 pt-8">
+          <NoteBox title="Đã xác minh email">
+            Cảm ơn bạn. {formatCoins(WELCOME_COINS)} quà chào mừng đã vào ví.
+          </NoteBox>
+        </div>
+      )}
+      {verifyResult === "da-co" && (
+        <div className="mx-auto max-w-6xl px-6 pt-8">
+          <NoteBox title="Email đã được xác minh từ trước">
+            Không có gì thay đổi — quà chào mừng đã vào ví của bạn trước đó rồi.
+          </NoteBox>
+        </div>
+      )}
+      {verifyResult === "loi" && (
+        <div className="mx-auto max-w-6xl px-6 pt-8">
+          <NoteBox title="Liên kết xác minh không dùng được">
+            {verifyReason === "HET_HAN"
+              ? "Liên kết đã quá 24 giờ. Bấm nút gửi lại bên dưới để nhận thư mới."
+              : verifyReason === "DA_DUNG"
+                ? "Liên kết này đã được dùng rồi. Nếu email của bạn vẫn chưa xác minh, hãy gửi lại thư mới."
+                : "Liên kết không hợp lệ. Hãy gửi lại thư xác minh."}
+          </NoteBox>
+        </div>
+      )}
+
+      {!verified && (
+        <div className="mx-auto max-w-6xl px-6 pt-8">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-l-4 border-gold bg-gold-pale px-6 py-5">
+            <p className="flex items-start gap-3 font-ui text-sm leading-relaxed text-ink">
+              <MailWarning className="mt-0.5 h-5 w-5 shrink-0 text-gold" aria-hidden="true" />
+              <span>
+                <strong>Email chưa được xác minh.</strong> Xác minh xong bạn nhận
+                ngay {formatCoins(WELCOME_COINS)} vào ví — đủ mở 16 đề Reading.
+                Thư đã gửi tới {user.email}.
+              </span>
+            </p>
+            <form action={resendVerificationAction}>
+              <SubmitButton variant="outline">Gửi lại thư xác minh</SubmitButton>
+            </form>
+          </div>
+        </div>
+      )}
 
       <section className="mx-auto max-w-6xl space-y-8 px-6 py-12">
         <StudentNav current="student" />

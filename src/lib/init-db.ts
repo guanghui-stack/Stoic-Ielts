@@ -1024,6 +1024,51 @@ const DDL = [
     CONSTRAINT \`FeynmanAiBudget_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
   ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
 
+  `CREATE TABLE IF NOT EXISTS \`EmailVerification\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`tokenHash\` VARCHAR(64) NOT NULL,
+    \`expiresAt\` DATETIME(3) NOT NULL,
+    \`consumedAt\` DATETIME(3) NULL,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`EmailVerification_tokenHash_key\` (\`tokenHash\`),
+    INDEX \`EmailVerification_userId_createdAt_idx\` (\`userId\`, \`createdAt\`),
+    CONSTRAINT \`EmailVerification_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`CoinWallet\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`grantedTotal\` INTEGER NOT NULL DEFAULT 0,
+    \`spentTotal\` INTEGER NOT NULL DEFAULT 0,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`updatedAt\` DATETIME(3) NOT NULL,
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`CoinWallet_userId_key\` (\`userId\`),
+    CONSTRAINT \`CoinWallet_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`CoinLedger\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`kind\` VARCHAR(191) NOT NULL,
+    \`amount\` INTEGER NOT NULL,
+    \`balanceAfter\` INTEGER NOT NULL,
+    \`ledgerKey\` VARCHAR(191) NOT NULL,
+    \`orderId\` VARCHAR(191) NULL,
+    \`offerCode\` VARCHAR(191) NULL,
+    \`exerciseId\` VARCHAR(191) NULL,
+    \`attemptId\` VARCHAR(191) NULL,
+    \`note\` TEXT NULL,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`CoinLedger_ledgerKey_key\` (\`ledgerKey\`),
+    INDEX \`CoinLedger_userId_createdAt_idx\` (\`userId\`, \`createdAt\`),
+    CONSTRAINT \`CoinLedger_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`CoinLedger_orderId_fkey\` FOREIGN KEY (\`orderId\`) REFERENCES \`PaymentOrder\` (\`id\`) ON DELETE SET NULL ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
   `CREATE TABLE IF NOT EXISTS \`FeynmanAiAttemptState\` (
     \`id\` VARCHAR(191) NOT NULL,
     \`attemptId\` VARCHAR(191) NOT NULL,
@@ -1063,6 +1108,17 @@ const DDL = [
  * cột đã tồn tại nên từng lệnh được bọc try/catch ở nơi gọi.
  */
 const MIGRATIONS = [
+  // Vi xu: hai cot moi tren don hang co san. Bang CoinWallet/CoinLedger nam o
+  // phan CREATE TABLE nen khong can migration.
+  `ALTER TABLE \`PaymentOrder\` ADD COLUMN \`orderKind\` VARCHAR(191) NOT NULL DEFAULT 'PACKAGE'`,
+  `ALTER TABLE \`PaymentOrder\` ADD COLUMN \`coinsGranted\` INTEGER NOT NULL DEFAULT 0`,
+
+  // Xac minh email
+  `ALTER TABLE \`User\` ADD COLUMN \`emailVerifiedAt\` DATETIME(3) NULL`,
+
+  // So cai xu ghi them cot "de nao duoc mo"
+  `ALTER TABLE \`CoinLedger\` ADD COLUMN \`exerciseId\` VARCHAR(191) NULL`,
+
   // Dang nhap Google + gioi han mot thiet bi
   `ALTER TABLE \`User\` MODIFY COLUMN \`passwordHash\` VARCHAR(191) NULL`,
   `ALTER TABLE \`User\` ADD COLUMN \`googleId\` VARCHAR(191) NULL`,
@@ -1316,6 +1372,72 @@ export async function initDatabase() {
     if (res.count > 0) {
       console.log(`[wobridges] Da mo mien phi ${res.count} de Reading.`);
     }
+  });
+
+  /**
+   * Doi chieu mo hinh: KHOA lai toan bo de Reading, mo le 9 xu moi de.
+   *
+   * Buoc PUBLIC_READING_ALL_v1 ngay tren da chay hom 11/08 va mo het de ra —
+   * buoc nay dao nguoc no theo quyet dinh cua chu du an ngay 12/08. GIU NGUYEN
+   * CA HAI, dung xoa buoc cu: `applyOnce` danh dau theo khoa, xoa buoc cu di
+   * thi database nao chua chay se chay nham thu tu.
+   *
+   * Doi lai, moi tai khoan da xac minh email duoc tang 150 xu = 16 de. Hai ve
+   * nay di cung nhau, tach mot ve ra la doi mo hinh kinh doanh chu khong con
+   * la sua loi.
+   */
+  await applyOnce("RESTRICT_READING_ALL_v1", async () => {
+    const res = await db.exercise.updateMany({
+      where: { skill: "READING", accessLevel: { not: "RESTRICTED" } },
+      data: { accessLevel: "RESTRICTED" },
+    });
+    if (res.count > 0) {
+      console.log(`[wobridges] Da khoa ${res.count} de Reading — mo le 9 xu.`);
+    }
+  });
+
+  /**
+   * Tai khoan tao TRUOC ngay co xac minh email duoc coi la da xac minh.
+   *
+   * Khong lam buoc nay thi moi hoc vien dang hoc bong dung mat quyen nhan qua
+   * chao mung va co the bi chan o nhung cho doi email da xac minh — ho khong
+   * lam gi sai, chi la dang ky truoc khi luat doi.
+   */
+  await applyOnce("GRANDFATHER_EMAIL_VERIFIED_v1", async () => {
+    const res = await db.user.updateMany({
+      where: { emailVerifiedAt: null },
+      data: { emailVerifiedAt: new Date() },
+    });
+    if (res.count > 0) {
+      console.log(`[wobridges] Da danh dau ${res.count} tai khoan cu la da xac minh.`);
+    }
+  });
+
+  /**
+   * Tang qua chao mung cho tai khoan da co tu truoc.
+   *
+   * Chu du an chot 12/08/2026: tang mot lan cho TAT CA, khong chi tai khoan
+   * moi. Ly do la de vua bi khoa lai — nguoi dang hoc do khong lam gi sai va
+   * khong duoc de ho mat quyen ma khong co gi bu.
+   *
+   * Goi `grantWelcomeCoins` chu khong tu viet lai phep cong: no da co khoa
+   * `GIFT:WELCOME:<userId>` chong tang hai lan, va mot nguoi vua duoc tang qua
+   * o buoc dang ky roi lai duoc buoc nay tang them la mat tien that.
+   */
+  await applyOnce("WELCOME_COINS_BACKFILL_v1", async () => {
+    const { grantWelcomeCoins } = await import("@/lib/payments/coin-service");
+    const users = await db.user.findMany({
+      where: { emailVerifiedAt: { not: null } },
+      select: { id: true },
+    });
+
+    let granted = 0;
+    for (const user of users) {
+      if (await grantWelcomeCoins(user.id)) granted++;
+    }
+    console.log(
+      `[wobridges] Qua chao mung: da tang cho ${granted}/${users.length} tai khoan cu.`
+    );
   });
 
   // Chuyển quyền đã cấp ở bảng cũ ExerciseAccess sang sổ cái AccessGrant.

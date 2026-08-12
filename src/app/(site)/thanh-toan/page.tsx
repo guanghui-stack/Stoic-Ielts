@@ -1,8 +1,8 @@
+import { randomBytes } from "node:crypto";
 import Link from "next/link";
-import { BookOpenCheck, Brain, Check, Coins, Sparkles } from "lucide-react";
-import { db } from "@/lib/db";
+import { BookOpenCheck, Brain, Check, Coins, Sparkles, Wallet } from "lucide-react";
 import { getCurrentUser } from "@/lib/session";
-import { walletRemaining } from "@/lib/feynman-ai/rules";
+import { getCoinWallet } from "@/lib/payments/coin-service";
 import { isSePayConfigured } from "@/lib/payments/sepay";
 import {
   OFFERS,
@@ -11,13 +11,23 @@ import {
   AI_EVIDENCE_NOTICE,
   type AttemptOfferCode,
 } from "@/lib/payments/catalog";
-import { PurchaseButton } from "@/components/payments/purchase-button";
+import {
+  TOPUP_TIERS,
+  bonusCoinsOf,
+  formatCoins,
+  listTopUpTiers,
+  type TopUpTierCode,
+} from "@/lib/payments/coins";
+import {
+  CoinPurchaseButton,
+  TopUpButton,
+} from "@/components/payments/purchase-button";
 import { ErrorBanner, NoteBox, SectionHeading } from "@/components/ui";
 
 export const metadata = {
   title: "Bảng giá",
   description:
-    "Đề thi Reading miễn phí. Trả phí ở lớp chữa sâu Feynman và lượt AI chấm.",
+    "Đề thi Reading miễn phí. Nạp xu để mở lớp chữa sâu Feynman và lượt AI chấm.",
 };
 export const dynamic = "force-dynamic";
 
@@ -38,53 +48,112 @@ const ERROR_MESSAGES: Record<string, string> = {
 export default async function PricingPage({
   searchParams,
 }: {
-  searchParams: Promise<{ loi?: string; goi?: string; luot?: string }>;
+  searchParams: Promise<{ loi?: string; thieu?: string; luot?: string }>;
 }) {
-  const { loi, goi, luot } = await searchParams;
+  const { loi, thieu, luot } = await searchParams;
   const user = await getCurrentUser();
 
-  // Ví lượt AI là con số duy nhất trang này mua thẳng được, nên nó phải hiện
-  // đúng số dư — mời nạp khi người ta còn đầy ví là cách nhanh nhất mất niềm tin.
-  const budget = user
-    ? await db.feynmanAiBudget.findUnique({ where: { userId: user.id } })
-    : null;
-  const credits = user
-    ? walletRemaining(budget ?? { grantedTotal: 0, usedTotal: 0 })
-    : null;
-
+  const wallet = user ? await getCoinWallet(user.id) : null;
   const configured = isSePayConfigured();
+
   // Từ khối "hết lượt" trong phòng Feynman đá sang: giữ lại mã lượt làm bài để
-  // mua xong quay đúng chỗ đang chữa dở, thay vì thả về trang chủ.
-  const highlightTopUp = goi === "FEYNMAN_AI_TOPUP";
-  const backToAttempt = typeof luot === "string" && luot.trim() ? luot.trim() : undefined;
+  // nạp xong quay đúng chỗ đang chữa dở, thay vì thả về trang chủ.
+  const backToAttempt =
+    typeof luot === "string" && luot.trim() ? luot.trim() : undefined;
+
+  // Thiếu xu là lối vào phổ biến nhất của trang này, nên câu báo phải nói đúng
+  // số còn thiếu chứ không chỉ "không đủ".
+  const missing = Number.parseInt(thieu ?? "", 10);
+  const shortMessage =
+    loi === "thieu-xu" && Number.isFinite(missing) && missing > 0
+      ? `Ví của bạn còn thiếu ${formatCoins(missing)} cho gói vừa chọn. Nạp thêm rồi bấm mua lại.`
+      : loi === "thieu-xu"
+        ? "Ví của bạn không đủ xu cho gói vừa chọn."
+        : ERROR_MESSAGES[loi ?? ""];
+
+  /**
+   * Khóa chống trừ hai lần cho gói nạp lượt AI — gói duy nhất không có khóa tự
+   * nhiên vì mua lại nhiều lần là đúng ý. Sinh mới mỗi lần dựng trang, nên hai
+   * cú bấm trên cùng một trang là một lần trừ, tải lại trang thì mua tiếp được.
+   */
+  const spendToken = randomBytes(12).toString("hex");
 
   return (
     <section className="mx-auto max-w-5xl px-6 py-12 md:py-16">
       <SectionHeading
         label="Học phí trực tuyến"
-        title="Đề thi miễn phí. Trả tiền cho phần chữa bài."
+        title="Đề thi miễn phí. Nạp xu cho phần chữa bài."
         align="center"
       />
       <p className="mx-auto mt-6 max-w-2xl text-center text-[0.98rem] leading-relaxed text-ink-soft">
         Toàn bộ đề Reading, chấm điểm, quy đổi band và đáp án đúng/sai đều miễn
-        phí. Bạn chỉ trả tiền khi muốn mở lời giải chi tiết của giáo viên và lớp
-        chữa sâu Feynman cho đúng lượt làm bài của mình.
+        phí. Bạn nạp xu vào ví, rồi dùng xu mở lời giải chi tiết của giáo viên và
+        lớp chữa sâu Feynman cho đúng lượt làm bài của mình.
       </p>
 
-      {loi && (
+      {shortMessage && (
         <div className="mx-auto mt-8 max-w-2xl">
-          <ErrorBanner message={ERROR_MESSAGES[loi]} />
+          <ErrorBanner message={shortMessage} />
         </div>
       )}
 
-      <div className="mt-8 flex items-start gap-3 border border-gold bg-gold-pale px-6 py-5">
+      {wallet && (
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border border-gold bg-gold-pale px-6 py-5">
+          <p className="flex items-center gap-3 font-ui text-sm text-ink">
+            <Wallet className="h-5 w-5 shrink-0 text-gold" aria-hidden="true" />
+            <span>
+              Ví của bạn đang có{" "}
+              <strong className="tabular-nums">{formatCoins(wallet.balance)}</strong>
+            </span>
+          </p>
+          <p className="font-ui text-xs text-muted">
+            Đã nạp {formatCoins(wallet.grantedTotal)} · đã tiêu{" "}
+            {formatCoins(wallet.spentTotal)}
+          </p>
+        </div>
+      )}
+
+      {/* ===== Nạp ví ===== */}
+      <h2 className="mt-12 font-display text-2xl font-bold text-navy-deep">
+        Nạp xu vào ví
+      </h2>
+      <p className="mt-2 font-ui text-sm leading-relaxed text-ink-soft">
+        1 xu = 1.000đ. Hai mốc lớn được tặng thêm xu. Xu không hết hạn và dùng
+        được cho mọi bài.
+      </p>
+
+      <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        {listTopUpTiers().map((code) => (
+          <TopUpCard
+            key={code}
+            code={code}
+            signedIn={Boolean(user)}
+            configured={configured}
+            attemptId={backToAttempt}
+          />
+        ))}
+      </div>
+
+      {!configured && (
+        <NoteBox className="mt-6" title="Thanh toán trực tuyến đang tạm đóng">
+          Trung tâm chưa bật cổng thanh toán. Bạn vẫn có thể liên hệ để được nạp
+          xu thủ công.
+        </NoteBox>
+      )}
+
+      {/* ===== Tiêu xu ===== */}
+      <h2 className="mt-14 font-display text-2xl font-bold text-navy-deep">
+        Xu dùng để mở gì
+      </h2>
+
+      <div className="mt-6 flex items-start gap-3 border border-line bg-cream-deep px-6 py-5">
         <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-gold" aria-hidden="true" />
         <p className="font-ui text-sm leading-relaxed text-ink">
           {FREE_PRACTICE_NOTICE}
         </p>
       </div>
 
-      <div className="mt-12 grid gap-8 md:grid-cols-2">
+      <div className="mt-6 grid gap-8 md:grid-cols-2">
         <AttemptPlanCard
           offerCode="FEYNMAN_ATTEMPT_FULL"
           icon="feynman"
@@ -97,17 +166,15 @@ export default async function PricingPage({
         />
       </div>
 
-      <TopUpCard
-        credits={credits}
+      <AiTopUpCard
         signedIn={Boolean(user)}
-        configured={configured}
-        highlight={highlightTopUp}
-        attemptId={backToAttempt}
+        balance={wallet?.balance ?? 0}
+        spendToken={spendToken}
       />
 
       {!user && (
         <NoteBox className="mt-10" title="Cần đăng nhập">
-          Quyền học và ví lượt AI gắn với tài khoản của bạn.{" "}
+          Ví xu gắn với tài khoản của bạn.{" "}
           <Link href="/dang-nhap" className="font-semibold text-navy underline underline-offset-4">
             Đăng nhập
           </Link>{" "}
@@ -115,29 +182,95 @@ export default async function PricingPage({
           <Link href="/dang-ky" className="font-semibold text-navy underline underline-offset-4">
             tạo tài khoản miễn phí
           </Link>{" "}
-          trước khi mua.
+          trước khi nạp.
         </NoteBox>
       )}
 
-      <NoteBox className="mt-6" title="Ví lượt AI dùng chung">
-        Lượt AI chấm nằm ở ví chung của tài khoản: mua ở đề nào cũng tiêu được ở
-        đề khác. Riêng nhịp chấm thì tính theo từng lượt làm bài — mỗi lượt chấm
-        tối đa một lần mỗi ngày. {AI_EVIDENCE_NOTICE}
+      <NoteBox className="mt-6" title="Điều cần biết về xu">
+        Xu <strong>không hết hạn</strong> và dùng được cho mọi bài. Xu{" "}
+        <strong>không đổi ngược ra tiền mặt</strong> và không chuyển cho tài
+        khoản khác — nó là tín dụng học phí trả trước, không phải tiền gửi.
+        {" "}Lượt AI chấm là thứ khác: gói tặng kèm, đếm riêng, không mua thẳng
+        bằng xu được. {AI_EVIDENCE_NOTICE}
       </NoteBox>
 
       <NoteBox className="mt-6" title="Về quyền đã mua trước đây">
         Ba gói cũ (Reading mở lẻ, Reading 30 ngày, Feynman 30 ngày) đã dừng bán.
         Quyền bạn đã trả tiền vẫn còn nguyên và dùng hết thời hạn như cũ — không
-        có gì bị xóa hay đổi.
+        có gì bị xóa hay quy đổi thành xu.
       </NoteBox>
     </section>
+  );
+}
+
+/** Một mốc nạp. Phần thưởng hiện rõ, vì đó là lý do duy nhất chọn mốc lớn. */
+function TopUpCard({
+  code,
+  signedIn,
+  configured,
+  attemptId,
+}: {
+  code: TopUpTierCode;
+  signedIn: boolean;
+  configured: boolean;
+  attemptId?: string;
+}) {
+  const tier = TOPUP_TIERS[code];
+  const bonus = bonusCoinsOf(code);
+
+  return (
+    <article
+      className={`flex flex-col border bg-paper p-6 shadow-card ${
+        bonus > 0 ? "border-gold" : "border-line"
+      }`}
+    >
+      <p className="font-display text-2xl font-bold text-navy-deep">
+        {formatCoins(tier.coins)}
+      </p>
+      <p className="mt-1 font-ui text-sm text-ink-soft tabular-nums">
+        {formatVnd(tier.amountVnd)}
+      </p>
+
+      {bonus > 0 ? (
+        <p className="mt-3 inline-flex w-fit items-center gap-1.5 border border-gold bg-gold-pale px-2.5 py-0.5 font-ui text-[0.68rem] font-semibold uppercase tracking-[0.08em] text-gold">
+          <Sparkles className="h-3 w-3" aria-hidden="true" />
+          Tặng thêm {bonus} xu
+        </p>
+      ) : (
+        <p className="mt-3 font-ui text-xs text-muted">Đúng tỉ giá gốc</p>
+      )}
+
+      <div className="mt-auto pt-5">
+        {!signedIn ? (
+          <Link
+            href="/dang-nhap"
+            className="inline-flex w-full items-center justify-center border border-navy px-5 py-2.5 font-ui text-[0.75rem] font-semibold uppercase tracking-[0.1em] text-navy transition-colors hover:bg-navy hover:text-paper"
+          >
+            Đăng nhập để nạp
+          </Link>
+        ) : !configured ? (
+          <span className="inline-flex w-full cursor-not-allowed items-center justify-center border border-line-strong bg-cream-deep px-5 py-2.5 font-ui text-[0.75rem] font-semibold uppercase tracking-[0.1em] text-muted">
+            Tạm chưa nạp được
+          </span>
+        ) : (
+          <TopUpButton
+            tierCode={code}
+            attemptId={attemptId}
+            variant={bonus > 0 ? "gold" : "primary"}
+            className="w-full"
+          >
+            Nạp {formatVnd(tier.amountVnd)}
+          </TopUpButton>
+        )}
+      </div>
+    </article>
   );
 }
 
 /**
  * Gói bán theo LƯỢT LÀM BÀI nên không mua thẳng ở đây được: máy chủ phải biết
  * mở cho lượt nào. Thẻ này chỉ in giá và chỉ đường về trang kết quả bài làm —
- * đặt một nút mua ở đây sẽ tạo đơn không gắn lượt nào và mở nhầm chỗ.
+ * đặt một nút mua ở đây sẽ trừ xu cho một lượt không xác định.
  */
 function AttemptPlanCard({
   offerCode,
@@ -159,18 +292,20 @@ function AttemptPlanCard({
       </p>
 
       <p className="mt-4 font-display text-3xl font-bold text-navy-deep">
-        {formatVnd(offer.amount)}
+        {formatCoins(offer.priceCoins)}
         <span className="ml-2 font-ui text-sm font-normal text-muted">
           / một lượt làm bài
         </span>
       </p>
-      <p className="mt-1.5 font-ui text-xs text-muted">{note}</p>
+      <p className="mt-1.5 font-ui text-xs text-muted">
+        Tương đương {formatVnd(offer.amount)} · {note}
+      </p>
 
       <ul className="mt-6 space-y-2.5">
         {[
           "Lời giải chi tiết của giáo viên cho tất cả các câu, giữ vĩnh viễn",
           "Luyện Feynman lại không giới hạn số lần",
-          `Tặng ${offer.aiGradingCredits} lượt AI chấm vào ví chung`,
+          `Tặng ${offer.aiGradingCredits} lượt AI chấm vào ví lượt`,
           `Hỏi AI tối đa ${offer.aiChatLimit} câu mỗi lần chấm`,
         ].map((b) => (
           <li key={b} className="flex gap-2.5 font-ui text-sm leading-relaxed text-ink-soft">
@@ -190,45 +325,33 @@ function AttemptPlanCard({
   );
 }
 
-/** Gói duy nhất mua thẳng được ở trang này: nó không gắn với lượt làm bài nào. */
-function TopUpCard({
-  credits,
+/** Gói duy nhất tiêu xu được ngay ở trang này: nó không gắn với lượt nào. */
+function AiTopUpCard({
   signedIn,
-  configured,
-  highlight,
-  attemptId,
+  balance,
+  spendToken,
 }: {
-  credits: number | null;
   signedIn: boolean;
-  configured: boolean;
-  highlight: boolean;
-  attemptId?: string;
+  balance: number;
+  spendToken: string;
 }) {
   const offer = OFFERS.FEYNMAN_AI_TOPUP;
+  const enough = balance >= offer.priceCoins;
 
   return (
-    <article
-      className={`mt-8 flex flex-col gap-6 border bg-paper p-8 shadow-card md:flex-row md:items-center md:justify-between ${
-        highlight ? "border-gold" : "border-line"
-      }`}
-    >
+    <article className="mt-8 flex flex-col gap-6 border border-line bg-paper p-8 shadow-card md:flex-row md:items-center md:justify-between">
       <div className="min-w-0">
         <p className="label-caps flex items-center gap-2">
           <Coins className="h-3.5 w-3.5" aria-hidden="true" />
-          Ví lượt AI
+          Lượt AI chấm
         </p>
-        <h2 className="mt-2.5 font-display text-xl font-bold text-navy-deep">
-          {offer.label} · {formatVnd(offer.amount)}
-        </h2>
+        <h3 className="mt-2.5 font-display text-xl font-bold text-navy-deep">
+          {offer.label} · {formatCoins(offer.priceCoins)}
+        </h3>
         <p className="mt-2 max-w-xl font-ui text-sm leading-relaxed text-ink-soft">
-          {offer.blurb} Không mở thêm quyền nào, chỉ cộng lượt — nên mua được bất
-          cứ lúc nào, kể cả khi bạn chưa có gói chữa bài.
+          {offer.blurb} Mua được bất cứ lúc nào, kể cả khi bạn chưa có gói chữa
+          bài nào.
         </p>
-        {credits !== null && (
-          <p className="mt-3 font-ui text-sm text-ink">
-            Ví của bạn còn <strong className="tabular-nums">{credits}</strong> lượt.
-          </p>
-        )}
       </div>
 
       <div className="shrink-0">
@@ -237,21 +360,26 @@ function TopUpCard({
             href="/dang-nhap"
             className="inline-flex items-center gap-2 border border-navy px-7 py-3 font-ui text-[0.8rem] font-semibold uppercase tracking-[0.12em] text-navy transition-colors hover:bg-navy hover:text-paper"
           >
-            Đăng nhập để nạp
+            Đăng nhập để mua
           </Link>
-        ) : !configured ? (
-          <span className="inline-flex cursor-not-allowed items-center border border-line-strong bg-cream-deep px-7 py-3 font-ui text-[0.8rem] font-semibold uppercase tracking-[0.12em] text-muted">
-            Tạm chưa mua được
-          </span>
+        ) : !enough ? (
+          // Không đủ xu thì nói thẳng còn thiếu bao nhiêu, thay vì để họ bấm
+          // rồi bị đá ngược về đúng trang này.
+          <p className="max-w-[16rem] font-ui text-sm leading-relaxed text-muted">
+            Cần thêm{" "}
+            <strong className="tabular-nums text-ink">
+              {formatCoins(offer.priceCoins - balance)}
+            </strong>{" "}
+            — nạp ví ở phần trên rồi quay lại.
+          </p>
         ) : (
-          <PurchaseButton
+          <CoinPurchaseButton
             offerCode="FEYNMAN_AI_TOPUP"
-            attemptId={attemptId}
-            variant="gold"
+            spendToken={spendToken}
           >
             <Coins className="h-4 w-4" aria-hidden="true" />
-            Nạp {offer.aiGradingCredits} lượt · {formatVnd(offer.amount)}
-          </PurchaseButton>
+            Đổi {formatCoins(offer.priceCoins)} lấy {offer.aiGradingCredits} lượt
+          </CoinPurchaseButton>
         )}
       </div>
     </article>

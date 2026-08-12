@@ -13,6 +13,8 @@ import {
   toggleAllFeynmanAccessAction,
 } from "@/lib/actions/admin";
 import { summarizeGrantsForAdmin } from "@/lib/access-grants";
+import { coinBalance, formatCoins } from "@/lib/payments/coins";
+import { GiftCoinsForm } from "@/components/admin/gift-coins-form";
 import { ResetPasswordForm } from "@/components/admin/reset-password-form";
 import { DeleteUserButton } from "@/components/admin/delete-user-button";
 
@@ -25,7 +27,7 @@ function fmt(d: Date) {
 export default async function AdminStudentsPage() {
   await requireAdmin();
 
-  const [students, restrictedCount, grants] = await Promise.all([
+  const [students, restrictedCount, grants, wallets] = await Promise.all([
     db.user.findMany({
       where: { role: "STUDENT" },
       orderBy: { createdAt: "desc" },
@@ -41,7 +43,16 @@ export default async function AdminStudentsPage() {
     // Cần phân biệt quyền trung tâm TẶNG với quyền học viên MUA, vì nút
     // mở/thu hồi bên dưới chỉ được phép đụng tới phần tặng.
     summarizeGrantsForAdmin(),
+    db.coinWallet.findMany({
+      select: { userId: true, grantedTotal: true, spentTotal: true },
+    }),
   ]);
+
+  // Tra cứu theo Map thay vì hỏi database cho từng học viên: bảng này liệt kê
+  // TOÀN BỘ học viên, nên một truy vấn mỗi dòng sẽ thành hàng trăm truy vấn.
+  const balanceOf = new Map(
+    wallets.map((w) => [w.userId, coinBalance(w)] as const)
+  );
 
   return (
     <section className="mx-auto max-w-6xl px-6 py-12">
@@ -81,6 +92,7 @@ export default async function AdminStudentsPage() {
                 <th className="px-4 py-3 text-left font-semibold">Email</th>
                 <th className="px-4 py-3 text-center font-semibold">Ngày đăng ký</th>
                 <th className="px-4 py-3 text-center font-semibold">Bài đã làm</th>
+                <th className="px-4 py-3 text-center font-semibold">Ví xu</th>
                 <th className="px-4 py-3 text-center font-semibold">Quyền Reading</th>
                 <th className="px-4 py-3 text-center font-semibold">Trạng thái</th>
                 <th className="px-4 py-3 text-right font-semibold">Thao tác</th>
@@ -101,6 +113,11 @@ export default async function AdminStudentsPage() {
                     </td>
                     <td className="px-4 py-3 text-center tabular-nums text-ink-soft">
                       {s._count.attempts}
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      <span className="font-ui text-sm font-semibold tabular-nums text-ink">
+                        {formatCoins(balanceOf.get(s.id) ?? 0)}
+                      </span>
                     </td>
                     <td className="px-4 py-3 text-center text-xs">
                       {gifted && (
@@ -136,6 +153,8 @@ export default async function AdminStudentsPage() {
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1.5">
                         <ResetPasswordForm userId={s.id} userEmail={s.email} />
+
+                        <GiftCoinsForm userId={s.id} userName={s.name} />
 
                         <form action={toggleAllExerciseAccessAction.bind(null, s.id)}>
                           <button

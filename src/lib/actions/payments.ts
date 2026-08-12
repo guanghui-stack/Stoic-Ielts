@@ -1,19 +1,21 @@
 "use server";
 
 import { randomBytes } from "node:crypto";
-import { Prisma } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
-import { hasActiveAccess } from "@/lib/access-grants";
 import {
   OFFERS,
   isOfferCode,
   isOfferOnSale,
   type OfferCode,
 } from "@/lib/payments/catalog";
-import { quoteOffer } from "@/lib/payments/quote";
-import { introTokenStillHeld } from "@/lib/payments/payment-rules";
+import {
+  COIN_RATE_VERSION,
+  TOPUP_TIERS,
+  isTopUpTierCode,
+} from "@/lib/payments/coins";
+import { spendCoinsForOffer } from "@/lib/payments/coin-service";
 import { sePayEnvironment, isSePayConfigured } from "@/lib/payments/sepay";
 
 /** Đơn chưa trả tiền sau 24 giờ coi như bỏ; học viên bấm mua lại là có đơn mới. */
@@ -29,72 +31,42 @@ function newInvoiceNumber(): string {
 }
 
 /**
- * Tạo đơn hàng rồi chuyển sang trang thanh toán.
+ * Nạp xu vào ví — ĐƯỜNG DUY NHẤT tiền thật đi vào hệ thống.
  *
- * Biểu mẫu chỉ gửi lên MÃ sản phẩm và mã bài — số tiền lấy từ bảng giá phía
- * máy chủ, đường dẫn quay về cũng do máy chủ tự dựng. Nhờ vậy người dùng sửa
- * HTML cũng không mua được giá rẻ hơn, cũng không chuyển hướng đi đâu khác.
+ * Từ 11/08/2026 không còn đường trả VND thẳng cho một gói nào: học viên nạp
+ * xu, rồi tiêu xu. Một đường vào duy nhất là chủ ý, không phải tiện tay — hai
+ * đường cấp quyền song song sớm muộn cũng lệch nhau, và lệch ở chỗ này nghĩa
+ * là có người trả tiền mà không được học.
+ *
+ * Biểu mẫu chỉ gửi lên MÃ MỐC NẠP. Số tiền và số xu đều lấy từ bảng phía máy
+ * chủ, nên sửa HTML không nạp được nhiều xu hơn.
  */
-export async function createPaymentOrderAction(formData: FormData) {
+export async function createTopUpOrderAction(formData: FormData) {
   const user = await requireUser();
 
   if (!isSePayConfigured()) {
     redirect("/thanh-toan?loi=chua-cau-hinh");
   }
 
-  const offerCodeRaw = String(formData.get("offerCode") ?? "");
-  if (!isOfferCode(offerCodeRaw)) redirect("/thanh-toan?loi=san-pham");
-  const offerCode: OfferCode = offerCodeRaw;
-  const offer = OFFERS[offerCode];
+  const tierCodeRaw = String(formData.get("tierCode") ?? "");
+  if (!isTopUpTierCode(tierCodeRaw)) redirect("/thanh-toan?loi=san-pham");
+  const tier = TOPUP_TIERS[tierCodeRaw];
 
-  const exerciseId = String(formData.get("exerciseId") ?? "").trim() || null;
-  const attemptId = String(formData.get("attemptId") ?? "").trim() || null;
+  // Nạp xong quay về đúng chỗ đang đứng. Lượt làm bài chỉ dùng để dựng đường
+  // quay về; ví là của tài khoản nên KHÔNG ghim vào đơn nạp.
+  const attemptIdRaw = String(formData.get("attemptId") ?? "").trim() || null;
+  const returnPath = await topUpReturnPath(user.id, attemptIdRaw);
 
-  // Gói đã dừng bán không được tạo đơn mới. Đơn cũ và quyền cũ vẫn đọc bình
-  // thường; chặn ở đây chỉ ngăn người dùng gửi tay mã gói cũ để mua giá cũ.
-  if (!isOfferOnSale(offerCode)) redirect("/thanh-toan?loi=ngung-ban");
-
-  const resolved = await resolveReturnTarget({
-    userId: user.id,
-    offerCode,
-    exerciseId,
-    attemptId,
-  });
-
-  // Gói nạp lượt AI luôn mua được: nó không mở quyền gì, chỉ cộng vào ví. Chặn
-  // theo quyền ở đây sẽ khóa mất đường mua thêm lượt của người đã có quyền —
-  // tức là đúng nhóm khách duy nhất cần gói này.
-  if (offer.kind === "ACCESS") {
-    // Đã có quyền rồi thì đừng bán thêm — đưa thẳng về chỗ học.
-    if (
-      await hasActiveAccess({
-        userId: user.id,
-        feature: offer.feature,
-        exerciseId,
-        attemptId: resolved.attemptId,
-      })
-    ) {
-      redirect(resolved.path);
-    }
-  }
-
-  const returnPath = resolved.path;
-
-  const quote = await quoteOffer({ userId: user.id, offerCode });
-
-  // Bấm mua nhiều lần cho cùng một thứ thì quay lại đúng đơn đang chờ, thay vì
-  // rải ra hàng loạt đơn rác khiến việc đối soát rối tung.
+  // Bấm nạp nhiều lần cùng một mốc thì quay lại đúng đơn đang chờ, thay vì rải
+  // ra hàng loạt đơn rác khiến việc đối soát rối tung.
   const reusable = await db.paymentOrder.findFirst({
     where: {
       userId: user.id,
-      offerCode,
-      exerciseId,
-      // Phải khớp cả lượt làm bài: mua Feynman cho lượt A rồi bấm mua cho lượt
-      // B mà dùng lại đơn của A thì học viên trả tiền cho thứ mình không xin.
-      attemptId: resolved.attemptId,
+      orderKind: "TOPUP",
+      offerCode: tierCodeRaw,
       status: "PENDING",
-      amount: quote.amount,
-      priceVersion: quote.priceVersion,
+      amount: tier.amountVnd,
+      priceVersion: COIN_RATE_VERSION,
       expiresAt: { gt: new Date() },
     },
     orderBy: { createdAt: "desc" },
@@ -113,18 +85,100 @@ export async function createPaymentOrderAction(formData: FormData) {
     redirect("/thanh-toan?loi=qua-nhieu-don");
   }
 
-  const invoiceNumber = await createOrder({
-    userId: user.id,
-    exerciseId,
-    attemptId: resolved.attemptId,
-    returnPath,
-    offerCode,
-    feature: offer.feature,
-    scope: offer.scope,
-    quote,
+  const order = await db.paymentOrder.create({
+    data: {
+      invoiceNumber: newInvoiceNumber(),
+      userId: user.id,
+      exerciseId: null,
+      attemptId: null,
+      returnPath,
+      offerCode: tierCodeRaw,
+      orderKind: "TOPUP",
+      // Chốt số xu vào đơn NGAY LÚC TẠO. Đổi mức thưởng sau đó không được phép
+      // làm thay đổi số xu của một đơn học viên đã bấm mua theo tỉ lệ cũ.
+      coinsGranted: tier.coins,
+      feature: "COIN",
+      scope: "NONE",
+      amount: tier.amountVnd,
+      currency: "VND",
+      priceVersion: COIN_RATE_VERSION,
+      priceRule: "STANDARD",
+      status: "PENDING",
+      provider: "SEPAY_PG",
+      providerEnvironment: sePayEnvironment(),
+      expiresAt: new Date(Date.now() + ORDER_TTL_MS),
+    },
+    select: { invoiceNumber: true },
   });
 
-  redirect(`/thanh-toan/${invoiceNumber}`);
+  redirect(`/thanh-toan/${order.invoiceNumber}`);
+}
+
+/**
+ * Tiêu xu để mở một gói. Xong ngay, không qua cổng thanh toán, không có đơn
+ * treo — đây là lợi ích thật của hệ xu: bớt hẳn một chặng hay hỏng.
+ *
+ * Việc trừ xu và cấp quyền nằm ở `spendCoinsForOffer()`; hàm này chỉ lo xác
+ * minh đầu vào rồi dẫn học viên về đúng chỗ.
+ */
+export async function buyWithCoinsAction(formData: FormData) {
+  const user = await requireUser();
+
+  const offerCodeRaw = String(formData.get("offerCode") ?? "");
+  if (!isOfferCode(offerCodeRaw)) redirect("/thanh-toan?loi=san-pham");
+  const offerCode: OfferCode = offerCodeRaw;
+  if (!isOfferOnSale(offerCode)) redirect("/thanh-toan?loi=ngung-ban");
+
+  const exerciseId = String(formData.get("exerciseId") ?? "").trim() || null;
+  const attemptId = String(formData.get("attemptId") ?? "").trim() || null;
+  const spendToken = String(formData.get("spendToken") ?? "").trim() || null;
+
+  // Chỗ DUY NHẤT xác minh lượt làm bài có thật, đúng chủ, đã chấm và đúng bài.
+  // Không tin bất cứ ID nào từ trình duyệt.
+  const resolved = await resolveReturnTarget({
+    userId: user.id,
+    offerCode,
+    exerciseId,
+    attemptId,
+  });
+
+  const result = await spendCoinsForOffer({
+    userId: user.id,
+    offerCode,
+    exerciseId,
+    attemptId: resolved.attemptId,
+    spendToken,
+  });
+
+  if (result.ok) redirect(resolved.path);
+
+  // Thiếu xu là trường hợp PHỔ BIẾN nhất, nên nó phải dẫn thẳng tới chỗ nạp
+  // kèm số còn thiếu — chứ không phải một câu "không đủ" rồi bỏ mặc.
+  if (result.reason === "NOT_ENOUGH_COINS") {
+    redirect(`/thanh-toan?loi=thieu-xu&thieu=${result.missing}`);
+  }
+  if (result.reason === "ALREADY_OWNED") redirect(resolved.path);
+  redirect("/thanh-toan?loi=san-pham");
+}
+
+/**
+ * Đường quay về sau khi nạp ví.
+ *
+ * Lượt làm bài không hợp lệ thì lặng lẽ bỏ qua thay vì chặn — học viên chỉ
+ * đang nạp tiền vào ví của chính mình, không có gì để bảo vệ ở đây.
+ */
+async function topUpReturnPath(
+  userId: string,
+  attemptId: string | null
+): Promise<string> {
+  if (!attemptId) return "/thanh-toan";
+  const attempt = await db.attempt.findUnique({
+    where: { id: attemptId },
+    select: { id: true, userId: true, status: true },
+  });
+  const mine =
+    attempt && attempt.userId === userId && attempt.status === "GRADED";
+  return mine ? `/hoc-vien/bai-lam/${attempt.id}` : "/thanh-toan";
 }
 
 type ReturnTarget = {
@@ -222,79 +276,6 @@ async function resolveReturnTarget(input: {
     // nguyên null để quyền của nó vẫn phủ mọi lượt của bài như đã bán.
     attemptId: offer.scope === "ATTEMPT" ? attempt.id : null,
   };
-}
-
-/**
- * Ghi đơn xuống database, xử lý trường hợp khóa ưu đãi đang bị một đơn cũ giữ.
- *
- * Ràng buộc unique trên `introPromoToken` là thứ chặn được hai tab cùng bấm
- * mua giá 9.000đ. Nhưng nếu đơn giữ khóa đã hủy/hết hạn thì phải NHẢ khóa,
- * nếu không học viên bấm nhầm một lần là mất ưu đãi mà chưa tiêu đồng nào.
- */
-async function createOrder(input: {
-  userId: string;
-  exerciseId: string | null;
-  attemptId: string | null;
-  returnPath: string;
-  offerCode: OfferCode;
-  feature: string;
-  scope: string;
-  quote: Awaited<ReturnType<typeof quoteOffer>>;
-}): Promise<string> {
-  const data = {
-    invoiceNumber: newInvoiceNumber(),
-    userId: input.userId,
-    exerciseId: input.exerciseId,
-    attemptId: input.attemptId,
-    returnPath: input.returnPath,
-    offerCode: input.offerCode,
-    feature: input.feature,
-    scope: input.scope,
-    amount: input.quote.amount,
-    currency: "VND",
-    priceVersion: input.quote.priceVersion,
-    priceRule: input.quote.priceRule,
-    status: "PENDING",
-    provider: "SEPAY_PG",
-    providerEnvironment: sePayEnvironment(),
-    introPromoToken: input.quote.introPromoToken,
-    expiresAt: new Date(Date.now() + ORDER_TTL_MS),
-  };
-
-  try {
-    const order = await db.paymentOrder.create({ data, select: { invoiceNumber: true } });
-    return order.invoiceNumber;
-  } catch (error) {
-    const isDuplicate =
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === "P2002";
-    if (!isDuplicate || !input.quote.introPromoToken) throw error;
-
-    const holder = await db.paymentOrder.findUnique({
-      where: { introPromoToken: input.quote.introPromoToken },
-      select: { id: true, invoiceNumber: true, status: true, expiresAt: true },
-    });
-    if (!holder) throw error;
-
-    const stillValid =
-      holder.status === "PENDING" && holder.expiresAt.getTime() > Date.now();
-    if (stillValid) return holder.invoiceNumber; // hai tab cùng bấm → dùng chung một đơn
-    if (introTokenStillHeld(holder.status)) throw error; // đã thanh toán: ưu đãi đã tiêu thật
-
-    // Đơn cũ đã hủy/lỗi/hết hạn → nhả khóa rồi tạo lại đơn mới
-    await db.paymentOrder.update({
-      where: { id: holder.id },
-      data: {
-        introPromoToken: null,
-        status: holder.status === "PENDING" ? "EXPIRED" : holder.status,
-      },
-    });
-    const retried = await db.paymentOrder.create({
-      data: { ...data, invoiceNumber: newInvoiceNumber() },
-      select: { invoiceNumber: true },
-    });
-    return retried.invoiceNumber;
-  }
 }
 
 /** Học viên tự bỏ một đơn đang chờ (nút "Hủy đơn" ở trang kết quả). */

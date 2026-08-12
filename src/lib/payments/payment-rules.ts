@@ -151,6 +151,14 @@ export function introPromoTokenFor(userId: string): string {
  * không tính là đã dùng — nếu tính, học viên bấm nhầm rồi bỏ dở sẽ mất ưu đãi
  * mà chưa tiêu đồng nào.
  */
+/**
+ * LỊCH SỬ, không còn đường nào gọi tới từ mã chạy thật.
+ *
+ * Từ 12/08/2026 gói mua bằng xu nên không còn báo giá VND cho gói nào nữa. Giữ
+ * hàm này vì `PaymentOrder.priceRule` của các đơn CŨ mang giá trị
+ * `FIRST_FEYNMAN_9K`, và đây là chỗ duy nhất ghi lại giá trị đó từng nghĩa là
+ * gì. Xóa đi thì vài năm nữa không ai đọc nổi những đơn ấy.
+ */
 export function resolveOfferPrice(input: {
   offerCode: OfferCode;
   userId: string;

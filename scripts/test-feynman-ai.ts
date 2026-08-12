@@ -109,12 +109,23 @@ console.log("\nBẢNG GIÁ — ba gói đang bán, ba gói đã dừng nhưng c�
 check("Full Test = 39.000đ", OFFERS.FEYNMAN_ATTEMPT_FULL.amount, 39_000);
 check("Đề đơn = 19.000đ", OFFERS.FEYNMAN_ATTEMPT_SINGLE.amount, 19_000);
 check("Nạp lượt AI = 29.000đ", OFFERS.FEYNMAN_AI_TOPUP.amount, 29_000);
-check("Bản giá đã tăng khi đổi mô hình", PRICE_VERSION, "2026-08-09-v2");
+// Ghim đúng chuỗi là cố ý: đổi giá mà quên tăng bản là đơn cũ không còn tra
+// được mình đã bán theo giá nào. Phép thử này buộc việc tăng bản thành một
+// hành động có ý thức chứ không phải thứ nhớ thì làm.
+check("Bản giá đã tăng khi chuyển sang bán bằng xu", PRICE_VERSION, "2026-08-11-v3");
 
+// Liệt kê đúng từng mã chứ không chỉ đếm: thêm một gói vào bảng giá là mở thêm
+// một đường tiêu tiền của học viên, và nó phải là việc ai đó cố ý làm rồi sửa
+// phép thử này, không phải thứ lọt vào lúc nào không hay.
 check(
-  "Đúng ba gói còn bán",
+  "Đúng bốn gói còn bán",
   listOffersForSale().sort(),
-  ["FEYNMAN_AI_TOPUP", "FEYNMAN_ATTEMPT_FULL", "FEYNMAN_ATTEMPT_SINGLE"]
+  [
+    "FEYNMAN_AI_TOPUP",
+    "FEYNMAN_ATTEMPT_FULL",
+    "FEYNMAN_ATTEMPT_SINGLE",
+    "READING_UNLOCK",
+  ]
 );
 check("FEYNMAN_ALL_30D đã dừng bán", isOfferOnSale("FEYNMAN_ALL_30D"), false);
 check("READING_SINGLE đã dừng bán", isOfferOnSale("READING_SINGLE"), false);

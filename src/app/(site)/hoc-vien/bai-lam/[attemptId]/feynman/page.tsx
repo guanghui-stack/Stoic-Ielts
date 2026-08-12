@@ -227,7 +227,7 @@ async function loadAiPanel(input: {
     questionLimit: evaluation?.questionLimit ?? 0,
     questionUsed: evaluation?.questionUsed ?? 0,
     walletRemaining: walletRemaining(budget ?? { grantedTotal: 0, usedTotal: 0 }),
-    topUpHref: `/thanh-toan?goi=FEYNMAN_AI_TOPUP&luot=${input.attemptId}`,
+    topUpHref: `/thanh-toan?luot=${input.attemptId}`,
   };
 }
 
