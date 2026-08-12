@@ -8,6 +8,7 @@
 export const MAIN_NAV = [
   { href: "/", label: "Trang chủ" },
   { href: "/nguyet-thi", label: "Nguyệt Thí" },
+  { href: "/nghi-su-duong", label: "Nghị Sự Đường" },
   { href: "/dien-danh-vong", label: "Điện Danh Vọng" },
   { href: "/bang-vang", label: "Bảng Vàng" },
 ] as const;

@@ -59,6 +59,15 @@ model User {
 
   emailVerifications EmailVerification[]
 
+  /// Bi cam dang tren dien dan. NULL = binh thuong. Cam dang KHONG cam doc:
+  /// khoa hoc lai cua ho van con, va ho van theo doi duoc cong dong.
+  forumBannedAt DateTime?
+
+  forumPosts    ForumPost[]
+  forumComments ForumComment[]
+  forumVotes    ForumVote[]
+  forumReports  ForumReport[]
+
   assemblies                ReadingAssembly[]
   competitionEntries        CompetitionEntry[]
   competitionQualifications CompetitionQualification[]
@@ -1689,4 +1698,121 @@ model EmailVerification {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
+}
+
+/// ===== Nghi Su Duong (dien dan theo cap bac) =====
+///
+/// Phong la DU LIEU, khong phai hang so trong ma. Chin phong theo chin bac la
+/// lua chon hom nay; gop lai ba phong theo thoi dai, hay tach ra khac di, chi
+/// la sua seed chu khong phai viet lai.
+model ForumChannel {
+  id    String @id @default(cuid())
+  /// Ma on dinh dung trong duong dan: `bach-than`, `nghia-binh`...
+  key   String @unique @db.VarChar(64)
+  /// Bac toi thieu de vao. Phong bac N mo DAY DU cho moi nguoi tu bac N tro
+  /// len — bac cao quay ve phong duoi dang bai duoc, khong chi binh luan.
+  level Int    @unique
+  name  String
+  blurb String @db.Text
+
+  sortOrder Int      @default(0)
+  /// Quan tri vien khoa phong: van doc duoc, khong viet duoc.
+  locked    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  posts ForumPost[]
+}
+
+model ForumPost {
+  id        String @id @default(cuid())
+  channelId String
+  authorId  String
+  title     String @db.VarChar(200)
+  body      String @db.Text
+
+  /// Uy vong = tong phieu. Cot nay la SO DEM SAN, chi duoc sua trong cung
+  /// transaction voi hang ForumVote — tach ra la so dem troi khoi su that.
+  score        Int @default(0)
+  commentCount Int @default(0)
+
+  /// VISIBLE | HIDDEN | DELETED. Khong xoa cung: bai da bi bao cao con phai
+  /// tra cuu duoc khi co tranh chap.
+  status String @default("VISIBLE") @db.VarChar(16)
+
+  pinnedAt       DateTime?
+  lockedAt       DateTime?
+  /// Moc de xep bai len dau danh sach. Cap nhat khi co binh luan moi.
+  lastActivityAt DateTime  @default(now())
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  channel  ForumChannel   @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  author   User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  comments ForumComment[]
+
+  @@index([channelId, status, lastActivityAt])
+  @@index([authorId, createdAt])
+}
+
+model ForumComment {
+  id       String  @id @default(cuid())
+  postId   String
+  authorId String
+  /// NULL = binh luan goc. Co gia tri = tra loi mot binh luan khac.
+  parentId String?
+  /// Do sau da chan o MAX_DEPTH. Luu san de giao dien khong phai tinh lai.
+  depth    Int     @default(0)
+  body     String  @db.Text
+
+  score  Int    @default(0)
+  status String @default("VISIBLE") @db.VarChar(16)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  post    ForumPost      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author  User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  parent  ForumComment?  @relation("ForumCommentThread", fields: [parentId], references: [id], onDelete: SetNull)
+  replies ForumComment[] @relation("ForumCommentThread")
+
+  @@index([postId, createdAt])
+}
+
+/// Mot nguoi mot phieu cho mot muc tieu. Rang buoc unique O DAY la thu chan
+/// bau hai lan — khong phai mot phep kiem tra viet bang tay o tang tren.
+model ForumVote {
+  id         String @id @default(cuid())
+  userId     String
+  /// POST | COMMENT
+  targetType String @db.VarChar(8)
+  targetId   String @db.VarChar(32)
+  /// 1 = Cam co, -1 = Ha co. Hang bi XOA khi nguoi dung rut phieu.
+  value      Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, targetType, targetId])
+  @@index([targetType, targetId])
+}
+
+model ForumReport {
+  id         String  @id @default(cuid())
+  reporterId String
+  targetType String  @db.VarChar(8)
+  targetId   String  @db.VarChar(32)
+  reason     String  @db.Text
+  /// OPEN | RESOLVED | DISMISSED
+  status     String  @default("OPEN") @db.VarChar(16)
+  adminNote  String? @db.Text
+
+  resolvedAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  reporter User @relation(fields: [reporterId], references: [id], onDelete: Cascade)
+
+  @@index([status, createdAt])
 }

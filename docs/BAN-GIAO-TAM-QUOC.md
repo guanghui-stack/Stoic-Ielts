@@ -1008,3 +1008,122 @@ OK  tang xu: xu DA BAN khong doi — tang khong phai doanh thu
 5. Quyết định số phận nhánh `feature/integrity-consent-alignment`.
 6. PR-09: nhờ luật sư rà `DU-THAO-PHAP-LY-NGUYET-THI.md`.
 7. Chưa soi: `context.ts`, `prompts.ts`, ba route API ở mức chi tiết.
+
+## 10.18. Nghị Sự Đường — diễn đàn theo cấp bậc (12/08/2026)
+
+Diễn đàn kiểu Reddit, chín phòng theo chín bậc. **Bản đầu đã chạy được trọn
+vòng**: đăng bài → bình luận lồng nhau → cắm cờ/hạ cờ → báo cáo → kiểm duyệt.
+
+### Bốn điều đã chốt với chủ dự án, đừng tự đổi
+
+1. **Chín phòng, mỗi bậc một phòng.** Phòng bậc N mở **ĐẦY ĐỦ** cho mọi người
+   từ bậc N trở lên — bậc cao quay về phòng dưới **đăng bài** được, không chỉ
+   bình luận. Chủ dự án nói rõ điều này sau khi tôi hiểu hẹp lần đầu, và chính
+   nó là câu trả lời cho nỗi lo "phòng bậc cao sẽ vắng".
+2. **Nguyệt Thí khóa phần viết**, vẫn đọc được. Một câu "câu 12 chọn NOT GIVEN"
+   là đủ hỏng cả kỳ thi.
+3. Hai chiều phiếu: **Cắm cờ** (+1) / **Hạ cờ** (−1).
+4. Chỉ chữ. Ảnh, tệp, video để bản sau.
+
+### Vì sao gọi là "uy vọng"
+
+Điểm cộng dồn KHÔNG gọi là "quân công" — `ranks/catalog.ts` đã dùng từ đó cho
+công trạng làm bài ("Người áo vải chưa có quân công"). Ba thứ đếm được thì ba
+tên: **xu** là tiền · **quân công** là học tập · **uy vọng** là đóng góp cộng
+đồng. Trùng tên là ngày nào đó có người cộng nhầm hai thứ.
+
+### Phòng là DỮ LIỆU, không phải hằng số
+
+`ForumChannel` có `level`, và seed đọc thẳng `RANK_SEEDS` nên tên phòng không
+bao giờ lệch tên bậc. Muốn gộp 9 → 3 theo thời đại, hay tách khác đi, chỉ là
+sửa seed. Seed **không** bọc `applyOnce` — nó idempotent theo `key` và cần chạy
+lại mỗi lần triển khai để phòng mới tự xuất hiện; nhưng nó **không đụng** cột
+`locked` vì đó là thiết lập của quản trị viên.
+
+### Hai quyết định kỹ thuật đã đổi so với bản phác thảo
+
+**Bỏ "đường dẫn cụ thể hóa" (materialized path), dựng cây trong bộ nhớ.** Đường
+dẫn phải sinh từ số thứ tự anh em, mà hai người trả lời cùng lúc sẽ đọc cùng
+một số rồi ghi đè nhau — sửa được nhưng phải thêm khóa và vòng thử lại. Một bài
+vài trăm bình luận thì `buildCommentTree()` là một vòng lặp O(n), không đáng
+đánh đổi lấy cả lớp lỗi đua tranh đó.
+
+**Bình luận mồ côi được nâng lên gốc**, không biến mất — mất cả một nhánh thảo
+luận vì một hàng lỗi là quá đắt.
+
+### Ba chỗ dễ sai nhất, đã có phép thử ghim
+
+1. **Thứ tự xét quyền.** Quyền đọc xét TRƯỚC mọi lý do khóa. Chưa đủ bậc mà bị
+   báo "đang kỳ thi" là dẫn học viên đi chờ một thứ không bao giờ tới.
+2. **Đổi phiếu phải là 2 điểm, không phải 1.** Tính 1 thì uy vọng trôi dần khỏi
+   sự thật sau mỗi lần ai đó đổi ý, và không ai phát hiện vì số vẫn "hợp lý".
+3. **Bài phải thuộc ĐÚNG phòng trên đường dẫn.** Thiếu phép kiểm này thì đổi
+   tên phòng trong URL là đọc được bài của phòng bậc trên.
+
+### An toàn nội dung
+
+Kết xuất **văn bản thuần** — React tự thoát chuỗi, nên `<script>` người dùng gõ
+hiện ra đúng như chữ. **Tuyệt đối không đổi sang `dangerouslySetInnerHTML`.**
+`checkText()` cố ý KHÔNG lọc ký tự HTML lúc nhập: lọc lúc nhập luôn sót, và sót
+một lần là lưu vĩnh viễn thứ độc hại vào database. An toàn nằm ở chỗ hiển thị.
+
+Giới hạn: 5 bài/ngày, 30 bình luận/giờ, đếm trên database chứ không giữ bộ đếm
+trong bộ nhớ (Hostinger khởi động lại mỗi lần triển khai).
+
+### Kiểm duyệt: ẩn, KHÔNG xóa
+
+`/quan-tri/nghi-su-duong` có hàng đợi báo cáo, ẩn/hiện bài và bình luận, đóng
+/ghim chủ đề, khóa phòng, cấm đăng. **Cấm đăng không cấm đọc** — cắt cả quyền
+đọc là hình phạt khác hẳn về mức độ, nên phải là quyết định khác.
+
+Nội dung bị báo cáo giữ nguyên trong database để tra khi có tranh chấp. Xóa
+cứng là tự tay vứt bằng chứng của chính mình.
+
+### Lối vào đã làm TRƯỚC khi dựng trang
+
+`MAIN_NAV` có "Nghị Sự Đường", khu quản trị có tab riêng. Dự án đã ba lần dựng
+xong tính năng rồi quên lối vào (10.4, 10.8, 10.15) — lần này lối vào là việc
+đầu tiên, không phải việc cuối.
+
+### Đã kiểm chứng thật
+
+41 phép thử thuần (`scripts/test-forum.ts`), **làm hỏng có ý hai lần**: đổi
+phiếu tính 1 điểm → 3 phép thử báo lỗi; xét Nguyệt Thí trước quyền đọc → 2 phép
+thử báo lỗi. Khôi phục thì xanh lại.
+
+Chạy thật trên MySQL:
+
+```
+OK  bac 1 thay 1 phong · bac 5 thay 5 phong
+OK  bac 5 DANG BAI duoc o phong bac 1
+OK  bac 1 KHONG dang duoc o phong bac 2, bao dung ly do
+OK  tra loi tao nhanh con, con o tang 1, so binh luan = 2
+OK  cam co +1 · bam lai rut ve 0 · doi sang ha co ra -1 (tru 2 diem)
+OK  chi 2 hang phieu cho 2 nguoi, khong nhan doi
+OK  bac 1 bau bai phong bac 3 bi chan
+OK  Nguyet Thi: dang bai va binh luan bi chan, VAN doc duoc
+OK  bao cao trung khong lam loang hang doi
+OK  bi cam dang: khong dang duoc nhung VAN doc duoc
+```
+
+`tsc` · `lint` · `npm test` (23 bộ) · `build` (4 route mới) đều sạch.
+
+**CHƯA kiểm chứng:** giao diện trên trình duyệt thật — mọi trang đều sau đăng
+nhập, và máy này không có phiên đăng nhập. Cần xem tận mắt sau khi triển khai.
+
+### Việc còn nợ (thay cho 10.17)
+
+1. **Triển khai rồi xem tận mắt Nghị Sự Đường** — nhất là cây bình luận trên
+   điện thoại, và nút Cắm cờ/Hạ cờ có tô sáng đúng phiếu của mình không.
+2. **Triển khai rồi test ví xu bằng Playwright** — chủ dự án đăng nhập, Claude
+   lái. Claude KHÔNG gõ mật khẩu và KHÔNG điền thông tin thẻ, kể cả sandbox.
+3. **300 đề sắp lên phải đặt `accessLevel: "RESTRICTED"`** trong file seed, nếu
+   không sẽ bị cho không. Chủ dự án đã xác nhận giá 9 xu mỗi đề.
+4. **Huy hiệu riêng cho từng bậc** — chủ dự án nêu 12/08, chưa làm. Đã có 5
+   thành phần giao diện cấp bậc ở `src/components/ranks/` nhưng **chưa có ảnh
+   nào**; `public/art/ranks/` chưa tồn tại. Đó là chỗ đặt.
+5. **Chấm thử một bài Feynman thật** — vẫn là thứ chặn giai đoạn 2.
+6. Chưa làm cho diễn đàn: phân trang (đang cứng 30 bài/phòng), tìm kiếm, thông
+   báo, sửa/xóa bài của chính mình.
+7. Nén video hero nếu trang chủ chậm — cần ffmpeg.
+8. PR-09: nhờ luật sư rà `DU-THAO-PHAP-LY-NGUYET-THI.md`.

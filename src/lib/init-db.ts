@@ -1024,6 +1024,90 @@ const DDL = [
     CONSTRAINT \`FeynmanAiBudget_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
   ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
 
+  `CREATE TABLE IF NOT EXISTS \`ForumChannel\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`key\` VARCHAR(64) NOT NULL,
+    \`level\` INTEGER NOT NULL,
+    \`name\` VARCHAR(191) NOT NULL,
+    \`blurb\` TEXT NOT NULL,
+    \`sortOrder\` INTEGER NOT NULL DEFAULT 0,
+    \`locked\` BOOLEAN NOT NULL DEFAULT false,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`updatedAt\` DATETIME(3) NOT NULL,
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`ForumChannel_key_key\` (\`key\`),
+    UNIQUE INDEX \`ForumChannel_level_key\` (\`level\`)
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`ForumPost\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`channelId\` VARCHAR(191) NOT NULL,
+    \`authorId\` VARCHAR(191) NOT NULL,
+    \`title\` VARCHAR(200) NOT NULL,
+    \`body\` TEXT NOT NULL,
+    \`score\` INTEGER NOT NULL DEFAULT 0,
+    \`commentCount\` INTEGER NOT NULL DEFAULT 0,
+    \`status\` VARCHAR(16) NOT NULL DEFAULT 'VISIBLE',
+    \`pinnedAt\` DATETIME(3) NULL,
+    \`lockedAt\` DATETIME(3) NULL,
+    \`lastActivityAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`updatedAt\` DATETIME(3) NOT NULL,
+    PRIMARY KEY (\`id\`),
+    INDEX \`ForumPost_channelId_status_lastActivityAt_idx\` (\`channelId\`, \`status\`, \`lastActivityAt\`),
+    INDEX \`ForumPost_authorId_createdAt_idx\` (\`authorId\`, \`createdAt\`),
+    CONSTRAINT \`ForumPost_channelId_fkey\` FOREIGN KEY (\`channelId\`) REFERENCES \`ForumChannel\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`ForumPost_authorId_fkey\` FOREIGN KEY (\`authorId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`ForumComment\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`postId\` VARCHAR(191) NOT NULL,
+    \`authorId\` VARCHAR(191) NOT NULL,
+    \`parentId\` VARCHAR(191) NULL,
+    \`depth\` INTEGER NOT NULL DEFAULT 0,
+    \`body\` TEXT NOT NULL,
+    \`score\` INTEGER NOT NULL DEFAULT 0,
+    \`status\` VARCHAR(16) NOT NULL DEFAULT 'VISIBLE',
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`updatedAt\` DATETIME(3) NOT NULL,
+    PRIMARY KEY (\`id\`),
+    INDEX \`ForumComment_postId_createdAt_idx\` (\`postId\`, \`createdAt\`),
+    INDEX \`ForumComment_parentId_idx\` (\`parentId\`),
+    CONSTRAINT \`ForumComment_postId_fkey\` FOREIGN KEY (\`postId\`) REFERENCES \`ForumPost\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`ForumComment_authorId_fkey\` FOREIGN KEY (\`authorId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`ForumComment_parentId_fkey\` FOREIGN KEY (\`parentId\`) REFERENCES \`ForumComment\` (\`id\`) ON DELETE SET NULL ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`ForumVote\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`targetType\` VARCHAR(8) NOT NULL,
+    \`targetId\` VARCHAR(32) NOT NULL,
+    \`value\` INTEGER NOT NULL,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`updatedAt\` DATETIME(3) NOT NULL,
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`ForumVote_userId_targetType_targetId_key\` (\`userId\`, \`targetType\`, \`targetId\`),
+    INDEX \`ForumVote_targetType_targetId_idx\` (\`targetType\`, \`targetId\`),
+    CONSTRAINT \`ForumVote_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`ForumReport\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`reporterId\` VARCHAR(191) NOT NULL,
+    \`targetType\` VARCHAR(8) NOT NULL,
+    \`targetId\` VARCHAR(32) NOT NULL,
+    \`reason\` TEXT NOT NULL,
+    \`status\` VARCHAR(16) NOT NULL DEFAULT 'OPEN',
+    \`adminNote\` TEXT NULL,
+    \`resolvedAt\` DATETIME(3) NULL,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (\`id\`),
+    INDEX \`ForumReport_status_createdAt_idx\` (\`status\`, \`createdAt\`),
+    CONSTRAINT \`ForumReport_reporterId_fkey\` FOREIGN KEY (\`reporterId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
   `CREATE TABLE IF NOT EXISTS \`EmailVerification\` (
     \`id\` VARCHAR(191) NOT NULL,
     \`userId\` VARCHAR(191) NOT NULL,
@@ -1118,6 +1202,9 @@ const MIGRATIONS = [
 
   // So cai xu ghi them cot "de nao duoc mo"
   `ALTER TABLE \`CoinLedger\` ADD COLUMN \`exerciseId\` VARCHAR(191) NULL`,
+
+  // Cam dang tren dien dan
+  `ALTER TABLE \`User\` ADD COLUMN \`forumBannedAt\` DATETIME(3) NULL`,
 
   // Dang nhap Google + gioi han mot thiet bi
   `ALTER TABLE \`User\` MODIFY COLUMN \`passwordHash\` VARCHAR(191) NULL`,
@@ -1424,6 +1511,43 @@ export async function initDatabase() {
    * `GIFT:WELCOME:<userId>` chong tang hai lan, va mot nguoi vua duoc tang qua
    * o buoc dang ky roi lai duoc buoc nay tang them la mat tien that.
    */
+  /**
+   * Chín phòng Nghị Sự Đường, mỗi bậc một phòng.
+   *
+   * Tên và mã lấy THẲNG từ `RANK_SEEDS` chứ không chép tay: chép tay thì đổi
+   * tên một bậc là lệch ngay, và lệch ở đây nghĩa là học viên bậc 4 nhìn thấy
+   * một phòng mang tên bậc 5.
+   *
+   * KHÔNG bọc applyOnce: đây là seed idempotent theo `key`, cần chạy lại mỗi
+   * lần triển khai để phòng mới (nếu sau này thêm bậc) tự xuất hiện. Phòng đã
+   * có thì chỉ cập nhật tên và mô tả, KHÔNG đụng tới `locked` — đó là thiết
+   * lập của quản trị viên.
+   */
+  try {
+    const { RANK_SEEDS } = await import("@/lib/ranks/catalog");
+    for (const rank of RANK_SEEDS) {
+      await db.forumChannel.upsert({
+        where: { key: rank.slug },
+        create: {
+          key: rank.slug,
+          level: rank.level,
+          name: rank.name,
+          blurb: rank.description,
+          sortOrder: rank.level,
+        },
+        update: {
+          level: rank.level,
+          name: rank.name,
+          blurb: rank.description,
+          sortOrder: rank.level,
+        },
+      });
+    }
+    console.log(`[wobridges] Nghi Su Duong: ${RANK_SEEDS.length} phong.`);
+  } catch (err) {
+    console.error("[wobridges] Khong seed duoc phong dien dan:", err);
+  }
+
   await applyOnce("WELCOME_COINS_BACKFILL_v1", async () => {
     const { grantWelcomeCoins } = await import("@/lib/payments/coin-service");
     const users = await db.user.findMany({
