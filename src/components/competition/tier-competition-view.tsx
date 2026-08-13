@@ -59,7 +59,7 @@ export async function TierCompetitionView({ tier }: { tier: CompetitionTier }) {
   const sourceName = sourcePolicy?.name ?? "";
 
   return (
-    <main className="mx-auto max-w-4xl px-6 py-10">
+    <main className="motion-page-entry mx-auto max-w-4xl px-6 py-10">
       <SectionHeading
         label={policy.name}
         title={

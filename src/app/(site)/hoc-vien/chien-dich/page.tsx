@@ -52,7 +52,7 @@ export default async function CampaignPage() {
   const passed = nodes.filter((node) => node.state === "PASSED").length;
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-10">
+    <main className="motion-page-entry mx-auto max-w-6xl px-6 py-10">
       <StudentNav current="campaign" />
 
 

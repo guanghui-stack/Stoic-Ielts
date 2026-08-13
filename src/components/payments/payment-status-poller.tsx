@@ -154,7 +154,10 @@ export function PaymentStatusPoller({
 
   return (
     <div className="mt-8">
-      <div className={`flex items-start gap-3 border-l-4 px-6 py-5 ${TONE_CLASS[view.tone]}`}>
+      <div
+        key={status}
+        className={`motion-status-enter flex items-start gap-3 border-l-4 px-6 py-5 ${TONE_CLASS[view.tone]}`}
+      >
         {view.tone === "wait" ? (
           <Loader2 className="mt-0.5 h-5 w-5 shrink-0 animate-spin" aria-hidden="true" />
         ) : view.tone === "good" ? (
@@ -187,7 +190,7 @@ export function PaymentStatusPoller({
             type="button"
             onClick={onManualCheck}
             disabled={checking}
-            className="inline-flex cursor-pointer items-center gap-2 border border-navy px-7 py-3 font-ui text-[0.8rem] font-semibold uppercase tracking-[0.12em] text-navy transition-colors hover:bg-navy hover:text-paper disabled:cursor-not-allowed disabled:opacity-50"
+            className="motion-press inline-flex cursor-pointer items-center gap-2 border border-navy px-7 py-3 font-ui text-[0.8rem] font-semibold uppercase tracking-[0.12em] text-navy hover:bg-navy hover:text-paper disabled:cursor-not-allowed disabled:opacity-50"
           >
             <RefreshCw
               className={`h-4 w-4 ${checking ? "animate-spin" : ""}`}

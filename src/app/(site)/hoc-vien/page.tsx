@@ -151,7 +151,7 @@ export default async function StudentDashboard({
   }));
 
   return (
-    <>
+    <div className="motion-page-entry">
       <section className="border-b border-line bg-paper">
         <div className="mx-auto flex max-w-6xl flex-wrap items-end justify-between gap-6 px-6 py-12">
           <div>
@@ -337,6 +337,6 @@ export default async function StudentDashboard({
           </ButtonLink>
         </div>
       </section>
-    </>
+    </div>
   );
 }

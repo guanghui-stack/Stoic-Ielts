@@ -64,7 +64,7 @@ export default async function AdminCompetitionPage() {
   ]);
 
   return (
-    <section className="mx-auto max-w-6xl px-6 py-12">
+    <section className="motion-page-entry mx-auto max-w-6xl px-6 py-12">
       <p className="label-caps flex items-center gap-2">
         <Trophy className="h-3.5 w-3.5" aria-hidden="true" />
         Cuộc thi

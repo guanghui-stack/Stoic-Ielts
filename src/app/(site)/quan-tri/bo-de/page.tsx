@@ -37,7 +37,7 @@ export default async function AdminCollectionsPage() {
   const active = collections.find((c) => c.status === "ACTIVE");
 
   return (
-    <section className="mx-auto max-w-5xl px-6 py-12">
+    <section className="motion-page-entry mx-auto max-w-5xl px-6 py-12">
       <p className="label-caps flex items-center gap-2">
         <Snowflake className="h-3.5 w-3.5" aria-hidden="true" />
         Danh hiệu

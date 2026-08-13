@@ -27,7 +27,7 @@ export function ResetPasswordForm({
         type="button"
         onClick={() => setOpen(true)}
         title={`Đặt lại mật khẩu cho ${userEmail}`}
-        className="flex h-9 w-9 cursor-pointer items-center justify-center border border-line text-ink-soft transition-colors hover:border-navy hover:text-navy"
+        className="motion-press flex h-9 w-9 cursor-pointer items-center justify-center border border-line text-ink-soft hover:border-navy hover:text-navy"
       >
         <KeyRound className="h-4 w-4" aria-hidden="true" />
         <span className="sr-only">Đặt lại mật khẩu</span>
@@ -36,7 +36,7 @@ export function ResetPasswordForm({
   }
 
   return (
-    <div className="flex flex-col items-end gap-2">
+    <div className="motion-panel-swap flex flex-col items-end gap-2">
       {state?.error && <ErrorBanner message={state.error} />}
       {state?.success && (
         <p className="border-l-4 border-success bg-success-pale px-3 py-1.5 font-ui text-xs text-success">
@@ -53,14 +53,14 @@ export function ResetPasswordForm({
           placeholder="Mật khẩu mới (≥8 ký tự)"
           className="w-48 border border-line-strong bg-paper px-3 py-2 font-ui text-sm focus:border-navy focus:outline-none"
         />
-        <SubmitButton disabled={pending} className="!px-4 !py-2">
+        <SubmitButton disabled={pending} className="motion-press !px-4 !py-2">
           {pending ? "…" : "Đặt lại"}
         </SubmitButton>
         <button
           type="button"
           onClick={() => setOpen(false)}
           aria-label="Đóng"
-          className="flex h-9 w-9 cursor-pointer items-center justify-center border border-line text-ink-soft hover:text-danger"
+          className="motion-press flex h-9 w-9 cursor-pointer items-center justify-center border border-line text-ink-soft hover:text-danger"
         >
           <X className="h-4 w-4" aria-hidden="true" />
         </button>

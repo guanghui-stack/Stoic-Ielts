@@ -70,7 +70,7 @@ export default async function MyDataPage() {
   const fmt = (d: Date | null) => (d ? d.toLocaleDateString("vi-VN") : "—");
 
   return (
-    <main className="mx-auto max-w-4xl px-6 py-10">
+    <main className="motion-page-entry mx-auto max-w-4xl px-6 py-10">
       <StudentNav />
 
       <SectionHeading label="Quyền dữ liệu" title="Dữ liệu của tôi" />

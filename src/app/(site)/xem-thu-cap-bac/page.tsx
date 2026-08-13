@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { CurrentRankCard } from "@/components/ranks/current-rank-card";
+import { RankPromotionMoment } from "@/components/ranks/rank-promotion-moment";
 import { TrialGateCard } from "@/components/ranks/trial-gate-card";
 import { TrialProgress } from "@/components/ranks/trial-progress";
 import { CardinalTitlePicker } from "@/components/ranks/cardinal-title-picker";
@@ -121,6 +122,16 @@ export default function RankPreviewPage() {
           era="LOAN_THE"
           bandAnchor="Band 4.5 ổn định"
           active
+        />
+      </Block>
+
+      <Block title="Khoảnh khắc khải hoàn — chỉ hiện một lần">
+        <RankPromotionMoment
+          userId="xem-thu-cap-bac"
+          promotionId="preview-rank-5"
+          level={5}
+          rankName="Nha tướng"
+          eligible
         />
       </Block>
 

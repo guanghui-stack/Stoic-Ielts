@@ -94,7 +94,7 @@ export default async function QualificationDetailPage({
     }));
 
   return (
-    <main className="mx-auto max-w-5xl px-6 py-10">
+    <main className="motion-page-entry mx-auto max-w-5xl px-6 py-10">
       <Link
         href="/quan-tri/tuyen-chon"
         className="mb-6 inline-flex items-center gap-2 text-sm text-muted hover:text-navy"

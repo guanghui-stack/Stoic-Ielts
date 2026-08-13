@@ -45,7 +45,7 @@ const PILLARS = [
 
 export default async function HomePage() {
   return (
-    <>
+    <div className="motion-page-entry">
       {/* ===== Hero ===== */}
       <InkWashHero
         asset={ART_ASSETS.homeTrieuVan}
@@ -241,6 +241,6 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-    </>
+    </div>
   );
 }

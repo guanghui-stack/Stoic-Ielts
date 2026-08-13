@@ -71,13 +71,17 @@ export function PublicProfileForm({
       <button
         type="submit"
         disabled={pending}
-        className="mt-5 inline-flex cursor-pointer items-center border border-navy px-6 py-2.5 font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-navy transition-colors hover:bg-navy hover:text-paper disabled:opacity-50"
+        className="motion-press mt-5 inline-flex cursor-pointer items-center border border-navy px-6 py-2.5 font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-navy hover:bg-navy hover:text-paper disabled:opacity-50"
       >
         {pending ? "Đang lưu…" : "Lưu lựa chọn"}
       </button>
 
-      {state?.error && <p className="mt-3 font-ui text-sm text-danger">{state.error}</p>}
-      {state?.success && <p className="mt-3 font-ui text-sm text-success">{state.success}</p>}
+      {state?.error && (
+        <p className="motion-status-enter mt-3 font-ui text-sm text-danger">{state.error}</p>
+      )}
+      {state?.success && (
+        <p className="motion-status-enter mt-3 font-ui text-sm text-success">{state.success}</p>
+      )}
     </form>
   );
 }

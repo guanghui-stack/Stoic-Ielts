@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Award, ChevronDown, Info, Users } from "lucide-react";
+import { Users } from "lucide-react";
 import { db } from "@/lib/db";
 import {
   CATEGORY_LABELS,
@@ -14,6 +14,7 @@ import {
   rarityLabel,
 } from "@/lib/achievements/explain";
 import { CatalogToc } from "@/components/achievements/catalog-toc";
+import { AchievementDisclosure } from "@/components/achievements/achievement-disclosure";
 import { PageHero, NoteBox } from "@/components/ui";
 
 export const metadata = {
@@ -68,7 +69,7 @@ export default async function HallOfFamePage() {
   }));
 
   return (
-    <>
+    <div className="motion-page-entry">
       <PageHero
         label="Vinh danh"
         title="Điện Danh Vọng"
@@ -164,100 +165,17 @@ export default async function HallOfFamePage() {
                   });
 
                   return (
-                    <details
+                    <AchievementDisclosure
                       key={def.id}
-                      className="group border border-line bg-paper open:border-navy open:shadow-card"
-                    >
-                      <summary className="flex cursor-pointer list-none flex-wrap items-start gap-4 p-6 transition-colors hover:bg-cream [&::-webkit-details-marker]:hidden">
-                        <span className="flex shrink-0 items-baseline gap-2 pt-0.5">
-                          <span className="font-ui text-xs font-semibold tabular-nums text-muted">
-                            {index + 1}
-                          </span>
-                          <Award className="h-4 w-4 text-gold" aria-hidden="true" />
-                        </span>
-
-                        <span className="min-w-0 flex-1">
-                          <span className="flex flex-wrap items-center gap-2">
-                            <span className="font-display text-lg font-bold text-navy-deep">
-                              {def.name}
-                            </span>
-                            <span className="border border-line-strong px-2 py-0.5 font-ui text-[0.65rem] font-semibold uppercase tracking-[0.06em] text-muted">
-                              {rarityLabel(def.rarity)}
-                            </span>
-                          </span>
-                          {attribution && (
-                            <span className="mt-1.5 block font-ui text-xs italic text-muted">
-                              {attribution}
-                            </span>
-                          )}
-                          <span className="mt-2.5 block text-[0.93rem] leading-relaxed text-ink-soft">
-                            {def.description}
-                          </span>
-                          <span className="mt-3 inline-flex items-center gap-1.5 font-ui text-[0.72rem] font-semibold uppercase tracking-[0.1em] text-navy">
-                            <ChevronDown
-                              className="h-3.5 w-3.5 transition-transform group-open:rotate-180"
-                              aria-hidden="true"
-                            />
-                            <span className="group-open:hidden">Cách đạt được</span>
-                            <span className="hidden group-open:inline">Thu gọn</span>
-                          </span>
-                        </span>
-
-                        <span className="shrink-0 text-right">
-                          <span className="block font-display text-3xl font-bold tabular-nums text-navy-deep">
-                            {count}
-                          </span>
-                          <span className="block font-ui text-xs text-muted">
-                            {percent}% học viên
-                          </span>
-                        </span>
-                      </summary>
-
-                      <div className="border-t border-line bg-cream px-6 py-6">
-                        <p className="font-ui text-sm font-semibold text-navy-deep">
-                          {guide.summary}
-                        </p>
-
-                        {guide.steps.length > 0 && (
-                          <>
-                            <p className="label-caps mt-5">
-                              Cần đạt đủ các điều kiện sau
-                            </p>
-                            <ul className="mt-3 space-y-2">
-                              {guide.steps.map((step, i) => (
-                                <li
-                                  key={i}
-                                  className="flex gap-3 text-[0.93rem] leading-relaxed text-ink-soft"
-                                >
-                                  <span
-                                    className="mt-[0.55rem] h-1.5 w-1.5 shrink-0 bg-gold"
-                                    aria-hidden="true"
-                                  />
-                                  <span>{step}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </>
-                        )}
-
-                        {guide.notes.length > 0 && (
-                          <div className="mt-6 space-y-2.5 border-t border-line pt-5">
-                            {guide.notes.map((note, i) => (
-                              <p
-                                key={i}
-                                className="flex gap-2.5 font-ui text-[0.85rem] leading-relaxed text-muted"
-                              >
-                                <Info
-                                  className="mt-0.5 h-3.5 w-3.5 shrink-0"
-                                  aria-hidden="true"
-                                />
-                                <span>{note}</span>
-                              </p>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </details>
+                      index={index + 1}
+                      name={def.name}
+                      rarity={rarityLabel(def.rarity)}
+                      attribution={attribution}
+                      description={def.description}
+                      count={count}
+                      percent={percent}
+                      guide={guide}
+                    />
                   );
                 })}
               </div>
@@ -278,6 +196,6 @@ export default async function HallOfFamePage() {
           Email, điểm số chi tiết và lịch sử học tập không bao giờ hiển thị công khai.
         </NoteBox>
       </section>
-    </>
+    </div>
   );
 }

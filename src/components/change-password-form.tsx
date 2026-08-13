@@ -47,7 +47,7 @@ export function ChangePasswordForm() {
         required
         autoComplete="new-password"
       />
-      <SubmitButton disabled={pending} variant="gold" className="w-full">
+      <SubmitButton disabled={pending} variant="gold" className="motion-press w-full">
         <KeyRound className="h-4 w-4" aria-hidden="true" />
         {pending ? "Đang lưu…" : "Đổi mật khẩu"}
       </SubmitButton>

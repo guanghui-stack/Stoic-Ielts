@@ -71,7 +71,7 @@ export default async function StudyLogPage() {
   }
 
   return (
-    <main className="mx-auto max-w-4xl px-6 py-10">
+    <main className="motion-page-entry mx-auto max-w-4xl px-6 py-10">
       <StudentNav current="studyDays" />
 
 

@@ -13,7 +13,7 @@ export default async function LoginPage() {
   if (user) redirect(user.role === "ADMIN" ? "/quan-tri" : "/hoc-vien");
 
   return (
-    <section className="mx-auto max-w-md px-6 py-16 md:py-20">
+    <section className="motion-page-entry mx-auto max-w-md px-6 py-16 md:py-20">
       <p className="label-caps text-center">Khu vực học viên</p>
       <h1 className="mt-3 text-center font-display text-4xl font-bold text-navy-deep">
         Đăng nhập

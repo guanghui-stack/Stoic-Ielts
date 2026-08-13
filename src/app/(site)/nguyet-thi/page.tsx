@@ -58,7 +58,7 @@ export default async function CompetitionPage({
   const now = new Date();
 
   return (
-    <>
+    <div className="motion-page-entry">
       <PageHero
         label="Cuộc thi hàng tháng"
         title="Nguyệt Thí"
@@ -237,7 +237,7 @@ export default async function CompetitionPage({
           />
         )}
       </section>
-    </>
+    </div>
   );
 }
 

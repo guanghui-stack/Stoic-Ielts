@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { Trash2, X, AlertTriangle } from "lucide-react";
 import { deleteUserAction, type AdminFormState } from "@/lib/actions/admin";
 import { ErrorBanner, SubmitButton } from "@/components/ui";
@@ -21,10 +21,18 @@ export function DeleteUserButton({
   attemptCount: number;
 }) {
   const [open, setOpen] = useState(false);
+  const dialogRef = useRef<HTMLDialogElement>(null);
   const [state, formAction, pending] = useActionState<AdminFormState, FormData>(
     deleteUserAction,
     undefined
   );
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (open && !dialog.open) dialog.showModal();
+    if (!open && dialog.open) dialog.close();
+  }, [open]);
 
   return (
     <>
@@ -32,26 +40,31 @@ export function DeleteUserButton({
         type="button"
         onClick={() => setOpen(true)}
         title={`Xóa vĩnh viễn tài khoản ${userEmail}`}
-        className="flex h-9 w-9 cursor-pointer items-center justify-center border border-line text-ink-soft transition-colors hover:border-danger hover:bg-danger-pale hover:text-danger"
+        className="motion-press flex h-9 w-9 cursor-pointer items-center justify-center border border-line text-ink-soft hover:border-danger hover:bg-danger-pale hover:text-danger"
       >
         <Trash2 className="h-4 w-4" aria-hidden="true" />
         <span className="sr-only">Xóa tài khoản</span>
       </button>
 
-      {open && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label="Xác nhận xóa tài khoản"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-navy-deep/50 p-4"
-          onClick={(e) => e.target === e.currentTarget && setOpen(false)}
-        >
-          <div className="w-full max-w-lg border border-line bg-paper p-7 shadow-lift">
+      <dialog
+        ref={dialogRef}
+        aria-labelledby={`delete-user-title-${userId}`}
+        className="motion-dialog"
+        onCancel={() => setOpen(false)}
+        onClose={() => setOpen(false)}
+        onClick={(event) => {
+          if (event.target === event.currentTarget) setOpen(false);
+        }}
+      >
+          <div className="w-full border border-line bg-paper p-7 shadow-lift">
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-start gap-3">
                 <AlertTriangle className="mt-0.5 h-6 w-6 shrink-0 text-danger" aria-hidden="true" />
                 <div>
-                  <h2 className="font-display text-xl font-bold text-navy-deep">
+                  <h2
+                    id={`delete-user-title-${userId}`}
+                    className="font-display text-xl font-bold text-navy-deep"
+                  >
                     Xóa vĩnh viễn tài khoản?
                   </h2>
                   <p className="mt-1 font-ui text-sm text-ink-soft">
@@ -63,7 +76,7 @@ export function DeleteUserButton({
                 type="button"
                 onClick={() => setOpen(false)}
                 aria-label="Đóng"
-                className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center text-ink-soft hover:text-danger"
+                className="motion-press flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center text-ink-soft hover:text-danger"
               >
                 <X className="h-4 w-4" aria-hidden="true" />
               </button>
@@ -86,7 +99,7 @@ export function DeleteUserButton({
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
-                  className="mt-5 cursor-pointer border border-navy px-6 py-2.5 font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-navy hover:bg-navy hover:text-paper"
+                  className="motion-press mt-5 cursor-pointer border border-navy px-6 py-2.5 font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-navy hover:bg-navy hover:text-paper"
                 >
                   Đóng
                 </button>
@@ -107,20 +120,21 @@ export function DeleteUserButton({
                     id={`confirm-${userId}`}
                     name="confirmEmail"
                     required
+                    autoFocus
                     autoComplete="off"
                     placeholder="Nhập lại email ở trên"
                     className="mt-2 w-full border border-line-strong bg-paper px-4 py-3 font-ui text-[0.95rem] text-ink placeholder:text-muted focus:border-danger focus:outline-none focus:ring-2 focus:ring-danger/20"
                   />
                 </div>
                 <div className="flex flex-wrap gap-3">
-                  <SubmitButton disabled={pending} variant="danger">
+                  <SubmitButton disabled={pending} variant="danger" className="motion-press">
                     <Trash2 className="h-4 w-4" aria-hidden="true" />
                     {pending ? "Đang xóa…" : "Xóa vĩnh viễn"}
                   </SubmitButton>
                   <button
                     type="button"
                     onClick={() => setOpen(false)}
-                    className="cursor-pointer border border-line px-6 py-3 font-ui text-[0.8rem] font-semibold uppercase tracking-[0.12em] text-ink-soft hover:border-navy hover:text-navy"
+                    className="motion-press cursor-pointer border border-line px-6 py-3 font-ui text-[0.8rem] font-semibold uppercase tracking-[0.12em] text-ink-soft hover:border-navy hover:text-navy"
                   >
                     Hủy
                   </button>
@@ -128,8 +142,7 @@ export function DeleteUserButton({
               </form>
             )}
           </div>
-        </div>
-      )}
+      </dialog>
     </>
   );
 }

@@ -28,7 +28,7 @@ export default async function WeaknessPage() {
   const rows = weaknessRows(facts.attempts, now);
 
   return (
-    <main className="mx-auto max-w-4xl px-6 py-10">
+    <main className="motion-page-entry mx-auto max-w-4xl px-6 py-10">
       <StudentNav current="weakness" />
 
 

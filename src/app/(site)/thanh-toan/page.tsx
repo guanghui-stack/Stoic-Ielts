@@ -257,7 +257,7 @@ function TopUpCard({
             tierCode={code}
             attemptId={attemptId}
             variant={bonus > 0 ? "gold" : "primary"}
-            className="w-full"
+            className="motion-press w-full"
           >
             Nạp {formatVnd(tier.amountVnd)}
           </TopUpButton>
@@ -376,6 +376,7 @@ function AiTopUpCard({
           <CoinPurchaseButton
             offerCode="FEYNMAN_AI_TOPUP"
             spendToken={spendToken}
+            className="motion-press"
           >
             <Coins className="h-4 w-4" aria-hidden="true" />
             Đổi {formatCoins(offer.priceCoins)} lấy {offer.aiGradingCredits} lượt

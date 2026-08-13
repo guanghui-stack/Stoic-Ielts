@@ -29,7 +29,7 @@ function GoogleAuthButton({ label }: { label: string }) {
       </div>
       <a
         href="/api/auth/google"
-        className="flex w-full items-center justify-center gap-3 border border-line-strong bg-paper px-4 py-3 font-ui text-sm font-semibold text-ink transition-colors hover:border-navy hover:bg-cream"
+        className="motion-press flex w-full items-center justify-center gap-3 border border-line-strong bg-paper px-4 py-3 font-ui text-sm font-semibold text-ink hover:border-navy hover:bg-cream"
       >
         <svg className="h-4 w-4" viewBox="0 0 48 48" aria-hidden="true">
           <path fill="#4285F4" d="M45.1 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h11.8c-.5 2.7-2 5-4.4 6.6v5.5h7.1c4.1-3.8 6.6-9.4 6.6-16.1z" />
@@ -64,7 +64,7 @@ export function LoginForm() {
         autoComplete="current-password"
         placeholder="••••••••"
       />
-      <SubmitButton disabled={pending} className="w-full">
+      <SubmitButton disabled={pending} className="motion-press w-full">
         <LogIn className="h-4 w-4" aria-hidden="true" />
         {pending ? "Đang đăng nhập…" : "Đăng nhập"}
       </SubmitButton>
@@ -124,7 +124,7 @@ export function RegisterForm() {
         autoComplete="new-password"
         placeholder="Nhập lại mật khẩu"
       />
-      <SubmitButton disabled={pending} variant="gold" className="w-full">
+      <SubmitButton disabled={pending} variant="gold" className="motion-press w-full">
         <UserRoundPlus className="h-4 w-4" aria-hidden="true" />
         {pending ? "Đang tạo tài khoản…" : "Tạo tài khoản học viên"}
       </SubmitButton>

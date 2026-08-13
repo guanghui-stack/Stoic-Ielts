@@ -3,6 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { db } from "@/lib/db";
 import { features } from "@/lib/features";
 import { CurrentRankCard } from "@/components/ranks/current-rank-card";
+import { RankPromotionMoment } from "@/components/ranks/rank-promotion-moment";
 import { TrialProgress } from "@/components/ranks/trial-progress";
 import { CampaignMini } from "@/components/campaign/campaign-mini";
 import { campaignView, type TrialStatusMap } from "@/lib/campaign/view";
@@ -64,9 +65,22 @@ export async function RankDashboardBlock({ userId }: { userId: string }) {
   const lastActivity = facts.attempts.at(-1)?.submittedAt ?? profile.promotedAt;
   const isActive =
     facts.now.getTime() - lastActivity.getTime() < 30 * 24 * 60 * 60 * 1000;
+  const promotionAge = facts.now.getTime() - profile.promotedAt.getTime();
+  const promotionIsFresh =
+    profile.currentLevel > 1 &&
+    promotionAge >= 0 &&
+    promotionAge <= 14 * 24 * 60 * 60 * 1000;
 
   return (
     <div className="space-y-6">
+      <RankPromotionMoment
+        userId={userId}
+        promotionId={`${profile.currentLevel}:${profile.version}:${profile.promotedAt.toISOString()}`}
+        level={profile.currentLevel}
+        rankName={cardinalName ?? rank.name}
+        eligible={promotionIsFresh}
+      />
+
       <CurrentRankCard
         level={profile.currentLevel}
         rankName={rank.name}

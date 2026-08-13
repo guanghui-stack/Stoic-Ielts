@@ -33,7 +33,7 @@ export default async function QualificationAdminPage() {
   });
 
   return (
-    <main className="mx-auto max-w-5xl px-6 py-10">
+    <main className="motion-page-entry mx-auto max-w-5xl px-6 py-10">
       <p className="label-caps flex items-center gap-2">
         <Ticket className="h-3.5 w-3.5" aria-hidden />
         Quản trị

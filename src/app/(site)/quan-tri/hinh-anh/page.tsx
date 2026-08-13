@@ -73,7 +73,7 @@ export default async function ArtAdminPage() {
   const totalKb = rows.reduce((sum, r) => sum + (r.sizeKb ?? 0), 0);
 
   return (
-    <main className="mx-auto max-w-6xl px-6 py-10">
+    <main className="motion-page-entry mx-auto max-w-6xl px-6 py-10">
       <p className="label-caps flex items-center gap-2">
         <ImageIcon className="h-3.5 w-3.5" aria-hidden />
         Quản trị
