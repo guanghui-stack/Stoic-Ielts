@@ -31,6 +31,7 @@ export function GoalsCard({
   daysLeft: number | null;
 }) {
   const [editing, setEditing] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
   const [state, formAction, pending] = useActionState<AccountFormState, FormData>(
     updateGoalsAction,
     undefined
@@ -48,7 +49,7 @@ export function GoalsCard({
     return (
       <form
         action={formAction}
-        className="border border-line bg-paper p-7 shadow-card"
+        className={`${hasInteracted ? "motion-panel-swap " : ""}border border-line bg-paper p-7 shadow-card`}
       >
         <div className="flex items-center justify-between gap-4">
           <p className="label-caps flex items-center gap-2">
@@ -57,9 +58,12 @@ export function GoalsCard({
           </p>
           <button
             type="button"
-            onClick={() => setEditing(false)}
+            onClick={() => {
+              setHasInteracted(true);
+              setEditing(false);
+            }}
             aria-label="Hủy chỉnh sửa"
-            className="flex h-9 w-9 cursor-pointer items-center justify-center border border-line text-ink-soft hover:border-danger hover:text-danger"
+            className="motion-press flex h-9 w-9 cursor-pointer items-center justify-center border border-line text-ink-soft hover:border-danger hover:text-danger"
           >
             <X className="h-4 w-4" aria-hidden="true" />
           </button>
@@ -106,7 +110,7 @@ export function GoalsCard({
           </div>
         </div>
         <div className="mt-5">
-          <SubmitButton disabled={pending} variant="gold">
+          <SubmitButton disabled={pending} variant="gold" className="motion-press">
             <Save className="h-4 w-4" aria-hidden="true" />
             {pending ? "Đang lưu…" : "Lưu mục tiêu"}
           </SubmitButton>
@@ -116,7 +120,9 @@ export function GoalsCard({
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1.7fr_1fr]">
+    <div
+      className={`${hasInteracted ? "motion-panel-swap " : ""}grid gap-6 lg:grid-cols-[1.7fr_1fr]`}
+    >
       {/* Mục tiêu band điểm */}
       <div className="border border-line bg-paper p-7 shadow-card">
         <div className="flex items-center justify-between gap-4">
@@ -126,10 +132,13 @@ export function GoalsCard({
           </p>
           <button
             type="button"
-            onClick={() => setEditing(true)}
+            onClick={() => {
+              setHasInteracted(true);
+              setEditing(true);
+            }}
             aria-label="Chỉnh sửa mục tiêu"
             title="Chỉnh sửa mục tiêu"
-            className="flex h-9 w-9 cursor-pointer items-center justify-center border border-line text-ink-soft transition-colors hover:border-gold hover:text-gold"
+            className="motion-press flex h-9 w-9 cursor-pointer items-center justify-center border border-line text-ink-soft hover:border-gold hover:text-gold"
           >
             <Pencil className="h-4 w-4" aria-hidden="true" />
           </button>

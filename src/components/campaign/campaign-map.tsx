@@ -76,7 +76,7 @@ export function CampaignMap({ nodes }: { nodes: CampaignNodeView[] }) {
                 aria-label={nodeLabel(node)}
                 aria-disabled={locked}
                 tabIndex={locked ? -1 : undefined}
-                className={`group flex w-32 flex-col items-center gap-1 rounded-md p-2 text-center transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy ${
+                className={`group flex w-32 flex-col items-center gap-1 rounded-md p-2 text-center transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-navy ${
                   locked ? "cursor-default opacity-60" : "hover:bg-cream/70"
                 }`}
               >

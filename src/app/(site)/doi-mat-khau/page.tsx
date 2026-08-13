@@ -11,7 +11,7 @@ export default async function ChangePasswordPage() {
   const backHref = user.role === "ADMIN" ? "/quan-tri" : "/hoc-vien";
 
   return (
-    <section className="mx-auto max-w-md px-6 py-16 md:py-20">
+    <section className="motion-page-entry mx-auto max-w-md px-6 py-16 md:py-20">
       <Link
         href={backHref}
         className="inline-flex items-center gap-2 font-ui text-sm font-semibold text-navy hover:text-gold"

@@ -89,7 +89,7 @@ export default async function AdminForumPage() {
   const commentById = new Map(reportedComments.map((c) => [c.id, c]));
 
   return (
-    <section className="mx-auto max-w-6xl px-6 py-12">
+    <section className="motion-page-entry mx-auto max-w-6xl px-6 py-12">
       <p className="label-caps">Kiểm duyệt</p>
       <h1 className="mt-3 font-display text-3xl font-bold text-navy-deep md:text-4xl">
         Nghị Sự Đường

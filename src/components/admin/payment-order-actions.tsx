@@ -26,7 +26,7 @@ export function ReconcileButton({ invoiceNumber }: { invoiceNumber: string }) {
           type="submit"
           disabled={pending}
           title="Hỏi SePay xem đơn này đã thanh toán chưa"
-          className="inline-flex cursor-pointer items-center gap-1.5 border border-navy px-3 py-1.5 font-ui text-[0.7rem] font-semibold uppercase tracking-[0.06em] text-navy transition-colors hover:bg-navy hover:text-paper disabled:cursor-not-allowed disabled:opacity-50"
+          className="motion-press inline-flex cursor-pointer items-center gap-1.5 border border-navy px-3 py-1.5 font-ui text-[0.7rem] font-semibold uppercase tracking-[0.06em] text-navy hover:bg-navy hover:text-paper disabled:cursor-not-allowed disabled:opacity-50"
         >
           <RefreshCw
             className={`h-3.5 w-3.5 ${pending ? "animate-spin" : ""}`}
@@ -67,7 +67,7 @@ export function RefundButton({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex cursor-pointer items-center gap-1.5 border border-danger px-3 py-1.5 font-ui text-[0.7rem] font-semibold uppercase tracking-[0.06em] text-danger transition-colors hover:bg-danger hover:text-paper"
+        className="motion-press inline-flex cursor-pointer items-center gap-1.5 border border-danger px-3 py-1.5 font-ui text-[0.7rem] font-semibold uppercase tracking-[0.06em] text-danger hover:bg-danger hover:text-paper"
       >
         <Undo2 className="h-3.5 w-3.5" aria-hidden="true" />
         Hoàn tiền
@@ -76,7 +76,7 @@ export function RefundButton({
   }
 
   return (
-    <div className="max-w-[20rem] border border-danger bg-danger-pale p-3 text-left">
+    <div className="motion-panel-swap max-w-[20rem] border border-danger bg-danger-pale p-3 text-left">
       <p className="font-ui text-[0.72rem] leading-snug text-danger">
         Ghi nhận hoàn tiền {amountLabel} cho đơn {invoiceNumber} và thu hồi
         quyền của đơn này. Việc chuyển tiền lại cho học viên bạn phải tự làm
@@ -95,14 +95,14 @@ export function RefundButton({
           <button
             type="submit"
             disabled={pending}
-            className="cursor-pointer border border-danger bg-danger px-3 py-1.5 font-ui text-[0.7rem] font-semibold uppercase tracking-[0.06em] text-paper disabled:opacity-50"
+            className="motion-press cursor-pointer border border-danger bg-danger px-3 py-1.5 font-ui text-[0.7rem] font-semibold uppercase tracking-[0.06em] text-paper disabled:opacity-50"
           >
             {pending ? "Đang ghi…" : "Xác nhận hoàn tiền"}
           </button>
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="cursor-pointer border border-line-strong px-3 py-1.5 font-ui text-[0.7rem] font-semibold uppercase tracking-[0.06em] text-ink-soft"
+            className="motion-press cursor-pointer border border-line-strong px-3 py-1.5 font-ui text-[0.7rem] font-semibold uppercase tracking-[0.06em] text-ink-soft"
           >
             Thôi
           </button>

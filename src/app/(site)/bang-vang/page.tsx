@@ -56,7 +56,7 @@ export default async function HonorBoardPage({
   );
 
   return (
-    <>
+    <div className="motion-page-entry">
       <PageHero
         label="Nguyệt Thí"
         title="Bảng Vàng"
@@ -158,6 +158,6 @@ export default async function HonorBoardPage({
           đó để trống, không hạ chuẩn.
         </NoteBox>
       </section>
-    </>
+    </div>
   );
 }

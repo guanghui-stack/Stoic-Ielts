@@ -8,7 +8,7 @@ export const metadata = { title: "Tạo đề Reading mới" };
 export default async function NewExercisePage() {
   await requireAdmin();
   return (
-    <section className="mx-auto max-w-4xl px-6 py-12">
+    <section className="motion-page-entry mx-auto max-w-4xl px-6 py-12">
       <Link
         href="/quan-tri/bai-tap"
         className="inline-flex items-center gap-2 font-ui text-sm font-semibold text-navy hover:text-gold"

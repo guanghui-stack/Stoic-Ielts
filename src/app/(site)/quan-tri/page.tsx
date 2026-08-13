@@ -29,7 +29,7 @@ export default async function AdminOverviewPage() {
     ]);
 
   return (
-    <section className="mx-auto max-w-6xl px-6 py-12">
+    <section className="motion-page-entry mx-auto max-w-6xl px-6 py-12">
       <p className="label-caps">Tổng quan</p>
       <h1 className="mt-3 font-display text-3xl font-bold text-navy-deep md:text-4xl">
         Bảng điều khiển Reading

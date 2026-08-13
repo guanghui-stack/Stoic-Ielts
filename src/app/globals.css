@@ -96,6 +96,12 @@
   --shadow-lift: 0 2px 4px rgb(34 48 62 / 0.08), 0 16px 40px rgb(34 48 62 / 0.12);
 }
 
+:root {
+  /* Một đường cong chung để các chuyển động ngắn có cùng cảm giác mềm và dứt khoát. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+}
+
 body {
   background: var(--color-cream);
   color: var(--color-ink);
@@ -252,6 +258,191 @@ body {
   color: inherit;
 }
 
+/*
+  Chỉ gắn lớp này vào các trang ngoài phòng học. Không đưa lên `(site)/layout.tsx`:
+  Feynman cũng dùng layout đó và phải giữ hoàn toàn tĩnh.
+*/
+.motion-page-entry {
+  animation: wb-page-enter 160ms var(--ease-out) both;
+}
+
+/* Mỗi trạng thái mới đi ra từ góc có nút chỉnh sửa, giúp quan hệ nhân quả dễ đọc. */
+.motion-panel-swap {
+  transform-origin: top right;
+  animation: wb-panel-enter 200ms var(--ease-out) both;
+}
+
+/* Phản hồi ngay từ lúc nhấn; chỉ gắn vào nút ngoài vùng học tập bị loại trừ. */
+.motion-press {
+  transition:
+    transform 100ms var(--ease-out),
+    color 200ms ease,
+    background-color 200ms ease,
+    border-color 200ms ease,
+    opacity 200ms ease;
+}
+
+.motion-press:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* Trạng thái do hệ thống trả về chỉ nhích rất nhẹ để người dùng nhận ra thay đổi. */
+.motion-status-enter {
+  animation: wb-status-enter 160ms var(--ease-out) both;
+}
+
+/*
+  Dialog native giữ focus, Escape và lớp nền đúng chuẩn trình duyệt. Hai thuộc
+  tính rời rạc cho phép chạy đường thoát trước khi dialog trở về display:none.
+*/
+.motion-dialog {
+  width: min(calc(100% - 2rem), 32rem);
+  max-width: none;
+  max-height: calc(100% - 2rem);
+  margin: auto;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  opacity: 0;
+  transform: scale(0.96);
+  transition:
+    opacity 250ms var(--ease-out),
+    transform 250ms var(--ease-out),
+    overlay 250ms allow-discrete,
+    display 250ms allow-discrete;
+}
+
+.motion-dialog[open] {
+  opacity: 1;
+  transform: none;
+}
+
+@starting-style {
+  .motion-dialog[open] {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+.motion-dialog::backdrop {
+  background: transparent;
+  transition:
+    background-color 250ms var(--ease-out),
+    overlay 250ms allow-discrete,
+    display 250ms allow-discrete;
+}
+
+.motion-dialog[open]::backdrop {
+  background: color-mix(in srgb, var(--color-navy-deep) 52%, transparent);
+}
+
+@starting-style {
+  .motion-dialog[open]::backdrop {
+    background: transparent;
+  }
+}
+
+/* Khải hoàn chỉ xuất hiện một lần sau khi thăng cấp, không dùng ở trạng thái thường. */
+.rank-promotion-moment {
+  animation: wb-rank-arrive 300ms var(--ease-out) both;
+}
+
+.rank-promotion-moment__insignia {
+  animation: wb-rank-mark 300ms var(--ease-out) 50ms both;
+}
+
+.rank-promotion-moment__copy {
+  animation: wb-rank-copy 300ms var(--ease-out) 100ms both;
+}
+
+.achievement-disclosure__region {
+  overflow: hidden;
+  opacity: 0;
+  transition:
+    height 200ms var(--ease-out),
+    opacity 200ms var(--ease-out);
+}
+
+.achievement-disclosure[data-open="true"] .achievement-disclosure__region {
+  opacity: 1;
+}
+
+.achievement-disclosure__chevron {
+  transition: transform 200ms var(--ease-out);
+}
+
+@keyframes wb-page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes wb-panel-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes wb-status-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes wb-rank-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes wb-rank-mark {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes wb-rank-copy {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes wb-fade-only {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 /* Bấm mục lục thì trượt tới nơi thay vì nhảy giật — người đọc thấy được mình
    vừa đi từ đâu tới đâu. Chỉ bật cho ai không yêu cầu giảm chuyển động. */
 @media (prefers-reduced-motion: no-preference) {
@@ -274,6 +465,40 @@ body {
      nên hero vẫn có nền chứ không trống. */
   .hero-motion {
     display: none;
+  }
+
+  /* Giữ tín hiệu đổi trạng thái bằng opacity, bỏ toàn bộ dịch chuyển và co giãn. */
+  .motion-page-entry,
+  .motion-panel-swap,
+  .motion-status-enter,
+  .rank-promotion-moment,
+  .rank-promotion-moment__insignia,
+  .rank-promotion-moment__copy {
+    animation: wb-fade-only 160ms ease !important;
+  }
+
+  .motion-press:active:not(:disabled) {
+    transform: none;
+  }
+
+  .motion-dialog,
+  .motion-dialog[open] {
+    transform: none !important;
+    transition:
+      opacity 160ms ease,
+      overlay 160ms allow-discrete,
+      display 160ms allow-discrete !important;
+  }
+
+  .motion-dialog::backdrop {
+    transition:
+      background-color 160ms ease,
+      overlay 160ms allow-discrete,
+      display 160ms allow-discrete !important;
+  }
+
+  .achievement-disclosure__region {
+    transition: opacity 160ms ease !important;
   }
 }
 

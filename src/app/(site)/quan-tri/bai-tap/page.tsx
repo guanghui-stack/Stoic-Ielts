@@ -34,7 +34,7 @@ export default async function AdminExercisesPage() {
   });
 
   return (
-    <section className="mx-auto max-w-6xl px-6 py-12">
+    <section className="motion-page-entry mx-auto max-w-6xl px-6 py-12">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="label-caps">Ngân hàng đề</p>
