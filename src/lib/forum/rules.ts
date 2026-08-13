@@ -182,6 +182,65 @@ export function checkText(
   return { ok: true, value };
 }
 
+/**
+ * Cửa sổ gỡ lời bàn của chính mình: 10 phút.
+ *
+ * Có hạn chứ không mở vĩnh viễn là cố ý. Gỡ được bất cứ lúc nào thì một người
+ * có thể xóa sạch vế của mình sau khi tranh luận đã kết thúc, để lại những câu
+ * trả lời treo lơ lửng không còn ai hiểu đang đáp lại điều gì. Mười phút đủ để
+ * sửa một cú bấm nhầm hay một câu viết vội, chưa đủ để viết lại lịch sử.
+ */
+export const COMMENT_DELETE_WINDOW_MS = 10 * 60 * 1000;
+
+/**
+ * Ai được gỡ một lời bàn.
+ *
+ * Chỉ CHÍNH TÁC GIẢ, và chỉ trong cửa sổ trên. Quản trị viên không đi đường
+ * này — họ có nút ẩn riêng, và việc đó phải để lại dấu vết khác hẳn với việc
+ * người viết tự rút lời.
+ */
+export function canDeleteComment(input: {
+  authorId: string;
+  viewerId: string;
+  createdAt: Date;
+  now?: Date;
+}): boolean {
+  if (input.authorId !== input.viewerId) return false;
+  const now = input.now ?? new Date();
+  const age = now.getTime() - input.createdAt.getTime();
+  // Mốc tạo nằm ở tương lai nghĩa là đồng hồ lệch — từ chối thay vì mở toang.
+  if (age < 0) return false;
+  return age <= COMMENT_DELETE_WINDOW_MS;
+}
+
+/** Số phút còn lại để gỡ, làm tròn lên. 0 nghĩa là đã quá hạn. */
+export function deleteMinutesLeft(createdAt: Date, now = new Date()): number {
+  const left = COMMENT_DELETE_WINDOW_MS - (now.getTime() - createdAt.getTime());
+  return left <= 0 ? 0 : Math.ceil(left / 60_000);
+}
+
+/**
+ * Bỏ những lời bàn đã gỡ mà KHÔNG còn ai trả lời bên dưới.
+ *
+ * Lời bàn đã gỡ nhưng còn con thì phải giữ lại làm bia mộ: xóa nó đi là cắt
+ * đứt mạch, và những câu trả lời bên dưới bỗng treo lơ lửng không rõ đang đáp
+ * lại điều gì. Còn một lời bàn gỡ mà không ai trả lời thì giữ lại chỉ là rác.
+ *
+ * Cắt từ dưới lên: gỡ hết lá rồi mới xét cha, nên một nhánh toàn lời đã gỡ sẽ
+ * biến mất trọn vẹn thay vì để lại một chuỗi bia mộ rỗng.
+ */
+export function pruneDeletedLeaves<T extends CommentRow & { deleted: boolean }>(
+  nodes: CommentNode<T>[]
+): CommentNode<T>[] {
+  const kept: CommentNode<T>[] = [];
+  for (const node of nodes) {
+    node.children = pruneDeletedLeaves(node.children);
+    if (node.deleted && node.children.length === 0) continue;
+    kept.push(node);
+  }
+  return kept;
+}
+
 /** Trả lời ở tầng cuối thì gắn vào chính tầng đó, không thụt thêm. */
 export function depthForReply(parentDepth: number | null): number {
   if (parentDepth === null) return 0;

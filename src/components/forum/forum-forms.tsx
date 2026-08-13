@@ -1,10 +1,16 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { MessageSquarePlus, Flag as FlagIcon, MessagesSquare } from "lucide-react";
+import {
+  MessageSquarePlus,
+  CircleAlert,
+  MessagesSquare,
+  Trash2,
+} from "lucide-react";
 import {
   createCommentAction,
   createPostAction,
+  deleteCommentAction,
   reportAction,
   type ForumFormState,
 } from "@/lib/actions/forum";
@@ -170,6 +176,60 @@ export function CommentForm({
   );
 }
 
+/**
+ * Nút tác giả tự gỡ lời bàn của mình.
+ *
+ * Chỉ dựng ra khi máy chủ đã xác nhận còn trong cửa sổ gỡ — nhưng đó chỉ là
+ * phép lịch sự với mắt người dùng. Thứ thật sự chặn nằm ở `canDeleteComment`
+ * phía máy chủ, vì một nút ẩn đi không ngăn được ai gửi biểu mẫu bằng tay.
+ *
+ * Có bước hỏi lại: gỡ xong là không lấy lại được, và nút này nằm ngay cạnh
+ * nút Trả lời.
+ */
+export function DeleteCommentButton({
+  commentId,
+  minutesLeft,
+}: {
+  commentId: string;
+  minutesLeft: number;
+}) {
+  const [asking, setAsking] = useState(false);
+
+  if (!asking) {
+    return (
+      <button
+        type="button"
+        onClick={() => setAsking(true)}
+        title={`Gỡ lời bàn này — còn ${minutesLeft} phút`}
+        className="inline-flex cursor-pointer items-center gap-1.5 font-ui text-xs text-muted hover:text-danger"
+      >
+        <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
+        Gỡ ({minutesLeft} phút)
+      </button>
+    );
+  }
+
+  return (
+    <form action={deleteCommentAction} className="inline-flex items-center gap-2">
+      <input type="hidden" name="commentId" value={commentId} />
+      <span className="font-ui text-xs text-ink-soft">Gỡ hẳn lời bàn này?</span>
+      <button
+        type="submit"
+        className="cursor-pointer border border-danger px-2.5 py-1 font-ui text-[0.7rem] font-semibold uppercase tracking-[0.06em] text-danger"
+      >
+        Gỡ
+      </button>
+      <button
+        type="button"
+        onClick={() => setAsking(false)}
+        className="cursor-pointer font-ui text-xs text-muted hover:text-ink"
+      >
+        Thôi
+      </button>
+    </form>
+  );
+}
+
 /** Báo cáo một bài hoặc một bình luận. */
 export function ReportForm({
   targetType,
@@ -195,7 +255,7 @@ export function ReportForm({
         onClick={() => setOpen(true)}
         className="inline-flex cursor-pointer items-center gap-1.5 font-ui text-xs text-muted hover:text-danger"
       >
-        <FlagIcon className="h-3.5 w-3.5" aria-hidden="true" />
+        <CircleAlert className="h-3.5 w-3.5" aria-hidden="true" />
         Báo cáo
       </button>
     );

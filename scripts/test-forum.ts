@@ -8,10 +8,13 @@
 import {
   MAX_DEPTH,
   buildCommentTree,
+  canDeleteComment,
   checkText,
   decideForumAccess,
+  deleteMinutesLeft,
   depthForReply,
   nextVoteValue,
+  pruneDeletedLeaves,
   visibleChannelLevels,
   voteCountDelta,
   voteDelta,
@@ -237,6 +240,78 @@ check(
   { ok: true, value: "<script>alert(1)</script>" }
 );
 check("toàn khoảng trắng bị từ chối", checkText("      ", 2, 100, "Nội dung").ok, false);
+
+console.log("\n— Gỡ lời bàn của chính mình —");
+
+const NOW = new Date("2026-08-13T10:00:00.000Z");
+const phutTruoc = (n: number) => new Date(NOW.getTime() - n * 60_000);
+const D = (o: Partial<Parameters<typeof canDeleteComment>[0]>) =>
+  canDeleteComment({
+    authorId: "toi",
+    viewerId: "toi",
+    createdAt: phutTruoc(1),
+    now: NOW,
+    ...o,
+  });
+
+check("tác giả gỡ được lời vừa viết", D({}), true);
+check("phút thứ 9 vẫn gỡ được", D({ createdAt: phutTruoc(9) }), true);
+check("đúng phút thứ 10 vẫn gỡ được", D({ createdAt: phutTruoc(10) }), true);
+// Quá hạn thì thôi: gỡ được mãi nghĩa là ai đó có thể xoá sạch vế của mình sau
+// khi tranh luận kết thúc, để lại những câu trả lời treo lơ lửng.
+check("quá 10 phút thì hết quyền gỡ", D({ createdAt: phutTruoc(11) }), false);
+check("người khác KHÔNG gỡ được", D({ viewerId: "nguoi-khac" }), false);
+// Mốc tạo nằm ở tương lai nghĩa là đồng hồ lệch — từ chối thay vì mở toang.
+check("mốc thời gian ở tương lai bị từ chối", D({ createdAt: new Date(NOW.getTime() + 60_000) }), false);
+
+check("còn 9 phút", deleteMinutesLeft(phutTruoc(1), NOW), 9);
+check("hết hạn thì còn 0", deleteMinutesLeft(phutTruoc(30), NOW), 0);
+
+console.log("\n— Bia mộ giữ mạch hội thoại —");
+
+type XoaRow = CommentRow & { deleted: boolean };
+const cay = (rows: XoaRow[]) => pruneDeletedLeaves(buildCommentTree(rows));
+
+// Lời đã gỡ mà KHÔNG ai trả lời thì bỏ hẳn — giữ lại chỉ là rác.
+check(
+  "lời đã gỡ không có con thì biến mất",
+  cay([{ id: "a", parentId: null, createdAt: t(1), score: 0, deleted: true }]).length,
+  0
+);
+// Nhưng còn con thì phải giữ: xoá đi là cắt mạch, và câu trả lời bên dưới bỗng
+// treo lơ lửng không rõ đang đáp lại điều gì.
+check(
+  "lời đã gỡ CÒN con thì giữ làm bia mộ",
+  cay([
+    { id: "a", parentId: null, createdAt: t(1), score: 0, deleted: true },
+    { id: "b", parentId: "a", createdAt: t(2), score: 0, deleted: false },
+  ]).map((n) => n.id),
+  ["a"]
+);
+check(
+  "con của bia mộ vẫn hiện",
+  cay([
+    { id: "a", parentId: null, createdAt: t(1), score: 0, deleted: true },
+    { id: "b", parentId: "a", createdAt: t(2), score: 0, deleted: false },
+  ])[0].children.map((n) => n.id),
+  ["b"]
+);
+// Cắt từ dưới lên: một nhánh toàn lời đã gỡ phải biến mất TRỌN VẸN thay vì để
+// lại một chuỗi bia mộ rỗng.
+check(
+  "nhánh toàn lời đã gỡ biến mất trọn vẹn",
+  cay([
+    { id: "a", parentId: null, createdAt: t(1), score: 0, deleted: true },
+    { id: "b", parentId: "a", createdAt: t(2), score: 0, deleted: true },
+    { id: "c", parentId: "b", createdAt: t(3), score: 0, deleted: true },
+  ]).length,
+  0
+);
+check(
+  "lời bình thường không bị đụng tới",
+  cay([{ id: "a", parentId: null, createdAt: t(1), score: 0, deleted: false }]).map((n) => n.id),
+  ["a"]
+);
 
 console.log("\n— Định dạng chữ —");
 

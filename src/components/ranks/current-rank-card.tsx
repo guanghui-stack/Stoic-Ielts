@@ -1,5 +1,6 @@
 import { Shield, Moon } from "lucide-react";
 import { RANK_ERAS, type RankEra } from "@/lib/ranks/catalog";
+import { RankInsignia } from "@/components/ranks/rank-insignia";
 
 /**
  * Thẻ cấp bậc hiện tại.
@@ -33,13 +34,20 @@ export function CurrentRankCard({
         Cấp bậc · bậc {level} trên 9
       </p>
 
-      <h2 className="mt-2.5 font-display text-2xl font-bold text-navy-deep">
-        {cardinalTitleName ?? rankName}
-      </h2>
-
-      <p className="mt-1 font-ui text-sm text-muted">
-        Thời {RANK_ERAS[era].name} · {bandAnchor}
-      </p>
+      {/* Huy hiệu đặt cạnh tên bậc: học viên phải NHÌN THẤY thứ mình vừa đạt,
+          không chỉ đọc tên nó. Đây cũng là chỗ duy nhất họ gặp huy hiệu cấp
+          bậc của chính mình. */}
+      <div className="mt-2.5 flex items-center gap-4">
+        <RankInsignia level={level} className="h-14 w-14 shrink-0" />
+        <div className="min-w-0">
+          <h2 className="font-display text-2xl font-bold text-navy-deep">
+            {cardinalTitleName ?? rankName}
+          </h2>
+          <p className="mt-1 font-ui text-sm text-muted">
+            Thời {RANK_ERAS[era].name} · {bandAnchor}
+          </p>
+        </div>
+      </div>
 
       <p className="mt-4 text-[0.95rem] leading-relaxed text-ink-soft">
         {RANK_ERAS[era].meaning}

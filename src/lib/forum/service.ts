@@ -9,6 +9,8 @@ import {
   RATE_LIMITS,
   TITLE_MAX,
   TITLE_MIN,
+  COMMENT_DELETE_WINDOW_MS,
+  canDeleteComment,
   checkText,
   decideForumAccess,
   depthForReply,
@@ -413,6 +415,70 @@ export async function castVote(input: {
     }
     throw error;
   }
+}
+
+/**
+ * Tác giả tự gỡ lời bàn của mình trong 10 phút đầu.
+ *
+ * Đặt `status = "DELETED"` chứ KHÔNG xóa hàng: những câu trả lời bên dưới còn
+ * trỏ tới nó, và xóa cứng sẽ làm chúng thành mồ côi. Thân bài vẫn nằm lại
+ * database — cần khi có tranh chấp — nhưng không hiện cho ai nữa.
+ *
+ * `commentCount` giảm trong CÙNG transaction: tách ra thì danh sách bài đếm
+ * một đằng, cây bình luận hiện một nẻo.
+ */
+export async function deleteOwnComment(input: {
+  viewer: Viewer;
+  commentId: string;
+}): Promise<ActionResult<{ postId: string; channelKey: string }>> {
+  const comment = await db.forumComment.findUnique({
+    where: { id: input.commentId },
+    select: {
+      id: true,
+      authorId: true,
+      createdAt: true,
+      status: true,
+      postId: true,
+      post: { select: { channel: { select: { key: true } } } },
+    },
+  });
+  if (!comment) return { ok: false, error: "Không tìm thấy lời bàn này." };
+  if (comment.status !== "VISIBLE") {
+    return { ok: true, value: { postId: comment.postId, channelKey: comment.post.channel.key } };
+  }
+
+  if (
+    !canDeleteComment({
+      authorId: comment.authorId,
+      viewerId: input.viewer.id,
+      createdAt: comment.createdAt,
+    })
+  ) {
+    return {
+      ok: false,
+      error: `Chỉ tác giả gỡ được, và chỉ trong ${Math.round(COMMENT_DELETE_WINDOW_MS / 60_000)} phút đầu.`,
+    };
+  }
+
+  await db.$transaction(async (tx) => {
+    // updateMany + lọc theo status: hai tab cùng bấm gỡ thì cái thứ hai khớp 0
+    // hàng và KHÔNG trừ `commentCount` lần nữa.
+    const changed = await tx.forumComment.updateMany({
+      where: { id: comment.id, status: "VISIBLE" },
+      data: { status: "DELETED" },
+    });
+    if (changed.count > 0) {
+      await tx.forumPost.update({
+        where: { id: comment.postId },
+        data: { commentCount: { decrement: 1 } },
+      });
+    }
+  });
+
+  return {
+    ok: true,
+    value: { postId: comment.postId, channelKey: comment.post.channel.key },
+  };
 }
 
 /** Học viên báo cáo một bài hoặc một bình luận. */

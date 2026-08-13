@@ -6,6 +6,7 @@ import { requireAdmin } from "@/lib/session";
 import { features } from "@/lib/features";
 import { RANK_SEEDS, TRIAL_SEEDS, RANK_ERAS, trialByCode } from "@/lib/ranks/catalog";
 import { generalByCode } from "@/lib/story/generals";
+import { RankInsignia } from "@/components/ranks/rank-insignia";
 
 export const metadata = { title: "Cấp bậc và thí luyện" };
 export const dynamic = "force-dynamic";
@@ -94,6 +95,7 @@ export default async function RankAdminPage() {
             <thead>
               <tr className="border-b border-line">
                 <th scope="col" className="py-2 font-ui text-xs uppercase tracking-wide text-muted">Bậc</th>
+                <th scope="col" className="py-2 font-ui text-xs uppercase tracking-wide text-muted">Huy hiệu</th>
                 <th scope="col" className="py-2 font-ui text-xs uppercase tracking-wide text-muted">Tên</th>
                 <th scope="col" className="py-2 font-ui text-xs uppercase tracking-wide text-muted">Thời đại</th>
                 <th scope="col" className="py-2 font-ui text-xs uppercase tracking-wide text-muted">Neo năng lực</th>
@@ -104,6 +106,9 @@ export default async function RankAdminPage() {
               {RANK_SEEDS.map((rank) => (
                 <tr key={rank.code} className="border-b border-line last:border-0">
                   <td className="py-2 font-ui text-sm tabular-nums text-ink-soft">{rank.level}</td>
+                  <td className="py-2">
+                    <RankInsignia level={rank.level} className="h-10 w-10" />
+                  </td>
                   <td className="py-2 font-ui text-sm font-medium text-navy-deep">{rank.name}</td>
                   <td className="py-2 font-ui text-sm text-ink-soft">{RANK_ERAS[rank.era].name}</td>
                   <td className="py-2 font-ui text-sm text-muted">{rank.bandAnchor}</td>

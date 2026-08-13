@@ -1,4 +1,4 @@
-import { Flag, FlagOff } from "lucide-react";
+import { Flag } from "lucide-react";
 import { voteAction } from "@/lib/actions/forum";
 import { SCORE_LABEL, VOTE_LABELS } from "@/lib/forum/rules";
 
@@ -33,8 +33,22 @@ export function VoteButtons({
 }) {
   const size = compact ? "h-3.5 w-3.5" : "h-4 w-4";
   const pad = compact ? "px-1.5 py-1" : "px-2 py-1.5";
-
   const num = compact ? "text-xs" : "text-sm";
+
+  /**
+   * Cờ được TÔ RUỘT khi mình đã bầu — lục ngọc cho cắm cờ, chu sa cho hạ cờ.
+   *
+   * Hai màu lấy thẳng từ bảng màu Tam Quốc chứ không bịa màu mới: lục ngọc là
+   * màu của "chính đạo", chu sa là màu của con dấu phê. Đúng nghĩa hai việc
+   * này đang làm, và không phá vỡ hệ màu chung của website.
+   *
+   * Tô ruột (`fill`) chứ không chỉ đổi màu viền: viền mảnh 1px không đủ để
+   * nhận ra mình đã bầu hay chưa — chính chỗ đó khiến chủ dự án tưởng số cờ
+   * biến mất khi bấm sang phía bên kia.
+   */
+  const upFill = myValue === 1 ? "fill-[var(--color-jade)]" : "fill-none";
+  const downFill =
+    myValue === -1 ? "fill-[var(--color-vermilion)]" : "fill-none";
 
   if (disabled) {
     return (
@@ -43,11 +57,11 @@ export function VoteButtons({
         title={`${upCount - downCount} ${SCORE_LABEL}`}
       >
         <span className="inline-flex items-center gap-1">
-          <Flag className={size} aria-hidden="true" />
+          <Flag className={`${size} ${upFill}`} aria-hidden="true" />
           {upCount}
         </span>
         <span className="inline-flex items-center gap-1">
-          <FlagOff className={size} aria-hidden="true" />
+          <Flag className={`${size} ${downFill} -scale-x-100`} aria-hidden="true" />
           {downCount}
         </span>
       </span>
@@ -68,11 +82,11 @@ export function VoteButtons({
           aria-pressed={myValue === 1}
           className={`inline-flex cursor-pointer items-center gap-1.5 border transition-colors ${pad} ${num} font-semibold tabular-nums ${
             myValue === 1
-              ? "border-gold bg-gold-pale text-gold"
-              : "border-line text-muted hover:border-gold hover:text-gold"
+              ? "border-[var(--color-jade)] bg-[var(--color-jade-pale)] text-[var(--color-jade-ink)]"
+              : "border-line text-muted hover:border-[var(--color-jade)] hover:text-[var(--color-jade-ink)]"
           }`}
         >
-          <Flag className={size} aria-hidden="true" />
+          <Flag className={`${size} ${upFill}`} aria-hidden="true" />
           {upCount}
         </button>
       </form>
@@ -89,11 +103,17 @@ export function VoteButtons({
           aria-pressed={myValue === -1}
           className={`inline-flex cursor-pointer items-center gap-1.5 border transition-colors ${pad} ${num} font-semibold tabular-nums ${
             myValue === -1
-              ? "border-ink-soft bg-cream-deep text-ink"
-              : "border-line text-muted hover:border-ink-soft hover:text-ink-soft"
+              ? "border-[var(--color-vermilion)] bg-[var(--color-vermilion-pale)] text-[var(--color-vermilion-ink)]"
+              : "border-line text-muted hover:border-[var(--color-vermilion)] hover:text-[var(--color-vermilion-ink)]"
           }`}
         >
-          <FlagOff className={size} aria-hidden="true" />
+          {/* Cùng một lá cờ nhưng lật ngang: cắm cờ hướng tới, hạ cờ quay lại.
+              Dùng hai biểu tượng khác nhau sẽ đọc thành hai việc khác nhau,
+              trong khi đây là hai chiều của cùng một hành động. */}
+          <Flag
+            className={`${size} ${downFill} -scale-x-100`}
+            aria-hidden="true"
+          />
           {downCount}
         </button>
       </form>

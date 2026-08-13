@@ -12,10 +12,17 @@ import {
 } from "@/lib/forum/service";
 import {
   buildCommentTree,
+  canDeleteComment,
+  deleteMinutesLeft,
   MAX_DEPTH,
+  pruneDeletedLeaves,
   type CommentNode,
 } from "@/lib/forum/rules";
-import { CommentForm, ReportForm } from "@/components/forum/forum-forms";
+import {
+  CommentForm,
+  DeleteCommentButton,
+  ReportForm,
+} from "@/components/forum/forum-forms";
 import { VoteButtons } from "@/components/forum/vote-buttons";
 import { RichText } from "@/components/forum/rich-text";
 import { NoteBox } from "@/components/ui";
@@ -36,6 +43,11 @@ type CommentData = {
   body: string;
   status: string;
   authorName: string;
+  authorId: string;
+  /** Đã bị chính tác giả gỡ. Khác hẳn `HIDDEN` do quản trị viên ẩn. */
+  deleted: boolean;
+  /** Số phút tác giả còn được gỡ; 0 nghĩa là hết hạn hoặc không phải của mình. */
+  deleteMinutes: number;
 };
 
 export default async function PostPage({
@@ -84,14 +96,20 @@ export default async function PostPage({
       downCount: true,
       body: true,
       status: true,
+      authorId: true,
       author: { select: { name: true } },
     },
   });
 
+  const now = new Date();
   const comments: CommentData[] = rows
-    // Bình luận đã ẩn vẫn giữ trong database để tra khi có tranh chấp, nhưng
-    // không hiện cho học viên.
-    .filter((row) => row.status === "VISIBLE" || viewer.isAdmin)
+    // Lời bàn quản trị viên ẩn thì giấu hẳn khỏi học viên. Lời tác giả TỰ GỠ
+    // vẫn đi tiếp để làm bia mộ giữ mạch hội thoại — `pruneDeletedLeaves` sẽ
+    // bỏ những cái không còn ai trả lời.
+    .filter(
+      (row) =>
+        row.status === "VISIBLE" || row.status === "DELETED" || viewer.isAdmin
+    )
     .map((row) => ({
       id: row.id,
       parentId: row.parentId,
@@ -102,9 +120,19 @@ export default async function PostPage({
       body: row.body,
       status: row.status,
       authorName: row.author.name,
+      authorId: row.authorId,
+      deleted: row.status === "DELETED",
+      deleteMinutes: canDeleteComment({
+        authorId: row.authorId,
+        viewerId: viewer.id,
+        createdAt: row.createdAt,
+        now,
+      })
+        ? deleteMinutesLeft(row.createdAt, now)
+        : 0,
     }));
 
-  const tree = buildCommentTree(comments);
+  const tree = pruneDeletedLeaves(buildCommentTree(comments));
   const [postVotes, commentVotes] = await Promise.all([
     myVotes(viewer.id, "POST", [post.id]),
     myVotes(
@@ -242,9 +270,11 @@ function CommentBranch({
       }
     >
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-ui text-xs text-muted">
-        <span className="font-semibold text-ink">{node.authorName}</span>
+        <span className="font-semibold text-ink">
+          {node.deleted ? "—" : node.authorName}
+        </span>
         <span>{fmt(node.createdAt)}</span>
-        {node.status !== "VISIBLE" && (
+        {node.status === "HIDDEN" && (
           <span className="inline-flex items-center gap-1 font-semibold text-danger">
             <Lock className="h-3 w-3" aria-hidden="true" />
             Đã ẩn (chỉ quản trị viên thấy)
@@ -252,36 +282,58 @@ function CommentBranch({
         )}
       </div>
 
-      <RichText
-        text={node.body}
-        className="mt-1.5 text-[0.94rem] leading-relaxed text-ink"
-      />
-
-      <div className="mt-2 flex flex-wrap items-center gap-3">
-        <VoteButtons
-          targetType="COMMENT"
-          targetId={node.id}
-          upCount={node.upCount}
-          downCount={node.downCount}
-          myValue={votes.get(node.id) ?? 0}
-          path={basePath}
-          disabled={viewer.banned}
-          compact
+      {/*
+        Lời bàn tác giả đã gỡ chỉ còn là BIA MỘ: giữ chỗ để những câu trả lời
+        bên dưới không treo lơ lửng, nhưng không hiện lại chữ đã gỡ. Tên tác
+        giả cũng ẩn theo — họ đã rút lời thì không nên còn bị gắn với nó.
+      */}
+      {node.deleted ? (
+        <p className="mt-1.5 font-ui text-sm italic text-muted">
+          Lời bàn đã được tác giả gỡ.
+        </p>
+      ) : (
+        <RichText
+          text={node.body}
+          className="mt-1.5 text-[0.94rem] leading-relaxed text-ink"
         />
-        {canWrite && (
-          <CommentForm
-            postId={postId}
-            channelKey={channelKey}
-            // Ở tầng cuối thì trả lời gắn vào CHÍNH bình luận này; máy chủ tự
-            // kẹp độ sâu lại nên cây không thụt thêm.
-            parentId={node.id}
-            replyingTo={atMaxDepth ? node.authorName : undefined}
+      )}
+
+      {/* Bia mộ không có nút nào: không bầu, không trả lời, không báo cáo một
+          lời đã gỡ. Nhưng nhánh con bên dưới vẫn giữ đủ thao tác của chúng. */}
+      {!node.deleted && (
+        <div className="mt-2 flex flex-wrap items-center gap-3">
+          <VoteButtons
+            targetType="COMMENT"
+            targetId={node.id}
+            upCount={node.upCount}
+            downCount={node.downCount}
+            myValue={votes.get(node.id) ?? 0}
+            path={basePath}
+            disabled={viewer.banned}
+            compact
           />
-        )}
-        <span className="ml-auto">
-          <ReportForm targetType="COMMENT" targetId={node.id} />
-        </span>
-      </div>
+          {canWrite && (
+            <CommentForm
+              postId={postId}
+              channelKey={channelKey}
+              // Ở tầng cuối thì trả lời gắn vào CHÍNH bình luận này; máy chủ tự
+              // kẹp độ sâu lại nên cây không thụt thêm.
+              parentId={node.id}
+              replyingTo={atMaxDepth ? node.authorName : undefined}
+              label="Trả lời"
+            />
+          )}
+          {node.deleteMinutes > 0 && (
+            <DeleteCommentButton
+              commentId={node.id}
+              minutesLeft={node.deleteMinutes}
+            />
+          )}
+          <span className="ml-auto">
+            <ReportForm targetType="COMMENT" targetId={node.id} />
+          </span>
+        </div>
+      )}
 
       {node.children.length > 0 && (
         <div className="mt-3">

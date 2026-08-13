@@ -7,6 +7,7 @@ import {
   castVote,
   createComment,
   createPost,
+  deleteOwnComment,
   reportContent,
   viewerOf,
 } from "@/lib/forum/service";
@@ -111,4 +112,25 @@ export async function reportAction(
     success:
       "Đã gửi báo cáo. Quản trị viên sẽ xem và xử lý — cảm ơn bạn đã giữ Nghị Sự Đường sạch.",
   };
+}
+
+/**
+ * Tác giả tự gỡ lời bàn của mình.
+ *
+ * Nhận `commentId` rồi tự tra chủ sở hữu và mốc thời gian Ở MÁY CHỦ — không
+ * tin bất cứ dấu hiệu nào từ trình duyệt. Nút gỡ chỉ ẩn đi ở giao diện khi quá
+ * hạn; thứ thật sự chặn nằm ở `canDeleteComment` phía máy chủ.
+ */
+export async function deleteCommentAction(formData: FormData): Promise<void> {
+  const user = await requireUser();
+  const viewer = await viewerOf(user);
+
+  const commentId = String(formData.get("commentId") ?? "").trim();
+  if (!commentId) return;
+
+  const result = await deleteOwnComment({ viewer, commentId });
+  if (result.ok) {
+    const { channelKey, postId } = result.value;
+    revalidatePath(`/nghi-su-duong/${channelKey}/${postId}`);
+  }
 }
