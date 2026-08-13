@@ -1733,7 +1733,14 @@ model ForumPost {
 
   /// Uy vong = tong phieu. Cot nay la SO DEM SAN, chi duoc sua trong cung
   /// transaction voi hang ForumVote — tach ra la so dem troi khoi su that.
+  /// Uy vong = upCount - downCount. Giu de XEP HANG, khong phai de hien.
+  ///
+  /// Giao dien hien HAI SO RIENG: mot cu bam chi doi dung mot trong hai so, va
+  /// dung mot don vi. Hien mot so rong duy nhat thi doi tu cam co sang ha co
+  /// nhay 2 diem — dung ve toan hoc nhung nguoi dung doc thanh "mat 2 co".
   score        Int @default(0)
+  upCount      Int @default(0)
+  downCount    Int @default(0)
   commentCount Int @default(0)
 
   /// VISIBLE | HIDDEN | DELETED. Khong xoa cung: bai da bi bao cao con phai
@@ -1765,8 +1772,10 @@ model ForumComment {
   depth    Int     @default(0)
   body     String  @db.Text
 
-  score  Int    @default(0)
-  status String @default("VISIBLE") @db.VarChar(16)
+  score     Int    @default(0)
+  upCount   Int    @default(0)
+  downCount Int    @default(0)
+  status    String @default("VISIBLE") @db.VarChar(16)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

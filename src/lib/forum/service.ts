@@ -13,6 +13,7 @@ import {
   decideForumAccess,
   depthForReply,
   nextVoteValue,
+  voteCountDelta,
   voteDelta,
   type ForumAccess,
   type VoteValue,
@@ -307,7 +308,9 @@ export async function castVote(input: {
   targetType: "POST" | "COMMENT";
   targetId: string;
   clicked: 1 | -1;
-}): Promise<ActionResult<{ score: number; value: VoteValue }>> {
+}): Promise<
+  ActionResult<{ up: number; down: number; value: VoteValue }>
+> {
   if (input.viewer.banned) {
     return { ok: false, error: BLOCK_MESSAGES.BANNED };
   }
@@ -353,6 +356,7 @@ export async function castVote(input: {
         const oldValue = (existing?.value ?? 0) as VoteValue;
         const newValue = nextVoteValue(oldValue, input.clicked);
         const delta = voteDelta(oldValue, newValue);
+        const counts = voteCountDelta(oldValue, newValue);
 
         if (newValue === 0 && existing) {
           await tx.forumVote.delete({ where: { id: existing.id } });
@@ -372,24 +376,28 @@ export async function castVote(input: {
           });
         }
 
-        const score =
+        // Ba số đổi trong CÙNG một lệnh: `score` để xếp hạng, `upCount` và
+        // `downCount` để hiển thị. Tách thành nhiều lệnh thì một lần treo mạng
+        // để lại ba số không khớp nhau, và không có cách nào biết số nào đúng.
+        const data = {
+          score: { increment: delta },
+          upCount: { increment: counts.up },
+          downCount: { increment: counts.down },
+        };
+        const row =
           input.targetType === "POST"
-            ? (
-                await tx.forumPost.update({
-                  where: { id: input.targetId },
-                  data: { score: { increment: delta } },
-                  select: { score: true },
-                })
-              ).score
-            : (
-                await tx.forumComment.update({
-                  where: { id: input.targetId },
-                  data: { score: { increment: delta } },
-                  select: { score: true },
-                })
-              ).score;
+            ? await tx.forumPost.update({
+                where: { id: input.targetId },
+                data,
+                select: { upCount: true, downCount: true },
+              })
+            : await tx.forumComment.update({
+                where: { id: input.targetId },
+                data,
+                select: { upCount: true, downCount: true },
+              });
 
-        return { score, value: newValue };
+        return { up: row.upCount, down: row.downCount, value: newValue };
       },
       { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
     );

@@ -17,6 +17,7 @@ import {
 } from "@/lib/forum/rules";
 import { CommentForm, ReportForm } from "@/components/forum/forum-forms";
 import { VoteButtons } from "@/components/forum/vote-buttons";
+import { RichText } from "@/components/forum/rich-text";
 import { NoteBox } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -30,6 +31,8 @@ type CommentData = {
   parentId: string | null;
   createdAt: Date;
   score: number;
+  upCount: number;
+  downCount: number;
   body: string;
   status: string;
   authorName: string;
@@ -56,6 +59,8 @@ export default async function PostPage({
       title: true,
       body: true,
       score: true,
+      upCount: true,
+      downCount: true,
       status: true,
       lockedAt: true,
       createdAt: true,
@@ -75,6 +80,8 @@ export default async function PostPage({
       parentId: true,
       createdAt: true,
       score: true,
+      upCount: true,
+      downCount: true,
       body: true,
       status: true,
       author: { select: { name: true } },
@@ -90,6 +97,8 @@ export default async function PostPage({
       parentId: row.parentId,
       createdAt: row.createdAt,
       score: row.score,
+      upCount: row.upCount,
+      downCount: row.downCount,
       body: row.body,
       status: row.status,
       authorName: row.author.name,
@@ -128,25 +137,36 @@ export default async function PostPage({
         <div className="rule-gold mt-4" />
 
         {/*
-          Kết xuất VĂN BẢN THUẦN. React tự thoát chuỗi khi đặt vào node con, nên
-          `<script>` người dùng gõ hiện ra đúng như chữ họ gõ. Tuyệt đối KHÔNG
-          đổi sang dangerouslySetInnerHTML ở đây — đó là đường mở cho chèn mã.
-          `whitespace-pre-wrap` giữ lại xuống dòng, tức là giữ cấu trúc bài.
+          `RichText` dựng ra các phần tử React từ dấu quy ước — KHÔNG bao giờ
+          dựng HTML từ chuỗi người dùng. Xem chú thích đầu `lib/forum/markup.ts`
+          để hiểu vì sao đó là điều kiện an toàn, không phải lựa chọn phong cách.
         */}
-        <div className="mt-5 whitespace-pre-wrap break-words text-[0.98rem] leading-relaxed text-ink">
-          {post.body}
-        </div>
+        <RichText
+          text={post.body}
+          className="mt-5 text-[0.98rem] leading-relaxed text-ink"
+        />
 
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-line pt-5">
+        {/*
+          Một hàng flex-wrap chứa: cắm cờ · hạ cờ · Luận bàn · Báo cáo.
+          Khi mở, ô soạn thảo tự xuống dòng riêng và rộng hết khung nhờ
+          `w-full basis-full` bên trong — đó là cách sửa lỗi ô bị bóp hẹp.
+        */}
+        <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-line pt-5">
           <VoteButtons
             targetType="POST"
             targetId={post.id}
-            score={post.score}
+            upCount={post.upCount}
+            downCount={post.downCount}
             myValue={postVotes.get(post.id) ?? 0}
             path={basePath}
             disabled={viewer.banned}
           />
-          <ReportForm targetType="POST" targetId={post.id} />
+          {canWrite && (
+            <CommentForm postId={post.id} channelKey={channel.key} />
+          )}
+          <span className="ml-auto">
+            <ReportForm targetType="POST" targetId={post.id} />
+          </span>
         </div>
       </article>
 
@@ -163,17 +183,6 @@ export default async function PostPage({
             ? "Nguyệt Thí đang diễn ra nên phần viết tạm khóa."
             : "Bạn chưa viết được ở phòng này."}
         </NoteBox>
-      )}
-
-      {canWrite && (
-        <div className="mt-8 border border-line bg-paper p-6">
-          <p className="label-caps">Góp lời</p>
-          <CommentForm
-            postId={post.id}
-            channelKey={channel.key}
-            autoOpen
-          />
-        </div>
       )}
 
       <h2 className="mt-10 font-display text-lg font-bold text-navy-deep">
@@ -243,15 +252,17 @@ function CommentBranch({
         )}
       </div>
 
-      <div className="mt-1.5 whitespace-pre-wrap break-words text-[0.94rem] leading-relaxed text-ink">
-        {node.body}
-      </div>
+      <RichText
+        text={node.body}
+        className="mt-1.5 text-[0.94rem] leading-relaxed text-ink"
+      />
 
-      <div className="mt-2 flex flex-wrap items-center gap-4">
+      <div className="mt-2 flex flex-wrap items-center gap-3">
         <VoteButtons
           targetType="COMMENT"
           targetId={node.id}
-          score={node.score}
+          upCount={node.upCount}
+          downCount={node.downCount}
           myValue={votes.get(node.id) ?? 0}
           path={basePath}
           disabled={viewer.banned}
@@ -267,7 +278,9 @@ function CommentBranch({
             replyingTo={atMaxDepth ? node.authorName : undefined}
           />
         )}
-        <ReportForm targetType="COMMENT" targetId={node.id} />
+        <span className="ml-auto">
+          <ReportForm targetType="COMMENT" targetId={node.id} />
+        </span>
       </div>
 
       {node.children.length > 0 && (

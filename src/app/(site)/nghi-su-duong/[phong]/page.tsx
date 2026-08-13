@@ -46,6 +46,8 @@ export default async function ChannelPage({
       id: true,
       title: true,
       score: true,
+      upCount: true,
+      downCount: true,
       commentCount: true,
       pinnedAt: true,
       lockedAt: true,
@@ -112,7 +114,8 @@ export default async function ChannelPage({
                 <VoteButtons
                   targetType="POST"
                   targetId={post.id}
-                  score={post.score}
+                  upCount={post.upCount}
+                  downCount={post.downCount}
                   myValue={votes.get(post.id) ?? 0}
                   path={basePath}
                   disabled={!channel.access.canRead || viewer.banned}

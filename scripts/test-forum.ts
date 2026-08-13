@@ -13,9 +13,15 @@ import {
   depthForReply,
   nextVoteValue,
   visibleChannelLevels,
+  voteCountDelta,
   voteDelta,
   type CommentRow,
 } from "../src/lib/forum/rules.ts";
+import {
+  parseMarkup,
+  toggleBullet,
+  toggleWrap,
+} from "../src/lib/forum/markup.ts";
 
 let failures = 0;
 function check(label: string, actual: unknown, expected: unknown) {
@@ -131,6 +137,40 @@ check("rút phiếu cắm cờ: -1", voteDelta(1, 0), -1);
 check("rút phiếu hạ cờ: +1", voteDelta(-1, 0), 1);
 check("bầu lại đúng thứ đang bầu: 0", voteDelta(1, 1), 0);
 
+console.log("\n— Hai số đếm cờ, mỗi cú bấm chỉ đổi MỘT đơn vị —");
+
+// Đây là lý do có hai số riêng thay vì một hiệu số. Chủ dự án bấm Hạ cờ khi
+// đang cắm cờ và thấy tổng nhảy từ 2 xuống 0 — đúng về toán học nhưng đọc ra
+// thành "vừa mất 2 cờ". Với hai số riêng, cùng thao tác đó đọc đúng thứ đã xảy
+// ra: bớt một cờ cắm, thêm một cờ hạ.
+check("chưa bầu → cắm cờ", voteCountDelta(0, 1), { up: 1, down: 0 });
+check("chưa bầu → hạ cờ", voteCountDelta(0, -1), { up: 0, down: 1 });
+check("đổi cắm sang hạ", voteCountDelta(1, -1), { up: -1, down: 1 });
+check("đổi hạ sang cắm", voteCountDelta(-1, 1), { up: 1, down: -1 });
+check("rút phiếu cắm", voteCountDelta(1, 0), { up: -1, down: 0 });
+check("rút phiếu hạ", voteCountDelta(-1, 0), { up: 0, down: -1 });
+
+// BẤT BIẾN của hàm này: không cú bấm nào làm một số nhảy quá 1 đơn vị.
+const moiCapPhieu: Array<[0 | 1 | -1, 0 | 1 | -1]> = [
+  [0, 1], [0, -1], [1, -1], [-1, 1], [1, 0], [-1, 0], [0, 0], [1, 1], [-1, -1],
+];
+check(
+  "KHÔNG cú bấm nào làm một số đếm nhảy quá 1 đơn vị",
+  moiCapPhieu.every(([a, b]) => {
+    const d = voteCountDelta(a, b);
+    return Math.abs(d.up) <= 1 && Math.abs(d.down) <= 1;
+  }),
+  true
+);
+check(
+  "hiệu hai số đếm luôn khớp với uy vọng",
+  moiCapPhieu.every(([a, b]) => {
+    const d = voteCountDelta(a, b);
+    return d.up - d.down === voteDelta(a, b);
+  }),
+  true
+);
+
 check("bấm lại nút đang sáng thì rút phiếu", nextVoteValue(1, 1), 0);
 check("bấm nút kia thì đổi phiếu", nextVoteValue(1, -1), -1);
 check("chưa bầu thì bấm là bầu", nextVoteValue(0, -1), -1);
@@ -197,6 +237,99 @@ check(
   { ok: true, value: "<script>alert(1)</script>" }
 );
 check("toàn khoảng trắng bị từ chối", checkText("      ", 2, 100, "Nội dung").ok, false);
+
+console.log("\n— Định dạng chữ —");
+
+check("chữ thường ra một đoạn", parseMarkup("xin chao"), [
+  { type: "para", spans: [{ text: "xin chao" }] },
+]);
+check("in đậm", parseMarkup("**dam**"), [
+  { type: "para", spans: [{ text: "dam", bold: true }] },
+]);
+check("in nghiêng", parseMarkup("*nghieng*"), [
+  { type: "para", spans: [{ text: "nghieng", italic: true }] },
+]);
+check("gạch chân", parseMarkup("__gach__"), [
+  { type: "para", spans: [{ text: "gach", underline: true }] },
+]);
+check("đậm lồng trong câu", parseMarkup("a **b** c"), [
+  {
+    type: "para",
+    spans: [{ text: "a " }, { text: "b", bold: true }, { text: " c" }],
+  },
+]);
+check("đậm chứa nghiêng", parseMarkup("**a *b* c**"), [
+  {
+    type: "para",
+    spans: [
+      { text: "a ", bold: true },
+      { text: "b", bold: true, italic: true },
+      { text: " c", bold: true },
+    ],
+  },
+]);
+
+// Dấu lạc không có dấu đóng phải để nguyên như chữ thường — nếu không, một dấu
+// sao giữa bài sẽ bôi đậm toàn bộ phần còn lại mà người viết không hiểu vì sao.
+check("dấu mở không có dấu đóng thì để nguyên", parseMarkup("2 * 3 = 6"), [
+  { type: "para", spans: [{ text: "2 * 3 = 6" }] },
+]);
+// Chốt `end === from` trong parseInline là thứ giữ phép thử này. Bỏ nó đi thì
+// `****` biến thành một đoạn RỖNG — chữ người dùng gõ bốc hơi khỏi màn hình.
+check("bốn dấu sao liền không phải định dạng", parseMarkup("****"), [
+  { type: "para", spans: [{ text: "****" }] },
+]);
+
+check("gạch đầu dòng", parseMarkup("- mot\n- hai"), [
+  { type: "list", items: [[{ text: "mot" }], [{ text: "hai" }]] },
+]);
+check(
+  "hai dòng gạch đầu dòng gộp thành MỘT danh sách",
+  parseMarkup("- a\n- b").length,
+  1
+);
+check(
+  "chữ thường sau danh sách mở đoạn mới",
+  parseMarkup("- a\nsau do").map((b) => b.type),
+  ["list", "para"]
+);
+check("định dạng chạy bên trong gạch đầu dòng", parseMarkup("- **dam**"), [
+  { type: "list", items: [[{ text: "dam", bold: true }]] },
+]);
+
+// Thẻ HTML người dùng gõ phải đi qua như CHỮ THƯỜNG. Chống chèn mã nằm ở chỗ
+// hiển thị (React tự thoát chuỗi), không phải ở chỗ lọc đầu vào.
+check(
+  "thẻ HTML gõ tay chỉ là chữ, không thành thẻ",
+  parseMarkup("<script>alert(1)</script>"),
+  [{ type: "para", spans: [{ text: "<script>alert(1)</script>" }] }]
+);
+
+console.log("\n— Thanh công cụ —");
+
+check("bọc phần đang chọn", toggleWrap("abc", 0, 3, "**"), {
+  value: "**abc**",
+  selectionStart: 2,
+  selectionEnd: 5,
+});
+// Bấm lại đúng nút phải GỠ dấu ra; thiếu điều này thì không có cách nào bỏ in
+// đậm ngoài việc xóa tay hai dấu sao — và người dùng sẽ xóa nhầm chữ.
+check("bấm lại thì gỡ dấu ra", toggleWrap("**abc**", 2, 5, "**"), {
+  value: "abc",
+  selectionStart: 0,
+  selectionEnd: 3,
+});
+check("chưa chọn gì thì mở sẵn cặp dấu", toggleWrap("ab", 2, 2, "*"), {
+  value: "ab**",
+  selectionStart: 3,
+  selectionEnd: 3,
+});
+check("thêm gạch đầu dòng", toggleBullet("mot\nhai", 0, 7).value, "- mot\n- hai");
+check(
+  "bấm lại thì bỏ gạch đầu dòng",
+  toggleBullet("- mot\n- hai", 0, 11).value,
+  "mot\nhai"
+);
 
 console.log(
   failures === 0

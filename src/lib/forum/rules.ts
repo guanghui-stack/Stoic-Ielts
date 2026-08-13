@@ -125,6 +125,28 @@ export function voteDelta(oldValue: VoteValue, newValue: VoteValue): number {
   return newValue - oldValue;
 }
 
+export type CountDelta = { up: number; down: number };
+
+/**
+ * Hai số đếm cờ thay đổi bao nhiêu.
+ *
+ * VÌ SAO CẦN, dù đã có `voteDelta`: giao diện hiện HAI số riêng chứ không hiện
+ * một hiệu số. Đổi từ cắm sang hạ làm hiệu số nhảy 2 — đúng về toán học nhưng
+ * người dùng đọc thành "vừa mất 2 cờ". Với hai số riêng thì cùng thao tác đó
+ * đọc ra đúng thứ đã xảy ra: bớt một cờ cắm, thêm một cờ hạ.
+ *
+ * Mỗi số CHỈ đổi tối đa 1 đơn vị cho mỗi cú bấm. Đó là bất biến của hàm này.
+ */
+export function voteCountDelta(
+  oldValue: VoteValue,
+  newValue: VoteValue
+): CountDelta {
+  return {
+    up: (newValue === 1 ? 1 : 0) - (oldValue === 1 ? 1 : 0),
+    down: (newValue === -1 ? 1 : 0) - (oldValue === -1 ? 1 : 0),
+  };
+}
+
 /** Bấm lại nút đang sáng thì rút phiếu; bấm nút kia thì đổi phiếu. */
 export function nextVoteValue(
   current: VoteValue,

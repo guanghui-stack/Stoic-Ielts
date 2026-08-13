@@ -1046,6 +1046,8 @@ const DDL = [
     \`title\` VARCHAR(200) NOT NULL,
     \`body\` TEXT NOT NULL,
     \`score\` INTEGER NOT NULL DEFAULT 0,
+    \`upCount\` INTEGER NOT NULL DEFAULT 0,
+    \`downCount\` INTEGER NOT NULL DEFAULT 0,
     \`commentCount\` INTEGER NOT NULL DEFAULT 0,
     \`status\` VARCHAR(16) NOT NULL DEFAULT 'VISIBLE',
     \`pinnedAt\` DATETIME(3) NULL,
@@ -1068,6 +1070,8 @@ const DDL = [
     \`depth\` INTEGER NOT NULL DEFAULT 0,
     \`body\` TEXT NOT NULL,
     \`score\` INTEGER NOT NULL DEFAULT 0,
+    \`upCount\` INTEGER NOT NULL DEFAULT 0,
+    \`downCount\` INTEGER NOT NULL DEFAULT 0,
     \`status\` VARCHAR(16) NOT NULL DEFAULT 'VISIBLE',
     \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     \`updatedAt\` DATETIME(3) NOT NULL,
@@ -1205,6 +1209,12 @@ const MIGRATIONS = [
 
   // Cam dang tren dien dan
   `ALTER TABLE \`User\` ADD COLUMN \`forumBannedAt\` DATETIME(3) NULL`,
+
+  // Dem co cam va co ha RIENG, thay cho mot so rong duy nhat
+  `ALTER TABLE \`ForumPost\` ADD COLUMN \`upCount\` INTEGER NOT NULL DEFAULT 0`,
+  `ALTER TABLE \`ForumPost\` ADD COLUMN \`downCount\` INTEGER NOT NULL DEFAULT 0`,
+  `ALTER TABLE \`ForumComment\` ADD COLUMN \`upCount\` INTEGER NOT NULL DEFAULT 0`,
+  `ALTER TABLE \`ForumComment\` ADD COLUMN \`downCount\` INTEGER NOT NULL DEFAULT 0`,
 
   // Dang nhap Google + gioi han mot thiet bi
   `ALTER TABLE \`User\` MODIFY COLUMN \`passwordHash\` VARCHAR(191) NULL`,
@@ -1547,6 +1557,46 @@ export async function initDatabase() {
   } catch (err) {
     console.error("[wobridges] Khong seed duoc phong dien dan:", err);
   }
+
+  /**
+   * Dựng lại hai số đếm cờ từ sổ phiếu đã có.
+   *
+   * Cột `upCount`/`downCount` thêm sau khi diễn đàn đã có phiếu thật, nên phải
+   * đếm ngược từ `ForumVote` — nguồn sự thật duy nhất. Đếm lại từ phiếu chứ
+   * KHÔNG suy từ `score`: score chỉ là hiệu số, không tách được 3 cắm 1 hạ với
+   * 2 cắm 0 hạ, mà hai thứ đó hiện ra màn hình khác hẳn nhau.
+   */
+  await applyOnce("FORUM_VOTE_COUNTS_BACKFILL_v1", async () => {
+    for (const targetType of ["POST", "COMMENT"] as const) {
+      const groups = await db.forumVote.groupBy({
+        by: ["targetId", "value"],
+        where: { targetType },
+        _count: { _all: true },
+      });
+
+      const tally = new Map<string, { up: number; down: number }>();
+      for (const row of groups) {
+        const current = tally.get(row.targetId) ?? { up: 0, down: 0 };
+        if (row.value > 0) current.up += row._count._all;
+        else current.down += row._count._all;
+        tally.set(row.targetId, current);
+      }
+
+      for (const [targetId, counts] of tally) {
+        const data = { upCount: counts.up, downCount: counts.down };
+        if (targetType === "POST") {
+          await db.forumPost.updateMany({ where: { id: targetId }, data });
+        } else {
+          await db.forumComment.updateMany({ where: { id: targetId }, data });
+        }
+      }
+      if (tally.size > 0) {
+        console.log(
+          `[wobridges] Dung lai so dem co cho ${tally.size} ${targetType}.`
+        );
+      }
+    }
+  });
 
   await applyOnce("WELCOME_COINS_BACKFILL_v1", async () => {
     const { grantWelcomeCoins } = await import("@/lib/payments/coin-service");
