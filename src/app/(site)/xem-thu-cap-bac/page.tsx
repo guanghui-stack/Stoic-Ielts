@@ -7,6 +7,11 @@ import { TrialReflectionForm } from "@/components/ranks/trial-reflection-form";
 import { CampaignMap } from "@/components/campaign/campaign-map";
 import { CampaignTimelineMobile } from "@/components/campaign/campaign-timeline-mobile";
 import { campaignView } from "@/lib/campaign/view";
+import {
+  RankInsignia,
+  RankInsigniaWithLevel,
+} from "@/components/ranks/rank-insignia";
+import { RANK_ERAS, RANK_SEEDS } from "@/lib/ranks/catalog";
 
 /**
  * Trang xem thử hệ cấp bậc — CHỈ tồn tại ở môi trường dev.
@@ -69,6 +74,45 @@ export default function RankPreviewPage() {
         có truy vấn database nào. Các nút bấm được sẽ gọi Server Action thật và
         báo lỗi thiếu đăng nhập — đó là hành vi đúng.
       </p>
+
+      <Block title="Chín ấn triện — huy hiệu cấp bậc">
+        <p className="mb-5 max-w-2xl font-ui text-sm leading-relaxed text-ink-soft">
+          Núm ấn đổi theo thời đại (thanh ngang · vòng · vòng kép), số vạch
+          trong lòng ấn là bậc trong thời đại đó. Dải nhỏ bên dưới là cỡ thật
+          khi huy hiệu nằm cạnh tên trong bảng — đó mới là chỗ dễ vỡ.
+        </p>
+        <div className="flex flex-wrap gap-5">
+          {RANK_SEEDS.map((rank) => (
+            <div key={rank.code} className="w-28 text-center">
+              <RankInsignia level={rank.level} className="mx-auto h-16 w-16" />
+              <p className="mt-1.5 font-ui text-xs font-semibold text-navy-deep">
+                {rank.name}
+              </p>
+              <p className="font-ui text-[0.68rem] text-muted">
+                Bậc {rank.level} · {RANK_ERAS[rank.era].name}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <p className="mt-7 label-caps">Cỡ nhỏ trong bảng</p>
+        <div className="mt-2 flex flex-wrap items-center gap-3">
+          {RANK_SEEDS.map((rank) => (
+            <RankInsignia
+              key={rank.code}
+              level={rank.level}
+              className="h-7 w-7"
+            />
+          ))}
+        </div>
+
+        <p className="mt-7 label-caps">Kèm số bậc</p>
+        <div className="mt-2 flex flex-wrap items-center gap-4">
+          {[1, 5, 9].map((level) => (
+            <RankInsigniaWithLevel key={level} level={level} />
+          ))}
+        </div>
+      </Block>
 
       <Block title="Thẻ cấp bậc — đang trấn thủ">
         <CurrentRankCard

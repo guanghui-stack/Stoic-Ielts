@@ -1,7 +1,15 @@
 import { RANK_ERAS, rankByLevel, type RankEra } from "@/lib/ranks/catalog";
 
 /**
- * Huy hiệu chín bậc.
+ * Huy hiệu chín bậc — ẤN TRIỆN.
+ *
+ * VÌ SAO LÀ CON DẤU, không phải khiên: bản đầu tôi vẽ khiên đáy nhọn, và chủ
+ * dự án nhận ra ngay là lệch. Khiên đáy nhọn là hình huy hiệu **châu Âu** thời
+ * trung cổ — đổi màu cách mấy cũng không cứu được đường viền.
+ *
+ * Thời Hán thì cấp bậc quan chức đọc được từ chính con dấu: chất liệu ấn và
+ * màu dây thao đổi theo chức. Đây đúng nghĩa là vật dùng để phân cấp trong bối
+ * cảnh Tam Quốc, chứ không phải một hình gợi nhớ mơ hồ.
  *
  * KHÁC HẲN huy hiệu cuộc thi ở `components/competition/badges.tsx`:
  *
@@ -10,42 +18,106 @@ import { RANK_ERAS, rankByLevel, type RankEra } from "@/lib/ranks/catalog";
  * | Lấy bằng cách nào | Lên bậc qua quá trình luyện | **Đoạt giải** một kỳ thi |
  * | Ai cũng có thể có | Có, chỉ cần đủ kiên trì | Không, chỉ người thắng |
  * | Sống bao lâu | Vĩnh viễn theo bậc hiện tại | 30 ngày |
- * | Hình | Khiên theo thời đại | Vương miện · ấn · giáp |
  *
  * Trộn hai loại là xoá mất ý nghĩa của loại thứ hai: một huy hiệu ai cũng có
  * thì không còn là phần thưởng.
  *
- * VẼ BẰNG SVG chứ không phải ảnh, cùng lý do đã ghi ở huy hiệu cuộc thi: sắc
- * nét ở mọi cỡ, không tốn thêm lượt tải, và đổi màu theo hệ thiết kế được. Với
- * chín bậc thì đây còn là cách duy nhất giữ chúng nhất quán — chín file ảnh do
- * ba lần đặt hàng khác nhau sẽ không bao giờ cùng một nét.
+ * TUYỆT ĐỐI KHÔNG thêm chữ Hán vào đây, kể cả nét giả trang trí — dự án có
+ * `npm run test:no-han` chặn, và đó là quy tắc không có ngoại lệ.
  */
 
-const CREAM = "#f6f1e7";
+const PAPER = "#fffdf9";
 const NAVY = "#1e3a5c";
 
 /**
- * Mỗi thời đại một màu và một hình nền, lấy từ bảng màu Tam Quốc.
+ * Ba thời đại, ba chất ấn — lấy thẳng từ bảng màu Tam Quốc.
  *
- * Loạn thế dùng tro — chưa có gì để khoe, và đó là điểm xuất phát bình thường.
+ * Loạn thế dùng tro: chưa có gì để khoe, và đó là điểm xuất phát bình thường.
  * Quần hùng dùng lam điện của Chiến trận. Tam phân dùng chu sa, màu mà bảng
- * màu đã ghi rõ là dành cho "cấp bậc cao".
+ * màu đã ghi rõ là dành cho "con dấu, cấp bậc cao".
  */
-const ERA_STYLE: Record<RankEra, { stroke: string; fill: string; accent: string }> = {
-  LOAN_THE: { stroke: "#77736c", fill: "#efeae0", accent: "#5f5b54" },
-  QUAN_HUNG: { stroke: "#3a7fc4", fill: "#e6eef7", accent: "#2c6099" },
-  TAM_PHAN: { stroke: "#a33a2b", fill: "#f4e6e2", accent: "#8e3125" },
+const ERA_STYLE: Record<RankEra, { line: string; ink: string; pale: string }> = {
+  LOAN_THE: { line: "#77736c", ink: "#5f5b54", pale: "#efeae0" },
+  QUAN_HUNG: { line: "#3a7fc4", ink: "#2c6099", pale: "#e6eef7" },
+  TAM_PHAN: { line: "#a33a2b", ink: "#8e3125", pale: "#f4e6e2" },
 };
 
 /**
- * Bậc trong thời đại: 1, 2 hay 3.
+ * Bậc trong thời đại: 1, 2 hay 3 — số vạch trong lòng ấn.
  *
- * Số vạch trên khiên đọc ra bậc mà không cần chú thích — ba vạch ở Tam phân
- * là bậc 9. Suy từ `level` chứ không khai tay: khai tay thì thêm một bậc là
- * lệch ngay, và không ai để ý cho tới khi học viên hỏi.
+ * Suy từ `level` chứ không khai tay: khai tay thì thêm một bậc là lệch ngay,
+ * và không ai để ý cho tới khi học viên hỏi.
  */
 function tierWithinEra(level: number): number {
   return ((level - 1) % 3) + 1;
+}
+
+/**
+ * Núm ấn (nữu) — mấu nhỏ trên lưng ấn để xỏ dây thao.
+ *
+ * PHẢI NHỎ VÀ THẤP. Bản trước tôi vẽ núm thành vòng cung rộng bắc qua cả mặt
+ * ấn, và nhìn tận mắt thì cả con dấu đọc thành **cái túi xách** — vòng cung
+ * rộng trên một hình vuông bo góc là quai xách, không phải núm ấn. Núm thật
+ * chiếm chưa tới một phần ba bề ngang và gần như dính vào lưng ấn.
+ *
+ * Ba thời đại, ba kiểu nữu, đúng thứ tự leo thang của đồ án cổ:
+ * mấu trơn → nữu vòng → nữu vòng trên bệ.
+ */
+function knob(era: RankEra, line: string, ink: string) {
+  if (era === "LOAN_THE") {
+    return (
+      <rect
+        x="24.4"
+        y="10.2"
+        width="7.2"
+        height="3.6"
+        rx="1.1"
+        stroke={line}
+        strokeWidth="1.3"
+      />
+    );
+  }
+
+  if (era === "QUAN_HUNG") {
+    return (
+      <>
+        <rect
+          x="24.4"
+          y="11.4"
+          width="7.2"
+          height="2.6"
+          rx="0.9"
+          fill={line}
+          opacity="0.9"
+        />
+        <circle cx="28" cy="8.6" r="2.9" stroke={line} strokeWidth="1.3" />
+      </>
+    );
+  }
+
+  return (
+    <>
+      <rect
+        x="23.4"
+        y="11.4"
+        width="9.2"
+        height="2.6"
+        rx="0.9"
+        fill={line}
+        opacity="0.9"
+      />
+      <rect
+        x="25.2"
+        y="9.2"
+        width="5.6"
+        height="2.4"
+        rx="0.7"
+        fill={line}
+        opacity="0.7"
+      />
+      <circle cx="28" cy="6.4" r="2.9" stroke={ink} strokeWidth="1.4" />
+    </>
+  );
 }
 
 export function RankInsignia({
@@ -56,8 +128,8 @@ export function RankInsignia({
   className?: string;
 }) {
   const rank = rankByLevel(level);
-  // Bậc lạ (dữ liệu hỏng) vẽ theo Loạn thế thay vì đổ vỡ: một huy hiệu xám
-  // vẫn hơn một trang trắng.
+  // Bậc lạ (dữ liệu hỏng) vẽ theo Loạn thế thay vì đổ vỡ: một con dấu xám vẫn
+  // hơn một ô trống hay một trang lỗi.
   const era = rank?.era ?? "LOAN_THE";
   const style = ERA_STYLE[era];
   const tier = tierWithinEra(level);
@@ -65,9 +137,15 @@ export function RankInsignia({
     ? `${rank.name} — bậc ${level}, ${RANK_ERAS[era].name}`
     : `Bậc ${level}`;
 
+  const barWidth = 16;
+  const barX = 28 - barWidth / 2;
+  // Xếp các vạch quanh tâm mặt ấn (y = 29) để một vạch, hai vạch hay ba vạch
+  // đều nằm cân — cố định vị trí vạch đầu sẽ làm bậc 1 lệch lên trên.
+  const barTop = 29 - (tier * 6 - 2.6) / 2;
+
   return (
     <svg
-      viewBox="0 0 48 48"
+      viewBox="0 0 56 56"
       className={className}
       role="img"
       aria-label={label}
@@ -75,28 +153,31 @@ export function RankInsignia({
     >
       <title>{label}</title>
 
-      {/* Khiên: đáy nhọn dần theo thời đại — Loạn thế bo tròn, Tam phân nhọn. */}
-      <path
-        d={
-          era === "TAM_PHAN"
-            ? "M24 3l17 6v16c0 10-7 17-17 20-10-3-17-10-17-20V9z"
-            : era === "QUAN_HUNG"
-              ? "M24 4l16 5.5v15c0 9.5-6.5 16-16 19-9.5-3-16-9.5-16-19v-15z"
-              : "M24 5l15 5v14c0 9-6 15-15 17.5C15 39 9 33 9 24V10z"
-        }
-        fill={style.fill}
-        stroke={style.stroke}
-        strokeWidth="2"
-        strokeLinejoin="round"
+      {knob(era, style.line, style.ink)}
+
+      {/* Mặt ấn */}
+      <rect
+        x="13"
+        y="14"
+        width="30"
+        height="30"
+        rx="1.8"
+        fill={style.pale}
+        stroke={style.line}
+        strokeWidth="1.8"
       />
 
-      {/* Viền trong: chỉ có từ Quần hùng trở lên — bậc càng cao càng nhiều lớp. */}
+      {/* Khung trong: chỉ có từ Quần hùng trở lên. */}
       {era !== "LOAN_THE" && (
-        <path
-          d="M24 9l11 4v11.5c0 7-4.5 11.5-11 13.5-6.5-2-11-6.5-11-13.5V13z"
-          stroke={style.accent}
+        <rect
+          x="16.5"
+          y="17.5"
+          width="23"
+          height="23"
+          rx="2"
+          stroke={style.line}
           strokeWidth="0.9"
-          opacity="0.55"
+          opacity="0.5"
         />
       )}
 
@@ -104,39 +185,64 @@ export function RankInsignia({
       {Array.from({ length: tier }).map((_, index) => (
         <rect
           key={index}
-          x={24 - (tier * 5 - 1) / 2 + index * 5}
-          y="19"
-          width="3"
-          height="10"
-          rx="0.6"
-          fill={style.accent}
+          x={barX}
+          y={barTop + index * 6}
+          width={barWidth}
+          height="2.6"
+          rx="1"
+          fill={style.ink}
         />
       ))}
 
-      {/* Bậc 9 — Đại tướng quân: thêm một ngôi sao trên đỉnh khiên. */}
+      {/*
+        Bậc 9 — Đại tướng quân.
+
+        Bản trước vẽ hai dải thao buông dưới chân ấn, và nhìn tận mắt thì hai
+        nét đó đọc thành DẤU TÍCH. Nay đổi sang một khung viền thứ ba sát mép
+        trong: cùng ý "nhiều lớp hơn mọi bậc khác" mà không sinh ra một ký hiệu
+        mang nghĩa khác hẳn.
+      */}
       {level === 9 && (
-        <path
-          d="M24 9.5l1.5 3.2 3.5.5-2.6 2.5.7 3.5-3.1-1.7-3.1 1.7.7-3.5-2.6-2.5 3.5-.5z"
-          fill={CREAM}
-          stroke={style.accent}
+        <rect
+          x="19.5"
+          y="20.5"
+          width="17"
+          height="17"
+          rx="1.5"
+          stroke={style.ink}
           strokeWidth="0.8"
-          strokeLinejoin="round"
+          opacity="0.45"
         />
       )}
+    </svg>
+  );
+}
 
-      {/* Số bậc ở chân khiên: đọc được ngay mà không cần đếm vạch. */}
-      <circle cx="24" cy="36.5" r="5.2" fill={NAVY} />
-      <text
-        x="24"
-        y="38.6"
-        textAnchor="middle"
-        fontSize="7"
-        fontWeight="700"
-        fill={CREAM}
-        fontFamily="system-ui, sans-serif"
+/**
+ * Ấn kèm số bậc — dùng ở chỗ cần đọc ngay con số mà không phải đếm vạch,
+ * ví dụ bảng quản trị. Chỗ nào đã có cột "Bậc" riêng thì dùng `RankInsignia`.
+ */
+export function RankInsigniaWithLevel({
+  level,
+  className = "h-11 w-11",
+}: {
+  level: number;
+  className?: string;
+}) {
+  const rank = rankByLevel(level);
+  const era = rank?.era ?? "LOAN_THE";
+  const style = ERA_STYLE[era];
+
+  return (
+    <span className="relative inline-flex">
+      <RankInsignia level={level} className={className} />
+      <span
+        className="absolute -bottom-0.5 -right-0.5 inline-flex h-[1.15rem] w-[1.15rem] items-center justify-center rounded-full font-ui text-[0.62rem] font-bold tabular-nums"
+        style={{ background: NAVY, color: PAPER, border: `1px solid ${style.line}` }}
+        aria-hidden="true"
       >
         {level}
-      </text>
-    </svg>
+      </span>
+    </span>
   );
 }
