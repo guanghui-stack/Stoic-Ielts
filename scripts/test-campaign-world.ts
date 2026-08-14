@@ -167,14 +167,21 @@ check(
   },
 );
 
-const activeAndAvailable = [
-  activeNodes[0],
-  { ...availableNodes[0], code: "AVAILABLE_FIXTURE", trialCode: "TRIAL_01_DAO_VIEN" },
-];
+const availablePriorityNodes = campaignView(2, {
+  TRIAL_02_HOANG_CAN: { status: "ELIGIBLE" },
+});
+const activeAndAvailable = [activeNodes[0], availablePriorityNodes[1]];
 check(
   "active has priority over available",
-  buildCampaignWorld({ audience: "STUDENT", nodes: activeAndAvailable }).nextStep.href,
-  "/hoc-vien/thi-luyen/TRIAL_01_DAO_VIEN",
+  buildCampaignWorld({ audience: "STUDENT", nodes: activeAndAvailable }).nextStep,
+  {
+    eyebrow: "Bước tiếp theo của bạn",
+    title: "Tiếp tục Đào viên",
+    body: "Thí luyện đang dở được giữ nguyên. Tiếp tục từ đúng tiến độ hiện tại.",
+    href: "/hoc-vien/thi-luyen/TRIAL_01_DAO_VIEN",
+    actionLabel: "Tiếp tục thí luyện",
+    entersStudy: false,
+  },
 );
 
 process.exit(failures === 0 ? 0 : 1);
