@@ -5,7 +5,9 @@ import { features } from "@/lib/features";
 import { getCurrentUser } from "@/lib/session";
 import { CampaignMap } from "@/components/campaign/campaign-map";
 import { CampaignTimelineMobile } from "@/components/campaign/campaign-timeline-mobile";
+import { NextStepGuide } from "@/components/world/next-step-guide";
 import { campaignView, type TrialStatusMap } from "@/lib/campaign/view";
+import { buildCampaignWorld, type CampaignWorld } from "@/lib/campaign/world";
 import { ensureUserRank, syncTrialEligibility } from "@/lib/ranks/engine";
 import { loadRankFacts } from "@/lib/ranks/facts";
 import { rankByLevel } from "@/lib/ranks/catalog";
@@ -31,12 +33,13 @@ export async function CampaignHomeBlock() {
   // Khách: bản đồ giới thiệu, cửa đầu mở, không truy vấn gì thêm.
   if (!user) {
     const nodes = campaignView(1, { TRIAL_01_DAO_VIEN: { status: "ELIGIBLE" } });
+    const world = buildCampaignWorld({ audience: "GUEST", nodes });
     return (
       <Section
         eyebrow="Chiến Dịch"
         title="Tám cửa ải, chín cấp bậc"
         lede="Mỗi cấp bậc phải vượt một cửa ải mới lên được, và mỗi cửa ải đo một năng lực đọc thật. Không mua được, không tự rơi xuống."
-        nodes={nodes}
+        world={world}
         cta={{ href: "/dang-ky", label: "Bắt đầu từ Bạch thân" }}
       />
     );
@@ -54,6 +57,7 @@ export async function CampaignHomeBlock() {
   for (const row of rows) trials[row.trialCode] = { status: row.status };
 
   const nodes = campaignView(profile.currentLevel, trials);
+  const world = buildCampaignWorld({ audience: "STUDENT", nodes });
   const rank = rankByLevel(profile.currentLevel);
   const passed = nodes.filter((node) => node.state === "PASSED").length;
 
@@ -62,7 +66,7 @@ export async function CampaignHomeBlock() {
       eyebrow="Chiến Dịch"
       title={`Bạn đang ở ${rank?.name ?? "Bạch thân"}`}
       lede={`Đã vượt ${passed} trên 8 cửa ải. Cấp bậc chỉ tăng, không bao giờ tụt.`}
-      nodes={nodes}
+      world={world}
       cta={{ href: "/hoc-vien/chien-dich", label: "Xem toàn bộ Chiến Dịch" }}
     />
   );
@@ -72,13 +76,13 @@ function Section({
   eyebrow,
   title,
   lede,
-  nodes,
+  world,
   cta,
 }: {
   eyebrow: string;
   title: string;
   lede: string;
-  nodes: ReturnType<typeof campaignView>;
+  world: CampaignWorld;
   cta: { href: string; label: string };
 }) {
   return (
@@ -94,9 +98,11 @@ function Section({
         </p>
 
         <div className="mt-8">
-          <CampaignMap nodes={nodes} />
-          <CampaignTimelineMobile nodes={nodes} />
+          <CampaignMap world={world} variant="portal" />
+          <CampaignTimelineMobile world={world} />
         </div>
+
+        <NextStepGuide step={world.nextStep} />
 
         <Link
           href={cta.href}

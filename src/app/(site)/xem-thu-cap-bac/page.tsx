@@ -7,7 +7,9 @@ import { CardinalTitlePicker } from "@/components/ranks/cardinal-title-picker";
 import { TrialReflectionForm } from "@/components/ranks/trial-reflection-form";
 import { CampaignMap } from "@/components/campaign/campaign-map";
 import { CampaignTimelineMobile } from "@/components/campaign/campaign-timeline-mobile";
+import { NextStepGuide } from "@/components/world/next-step-guide";
 import { campaignView } from "@/lib/campaign/view";
+import { buildCampaignWorld } from "@/lib/campaign/world";
 import {
   RankInsignia,
   RankInsigniaWithLevel,
@@ -64,6 +66,8 @@ export default function RankPreviewPage() {
   const earlyNodes = campaignView(1, {
     TRIAL_01_DAO_VIEN: { status: "ELIGIBLE" },
   });
+  const mapWorld = buildCampaignWorld({ audience: "STUDENT", nodes: mapNodes });
+  const earlyWorld = buildCampaignWorld({ audience: "GUEST", nodes: earlyNodes });
 
   return (
     <section className="mx-auto max-w-5xl px-6 py-12">
@@ -211,13 +215,15 @@ export default function RankPreviewPage() {
       </Block>
 
       <Block title="Bản đồ — đang ở bậc 3, đã vượt 2 cửa">
-        <CampaignMap nodes={mapNodes} />
-        <CampaignTimelineMobile nodes={mapNodes} />
+        <CampaignMap world={mapWorld} variant="student" />
+        <CampaignTimelineMobile world={mapWorld} />
+        <NextStepGuide step={mapWorld.nextStep} />
       </Block>
 
       <Block title="Bản đồ — người mới, chỉ cửa đầu đã mở">
-        <CampaignMap nodes={earlyNodes} />
-        <CampaignTimelineMobile nodes={earlyNodes} />
+        <CampaignMap world={earlyWorld} variant="portal" />
+        <CampaignTimelineMobile world={earlyWorld} />
+        <NextStepGuide step={earlyWorld.nextStep} />
       </Block>
     </section>
   );

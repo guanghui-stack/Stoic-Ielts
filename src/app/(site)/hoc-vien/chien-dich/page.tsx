@@ -6,7 +6,9 @@ import { SectionHeading, NoteBox } from "@/components/ui";
 import { StudentNav } from "@/components/student/student-nav";
 import { CampaignMap } from "@/components/campaign/campaign-map";
 import { CampaignTimelineMobile } from "@/components/campaign/campaign-timeline-mobile";
+import { NextStepGuide } from "@/components/world/next-step-guide";
 import { campaignView, type TrialStatusMap } from "@/lib/campaign/view";
+import { buildCampaignWorld } from "@/lib/campaign/world";
 import { ensureUserRank, syncTrialEligibility } from "@/lib/ranks/engine";
 import { loadRankFacts } from "@/lib/ranks/facts";
 import { rankByLevel, RANK_ERAS } from "@/lib/ranks/catalog";
@@ -49,6 +51,7 @@ export default async function CampaignPage() {
   }
 
   const nodes = campaignView(profile.currentLevel, trials);
+  const world = buildCampaignWorld({ audience: "STUDENT", nodes });
   const passed = nodes.filter((node) => node.state === "PASSED").length;
 
   return (
@@ -69,8 +72,11 @@ export default async function CampaignPage() {
         {rank && <> · thời {RANK_ERAS[rank.era].name}</>} · đã vượt {passed}/8 cửa ải.
       </p>
 
-      <CampaignMap nodes={nodes} />
-      <CampaignTimelineMobile nodes={nodes} />
+      <CampaignMap world={world} variant="student" />
+      <CampaignTimelineMobile world={world} />
+      <div id="dieu-kien">
+        <NextStepGuide step={world.nextStep} />
+      </div>
 
       <NoteBox className="mt-6">
         Cấp bậc chỉ tăng, không bao giờ tụt. Nếu bạn nghỉ một thời gian, cấp bậc
