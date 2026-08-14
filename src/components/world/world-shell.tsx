@@ -18,7 +18,7 @@ export function WorldShell({ header, children, footer }: WorldShellProps) {
   }
   return (
     <div
-      className="world-shell"
+      className="world-shell flex min-h-screen flex-col"
       data-world-shell="true"
       data-route-area={experience.area}
       data-motion-tier={experience.motionTier}
