@@ -536,3 +536,92 @@ body {
     transparent 94%
   );
 }
+
+.world-shell {
+  --world-duration-press: 120ms;
+  --world-duration-utility: 180ms;
+  --world-duration-scene: 520ms;
+  --world-duration-map: 680ms;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  isolation: isolate;
+}
+
+.world-shell .world-route-scene {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.world-shell > header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--color-paper);
+  box-shadow: 0 1px 0 rgb(34 48 62 / 0.08);
+}
+
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .world-shell > header {
+    background: color-mix(in srgb, var(--color-paper) 88%, transparent);
+    -webkit-backdrop-filter: blur(18px) saturate(115%);
+    backdrop-filter: blur(18px) saturate(115%);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .world-shell > header {
+    background: var(--color-paper);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+.world-shell > footer {
+  margin-top: auto;
+}
+
+.world-shell[data-motion-tier="1"] .world-route-scene {
+  animation: world-utility-enter var(--world-duration-utility) var(--ease-out) both;
+}
+
+.world-shell[data-motion-tier="2"] .world-route-scene {
+  animation: world-scene-enter var(--world-duration-scene) var(--ease-out) both;
+}
+
+.world-shell .world-action {
+  transition:
+    transform var(--world-duration-press) var(--ease-out),
+    color var(--world-duration-utility) var(--ease-out),
+    background-color var(--world-duration-utility) var(--ease-out),
+    border-color var(--world-duration-utility) var(--ease-out),
+    box-shadow var(--world-duration-utility) var(--ease-out);
+}
+
+.world-shell .world-action:active:not(:disabled) {
+  transform: scale(0.975);
+}
+
+@keyframes world-utility-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes world-scene-enter {
+  from { opacity: 0; transform: translateY(12px) scale(0.995); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .world-shell .world-route-scene,
+  .world-shell .world-map-stage,
+  .world-shell .world-scene-reveal {
+    animation: world-utility-enter var(--world-duration-press) var(--ease-out) both !important;
+    transform: none !important;
+  }
+
+  .world-shell .world-action:active:not(:disabled) {
+    transform: none;
+  }
+}
