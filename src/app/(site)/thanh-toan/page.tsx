@@ -22,7 +22,8 @@ import {
   CoinPurchaseButton,
   TopUpButton,
 } from "@/components/payments/purchase-button";
-import { ErrorBanner, NoteBox, SectionHeading } from "@/components/ui";
+import { QuietWorldPanel } from "@/components/world/quiet-world-panel";
+import { ErrorBanner, NoteBox } from "@/components/ui";
 
 export const metadata = {
   title: "Bảng giá",
@@ -79,42 +80,37 @@ export default async function PricingPage({
   const spendToken = randomBytes(12).toString("hex");
 
   return (
-    <section className="mx-auto max-w-5xl px-6 py-12 md:py-16">
-      <SectionHeading
-        label="Học phí trực tuyến"
+    <div>
+      <QuietWorldPanel
+        eyebrow="Học phí trực tuyến"
         title="Đề thi miễn phí. Nạp xu cho phần chữa bài."
-        align="center"
-      />
-      <p className="mx-auto mt-6 max-w-2xl text-center text-[0.98rem] leading-relaxed text-ink-soft">
-        Toàn bộ đề Reading, chấm điểm, quy đổi band và đáp án đúng/sai đều miễn
-        phí. Bạn nạp xu vào ví, rồi dùng xu mở lời giải chi tiết của giáo viên và
-        lớp chữa sâu Feynman cho đúng lượt làm bài của mình.
-      </p>
+        lede="Toàn bộ đề Reading, chấm điểm, quy đổi band và đáp án đúng/sai đều miễn phí. Bạn nạp xu vào ví, rồi dùng xu mở lời giải chi tiết của giáo viên và lớp chữa sâu Feynman cho đúng lượt làm bài của mình."
+      >
+        {shortMessage && <ErrorBanner message={shortMessage} />}
 
-      {shortMessage && (
-        <div className="mx-auto mt-8 max-w-2xl">
-          <ErrorBanner message={shortMessage} />
-        </div>
-      )}
+        {wallet && (
+          <div
+            className={`flex flex-wrap items-center justify-between gap-4 border border-gold bg-gold-pale px-6 py-5 ${shortMessage ? "mt-6" : ""}`}
+          >
+            <p className="flex items-center gap-3 font-ui text-sm text-ink">
+              <Wallet className="h-5 w-5 shrink-0 text-gold" aria-hidden="true" />
+              <span>
+                Ví của bạn đang có{" "}
+                <strong className="tabular-nums">{formatCoins(wallet.balance)}</strong>
+              </span>
+            </p>
+            <p className="font-ui text-xs text-muted">
+              Đã nạp {formatCoins(wallet.grantedTotal)} · đã tiêu{" "}
+              {formatCoins(wallet.spentTotal)}
+            </p>
+          </div>
+        )}
+      </QuietWorldPanel>
 
-      {wallet && (
-        <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border border-gold bg-gold-pale px-6 py-5">
-          <p className="flex items-center gap-3 font-ui text-sm text-ink">
-            <Wallet className="h-5 w-5 shrink-0 text-gold" aria-hidden="true" />
-            <span>
-              Ví của bạn đang có{" "}
-              <strong className="tabular-nums">{formatCoins(wallet.balance)}</strong>
-            </span>
-          </p>
-          <p className="font-ui text-xs text-muted">
-            Đã nạp {formatCoins(wallet.grantedTotal)} · đã tiêu{" "}
-            {formatCoins(wallet.spentTotal)}
-          </p>
-        </div>
-      )}
+      <section className="mx-auto max-w-5xl px-6 py-12 md:py-16">
 
       {/* ===== Nạp ví ===== */}
-      <h2 className="mt-12 font-display text-2xl font-bold text-navy-deep">
+      <h2 className="font-display text-2xl font-bold text-navy-deep">
         Nạp xu vào ví
       </h2>
       <p className="mt-2 font-ui text-sm leading-relaxed text-ink-soft">
@@ -194,12 +190,13 @@ export default async function PricingPage({
         bằng xu được. {AI_EVIDENCE_NOTICE}
       </NoteBox>
 
-      <NoteBox className="mt-6" title="Về quyền đã mua trước đây">
-        Ba gói cũ (Reading mở lẻ, Reading 30 ngày, Feynman 30 ngày) đã dừng bán.
-        Quyền bạn đã trả tiền vẫn còn nguyên và dùng hết thời hạn như cũ — không
-        có gì bị xóa hay quy đổi thành xu.
-      </NoteBox>
-    </section>
+        <NoteBox className="mt-6" title="Về quyền đã mua trước đây">
+          Ba gói cũ (Reading mở lẻ, Reading 30 ngày, Feynman 30 ngày) đã dừng bán.
+          Quyền bạn đã trả tiền vẫn còn nguyên và dùng hết thời hạn như cũ — không
+          có gì bị xóa hay quy đổi thành xu.
+        </NoteBox>
+      </section>
+    </div>
   );
 }
 

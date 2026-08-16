@@ -4,6 +4,7 @@ import { requireUser } from "@/lib/session";
 import { formatVnd } from "@/lib/payments/catalog";
 import { orderCodeLabel } from "@/lib/payments/coins";
 import { PaymentStatusPoller } from "@/components/payments/payment-status-poller";
+import { QuietWorldPanel } from "@/components/world/quiet-world-panel";
 
 export const metadata = { title: "Kết quả thanh toán" };
 export const dynamic = "force-dynamic";
@@ -44,18 +45,12 @@ export default async function PaymentResultPage({
   const label = orderCodeLabel(order.offerCode);
 
   return (
-    <section className="mx-auto max-w-2xl px-6 py-12 md:py-16">
-      <p className="label-caps">Đơn hàng</p>
-      <h1 className="mt-3 font-display text-3xl font-bold leading-tight text-navy-deep md:text-4xl">
-        {label}
-      </h1>
-      <div className="rule-gold mt-5" />
-
+    <QuietWorldPanel eyebrow="Đơn hàng" title={label}>
       {/*
         Mã đơn luôn hiển thị, kể cả khi mọi thứ suôn sẻ: khi có trục trặc thật
         thì đây là thứ duy nhất giúp trung tâm tra được giao dịch với SePay.
       */}
-      <dl className="mt-6 grid gap-x-10 gap-y-3 font-ui text-sm text-ink-soft sm:grid-cols-2">
+      <dl className="grid gap-x-10 gap-y-3 font-ui text-sm text-ink-soft sm:grid-cols-2">
         <div>
           <dt className="inline font-semibold text-ink">Mã đơn: </dt>
           <dd className="inline tabular-nums">{order.invoiceNumber}</dd>
@@ -81,6 +76,6 @@ export default async function PaymentResultPage({
         initialStatus={order.status}
         initialReturnPath={order.status === "PAID" ? order.returnPath : null}
       />
-    </section>
+    </QuietWorldPanel>
   );
 }
