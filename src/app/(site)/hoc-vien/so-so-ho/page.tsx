@@ -1,7 +1,8 @@
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { requireUser } from "@/lib/session";
-import { SectionHeading, NoteBox, ButtonLink } from "@/components/ui";
+import { NoteBox, ButtonLink } from "@/components/ui";
 import { StudentNav } from "@/components/student/student-nav";
+import { NarrativeSection } from "@/components/world/narrative-section";
 import { loadRankFacts } from "@/lib/ranks/facts";
 import {
   MIN_SAMPLES,
@@ -28,11 +29,18 @@ export default async function WeaknessPage() {
   const rows = weaknessRows(facts.attempts, now);
 
   return (
-    <main className="motion-page-entry mx-auto max-w-4xl px-6 py-10">
-      <StudentNav current="weakness" />
+    <main>
+      <div className="mx-auto max-w-6xl px-6 pt-10">
+        <StudentNav current="weakness" />
+      </div>
 
-
-      <SectionHeading label="Sổ Sơ Hở" title="Dạng câu bạn hay sai" />
+      <NarrativeSection
+        id="so-so-ho"
+        eyebrow="Sổ Sơ Hở"
+        title="Dạng câu bạn hay sai"
+        tone="mist"
+      >
+        <div className="max-w-4xl">
 
       <p className="mt-4 max-w-2xl text-[0.95rem] leading-relaxed text-ink-soft">
         Bảng này chỉ tính {WINDOW_DAYS} ngày gần nhất, và chỉ kết luận về một
@@ -44,11 +52,6 @@ export default async function WeaknessPage() {
         <NoteBox className="mt-8" title="Chưa đủ dữ liệu để kết luận">
           Bạn chưa làm đủ {MIN_SAMPLES} câu của bất kỳ dạng nào trong{" "}
           {WINDOW_DAYS} ngày qua. Cứ làm thêm vài đề nữa, bảng này sẽ tự hiện ra.
-          <div className="mt-5">
-            <ButtonLink href="/luyen-tap/reading" variant="primary">
-              Vào Chiến Trận
-            </ButtonLink>
-          </div>
         </NoteBox>
       ) : (
         <div className="mt-8 overflow-x-auto">
@@ -109,6 +112,14 @@ export default async function WeaknessPage() {
           {WINDOW_DAYS} ngày — nghỉ một tuần không bị đọc thành đang tệ đi.
         </NoteBox>
       )}
+
+      <div className="mt-8">
+        <ButtonLink href="/luyen-tap/reading" variant="primary">
+          Vào Chiến Trận
+        </ButtonLink>
+      </div>
+        </div>
+      </NarrativeSection>
     </main>
   );
 }

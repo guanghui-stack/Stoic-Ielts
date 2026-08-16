@@ -151,7 +151,7 @@ export default async function StudentDashboard({
   }));
 
   return (
-    <div className="motion-page-entry">
+    <div>
       <section className="border-b border-line bg-paper">
         <div className="mx-auto flex max-w-6xl flex-wrap items-end justify-between gap-6 px-6 py-12">
           <div>
@@ -238,9 +238,6 @@ export default async function StudentDashboard({
             cờ ENABLE_RANK_ENGINE còn tắt. */}
         <RankDashboardBlock userId={user.id} />
 
-        {/* Danh hiệu: chỉ tóm tắt, KHÔNG truy vấn cả danh mục ở trang này */}
-        <AchievementSummaryCard userId={user.id} />
-
         {/* Mục tiêu + lịch thi */}
         <GoalsCard
           targets={{
@@ -251,6 +248,21 @@ export default async function StudentDashboard({
           examDateLabel={examKey ? keyToLabel(examKey) : "—"}
           daysLeft={daysLeft}
         />
+
+        {/* Lịch chuyên cần + thống kê tuần */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          <StudyCalendar
+            monthLabel={monthLabel}
+            offset={offset}
+            daysInMonth={daysInMonth}
+            activeDays={activeDays}
+            today={td}
+          />
+          <WeeklyStats rows={weeklyRows} />
+        </div>
+
+        {/* Danh hiệu: chỉ tóm tắt, KHÔNG truy vấn cả danh mục ở trang này */}
+        <AchievementSummaryCard userId={user.id} />
 
         {/* Thống kê tổng */}
         <div className="grid gap-px border border-line bg-line sm:grid-cols-2">
@@ -299,18 +311,6 @@ export default async function StudentDashboard({
             ))}
           </div>
         )}
-
-        {/* Lịch chuyên cần + thống kê tuần */}
-        <div className="grid gap-6 lg:grid-cols-2">
-          <StudyCalendar
-            monthLabel={monthLabel}
-            offset={offset}
-            daysInMonth={daysInMonth}
-            activeDays={activeDays}
-            today={td}
-          />
-          <WeeklyStats rows={weeklyRows} />
-        </div>
 
         {/* Lịch sử Reading */}
         {finished.length === 0 ? (

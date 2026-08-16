@@ -3,10 +3,11 @@ import { ArrowLeft, Award, Gift, Lock, Sparkles } from "lucide-react";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
 import { titleOverviewFor, type TitleCard } from "@/lib/achievements/view";
-import { SectionHeading, NoteBox } from "@/components/ui";
+import { NoteBox } from "@/components/ui";
 import { StudentNav } from "@/components/student/student-nav";
 import { RewardClaimForm } from "@/components/achievements/reward-claim-form";
 import { PublicProfileForm } from "@/components/achievements/public-profile-form";
+import { NarrativeSection } from "@/components/world/narrative-section";
 
 export const metadata = { title: "Danh hiệu của tôi" };
 export const dynamic = "force-dynamic";
@@ -46,20 +47,27 @@ export default async function MyTitlesPage() {
   }
 
   return (
-    <section className="motion-page-entry mx-auto max-w-4xl px-6 py-12 md:py-16">
-      <StudentNav current="titles" />
-
-      <Link
-        href="/hoc-vien"
-        className="inline-flex items-center gap-2 font-ui text-sm font-semibold text-navy hover:text-gold"
-      >
-        <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-        Hồ sơ học tập
-      </Link>
-
-      <div className="mt-6">
-        <SectionHeading label="Hành trình" title="Danh hiệu của tôi" />
+    <main>
+      <div className="mx-auto max-w-6xl px-6 pt-10">
+        <StudentNav current="titles" />
       </div>
+
+      <NarrativeSection
+        id="danh-hieu-cua-toi"
+        eyebrow="Hành trình"
+        title="Danh hiệu của tôi"
+        tone="mist"
+      >
+        <div className="max-w-4xl">
+
+          <Link
+            href="/hoc-vien"
+            className="inline-flex items-center gap-2 font-ui text-sm font-semibold text-navy hover:text-gold"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            Hồ sơ học tập
+          </Link>
+
       <p className="mt-6 max-w-2xl text-[0.98rem] leading-relaxed text-ink-soft">
         Danh hiệu ghi nhận những gì bạn đã thật sự làm được: giải đề đàng hoàng,
         sửa sai có chiều sâu, và giữ được kỷ luật. Không có điểm kinh nghiệm,
@@ -142,7 +150,9 @@ export default async function MyTitlesPage() {
           </div>
         </div>
       ))}
-    </section>
+        </div>
+      </NarrativeSection>
+    </main>
   );
 }
 

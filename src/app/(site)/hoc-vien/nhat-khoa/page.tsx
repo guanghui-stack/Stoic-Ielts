@@ -1,8 +1,9 @@
 import { Flame, CalendarCheck } from "lucide-react";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
-import { SectionHeading, NoteBox } from "@/components/ui";
+import { ButtonLink, NoteBox } from "@/components/ui";
 import { StudentNav } from "@/components/student/student-nav";
+import { NarrativeSection } from "@/components/world/narrative-section";
 
 export const metadata = { title: "Nhật Khóa — Ngày học thật" };
 export const dynamic = "force-dynamic";
@@ -71,11 +72,18 @@ export default async function StudyLogPage() {
   }
 
   return (
-    <main className="motion-page-entry mx-auto max-w-4xl px-6 py-10">
-      <StudentNav current="studyDays" />
+    <main>
+      <div className="mx-auto max-w-6xl px-6 pt-10">
+        <StudentNav current="studyDays" />
+      </div>
 
-
-      <SectionHeading label="Nhật Khóa" title="Ngày học thật của bạn" />
+      <NarrativeSection
+        id="nhat-khoa"
+        eyebrow="Nhật Khóa"
+        title="Ngày học thật của bạn"
+        tone="mist"
+      >
+        <div className="max-w-4xl">
 
       <p className="mt-4 max-w-2xl text-[0.95rem] leading-relaxed text-ink-soft">
         Một ngày được tính là <strong>ngày học thật</strong> khi bạn thật sự làm
@@ -146,6 +154,14 @@ export default async function StudyLogPage() {
         thói quen hay để lại dấu vết trong trí nhớ. Ngưỡng này giống nhau cho
         mọi học viên và không đổi theo cấp bậc.
       </NoteBox>
+
+      <div className="mt-8">
+        <ButtonLink href="/luyen-tap/reading" variant="primary">
+          Bắt đầu một phiên học
+        </ButtonLink>
+      </div>
+        </div>
+      </NarrativeSection>
     </main>
   );
 }
