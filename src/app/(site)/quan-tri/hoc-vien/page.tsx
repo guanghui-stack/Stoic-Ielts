@@ -17,6 +17,7 @@ import { coinBalance, formatCoins } from "@/lib/payments/coins";
 import { GiftCoinsForm } from "@/components/admin/gift-coins-form";
 import { ResetPasswordForm } from "@/components/admin/reset-password-form";
 import { DeleteUserButton } from "@/components/admin/delete-user-button";
+import { AdminPageShell } from "@/components/admin/admin-page-shell";
 
 export const metadata = { title: "Quản lý học viên" };
 
@@ -55,12 +56,7 @@ export default async function AdminStudentsPage() {
   );
 
   return (
-    <section className="motion-page-entry mx-auto max-w-6xl px-6 py-12">
-      <p className="label-caps">Danh sách</p>
-      <h1 className="mt-3 font-display text-3xl font-bold text-navy-deep md:text-4xl">
-        Quản lý học viên
-      </h1>
-      <div className="rule-gold mt-5" />
+    <AdminPageShell eyebrow="Danh sách" title="Quản lý học viên">
       <p className="mt-5 max-w-3xl text-[0.95rem] leading-relaxed text-ink-soft">
         Học viên tự đăng ký bằng email. Bạn có thể đặt lại mật khẩu khi học viên
         quên (nhớ báo mật khẩu mới qua Zalo/điện thoại), khóa tài khoản bất
@@ -254,6 +250,6 @@ export default async function AdminStudentsPage() {
           vĩnh viễn và mất toàn bộ bài làm.
         </p>
       </div>
-    </section>
+    </AdminPageShell>
   );
 }

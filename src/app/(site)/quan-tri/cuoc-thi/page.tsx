@@ -1,4 +1,3 @@
-import { Trophy } from "lucide-react";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/session";
 import { advanceCompetitionAction } from "@/lib/actions/competition";
@@ -8,6 +7,7 @@ import {
   FinalizeForm,
   DisqualifyForm,
 } from "@/components/admin/competition-forms";
+import { AdminPageShell } from "@/components/admin/admin-page-shell";
 
 export const metadata = { title: "Nguyệt Thí" };
 export const dynamic = "force-dynamic";
@@ -64,15 +64,7 @@ export default async function AdminCompetitionPage() {
   ]);
 
   return (
-    <section className="motion-page-entry mx-auto max-w-6xl px-6 py-12">
-      <p className="label-caps flex items-center gap-2">
-        <Trophy className="h-3.5 w-3.5" aria-hidden="true" />
-        Cuộc thi
-      </p>
-      <h1 className="mt-3 font-display text-3xl font-bold text-navy-deep md:text-4xl">
-        Nguyệt Thí
-      </h1>
-      <div className="rule-gold mt-5" />
+    <AdminPageShell eyebrow="Cuộc thi" title="Nguyệt Thí">
       <p className="mt-5 max-w-3xl text-[0.95rem] leading-relaxed text-ink-soft">
         Mỗi kỳ 7 ngày, 3 đề Reading, mở dần vào ngày 1 · 3 · 5. Giải thưởng
         999.000đ · 499.000đ · 199.000đ. Kết quả <strong>không</strong> tự công
@@ -217,6 +209,6 @@ export default async function AdminCompetitionPage() {
           })}
         </div>
       )}
-    </section>
+    </AdminPageShell>
   );
 }

@@ -1,6 +1,7 @@
 import { Users, BookOpen, CheckCircle2 } from "lucide-react";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/session";
+import { AdminPageShell } from "@/components/admin/admin-page-shell";
 
 function fmt(d: Date | null) {
   if (!d) return "—";
@@ -29,12 +30,11 @@ export default async function AdminOverviewPage() {
     ]);
 
   return (
-    <section className="motion-page-entry mx-auto max-w-6xl px-6 py-12">
-      <p className="label-caps">Tổng quan</p>
-      <h1 className="mt-3 font-display text-3xl font-bold text-navy-deep md:text-4xl">
-        Bảng điều khiển Reading
-      </h1>
-      <div className="rule-gold mt-5" />
+    <AdminPageShell
+      eyebrow="Tổng quan"
+      title="Bảng điều khiển Reading"
+      lede="Tình hình học viên, kho đề và các lượt Reading vừa hoàn thành."
+    >
 
       <div className="mt-10 grid gap-px border border-line bg-line sm:grid-cols-3">
         <div className="bg-paper p-6">
@@ -113,6 +113,6 @@ export default async function AdminOverviewPage() {
           </div>
         )}
       </div>
-    </section>
+    </AdminPageShell>
   );
 }

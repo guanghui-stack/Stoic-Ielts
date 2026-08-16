@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/session";
 import { features } from "@/lib/features";
 import { rankByLevel, trialByCode } from "@/lib/ranks/catalog";
+import { AdminPageShell } from "@/components/admin/admin-page-shell";
 
 export const metadata = { title: "Hành trình cấp bậc" };
 export const dynamic = "force-dynamic";
@@ -94,17 +95,21 @@ export default async function StudentRankTimelinePage({
     d ? d.toLocaleString("vi-VN", { dateStyle: "short", timeStyle: "short" }) : "—";
 
   return (
-    <main className="motion-page-entry mx-auto max-w-4xl px-6 py-10">
-      <Link
-        href="/quan-tri/cap-bac"
-        className="mb-6 inline-flex items-center gap-2 text-sm text-muted hover:text-navy"
-      >
-        <ArrowLeft className="size-4" aria-hidden />
-        Cấp bậc
-      </Link>
-
-      <h1 className="font-display text-3xl font-bold text-navy-deep">{user.name}</h1>
-      <p className="mt-1 font-ui text-sm text-muted">{user.email}</p>
+    <AdminPageShell
+      eyebrow="Hành trình cấp bậc"
+      title={user.name}
+      lede={user.email}
+      width="medium"
+      actions={
+        <Link
+          href="/quan-tri/cap-bac"
+          className="inline-flex items-center gap-2 text-sm text-muted hover:text-navy"
+        >
+          <ArrowLeft className="size-4" aria-hidden />
+          Cấp bậc
+        </Link>
+      }
+    >
 
       {profile ? (
         <p className="mt-4 font-ui text-sm text-ink-soft">
@@ -196,6 +201,6 @@ export default async function StudentRankTimelinePage({
         Nếu tính lại ở đây thì con số có thể khác thứ học viên đang nhìn, và lúc
         đó không ai biết bên nào đúng.
       </p>
-    </main>
+    </AdminPageShell>
   );
 }

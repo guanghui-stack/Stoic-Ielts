@@ -554,6 +554,106 @@ body {
   transform: scale(0.975);
 }
 
+/* Trướng lệnh quản trị: dày thông tin, một nhịp 8px, không dùng cảnh chuyển lớn. */
+.world-shell [data-admin-chrome="true"] {
+  border-color: rgb(211 178 100 / 0.3);
+  background:
+    linear-gradient(90deg, rgb(211 178 100 / 0.08), transparent 28%),
+    var(--color-navy-deep);
+}
+
+.world-shell [data-admin-chrome="true"] > div {
+  gap: 0.5rem 1rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+.world-shell [data-admin-nav="true"] {
+  gap: 0.25rem;
+}
+
+.world-shell [data-admin-nav="true"] a,
+.world-shell [data-admin-nav="true"] button {
+  min-height: 2.25rem;
+  transition:
+    color var(--world-duration-utility) var(--ease-out),
+    background-color var(--world-duration-utility) var(--ease-out),
+    border-color var(--world-duration-utility) var(--ease-out);
+}
+
+.world-shell .command-tent-page {
+  --command-gap: 0.5rem;
+}
+
+.world-shell .command-tent-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--color-line-strong);
+  padding-bottom: 1rem;
+}
+
+.world-shell .command-tent-heading h1 {
+  margin-top: var(--command-gap);
+  font-family: var(--font-display);
+  font-size: clamp(1.875rem, 3vw, 2.5rem);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--color-navy-deep);
+}
+
+.world-shell .command-tent-lede {
+  max-width: 52rem;
+  margin-top: var(--command-gap);
+  color: var(--color-ink-soft);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.world-shell .command-tent-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--command-gap);
+}
+
+.world-shell .command-tent-page .overflow-x-auto {
+  overscroll-behavior-inline: contain;
+  scrollbar-color: var(--color-gold) var(--color-cream-deep);
+  box-shadow: inset -12px 0 18px -18px rgb(34 48 62 / 0.7);
+}
+
+.world-shell .command-tent-page table thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.world-shell .command-tent-page table th {
+  letter-spacing: 0.04em;
+}
+
+.world-shell .command-tent-page [role="status"],
+.world-shell .command-tent-page [role="alert"] {
+  transition:
+    opacity var(--world-duration-utility) var(--ease-out),
+    border-color var(--world-duration-utility) var(--ease-out),
+    background-color var(--world-duration-utility) var(--ease-out);
+}
+
+@media (max-width: 767px) {
+  .world-shell .command-tent-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .world-shell .command-tent-actions {
+    justify-content: flex-start;
+  }
+}
+
 /* Nghi thức hiếm, chỉ chạy một lần cho mỗi sự kiện thăng bậc/nhận danh hiệu. */
 .world-shell .world-ceremony {
   position: relative;
