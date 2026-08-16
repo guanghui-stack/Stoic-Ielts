@@ -17,7 +17,11 @@ export function AdminNav({ tabs }: { tabs: AdminTab[] }) {
   const allowPressMotion = !pathname.startsWith("/quan-tri/ai-feynman");
 
   return (
-    <nav aria-label="Quản trị" className="flex flex-wrap items-center gap-1">
+    <nav
+      aria-label="Quản trị"
+      data-admin-nav="true"
+      className="flex flex-wrap items-center gap-1"
+    >
       {tabs.map((tab) => {
         const active = isActive(pathname, tab.href);
         return (

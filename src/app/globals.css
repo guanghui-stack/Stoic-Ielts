@@ -343,19 +343,6 @@ body {
   }
 }
 
-/* Khải hoàn chỉ xuất hiện một lần sau khi thăng cấp, không dùng ở trạng thái thường. */
-.rank-promotion-moment {
-  animation: wb-rank-arrive 300ms var(--ease-out) both;
-}
-
-.rank-promotion-moment__insignia {
-  animation: wb-rank-mark 300ms var(--ease-out) 50ms both;
-}
-
-.rank-promotion-moment__copy {
-  animation: wb-rank-copy 300ms var(--ease-out) 100ms both;
-}
-
 .achievement-disclosure__region {
   overflow: hidden;
   opacity: 0;
@@ -405,39 +392,6 @@ body {
   }
 }
 
-@keyframes wb-rank-arrive {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-@keyframes wb-rank-mark {
-  from {
-    opacity: 0;
-    transform: scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-@keyframes wb-rank-copy {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
 @keyframes wb-fade-only {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -470,10 +424,7 @@ body {
   /* Giữ tín hiệu đổi trạng thái bằng opacity, bỏ toàn bộ dịch chuyển và co giãn. */
   .motion-page-entry,
   .motion-panel-swap,
-  .motion-status-enter,
-  .rank-promotion-moment,
-  .rank-promotion-moment__insignia,
-  .rank-promotion-moment__copy {
+  .motion-status-enter {
     animation: wb-fade-only 160ms ease !important;
   }
 
@@ -535,4 +486,480 @@ body {
     rgba(0, 0, 0, 0.55) 68%,
     transparent 94%
   );
+}
+
+.world-shell {
+  --world-duration-press: 120ms;
+  --world-duration-utility: 180ms;
+  --world-duration-scene: 520ms;
+  --world-duration-map: 680ms;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  isolation: isolate;
+}
+
+.world-shell .world-route-scene {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.world-shell > header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--color-paper);
+  box-shadow: 0 1px 0 rgb(34 48 62 / 0.08);
+}
+
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .world-shell > header {
+    background: color-mix(in srgb, var(--color-paper) 88%, transparent);
+    -webkit-backdrop-filter: blur(18px) saturate(115%);
+    backdrop-filter: blur(18px) saturate(115%);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .world-shell > header {
+    background: var(--color-paper);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+.world-shell > footer {
+  margin-top: auto;
+}
+
+.world-shell[data-motion-tier="1"] .world-route-scene {
+  animation: world-utility-enter var(--world-duration-utility) var(--ease-out) both;
+}
+
+.world-shell[data-motion-tier="2"] .world-route-scene {
+  animation: world-scene-enter var(--world-duration-scene) var(--ease-out) both;
+}
+
+.world-shell .world-action {
+  transition:
+    transform var(--world-duration-press) var(--ease-out),
+    color var(--world-duration-utility) var(--ease-out),
+    background-color var(--world-duration-utility) var(--ease-out),
+    border-color var(--world-duration-utility) var(--ease-out),
+    box-shadow var(--world-duration-utility) var(--ease-out);
+}
+
+.world-shell .world-action:active:not(:disabled) {
+  transform: scale(0.975);
+}
+
+/* Trướng lệnh quản trị: dày thông tin, một nhịp 8px, không dùng cảnh chuyển lớn. */
+.world-shell [data-admin-chrome="true"] {
+  border-color: rgb(211 178 100 / 0.3);
+  background:
+    linear-gradient(90deg, rgb(211 178 100 / 0.08), transparent 28%),
+    var(--color-navy-deep);
+}
+
+.world-shell [data-admin-chrome="true"] > div {
+  gap: 0.5rem 1rem;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+.world-shell [data-admin-nav="true"] {
+  gap: 0.25rem;
+}
+
+.world-shell [data-admin-nav="true"] a,
+.world-shell [data-admin-nav="true"] button {
+  min-height: 2.25rem;
+  transition:
+    color var(--world-duration-utility) var(--ease-out),
+    background-color var(--world-duration-utility) var(--ease-out),
+    border-color var(--world-duration-utility) var(--ease-out);
+}
+
+.world-shell .command-tent-page {
+  --command-gap: 0.5rem;
+}
+
+.world-shell .command-tent-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--color-line-strong);
+  padding-bottom: 1rem;
+}
+
+.world-shell .command-tent-heading h1 {
+  margin-top: var(--command-gap);
+  font-family: var(--font-display);
+  font-size: clamp(1.875rem, 3vw, 2.5rem);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--color-navy-deep);
+}
+
+.world-shell .command-tent-lede {
+  max-width: 52rem;
+  margin-top: var(--command-gap);
+  color: var(--color-ink-soft);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.world-shell .command-tent-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--command-gap);
+}
+
+.world-shell .command-tent-page .overflow-x-auto {
+  overscroll-behavior-inline: contain;
+  scrollbar-color: var(--color-gold) var(--color-cream-deep);
+  box-shadow: inset -12px 0 18px -18px rgb(34 48 62 / 0.7);
+}
+
+.world-shell .command-tent-page table thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.world-shell .command-tent-page table th {
+  letter-spacing: 0.04em;
+}
+
+.world-shell .command-tent-page [role="status"],
+.world-shell .command-tent-page [role="alert"] {
+  transition:
+    opacity var(--world-duration-utility) var(--ease-out),
+    border-color var(--world-duration-utility) var(--ease-out),
+    background-color var(--world-duration-utility) var(--ease-out);
+}
+
+@media (max-width: 767px) {
+  .world-shell .command-tent-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .world-shell .command-tent-actions {
+    justify-content: flex-start;
+  }
+}
+
+/* Nghi thức hiếm, chỉ chạy một lần cho mỗi sự kiện thăng bậc/nhận danh hiệu. */
+.world-shell .world-ceremony {
+  position: relative;
+  isolation: isolate;
+  margin-bottom: 2rem;
+  animation: world-ceremony-surface 1200ms var(--ease-out) both;
+}
+
+.world-shell .world-ceremony__content {
+  position: relative;
+  z-index: 1;
+}
+
+.world-shell .world-ceremony__veil {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 18% 50%, rgb(34 48 62 / 0.38), transparent 48%),
+    linear-gradient(90deg, rgb(34 48 62 / 0.3), transparent 76%);
+  animation: world-ceremony-veil 1200ms var(--ease-out) both;
+}
+
+.world-shell .world-ceremony__insignia,
+.world-shell .world-ceremony__copy {
+  animation: world-ceremony-rise 1200ms var(--ease-out) both;
+}
+
+.world-shell .world-ceremony__copy {
+  animation-delay: 80ms;
+}
+
+.world-shell .world-ceremony__seal {
+  animation: world-ceremony-seal 1200ms var(--ease-out) both;
+}
+
+.world-shell .world-map-stage {
+  aspect-ratio: 21 / 9;
+  isolation: isolate;
+  animation: world-map-stage-reveal var(--world-duration-map) var(--ease-out) both;
+}
+
+.world-shell .world-map-art-layer,
+.world-shell .world-map-route-layer,
+.world-shell .world-locked-territories {
+  position: absolute;
+  inset: 0;
+}
+
+.world-shell .world-map-art-layer {
+  z-index: 0;
+}
+
+.world-shell .world-map-route-layer {
+  z-index: 2;
+}
+
+.world-shell .world-map-art-fallback {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 78% 18%, rgb(211 178 100 / 0.22), transparent 28%),
+    radial-gradient(circle at 18% 78%, rgb(30 58 92 / 0.2), transparent 34%),
+    linear-gradient(145deg, var(--color-paper), var(--color-cream-deep));
+}
+
+.world-shell .world-map-path-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  height: 100%;
+  width: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.world-shell .world-map-path-shadow,
+.world-shell .world-map-path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: world-map-path-draw var(--world-duration-map) var(--ease-in-out) both;
+}
+
+.world-shell .world-map-path-shadow {
+  stroke: rgb(255 253 249 / 0.82);
+  stroke-width: 5;
+}
+
+.world-shell .world-map-path {
+  stroke: var(--color-gold-ink);
+  stroke-width: 2;
+}
+
+.world-shell .world-map-gates {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.world-shell .world-map-gate {
+  position: absolute;
+  transform: translate(-50%, -50%);
+}
+
+.world-shell .world-map-marker {
+  --world-marker-opacity: 1;
+  display: flex;
+  width: 7rem;
+  min-height: 5.75rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  padding: 0.45rem;
+  border: 1px solid rgb(230 221 203 / 0.86);
+  background: rgb(255 253 249 / 0.86);
+  box-shadow: 0 8px 22px rgb(34 48 62 / 0.12);
+  opacity: var(--world-marker-opacity);
+  text-align: center;
+  animation: world-map-marker-enter var(--world-duration-utility) var(--ease-out)
+    var(--world-marker-delay) backwards;
+}
+
+.world-shell .world-map-marker.is-locked {
+  --world-marker-opacity: 0.68;
+  cursor: default;
+  border-style: dashed;
+}
+
+.world-shell .world-map-marker:focus-visible {
+  outline: 2px solid var(--color-navy);
+  outline-offset: 3px;
+}
+
+.world-shell .world-map-marker:not(.is-locked):hover {
+  border-color: var(--color-gold);
+  background: var(--color-paper);
+  box-shadow: var(--shadow-lift);
+}
+
+.world-shell .world-map-marker-seal {
+  box-shadow: 0 0 0 3px rgb(255 253 249 / 0.76);
+}
+
+.world-shell .world-map-marker-current {
+  line-height: 1.1;
+}
+
+.world-shell .world-locked-territories {
+  z-index: 1;
+  pointer-events: none;
+}
+
+.world-shell .world-locked-territory {
+  position: absolute;
+  width: min(10rem, 16vw);
+  transform: translate(-50%, -50%);
+  border: 1px dashed rgb(76 90 104 / 0.32);
+  background: rgb(243 236 221 / 0.76);
+  box-shadow: 0 8px 24px rgb(34 48 62 / 0.08);
+  padding: 0.55rem 0.7rem;
+  color: var(--color-muted);
+}
+
+.world-shell .world-locked-territory h3 {
+  margin-top: 0.2rem;
+  font-family: var(--font-display);
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-navy-deep);
+}
+
+.world-shell .world-locked-territory p {
+  margin-top: 0.18rem;
+  font-family: var(--font-ui);
+  font-size: 0.64rem;
+  line-height: 1.25;
+}
+
+.world-shell .world-landmark-rail {
+  display: grid;
+  gap: 1.25rem;
+  margin-top: 1rem;
+  border: 1px solid var(--color-line);
+  background: rgb(255 253 249 / 0.72);
+  padding: 1.25rem;
+}
+
+.world-shell .world-landmark-rail .world-action:hover {
+  border-color: var(--color-line-strong);
+  box-shadow: var(--shadow-card);
+}
+
+.world-shell .world-next-step {
+  margin-top: 2rem;
+  border-left: 3px solid var(--color-gold);
+  background: var(--color-paper);
+  box-shadow: var(--shadow-card);
+  padding: 1.5rem;
+}
+
+.world-shell .world-next-step .world-action:hover {
+  background: var(--color-navy-deep);
+  box-shadow: var(--shadow-card);
+}
+
+@media (min-width: 1280px) {
+  .world-shell .world-landmark-rail {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@keyframes world-utility-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes world-scene-enter {
+  from { opacity: 0; transform: translateY(12px) scale(0.995); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes world-map-stage-reveal {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes world-map-path-draw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes world-map-marker-enter {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: var(--world-marker-opacity); transform: none; }
+}
+
+@keyframes world-ceremony-surface {
+  0% { opacity: 0; }
+  24%, 100% { opacity: 1; }
+}
+
+@keyframes world-ceremony-veil {
+  0% { opacity: 0.72; }
+  38% { opacity: 0.28; }
+  72%, 100% { opacity: 0; }
+}
+
+@keyframes world-ceremony-rise {
+  0%, 18% { opacity: 0; transform: translateY(14px); }
+  62%, 100% { opacity: 1; transform: none; }
+}
+
+@keyframes world-ceremony-seal {
+  0%, 58% { opacity: 0; transform: scale(0.94); }
+  84%, 100% { opacity: 1; transform: none; }
+}
+
+@keyframes world-ceremony-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .world-shell .world-route-scene,
+  .world-shell .world-map-stage,
+  .world-shell .world-scene-reveal {
+    animation: world-utility-enter var(--world-duration-press) var(--ease-out) both !important;
+    transform: none !important;
+  }
+
+  .world-shell .world-action:active:not(:disabled) {
+    transform: none;
+  }
+
+  .world-shell .world-map-path-shadow,
+  .world-shell .world-map-path {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+
+  .world-shell .world-map-marker {
+    animation: none;
+    opacity: var(--world-marker-opacity);
+    transform: none;
+  }
+
+  .world-shell .world-ceremony {
+    animation: world-ceremony-fade 120ms var(--ease-out) both !important;
+  }
+
+  .world-shell .world-ceremony__veil {
+    display: none;
+  }
+
+  .world-shell .world-ceremony__insignia,
+  .world-shell .world-ceremony__copy,
+  .world-shell .world-ceremony__seal {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
 }

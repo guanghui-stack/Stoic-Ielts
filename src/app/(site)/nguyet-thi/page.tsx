@@ -7,7 +7,11 @@ import { ELIGIBILITY } from "@/lib/competition/ranking";
 import { startCompetitionAttemptAction } from "@/lib/actions/competition";
 import { CompetitionRegisterForm } from "@/components/competition/register-form";
 import { BADGE_INFO } from "@/components/competition/badges";
-import { ErrorBanner, NoteBox, PageHero, SubmitButton } from "@/components/ui";
+import { ART_ASSETS } from "@/lib/brand/art-manifest";
+import type { NextStepModel } from "@/lib/campaign/world";
+import { NextStepGuide } from "@/components/world/next-step-guide";
+import { SceneHero } from "@/components/world/scene-hero";
+import { ErrorBanner, NoteBox, SubmitButton } from "@/components/ui";
 
 export const metadata = {
   title: "Nguyệt Thí",
@@ -22,6 +26,15 @@ const ERRORS: Record<string, string> = {
   CHUA_DANG_KY: "Bạn chưa đăng ký kỳ thi này.",
   BI_LOAI: "Bài dự thi của bạn đang bị tạm dừng. Vui lòng liên hệ trung tâm.",
   DA_LAM: "Mỗi đề chỉ được làm một lần duy nhất.",
+};
+
+const MONTHLY_NEXT_STEP: NextStepModel = {
+  eyebrow: "Bước đầu tiên",
+  title: "Kiểm tra điều kiện dự thi của bạn",
+  body: "Điều kiện vào Nguyệt Thí đến từ đủ ba trụ: làm đề, chữa bài Feynman và duy trì ngày học thật.",
+  href: "/hoc-vien/danh-hieu",
+  actionLabel: "Kiểm tra ba trụ",
+  entersStudy: false,
 };
 
 function fmt(d: Date) {
@@ -58,12 +71,19 @@ export default async function CompetitionPage({
   const now = new Date();
 
   return (
-    <div className="motion-page-entry">
-      <PageHero
-        label="Cuộc thi hàng tháng"
+    <div>
+      <SceneHero
+        asset={ART_ASSETS.generalTruongPhi}
+        eyebrow="Cuộc thi hàng tháng"
         title="Nguyệt Thí"
-        lede="Bảy ngày, ba đề Reading, và một danh sách rất ngắn những người đủ tư cách bước vào. Không có đường tắt tới đây — chỉ có tháng ngày làm bài đều đặn và chữa sai tử tế."
-      />
+        functionalLabel="Ba đề Reading trong bảy ngày"
+      >
+        <p className="text-lg leading-relaxed text-ink-soft">
+          Bảy ngày, ba đề Reading, và một danh sách rất ngắn những người đủ tư
+          cách bước vào. Không có đường tắt tới đây — chỉ có tháng ngày làm bài
+          đều đặn và chữa sai tử tế.
+        </p>
+      </SceneHero>
 
       <section className="mx-auto max-w-4xl px-6 py-14">
         {loi && (
@@ -72,8 +92,10 @@ export default async function CompetitionPage({
           </div>
         )}
 
+        <NextStepGuide step={MONTHLY_NEXT_STEP} />
+
         {/* ===== Cuộc thi diễn ra thế nào ===== */}
-        <h2 className="font-display text-2xl font-bold text-navy-deep">
+        <h2 className="mt-14 font-display text-2xl font-bold text-navy-deep">
           Cuộc thi diễn ra thế nào
         </h2>
         <ol className="mt-6 space-y-4">

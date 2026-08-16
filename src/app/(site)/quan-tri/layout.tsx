@@ -34,7 +34,10 @@ export default async function AdminLayout({
   await requireAdmin();
   return (
     <>
-      <div className="border-b border-line bg-navy-deep">
+      <div
+        data-admin-chrome="true"
+        className="border-b border-line bg-navy-deep"
+      >
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-6 py-4">
           <p className="font-ui text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-gold-soft">
             Khu vực quản trị · HỔ PHÙ · IELTS

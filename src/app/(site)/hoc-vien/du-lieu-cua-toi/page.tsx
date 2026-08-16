@@ -1,9 +1,10 @@
 import { ShieldCheck, XCircle } from "lucide-react";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
-import { SectionHeading, NoteBox } from "@/components/ui";
+import { NoteBox } from "@/components/ui";
 import { StudentNav } from "@/components/student/student-nav";
 import { DataRightsForms } from "@/components/student/data-rights-forms";
+import { NarrativeSection } from "@/components/world/narrative-section";
 import {
   DATA_CATEGORIES,
   NOT_COLLECTED,
@@ -70,10 +71,18 @@ export default async function MyDataPage() {
   const fmt = (d: Date | null) => (d ? d.toLocaleDateString("vi-VN") : "—");
 
   return (
-    <main className="motion-page-entry mx-auto max-w-4xl px-6 py-10">
-      <StudentNav />
+    <main>
+      <div className="mx-auto max-w-6xl px-6 pt-10">
+        <StudentNav />
+      </div>
 
-      <SectionHeading label="Quyền dữ liệu" title="Dữ liệu của tôi" />
+      <NarrativeSection
+        id="du-lieu-cua-toi"
+        eyebrow="Quyền dữ liệu"
+        title="Dữ liệu của tôi"
+        tone="mist"
+      >
+        <div className="max-w-4xl">
 
       <p className="mt-4 max-w-2xl text-[0.95rem] leading-relaxed text-ink-soft">
         Trang này nói đúng những gì hệ thống đang lưu về bạn — không phải những
@@ -206,6 +215,8 @@ export default async function MyDataPage() {
           </ul>
         </section>
       )}
+        </div>
+      </NarrativeSection>
     </main>
   );
 }

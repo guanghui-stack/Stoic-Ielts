@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Ticket, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/session";
 import { features } from "@/lib/features";
 import { tierPolicy, type CompetitionTier } from "@/lib/competition/tiers";
+import { AdminPageShell } from "@/components/admin/admin-page-shell";
 
 export const metadata = { title: "Tuyển chọn Dương Thí — Thiên Thí" };
 export const dynamic = "force-dynamic";
@@ -33,14 +34,7 @@ export default async function QualificationAdminPage() {
   });
 
   return (
-    <main className="motion-page-entry mx-auto max-w-5xl px-6 py-10">
-      <p className="label-caps flex items-center gap-2">
-        <Ticket className="h-3.5 w-3.5" aria-hidden />
-        Quản trị
-      </p>
-      <h1 className="mt-3 font-display text-3xl font-bold text-navy-deep">
-        Nguồn tuyển chọn
-      </h1>
+    <AdminPageShell eyebrow="Quản trị" title="Nguồn tuyển chọn">
       <p className="mt-4 max-w-2xl text-[0.95rem] leading-relaxed text-ink-soft">
         Dương Thí và Thiên Thí không có đăng ký mở. Thí sinh đến từ kết quả của
         tầng dưới, nên ở đây bạn chỉ gắn kỳ nguồn và sinh vé — không có cách nào
@@ -88,6 +82,6 @@ export default async function QualificationAdminPage() {
           })}
         </ul>
       )}
-    </main>
+    </AdminPageShell>
   );
 }

@@ -11,6 +11,7 @@ import {
   ReconcileButton,
   RefundButton,
 } from "@/components/admin/payment-order-actions";
+import { AdminPageShell } from "@/components/admin/admin-page-shell";
 
 export const metadata = { title: "Đơn hàng và thanh toán" };
 export const dynamic = "force-dynamic";
@@ -83,12 +84,7 @@ export default async function AdminPaymentsPage({
   const configured = isSePayConfigured();
 
   return (
-    <section className="motion-page-entry mx-auto max-w-6xl px-6 py-12">
-      <p className="label-caps">Doanh thu</p>
-      <h1 className="mt-3 font-display text-3xl font-bold text-navy-deep md:text-4xl">
-        Đơn hàng và thanh toán
-      </h1>
-      <div className="rule-gold mt-5" />
+    <AdminPageShell eyebrow="Doanh thu" title="Đơn hàng và thanh toán">
       <p className="mt-5 max-w-3xl text-[0.95rem] leading-relaxed text-ink-soft">
         Quyền học chỉ được mở khi máy chủ SePay xác nhận đã nhận tiền. Nếu học
         viên báo đã chuyển khoản mà đơn vẫn ở trạng thái{" "}
@@ -329,6 +325,6 @@ export default async function AdminPaymentsPage({
         bù sự cố), hãy dùng nút mở khóa ở trang <strong>Học viên</strong> — quyền
         đó ghi nhãn riêng nên sổ sách doanh thu không bị sai.
       </p>
-    </section>
+    </AdminPageShell>
   );
 }

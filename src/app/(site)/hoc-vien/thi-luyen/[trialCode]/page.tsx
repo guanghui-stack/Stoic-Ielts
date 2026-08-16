@@ -4,9 +4,9 @@ import { ArrowLeft, ScrollText } from "lucide-react";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
 import { features } from "@/lib/features";
-import { SectionHeading, NoteBox } from "@/components/ui";
-import { InkWashArt } from "@/components/brand/ink-wash-art";
+import { NoteBox } from "@/components/ui";
 import { ART_ASSETS } from "@/lib/brand/art-manifest";
+import { SceneHero } from "@/components/world/scene-hero";
 import { TrialGateCard } from "@/components/ranks/trial-gate-card";
 import { TrialProgress } from "@/components/ranks/trial-progress";
 import { TrialReflectionForm } from "@/components/ranks/trial-reflection-form";
@@ -72,33 +72,32 @@ export default async function TrialPage({
   ].sort();
 
   return (
-    <main className="mx-auto max-w-4xl px-6 py-10">
-      <Link
-        href="/hoc-vien/chien-dich"
-        className="mb-6 inline-flex items-center gap-2 text-sm text-muted hover:text-navy"
-      >
-        <ArrowLeft className="size-4" aria-hidden />
-        Chiến Dịch
-      </Link>
-
-      {node && (
-        <div
-          className="relative mb-8 overflow-hidden border border-line bg-paper"
-          style={{ aspectRatio: "16 / 9" }}
+    <main>
+      <div className="mx-auto max-w-6xl px-6 pt-10">
+        <Link
+          href="/hoc-vien/chien-dich"
+          className="mb-8 inline-flex items-center gap-2 text-sm text-muted hover:text-navy"
         >
-          <InkWashArt asset={ART_ASSETS[node.artKey]} className="object-cover opacity-90" />
-        </div>
-      )}
+          <ArrowLeft className="size-4" aria-hidden />
+          Chiến Dịch
+        </Link>
+      </div>
 
-      <SectionHeading label={node?.functionalLabel ?? "Thí luyện"} title={trial.name} />
+      <SceneHero
+        asset={node ? ART_ASSETS[node.artKey] : ART_ASSETS.campaignMap}
+        eyebrow={node?.functionalLabel ?? "Thí luyện"}
+        title={trial.name}
+        functionalLabel="Cửa ải thăng cấp cá nhân"
+      >
+        <p className="font-ui text-sm text-muted">
+          {fromRank?.name} → {toRank?.name} · {general.name} · {trial.estimate}
+        </p>
+        <p className="mt-4 text-[0.95rem] leading-relaxed text-ink-soft">
+          {trial.narrative}
+        </p>
+      </SceneHero>
 
-      <p className="mt-4 font-ui text-sm text-muted">
-        {fromRank?.name} → {toRank?.name} · {general.name} · {trial.estimate}
-      </p>
-
-      <p className="mt-4 text-[0.95rem] leading-relaxed text-ink-soft">
-        {trial.narrative}
-      </p>
+      <section className="mx-auto max-w-4xl px-6 py-12 md:py-16">
 
       <div className="mt-6 border-l-4 border-gold bg-cream-deep px-6 py-5">
         <p className="label-caps flex items-center gap-2">
@@ -167,6 +166,7 @@ export default async function TrialPage({
           <TrialReflectionForm trialCode={trial.code} questionTypes={questionTypes} />
         )}
       </div>
+      </section>
     </main>
   );
 }

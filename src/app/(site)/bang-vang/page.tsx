@@ -3,8 +3,12 @@ import { Crown, Medal, Trophy } from "lucide-react";
 import { db } from "@/lib/db";
 import { honorBoard } from "@/lib/competition/service";
 import { formatVnd } from "@/lib/payments/catalog";
-import { PageHero, NoteBox } from "@/components/ui";
 import { features } from "@/lib/features";
+import { ART_ASSETS } from "@/lib/brand/art-manifest";
+import type { NextStepModel } from "@/lib/campaign/world";
+import { NextStepGuide } from "@/components/world/next-step-guide";
+import { SceneHero } from "@/components/world/scene-hero";
+import { NoteBox } from "@/components/ui";
 
 export const metadata = {
   title: "Bảng Vàng Nguyệt Thí",
@@ -14,6 +18,15 @@ export const metadata = {
 export const dynamic = "force-dynamic";
 
 const RANK_ICON = [Crown, Trophy, Medal];
+
+const HONOR_BOARD_NEXT_STEP: NextStepModel = {
+  eyebrow: "Bước đầu tiên",
+  title: "Xem kỳ thi đã được rà soát gần nhất",
+  body: "Bảng Vàng chỉ công bố kết quả sau khi kỳ thi khép lại và dữ liệu đã được kiểm tra; không có bảng xếp hạng trực tiếp khi đang thi.",
+  href: "/nguyet-thi",
+  actionLabel: "Xem đường đến Nguyệt Thí",
+  entersStudy: false,
+};
 
 /**
  * Ba tab tương ứng ba tầng. Trạng thái nằm ở URL chứ không ở React state:
@@ -56,16 +69,25 @@ export default async function HonorBoardPage({
   );
 
   return (
-    <div className="motion-page-entry">
-      <PageHero
-        label="Nguyệt Thí"
+    <div>
+      <SceneHero
+        asset={ART_ASSETS.generalTrieuVan}
+        eyebrow="Kết quả đại thí"
         title="Bảng Vàng"
-        lede="Kết quả các kỳ thi đã khép lại và đã được rà soát. Không có bảng xếp hạng trực tiếp trong lúc thi — thứ hạng chỉ có ý nghĩa khi đã được kiểm chứng."
-      />
+        functionalLabel="Kết quả kỳ thi đã được rà soát"
+      >
+        <p className="text-lg leading-relaxed text-ink-soft">
+          Kết quả các kỳ thi đã khép lại và đã được rà soát. Không có bảng xếp
+          hạng trực tiếp trong lúc thi — thứ hạng chỉ có ý nghĩa khi đã được
+          kiểm chứng.
+        </p>
+      </SceneHero>
 
       <section className="mx-auto max-w-4xl px-6 py-14">
+        <NextStepGuide step={HONOR_BOARD_NEXT_STEP} />
+
         {showTabs && (
-          <nav aria-label="Ba tầng đại thí" className="mb-10 border-b border-line">
+          <nav aria-label="Ba tầng đại thí" className="mb-10 mt-12 border-b border-line">
             <ul className="m-0 flex list-none flex-wrap gap-6 p-0 pb-3">
               {TABS.map((tab) => {
                 const isActive = tab.key === active.key;
@@ -90,14 +112,20 @@ export default async function HonorBoardPage({
         )}
 
         {boards.length === 0 ? (
-          <NoteBox title="Chưa có kỳ thi nào khép lại">
+          <NoteBox
+            className={showTabs ? "" : "mt-12"}
+            title="Chưa có kỳ thi nào khép lại"
+          >
             Nguyệt Thí đầu tiên đang được chuẩn bị. Điều kiện dự thi là danh hiệu{" "}
             <em>Nhận thức — Hành động — Ý chí</em>, đạt được qua ba trụ: giải đề,
             sửa đề và kỷ luật.
           </NoteBox>
         ) : (
           boards.map(({ competition, rows }) => (
-            <article key={competition.id} className="mb-14">
+            <article
+              key={competition.id}
+              className={`mb-14 ${showTabs ? "" : "first:mt-12"}`}
+            >
               <h2 className="font-display text-2xl font-bold text-navy-deep">
                 {competition.name}
               </h2>
@@ -150,7 +178,7 @@ export default async function HonorBoardPage({
           ))
         )}
 
-        <NoteBox title="Về cách xếp hạng">
+        <NoteBox className="mt-10" title="Về cách xếp hạng">
           Thí sinh phải đạt từ band 7.5 ở <strong>cả ba đề</strong> mới lên Bảng
           Vàng. Khi hai người bằng điểm trung bình, người có band thấp nhất cao
           hơn được xếp trên — hệ thống thưởng sự đều tay, không thưởng một bài

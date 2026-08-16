@@ -1,8 +1,9 @@
-import { Snowflake, SquareCheck, Square } from "lucide-react";
+import { SquareCheck, Square } from "lucide-react";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/session";
 import { toggleCollectionItemAction } from "@/lib/actions/collections";
 import { CollectionForms } from "@/components/admin/collection-forms";
+import { AdminPageShell } from "@/components/admin/admin-page-shell";
 
 export const metadata = { title: "Bộ đề danh hiệu" };
 export const dynamic = "force-dynamic";
@@ -37,15 +38,7 @@ export default async function AdminCollectionsPage() {
   const active = collections.find((c) => c.status === "ACTIVE");
 
   return (
-    <section className="motion-page-entry mx-auto max-w-5xl px-6 py-12">
-      <p className="label-caps flex items-center gap-2">
-        <Snowflake className="h-3.5 w-3.5" aria-hidden="true" />
-        Danh hiệu
-      </p>
-      <h1 className="mt-3 font-display text-3xl font-bold text-navy-deep md:text-4xl">
-        Bộ đề đóng băng
-      </h1>
-      <div className="rule-gold mt-5" />
+    <AdminPageShell eyebrow="Danh hiệu" title="Bộ đề đóng băng">
       <p className="mt-5 max-w-3xl text-[0.95rem] leading-relaxed text-ink-soft">
         Bốn danh hiệu kiểu <em>&ldquo;hoàn thành toàn bộ đề&rdquo;</em> phải xét
         trên một danh sách cố định. Nếu xét trên mọi đề hiện có, chỉ cần bạn đăng
@@ -146,6 +139,6 @@ export default async function AdminCollectionsPage() {
           </ul>
         </div>
       )}
-    </section>
+    </AdminPageShell>
   );
 }

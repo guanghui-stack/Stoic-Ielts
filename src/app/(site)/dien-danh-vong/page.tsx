@@ -15,7 +15,11 @@ import {
 } from "@/lib/achievements/explain";
 import { CatalogToc } from "@/components/achievements/catalog-toc";
 import { AchievementDisclosure } from "@/components/achievements/achievement-disclosure";
-import { PageHero, NoteBox } from "@/components/ui";
+import { ART_ASSETS } from "@/lib/brand/art-manifest";
+import type { NextStepModel } from "@/lib/campaign/world";
+import { NextStepGuide } from "@/components/world/next-step-guide";
+import { SceneHero } from "@/components/world/scene-hero";
+import { NoteBox } from "@/components/ui";
 
 export const metadata = {
   title: "Điện Danh Vọng",
@@ -23,6 +27,15 @@ export const metadata = {
     "Bảng vinh danh học viên HỔ PHÙ · IELTS — danh hiệu, độ hiếm và số người đã đạt.",
 };
 export const dynamic = "force-dynamic";
+
+const HALL_NEXT_STEP: NextStepModel = {
+  eyebrow: "Bước đầu tiên",
+  title: "Xem danh hiệu đầu tiên bạn có thể đạt",
+  body: "Mỗi danh hiệu chứng minh một hành vi học thật: làm bài, chữa sai hoặc giữ kỷ luật. Không danh hiệu nào được mua bằng điểm hay tiền.",
+  href: "/hoc-vien/danh-hieu",
+  actionLabel: "Xem danh hiệu của tôi",
+  entersStudy: false,
+};
 
 export default async function HallOfFamePage() {
   const [definitions, awards, profiles, eligibleCount] = await Promise.all([
@@ -69,16 +82,25 @@ export default async function HallOfFamePage() {
   }));
 
   return (
-    <div className="motion-page-entry">
-      <PageHero
-        label="Vinh danh"
+    <div>
+      <SceneHero
+        asset={ART_ASSETS.generalHoangTrung}
+        eyebrow="Vinh danh"
         title="Điện Danh Vọng"
-        lede="Nơi ghi lại những cột mốc học viên HỔ PHÙ · IELTS đã vượt qua. Danh hiệu không mua được — chỉ có làm bài đàng hoàng, sửa sai có chiều sâu và giữ được kỷ luật."
-      />
+        functionalLabel="Danh hiệu và thành tích học tập"
+      >
+        <p className="text-lg leading-relaxed text-ink-soft">
+          Nơi ghi lại những cột mốc học viên HỔ PHÙ · IELTS đã vượt qua. Danh
+          hiệu không mua được — chỉ có làm bài đàng hoàng, sửa sai có chiều sâu
+          và giữ được kỷ luật.
+        </p>
+      </SceneHero>
 
       <section className="mx-auto max-w-6xl px-6 py-14">
+        <NextStepGuide step={HALL_NEXT_STEP} />
+
         {recent.length > 0 && (
-          <div className="mb-12">
+          <div className="mb-12 mt-12">
             <h2 className="font-display text-2xl font-bold text-navy-deep">
               Vừa đạt được
             </h2>
@@ -103,7 +125,7 @@ export default async function HallOfFamePage() {
           </div>
         )}
 
-        <h2 className="font-display text-2xl font-bold text-navy-deep">
+        <h2 className="mt-12 font-display text-2xl font-bold text-navy-deep">
           Danh mục danh hiệu
         </h2>
         <p className="mt-2 flex items-center gap-2 font-ui text-sm text-muted">

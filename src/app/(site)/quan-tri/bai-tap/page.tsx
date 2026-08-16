@@ -10,6 +10,7 @@ import {
   toggleAchievementEligibleAction,
   toggleReadingTypeAction,
 } from "@/lib/actions/admin";
+import { AdminPageShell } from "@/components/admin/admin-page-shell";
 
 export const metadata = { title: "Quản lý bài tập" };
 
@@ -34,15 +35,10 @@ export default async function AdminExercisesPage() {
   });
 
   return (
-    <section className="motion-page-entry mx-auto max-w-6xl px-6 py-12">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="label-caps">Ngân hàng đề</p>
-          <h1 className="mt-3 font-display text-3xl font-bold text-navy-deep md:text-4xl">
-            Quản lý bài tập
-          </h1>
-          <div className="rule-gold mt-5" />
-        </div>
+    <AdminPageShell
+      eyebrow="Ngân hàng đề"
+      title="Quản lý bài tập"
+      actions={
         <Link
           href="/quan-tri/bai-tap/moi"
           className="flex items-center gap-2 border border-gold bg-gold px-6 py-3 font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-paper transition-colors hover:bg-[#9d7223]"
@@ -50,7 +46,8 @@ export default async function AdminExercisesPage() {
           <Plus className="h-4 w-4" aria-hidden="true" />
           Tạo bài tập mới
         </Link>
-      </div>
+      }
+    >
 
       <div className="mt-10 overflow-x-auto">
         <table className="w-full min-w-[720px] border border-line font-ui text-sm">
@@ -206,6 +203,6 @@ export default async function AdminExercisesPage() {
         Bài tập đã có lượt làm không thể xóa để bảo toàn hồ sơ học viên — hãy
         dùng nút ẩn thay thế.
       </p>
-    </section>
+    </AdminPageShell>
   );
 }

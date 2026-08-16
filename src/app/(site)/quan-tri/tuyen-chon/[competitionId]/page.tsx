@@ -12,6 +12,7 @@ import {
   GenerateOffersForm,
   ExpireOffersForm,
 } from "@/components/admin/qualification-forms";
+import { AdminPageShell } from "@/components/admin/admin-page-shell";
 
 export const dynamic = "force-dynamic";
 
@@ -91,27 +92,23 @@ export default async function QualificationDetailPage({
       name: c.name,
       seasonKey: c.seasonKey,
       finalized: c.finalizedAt !== null,
-    }));
+  }));
 
   return (
-    <main className="motion-page-entry mx-auto max-w-5xl px-6 py-10">
-      <Link
-        href="/quan-tri/tuyen-chon"
-        className="mb-6 inline-flex items-center gap-2 text-sm text-muted hover:text-navy"
-      >
-        <ArrowLeft className="size-4" aria-hidden />
-        Nguồn tuyển chọn
-      </Link>
-
-      <p className="label-caps">{policy.name} · mùa {competition.seasonKey}</p>
-      <h1 className="mt-3 font-display text-3xl font-bold text-navy-deep">
-        {competition.name}
-      </h1>
-      <p className="mt-3 font-ui text-sm text-muted">
-        Nhận top {policy.topPerSource} của {policy.sourceCount} kỳ{" "}
-        {tierPolicy(policy.sourceTier).name} · tối đa {policy.maxSeats} ghế · band thấp
-        nhất từ {policy.minLowestBand?.toFixed(1)}
-      </p>
+    <AdminPageShell
+      eyebrow={`${policy.name} · mùa ${competition.seasonKey}`}
+      title={competition.name}
+      lede={`Nhận top ${policy.topPerSource} của ${policy.sourceCount} kỳ ${tierPolicy(policy.sourceTier).name} · tối đa ${policy.maxSeats} ghế · band thấp nhất từ ${policy.minLowestBand?.toFixed(1)}`}
+      actions={
+        <Link
+          href="/quan-tri/tuyen-chon"
+          className="inline-flex items-center gap-2 text-sm text-muted hover:text-navy"
+        >
+          <ArrowLeft className="size-4" aria-hidden />
+          Nguồn tuyển chọn
+        </Link>
+      }
+    >
 
       <section aria-label="Kỳ nguồn" className="mt-8 border border-line bg-paper p-7">
         <h2 className="font-display text-lg font-bold text-navy-deep">
@@ -251,6 +248,6 @@ export default async function QualificationDetailPage({
         tấm vé có giá trị. Tiền thưởng của {policy.name} để trống cho tới khi
         chủ dự án duyệt mức cụ thể.
       </p>
-    </main>
+    </AdminPageShell>
   );
 }
