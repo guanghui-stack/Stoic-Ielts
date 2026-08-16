@@ -11,6 +11,21 @@ export type WorldPlace = {
   lockedMessage: string | null;
 };
 
+export const TERRITORY_CODES = [
+  "TERRITORY_WEI",
+  "TERRITORY_SHU",
+  "TERRITORY_WU",
+] as const;
+
+export type TerritoryCode = (typeof TERRITORY_CODES)[number];
+export type TerritoryArtKey = "wei" | "shu" | "wu";
+
+export type TerritoryPlace = Omit<WorldPlace, "code" | "kind"> & {
+  code: TerritoryCode;
+  kind: "TERRITORY";
+  artKey: TerritoryArtKey;
+};
+
 export type NextStepModel = {
   eyebrow: string;
   title: string;
@@ -25,7 +40,7 @@ export type CampaignWorld = {
   gates: CampaignNodeView[];
   landmarks: readonly WorldPlace[];
   competitions: readonly WorldPlace[];
-  territories: readonly WorldPlace[];
+  territories: readonly TerritoryPlace[];
   nextStep: NextStepModel;
 };
 
@@ -83,16 +98,35 @@ export const WORLD_COMPETITIONS = [
   },
 ] as const satisfies readonly WorldPlace[];
 
-export const LOCKED_TERRITORIES = ["TERRITORY_01", "TERRITORY_02", "TERRITORY_03"].map(
-  (code) => ({
-    code,
-    kind: "TERRITORY" as const,
-    title: "Lãnh địa chưa khai mở",
-    functionalLabel: "Lựa chọn phe trong tương lai",
+export const LOCKED_TERRITORIES = [
+  {
+    code: "TERRITORY_WEI",
+    kind: "TERRITORY",
+    artKey: "wei",
+    title: "Ngụy",
+    functionalLabel: "Lãnh địa phía bắc",
     href: null,
     lockedMessage: "Mở khi đạt cấp bậc yêu cầu",
-  }),
-) satisfies WorldPlace[];
+  },
+  {
+    code: "TERRITORY_SHU",
+    kind: "TERRITORY",
+    artKey: "shu",
+    title: "Thục",
+    functionalLabel: "Lãnh địa phía tây",
+    href: null,
+    lockedMessage: "Mở khi đạt cấp bậc yêu cầu",
+  },
+  {
+    code: "TERRITORY_WU",
+    kind: "TERRITORY",
+    artKey: "wu",
+    title: "Ngô",
+    functionalLabel: "Lãnh địa phía đông nam",
+    href: null,
+    lockedMessage: "Mở khi đạt cấp bậc yêu cầu",
+  },
+] as const satisfies readonly TerritoryPlace[];
 
 function trialStep(node: CampaignNodeView, active: boolean): NextStepModel {
   return {
