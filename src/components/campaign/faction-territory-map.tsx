@@ -6,12 +6,14 @@ import { useState, type CSSProperties } from "react";
 import { ART_ASSETS, type ArtAsset } from "@/lib/brand/art-manifest";
 import {
   TERRITORY_HIT_PATHS,
+  TERRITORY_INTERACTION_IDLE,
   TERRITORY_LABEL_POSITIONS,
+  territoryActiveCode,
+  territoryInteractionState,
   territoryLayerState,
 } from "@/lib/campaign/territory-map";
 import type {
   TerritoryArtKey,
-  TerritoryCode,
   TerritoryPlace,
 } from "@/lib/campaign/world";
 
@@ -31,7 +33,8 @@ export function FactionTerritoryMap({
 }: {
   territories: readonly TerritoryPlace[];
 }) {
-  const [activeCode, setActiveCode] = useState<TerritoryCode | null>(null);
+  const [interaction, setInteraction] = useState(TERRITORY_INTERACTION_IDLE);
+  const activeCode = territoryActiveCode(interaction);
 
   return (
     <section className="faction-territory-map" aria-labelledby="faction-territory-title">
@@ -48,7 +51,9 @@ export function FactionTerritoryMap({
       <div
         className="territory-map-canvas hidden lg:block"
         data-active-territory={activeCode ?? "none"}
-        onPointerLeave={() => setActiveCode(null)}
+        onPointerLeave={() =>
+          setInteraction((state) => territoryInteractionState(state, { type: "pointer-leave" }))
+        }
       >
         <Image
           src={ART_ASSETS.territoryBase.src}
@@ -89,7 +94,14 @@ export function FactionTerritoryMap({
               d={TERRITORY_HIT_PATHS[territory.code]}
               className="territory-map-hit-path"
               data-territory-hit={territory.code}
-              onPointerEnter={() => setActiveCode(territory.code)}
+              onPointerEnter={() =>
+                setInteraction((state) =>
+                  territoryInteractionState(state, { type: "pointer-enter", code: territory.code }),
+                )
+              }
+              onPointerLeave={() =>
+                setInteraction((state) => territoryInteractionState(state, { type: "pointer-leave" }))
+              }
             />
           ))}
         </svg>
@@ -112,9 +124,22 @@ export function FactionTerritoryMap({
                 className="territory-map-label"
                 data-active={layerState.isActive ? "true" : "false"}
                 style={style}
-                onPointerEnter={() => setActiveCode(territory.code)}
-                onFocus={() => setActiveCode(territory.code)}
-                onBlur={() => setActiveCode(null)}
+                onPointerEnter={() =>
+                  setInteraction((state) =>
+                    territoryInteractionState(state, { type: "pointer-enter", code: territory.code }),
+                  )
+                }
+                onPointerLeave={() =>
+                  setInteraction((state) => territoryInteractionState(state, { type: "pointer-leave" }))
+                }
+                onFocus={() =>
+                  setInteraction((state) =>
+                    territoryInteractionState(state, { type: "focus", code: territory.code }),
+                  )
+                }
+                onBlur={() =>
+                  setInteraction((state) => territoryInteractionState(state, { type: "blur" }))
+                }
               >
                 <Lock className="size-4" aria-hidden="true" />
                 <span className="font-display font-bold text-navy-deep">{territory.title}</span>

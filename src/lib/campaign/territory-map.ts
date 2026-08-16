@@ -6,6 +6,45 @@ export const TERRITORY_LAYER_OPACITY = {
   dimmed: 0.18,
 } as const;
 
+export type TerritoryInteractionState = Readonly<{
+  hoveredCode: TerritoryCode | null;
+  focusedCode: TerritoryCode | null;
+}>;
+
+export type TerritoryInteractionEvent =
+  | { type: "pointer-enter"; code: TerritoryCode }
+  | { type: "pointer-leave" }
+  | { type: "focus"; code: TerritoryCode }
+  | { type: "blur" };
+
+export const TERRITORY_INTERACTION_IDLE: TerritoryInteractionState = {
+  hoveredCode: null,
+  focusedCode: null,
+};
+
+export function territoryInteractionState(
+  state: TerritoryInteractionState,
+  event: TerritoryInteractionEvent,
+): TerritoryInteractionState {
+  switch (event.type) {
+    case "pointer-enter":
+      return { ...state, hoveredCode: event.code };
+    case "pointer-leave":
+      return { ...state, hoveredCode: null };
+    case "focus":
+      return { ...state, focusedCode: event.code };
+    case "blur":
+      return { ...state, focusedCode: null };
+  }
+}
+
+export function territoryActiveCode({
+  hoveredCode,
+  focusedCode,
+}: TerritoryInteractionState): TerritoryCode | null {
+  return focusedCode ?? hoveredCode;
+}
+
 export function territoryLayerOpacity(
   activeCode: TerritoryCode | null,
   candidateCode: TerritoryCode,

@@ -1,7 +1,10 @@
 import { LOCKED_TERRITORIES } from "../src/lib/campaign/world.ts";
 import {
   TERRITORY_HIT_PATHS,
+  TERRITORY_INTERACTION_IDLE,
   TERRITORY_LABEL_POSITIONS,
+  territoryActiveCode,
+  territoryInteractionState,
   territoryLayerOpacity,
   territoryLayerState,
 } from "../src/lib/campaign/territory-map.ts";
@@ -31,6 +34,45 @@ check(
 check("idle opacity", territoryLayerOpacity(null, "TERRITORY_WEI"), 0.68);
 check("active opacity", territoryLayerOpacity("TERRITORY_WEI", "TERRITORY_WEI"), 1);
 check("dimmed opacity", territoryLayerOpacity("TERRITORY_WEI", "TERRITORY_SHU"), 0.18);
+
+let interaction = territoryInteractionState(TERRITORY_INTERACTION_IDLE, {
+  type: "pointer-enter",
+  code: "TERRITORY_WEI",
+});
+check("hover A activates A", territoryActiveCode(interaction), "TERRITORY_WEI");
+
+interaction = territoryInteractionState(interaction, {
+  type: "focus",
+  code: "TERRITORY_SHU",
+});
+check("focus B takes precedence while A remains hovered", territoryActiveCode(interaction), "TERRITORY_SHU");
+check(
+  "focus B preserves the independently hovered A",
+  interaction,
+  { hoveredCode: "TERRITORY_WEI", focusedCode: "TERRITORY_SHU" },
+);
+
+interaction = territoryInteractionState(interaction, { type: "pointer-leave" });
+check("pointer leave keeps focused B active", territoryActiveCode(interaction), "TERRITORY_SHU");
+
+interaction = territoryInteractionState(TERRITORY_INTERACTION_IDLE, {
+  type: "pointer-enter",
+  code: "TERRITORY_WEI",
+});
+interaction = territoryInteractionState(interaction, {
+  type: "focus",
+  code: "TERRITORY_SHU",
+});
+interaction = territoryInteractionState(interaction, { type: "blur" });
+check("blur B restores hovered A", territoryActiveCode(interaction), "TERRITORY_WEI");
+
+interaction = territoryInteractionState(TERRITORY_INTERACTION_IDLE, {
+  type: "pointer-enter",
+  code: "TERRITORY_WEI",
+});
+interaction = territoryInteractionState(interaction, { type: "pointer-leave" });
+check("individual hit-region leave returns an unfocused map to idle", territoryActiveCode(interaction), null);
+
 for (const territory of LOCKED_TERRITORIES) {
   check(`${territory.title} is active when selected`, territoryLayerOpacity(territory.code, territory.code), 1);
   check(
