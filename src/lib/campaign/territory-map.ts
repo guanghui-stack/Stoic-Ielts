@@ -16,6 +16,16 @@ export function territoryLayerOpacity(
     : TERRITORY_LAYER_OPACITY.dimmed;
 }
 
+export function territoryLayerState(
+  activeCode: TerritoryCode | null,
+  candidateCode: TerritoryCode,
+) {
+  return {
+    opacity: territoryLayerOpacity(activeCode, candidateCode),
+    isActive: activeCode === candidateCode,
+  };
+}
+
 export const TERRITORY_HIT_PATHS: Record<TerritoryCode, string> = {
   TERRITORY_WEI:
     "M 367 90 C 560 30 1000 20 1300 55 C 1500 85 1560 250 1500 430 C 1390 520 1180 535 1030 570 C 870 530 700 500 565 420 C 450 350 365 220 367 90 Z",
