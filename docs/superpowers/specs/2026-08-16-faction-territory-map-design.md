@@ -1,7 +1,7 @@
 # Đặc tả bản đồ lãnh địa Ngụy — Thục — Ngô
 
-Ngày: 2026-08-16  
-Trạng thái: Đã duyệt hướng thiết kế, chờ duyệt đặc tả viết  
+Ngày: 2026-08-16
+Trạng thái: Đã duyệt hướng thiết kế, chờ duyệt đặc tả viết
 Phạm vi: Bản đồ Chiến Dịch trên trang chủ và trang chiến dịch học viên
 
 ## 1. Mục tiêu
