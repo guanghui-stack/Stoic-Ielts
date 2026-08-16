@@ -812,8 +812,7 @@ body {
 }
 
 .world-shell .world-map-art-layer,
-.world-shell .world-map-route-layer,
-.world-shell .world-locked-territories {
+.world-shell .world-map-route-layer {
   position: absolute;
   inset: 0;
 }
@@ -919,38 +918,6 @@ body {
 
 .world-shell .world-map-marker-current {
   line-height: 1.1;
-}
-
-.world-shell .world-locked-territories {
-  z-index: 1;
-  pointer-events: none;
-}
-
-.world-shell .world-locked-territory {
-  position: absolute;
-  width: min(10rem, 16vw);
-  transform: translate(-50%, -50%);
-  border: 1px dashed rgb(76 90 104 / 0.32);
-  background: rgb(243 236 221 / 0.76);
-  box-shadow: 0 8px 24px rgb(34 48 62 / 0.08);
-  padding: 0.55rem 0.7rem;
-  color: var(--color-muted);
-}
-
-.world-shell .world-locked-territory h3 {
-  margin-top: 0.2rem;
-  font-family: var(--font-display);
-  font-size: 0.76rem;
-  font-weight: 700;
-  line-height: 1.2;
-  color: var(--color-navy-deep);
-}
-
-.world-shell .world-locked-territory p {
-  margin-top: 0.18rem;
-  font-family: var(--font-ui);
-  font-size: 0.64rem;
-  line-height: 1.25;
 }
 
 .world-shell .world-landmark-rail {

@@ -1,4 +1,5 @@
 import { LOCKED_TERRITORIES } from "../src/lib/campaign/world.ts";
+import { CAMPAIGN_MAP_SECTION_ORDER } from "../src/lib/campaign/campaign-map-layout.ts";
 import {
   TERRITORY_HIT_PATHS,
   TERRITORY_INTERACTION_IDLE,
@@ -16,6 +17,12 @@ function check(label: string, actual: unknown, expected: unknown) {
   console.log(`${ok ? "PASS" : "FAIL"} ${label}`);
   if (!ok) failures += 1;
 }
+
+check(
+  "campaign map section order keeps territories before gates",
+  CAMPAIGN_MAP_SECTION_ORDER,
+  ["territories", "gates"],
+);
 
 check(
   "approved territory identity and art mapping",

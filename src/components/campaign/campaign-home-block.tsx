@@ -1,4 +1,4 @@
-import { CampaignMap } from "@/components/campaign/campaign-map";
+import { CampaignMapStack } from "@/components/campaign/campaign-map-stack";
 import { CampaignTimelineMobile } from "@/components/campaign/campaign-timeline-mobile";
 import { NextStepGuide } from "@/components/world/next-step-guide";
 import { db } from "@/lib/db";
@@ -60,7 +60,7 @@ function CampaignWorldSection({ world }: { world: CampaignWorld }) {
       className="scroll-mt-44 border-y border-line bg-cream"
     >
       <div className="mx-auto max-w-7xl px-6 py-16 md:py-20">
-        <CampaignMap
+        <CampaignMapStack
           world={world}
           variant={world.audience === "STUDENT" ? "student" : "portal"}
         />
