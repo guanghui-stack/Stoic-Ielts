@@ -4,7 +4,7 @@ import { requireUser } from "@/lib/session";
 import { features } from "@/lib/features";
 import { NoteBox } from "@/components/ui";
 import { StudentNav } from "@/components/student/student-nav";
-import { CampaignMap } from "@/components/campaign/campaign-map";
+import { CampaignMapStack } from "@/components/campaign/campaign-map-stack";
 import { CampaignTimelineMobile } from "@/components/campaign/campaign-timeline-mobile";
 import { NextStepGuide } from "@/components/world/next-step-guide";
 import { NarrativeSection } from "@/components/world/narrative-section";
@@ -78,7 +78,7 @@ export default async function CampaignPage() {
           {rank && <> · thời {RANK_ERAS[rank.era].name}</>} · đã vượt {passed}/8 cửa ải.
         </p>
 
-        <CampaignMap world={world} variant="student" />
+        <CampaignMapStack world={world} variant="student" />
         <CampaignTimelineMobile world={world} />
         <div id="dieu-kien">
           <NextStepGuide step={world.nextStep} />

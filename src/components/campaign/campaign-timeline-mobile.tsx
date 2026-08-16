@@ -100,28 +100,6 @@ export function CampaignTimelineMobile({ world }: { world: CampaignWorld }) {
 
       <MobilePlaceList label="Địa điểm" items={world.landmarks} />
       <MobilePlaceList label="Đại thí" items={world.competitions} />
-
-      <section aria-label="Ba lãnh địa chưa khai mở">
-        <p className="label-caps">Lãnh địa</p>
-        <ul className="mt-3 space-y-2">
-          {world.territories.map((territory) => (
-            <li key={territory.code}>
-              <div
-                aria-disabled="true"
-                className="flex gap-3 border border-line bg-cream-deep/60 px-4 py-3 text-muted"
-              >
-                <Lock className="mt-1 size-4 shrink-0" aria-hidden />
-                <span>
-                  <span className="block font-display font-semibold text-navy-deep">
-                    {territory.title}
-                  </span>
-                  <span className="block font-ui text-xs">{territory.lockedMessage}</span>
-                </span>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </section>
     </div>
   );
 }

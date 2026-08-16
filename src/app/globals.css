@@ -697,9 +697,122 @@ body {
   animation: world-map-stage-reveal var(--world-duration-map) var(--ease-out) both;
 }
 
+.world-shell .faction-territory-map {
+  margin-bottom: 2rem;
+  border: 1px solid var(--color-line);
+  background: var(--color-paper);
+  padding: 1.25rem;
+}
+
+.world-shell .territory-map-heading {
+  margin-bottom: 1rem;
+}
+
+.world-shell .territory-map-canvas {
+  position: relative;
+  isolation: isolate;
+  aspect-ratio: 1672 / 941;
+  overflow: hidden;
+  background: var(--color-cream-deep);
+}
+
+.world-shell .territory-map-layer,
+.world-shell .territory-map-hit-layer,
+.world-shell .territory-map-labels {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.world-shell .territory-map-base { z-index: 0; }
+
+.world-shell .territory-map-overlay {
+  z-index: 1;
+  transition: opacity 180ms ease;
+}
+
+.world-shell .territory-map-hit-layer {
+  z-index: 3;
+  pointer-events: none;
+}
+
+.world-shell .territory-map-hit-path {
+  fill: rgb(34 48 62 / 0.001);
+  pointer-events: none;
+}
+
+.world-shell .territory-map-labels {
+  z-index: 4;
+  pointer-events: none;
+}
+
+.world-shell .territory-map-label {
+  position: absolute;
+  left: var(--territory-x);
+  top: var(--territory-y);
+  display: flex;
+  width: 10rem;
+  min-height: 5.5rem;
+  transform: translate(-50%, -50%);
+  cursor: default;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  border: 1px dashed var(--color-line-strong);
+  background: rgb(255 253 249 / 0.88);
+  box-shadow: var(--shadow-card);
+  pointer-events: none;
+  text-align: center;
+}
+
+.world-shell .territory-map-label[data-active="true"] {
+  border-color: var(--color-gold);
+  background: var(--color-paper);
+}
+
+.world-shell .territory-map-label:focus-visible {
+  outline: 2px solid var(--color-navy);
+  outline-offset: 3px;
+}
+
+.world-shell .territory-map-mobile-composite {
+  min-height: 15rem;
+}
+
+.world-shell .territory-map-mobile-list {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.world-shell .territory-map-mobile-card {
+  display: flex;
+  gap: 0.75rem;
+  border: 1px solid var(--color-line);
+  background: var(--color-cream-deep);
+  padding: 0.875rem 1rem;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .world-shell .territory-map-hit-path {
+    pointer-events: visiblePainted;
+  }
+
+  .world-shell .territory-map-label {
+    pointer-events: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .world-shell .territory-map-overlay {
+    transition-duration: 120ms !important;
+  }
+}
+
 .world-shell .world-map-art-layer,
-.world-shell .world-map-route-layer,
-.world-shell .world-locked-territories {
+.world-shell .world-map-route-layer {
   position: absolute;
   inset: 0;
 }
@@ -805,38 +918,6 @@ body {
 
 .world-shell .world-map-marker-current {
   line-height: 1.1;
-}
-
-.world-shell .world-locked-territories {
-  z-index: 1;
-  pointer-events: none;
-}
-
-.world-shell .world-locked-territory {
-  position: absolute;
-  width: min(10rem, 16vw);
-  transform: translate(-50%, -50%);
-  border: 1px dashed rgb(76 90 104 / 0.32);
-  background: rgb(243 236 221 / 0.76);
-  box-shadow: 0 8px 24px rgb(34 48 62 / 0.08);
-  padding: 0.55rem 0.7rem;
-  color: var(--color-muted);
-}
-
-.world-shell .world-locked-territory h3 {
-  margin-top: 0.2rem;
-  font-family: var(--font-display);
-  font-size: 0.76rem;
-  font-weight: 700;
-  line-height: 1.2;
-  color: var(--color-navy-deep);
-}
-
-.world-shell .world-locked-territory p {
-  margin-top: 0.18rem;
-  font-family: var(--font-ui);
-  font-size: 0.64rem;
-  line-height: 1.25;
 }
 
 .world-shell .world-landmark-rail {

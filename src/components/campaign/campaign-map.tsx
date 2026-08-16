@@ -21,12 +21,6 @@ const NODE_STYLE: Record<
   },
 };
 
-const TERRITORY_POSITIONS = [
-  { left: "33%", top: "86%" },
-  { left: "62%", top: "86%" },
-  { left: "86%", top: "76%" },
-] as const;
-
 type MarkerStyle = CSSProperties & { "--world-marker-delay": string };
 
 function nodeLabel(node: CampaignNodeView): string {
@@ -145,25 +139,6 @@ export function CampaignMap({
             ))}
           </ol>
         </div>
-
-        <section
-          aria-label="Ba lãnh địa chưa khai mở"
-          className="world-locked-territories"
-        >
-          {world.territories.map((territory, index) => (
-            <article
-              key={territory.code}
-              role="group"
-              aria-disabled="true"
-              className="world-locked-territory"
-              style={TERRITORY_POSITIONS[index]}
-            >
-              <Lock className="size-4" aria-hidden />
-              <h3>{territory.title}</h3>
-              <p>{territory.lockedMessage}</p>
-            </article>
-          ))}
-        </section>
       </section>
 
       <WorldLandmarkRail
