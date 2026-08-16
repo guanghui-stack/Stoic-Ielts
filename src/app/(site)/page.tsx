@@ -39,7 +39,7 @@ const PILLARS = [
 
 export default async function HomePage() {
   return (
-    <div className="motion-page-entry">
+    <div>
       <SceneHero
         asset={ART_ASSETS.homeTrieuVan}
         eyebrow="HỔ PHÙ · IELTS · Luyện Reading Academic và General"
