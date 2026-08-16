@@ -42,7 +42,6 @@ export default async function HomePage() {
     <div className="motion-page-entry">
       <SceneHero
         asset={ART_ASSETS.homeTrieuVan}
-        videoSrc="/art/home/trieu-van-hero.mp4"
         eyebrow="HỔ PHÙ · IELTS · Luyện Reading Academic và General"
         title={
           <>
