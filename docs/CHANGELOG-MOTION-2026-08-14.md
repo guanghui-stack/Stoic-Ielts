@@ -1,5 +1,52 @@
 # Hồ sơ triển khai motion có chọn lọc — 14/08/2026
 
+> Tài liệu này giữ nguyên hồ sơ của hệ motion tiết chế ban đầu và bổ sung giai
+> đoạn mở rộng điện ảnh đã được duyệt sau đó. Các mô tả dưới mục “Giai đoạn
+> nền” là lịch sử của nhánh cũ, không phải giới hạn hiện tại của thế giới mới.
+
+## Mở rộng đã duyệt: thế giới chiến dịch thủy mặc
+
+Nhánh `feat/cinematic-campaign-map-redesign` mở rộng hệ thống tiết chế thành
+trải nghiệm theo tầng bên ngoài vùng học tập: Tier 1 cho tài khoản, thanh toán
+và quản trị; Tier 2 cho thế giới công khai, học viên và thí luyện; Tier 3 chỉ
+dành cho nghi thức thăng cấp hoặc nhận danh hiệu có định danh. Không thêm thư
+viện animation, không đổi database, Prisma schema, API hoặc luật nghiệp vụ.
+
+Phạm vi tĩnh hiện hành, tuyệt đối không nhận `WorldShell` hoặc motion mới:
+
+- `/luyen-tap/reading/**` và các alias `/luyen-tap/academic`,
+  `/luyen-tap/general`, `/luyen-tap/ghep-de`.
+- `/lam-bai/**`.
+- `/hoc-vien/bai-lam/**`, gồm cả Feynman Review.
+- `/quan-tri/ai-feynman/**`.
+- `/xem-thu-cbt`.
+
+Trang định hướng `/hoc-vien/thi-luyen/**` được phép dùng Tier 2; khi người học
+đi vào Reading hoặc Feynman, route policy chuyển ngay về Tier 0 tĩnh.
+
+Các thay đổi chính của giai đoạn mở rộng:
+
+- Trang chủ trở thành cổng chiến dịch: hero thủy mặc, bản đồ, lộ trình bắt đầu
+  và ba trụ làm đề — chữa sai — giữ kỷ luật.
+- Bản đồ dùng cùng một `CampaignWorld` cho khách và học viên; ba lãnh địa tương
+  lai luôn mờ, không liên kết và ghi đúng “Mở khi đạt cấp bậc yêu cầu”.
+- Nguyệt Thí, Dương Thí, Thiên Thí được trình bày theo đúng thứ tự; chưa thêm
+  lựa chọn phe, điểm phe hay logic phân thắng thua.
+- Trang công khai và học viên dùng hero/section/next-step chung; dữ liệu cấp
+  bậc, thí luyện, danh hiệu và bước tiếp theo vẫn lấy từ nghiệp vụ hiện có.
+- Đăng nhập, đăng ký, đổi mật khẩu và thanh toán dùng khung Tier 1 yên tĩnh.
+- 15 trang quản trị được phép dùng khung “quân trướng”; AI Feynman quản trị
+  nằm ngoài namespace này.
+- Nghi thức thăng cấp và nhận danh hiệu chỉ chạy một lần cho sự kiện mới trong
+  14 ngày, có fallback khi storage bị chặn và có chế độ Reduce Motion.
+- Hai ảnh Triệu Vân đã được làm sạch ký tự trên cờ nền. MP4 cũ không còn được
+  render ở trang chủ cho tới khi có thể kiểm định từng frame.
+
+Hồ sơ xác minh đầy đủ nằm tại
+`docs/qa/2026-08-14-cinematic-campaign-map-redesign.md`.
+
+## Giai đoạn nền: motion có chọn lọc
+
 ## Mục tiêu
 
 Giảm cảm giác chuyển trang đột ngột và làm rõ quan hệ nhân quả khi người dùng thao tác, theo hướng mềm, nhanh và có tính vật lý kiểu Apple. Chất Tam Quốc chỉ xuất hiện ở khoảnh khắc hiếm có ý nghĩa; giao diện hằng ngày vẫn điềm tĩnh, không phô diễn.
