@@ -6,6 +6,7 @@ import { buildSePayCheckout } from "@/lib/payments/sepay";
 import { expireOrderIfStale } from "@/lib/payments/fulfillment";
 import { formatVnd } from "@/lib/payments/catalog";
 import { AutoSubmitSePayForm } from "@/components/payments/auto-submit-sepay-form";
+import { QuietWorldPanel } from "@/components/world/quiet-world-panel";
 
 export const metadata = { title: "Đang chuyển đến cổng thanh toán" };
 export const dynamic = "force-dynamic";
@@ -36,14 +37,11 @@ export default async function CheckoutPage({
   const checkout = buildSePayCheckout(order);
 
   return (
-    <section className="mx-auto max-w-xl px-6 py-20 text-center">
-      <p className="label-caps">Thanh toán an toàn</p>
-      <h1 className="mt-3 font-display text-3xl font-bold leading-tight text-navy-deep">
-        Đang chuyển đến cổng thanh toán…
-      </h1>
-      <div className="rule-gold mx-auto mt-5" />
-
-      <dl className="mt-8 space-y-2 font-ui text-sm text-ink-soft">
+    <QuietWorldPanel
+      eyebrow="Thanh toán an toàn"
+      title="Đang chuyển đến cổng thanh toán…"
+    >
+      <dl className="space-y-2 font-ui text-sm text-ink-soft">
         <div>
           <dt className="inline font-semibold text-ink">Mã đơn: </dt>
           <dd className="inline tabular-nums">{order.invoiceNumber}</dd>
@@ -63,6 +61,6 @@ export default async function CheckoutPage({
           Việc thanh toán diễn ra trên hệ thống của SePay.
         </span>
       </p>
-    </section>
+    </QuietWorldPanel>
   );
 }

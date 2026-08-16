@@ -31,7 +31,11 @@ export function StudentNav({ current }: { current?: UiLabelKey }) {
   const items = ITEMS.filter((item) => item.show);
 
   return (
-    <nav aria-label="Khu học viên" className="mb-8 border-b border-line">
+    <nav
+      aria-label="Khu học viên"
+      data-student-nav="true"
+      className="mb-8 border-b border-line [.world-shell_&]:border-line-strong [.world-shell_&]:bg-paper/70 [.world-shell_&]:px-4 [.world-shell_&]:pt-3"
+    >
       <ul className="m-0 flex list-none flex-wrap gap-x-6 gap-y-2 p-0 pb-3">
         {items.map((item) => {
           const label = UI_LABELS[item.key];
@@ -42,7 +46,7 @@ export function StudentNav({ current }: { current?: UiLabelKey }) {
               <Link
                 href={label.href}
                 aria-current={active ? "page" : undefined}
-                className={`block border-b-2 pb-1 transition-colors ${
+                className={`world-action block min-h-11 border-b-2 pb-1 pt-1 transition-colors ${
                   active
                     ? "border-gold text-navy-deep"
                     : "border-transparent text-ink-soft hover:text-navy"

@@ -1,12 +1,12 @@
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 import { db } from "@/lib/db";
 import { features } from "@/lib/features";
 import { CurrentRankCard } from "@/components/ranks/current-rank-card";
 import { RankPromotionMoment } from "@/components/ranks/rank-promotion-moment";
 import { TrialProgress } from "@/components/ranks/trial-progress";
 import { CampaignMini } from "@/components/campaign/campaign-mini";
+import { NextStepGuide } from "@/components/world/next-step-guide";
 import { campaignView, type TrialStatusMap } from "@/lib/campaign/view";
+import { buildCampaignWorld } from "@/lib/campaign/world";
 import { ensureUserRank, syncTrialEligibility } from "@/lib/ranks/engine";
 import { loadRankFacts } from "@/lib/ranks/facts";
 import { evaluateTrialGate, evaluateTrialSuccess } from "@/lib/ranks/rules";
@@ -45,6 +45,7 @@ export async function RankDashboardBlock({ userId }: { userId: string }) {
   for (const row of rows) trials[row.trialCode] = { status: row.status };
 
   const nodes = campaignView(profile.currentLevel, trials);
+  const world = buildCampaignWorld({ audience: "STUDENT", nodes });
   const trial = trialFromLevel(profile.currentLevel);
   const record = trial ? rows.find((row) => row.trialCode === trial.code) : undefined;
 
@@ -90,6 +91,16 @@ export async function RankDashboardBlock({ userId }: { userId: string }) {
         cardinalTitleName={cardinalName}
       />
 
+      <NextStepGuide step={world.nextStep} />
+
+      <section aria-label="Chiến Dịch" className="border border-line bg-paper p-7">
+        <p className="label-caps">Vị trí hiện tại</p>
+        <h3 className="mb-4 mt-2.5 font-display text-lg font-bold text-navy-deep">
+          Ba cửa ải quanh bạn
+        </h3>
+        <CampaignMini nodes={world.gates} />
+      </section>
+
       {trial && profile.currentLevel < MAX_RANK_LEVEL && (
         <section
           aria-label="Cửa ải kế tiếp"
@@ -115,28 +126,8 @@ export async function RankDashboardBlock({ userId }: { userId: string }) {
               tone={active ? "azure" : "gold"}
             />
           </div>
-
-          <Link
-            href={`/hoc-vien/thi-luyen/${trial.code}`}
-            className="mt-5 inline-flex items-center gap-1.5 font-ui text-sm font-semibold text-navy hover:underline"
-          >
-            {active
-              ? "Tiếp tục thí luyện"
-              : gate?.complete
-                ? "Khởi thí luyện"
-                : "Xem điều kiện cửa ải"}
-            <ArrowRight className="size-3.5" aria-hidden />
-          </Link>
         </section>
       )}
-
-      <section aria-label="Chiến Dịch" className="border border-line bg-paper p-7">
-        <p className="label-caps">Chiến Dịch</p>
-        <h3 className="mt-2.5 mb-4 font-display text-lg font-bold text-navy-deep">
-          Ba cửa ải quanh bạn
-        </h3>
-        <CampaignMini nodes={nodes} />
-      </section>
     </div>
   );
 }

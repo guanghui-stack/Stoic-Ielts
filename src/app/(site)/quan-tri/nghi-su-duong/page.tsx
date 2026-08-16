@@ -11,6 +11,7 @@ import {
   togglePostPinAction,
   togglePostVisibilityAction,
 } from "@/lib/actions/admin-forum";
+import { AdminPageShell } from "@/components/admin/admin-page-shell";
 
 export const metadata = { title: "Kiểm duyệt Nghị Sự Đường" };
 export const dynamic = "force-dynamic";
@@ -89,12 +90,7 @@ export default async function AdminForumPage() {
   const commentById = new Map(reportedComments.map((c) => [c.id, c]));
 
   return (
-    <section className="motion-page-entry mx-auto max-w-6xl px-6 py-12">
-      <p className="label-caps">Kiểm duyệt</p>
-      <h1 className="mt-3 font-display text-3xl font-bold text-navy-deep md:text-4xl">
-        Nghị Sự Đường
-      </h1>
-      <div className="rule-gold mt-5" />
+    <AdminPageShell eyebrow="Kiểm duyệt" title="Nghị Sự Đường">
       <p className="mt-5 max-w-3xl text-[0.95rem] leading-relaxed text-ink-soft">
         Nguyên tắc ở đây là <strong>ẩn, không xóa</strong>. Nội dung bị báo cáo
         vẫn nằm trong database để tra cứu khi có tranh chấp — xóa cứng là tự tay
@@ -338,6 +334,6 @@ export default async function AdminForumPage() {
           ))}
         </ul>
       )}
-    </section>
+    </AdminPageShell>
   );
 }

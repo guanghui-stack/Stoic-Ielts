@@ -2,11 +2,14 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
 import { features } from "@/lib/features";
-import { SectionHeading, NoteBox } from "@/components/ui";
+import { NoteBox } from "@/components/ui";
 import { StudentNav } from "@/components/student/student-nav";
 import { CampaignMap } from "@/components/campaign/campaign-map";
 import { CampaignTimelineMobile } from "@/components/campaign/campaign-timeline-mobile";
+import { NextStepGuide } from "@/components/world/next-step-guide";
+import { NarrativeSection } from "@/components/world/narrative-section";
 import { campaignView, type TrialStatusMap } from "@/lib/campaign/view";
+import { buildCampaignWorld } from "@/lib/campaign/world";
 import { ensureUserRank, syncTrialEligibility } from "@/lib/ranks/engine";
 import { loadRankFacts } from "@/lib/ranks/facts";
 import { rankByLevel, RANK_ERAS } from "@/lib/ranks/catalog";
@@ -49,34 +52,44 @@ export default async function CampaignPage() {
   }
 
   const nodes = campaignView(profile.currentLevel, trials);
+  const world = buildCampaignWorld({ audience: "STUDENT", nodes });
   const passed = nodes.filter((node) => node.state === "PASSED").length;
 
   return (
-    <main className="motion-page-entry mx-auto max-w-6xl px-6 py-10">
-      <StudentNav current="campaign" />
+    <main>
+      <div className="mx-auto max-w-6xl px-6 pt-10">
+        <StudentNav current="campaign" />
+      </div>
 
+      <NarrativeSection
+        id="ban-do-thang-cap"
+        eyebrow="Chiến Dịch"
+        title="Bản đồ thăng cấp"
+        tone="mist"
+      >
+        <p className="max-w-3xl text-[0.95rem] leading-relaxed text-ink-soft">
+          Tám cửa ải nối chín cấp bậc. Mỗi cửa chỉ mở khi bạn đã đủ điều kiện,
+          và chỉ vượt được khi bạn chủ động bước vào.
+        </p>
 
-      <SectionHeading label="Chiến Dịch" title="Bản đồ thăng cấp" />
+        <p className="mb-6 mt-2 text-sm text-muted">
+          Bạn đang ở{" "}
+          <strong className="text-navy-deep">{rank?.name ?? "Bạch thân"}</strong>
+          {rank && <> · thời {RANK_ERAS[rank.era].name}</>} · đã vượt {passed}/8 cửa ải.
+        </p>
 
-      <p className="mt-4 text-[0.95rem] leading-relaxed text-ink-soft">
-        Tám cửa ải nối chín cấp bậc. Mỗi cửa chỉ mở khi bạn đã đủ điều kiện, và
-        chỉ vượt được khi bạn chủ động bước vào.
-      </p>
+        <CampaignMap world={world} variant="student" />
+        <CampaignTimelineMobile world={world} />
+        <div id="dieu-kien">
+          <NextStepGuide step={world.nextStep} />
+        </div>
 
-      <p className="mb-6 mt-2 text-sm text-muted">
-        Bạn đang ở{" "}
-        <strong className="text-navy-deep">{rank?.name ?? "Bạch thân"}</strong>
-        {rank && <> · thời {RANK_ERAS[rank.era].name}</>} · đã vượt {passed}/8 cửa ải.
-      </p>
-
-      <CampaignMap nodes={nodes} />
-      <CampaignTimelineMobile nodes={nodes} />
-
-      <NoteBox className="mt-6">
-        Cấp bậc chỉ tăng, không bao giờ tụt. Nếu bạn nghỉ một thời gian, cấp bậc
-        vẫn giữ nguyên và chỉ chuyển sang trạng thái Nhàn cư cho tới ngày học
-        thật tiếp theo.
-      </NoteBox>
+        <NoteBox className="mt-6">
+          Cấp bậc chỉ tăng, không bao giờ tụt. Nếu bạn nghỉ một thời gian, cấp
+          bậc vẫn giữ nguyên và chỉ chuyển sang trạng thái Nhàn cư cho tới ngày
+          học thật tiếp theo.
+        </NoteBox>
+      </NarrativeSection>
     </main>
   );
 }

@@ -1,7 +1,7 @@
-import { Gift } from "lucide-react";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/session";
 import { RewardDecisionForm } from "@/components/admin/reward-decision-form";
+import { AdminPageShell } from "@/components/admin/admin-page-shell";
 
 export const metadata = { title: "Phần thưởng danh hiệu" };
 export const dynamic = "force-dynamic";
@@ -43,15 +43,7 @@ export default async function AdminRewardsPage() {
   const waiting = rewards.filter((r) => r.status === "REQUESTED");
 
   return (
-    <section className="motion-page-entry mx-auto max-w-6xl px-6 py-12">
-      <p className="label-caps flex items-center gap-2">
-        <Gift className="h-3.5 w-3.5" aria-hidden="true" />
-        Danh hiệu
-      </p>
-      <h1 className="mt-3 font-display text-3xl font-bold text-navy-deep md:text-4xl">
-        Phần thưởng mở bài
-      </h1>
-      <div className="rule-gold mt-5" />
+    <AdminPageShell eyebrow="Danh hiệu" title="Phần thưởng mở bài">
       <p className="mt-5 max-w-3xl text-[0.95rem] leading-relaxed text-ink-soft">
         Hai danh hiệu <strong>Thanh xuân tu tảo vi</strong> và{" "}
         <strong>Tuấn kiệt như sao buổi sớm</strong> cho học viên quyền chọn một
@@ -129,6 +121,6 @@ export default async function AdminRewardsPage() {
           </table>
         </div>
       )}
-    </section>
+    </AdminPageShell>
   );
 }

@@ -13,6 +13,9 @@
 # testing
 /coverage
 
+# temporary visual brainstorming sessions
+/.superpowers/
+
 # next.js
 /.next/
 /out/
@@ -44,3 +47,6 @@ prisma/*.db-journal
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# isolated Codex development worktrees
+.worktrees/

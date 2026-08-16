@@ -1,11 +1,12 @@
 import fs from "node:fs";
 import path from "node:path";
 import { notFound } from "next/navigation";
-import { ImageIcon, AlertTriangle } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import { requireAdmin } from "@/lib/session";
 import { features } from "@/lib/features";
 import { ART_ASSETS, type ArtAsset } from "@/lib/brand/art-manifest";
 import { InkWashArt } from "@/components/brand/ink-wash-art";
+import { AdminPageShell } from "@/components/admin/admin-page-shell";
 
 export const metadata = { title: "Kho hình ảnh" };
 export const dynamic = "force-dynamic";
@@ -73,19 +74,11 @@ export default async function ArtAdminPage() {
   const totalKb = rows.reduce((sum, r) => sum + (r.sizeKb ?? 0), 0);
 
   return (
-    <main className="motion-page-entry mx-auto max-w-6xl px-6 py-10">
-      <p className="label-caps flex items-center gap-2">
-        <ImageIcon className="h-3.5 w-3.5" aria-hidden />
-        Quản trị
-      </p>
-      <h1 className="mt-3 font-display text-3xl font-bold text-navy-deep">
-        Kho hình ảnh
-      </h1>
-      <p className="mt-4 max-w-2xl text-[0.95rem] leading-relaxed text-ink-soft">
-        {rows.length} ảnh khai trong art manifest · tổng {Math.round(totalKb / 1024 * 10) / 10} MB.
-        Trang này chỉ đọc — ảnh production phải đi qua Git, vì mỗi lần deploy
-        Hostinger xoá sạch file của lần chạy trước.
-      </p>
+    <AdminPageShell
+      eyebrow="Quản trị"
+      title="Kho hình ảnh"
+      lede={`${rows.length} ảnh khai trong art manifest · tổng ${Math.round(totalKb / 1024 * 10) / 10} MB. Trang này chỉ đọc — ảnh production phải đi qua Git, vì mỗi lần deploy Hostinger xoá sạch file của lần chạy trước.`}
+    >
 
       {(missing.length > 0 || oversize.length > 0) && (
         <div className="mt-6 border-l-4 border-danger bg-danger-pale px-6 py-5">
@@ -162,6 +155,6 @@ export default async function ArtAdminPage() {
         bằng mắt trước khi đưa ảnh vào repo — xem quy trình duyệt ở{" "}
         <code className="text-xs">docs/ART-ASSET-REGISTER.md</code>.
       </p>
-    </main>
+    </AdminPageShell>
   );
 }

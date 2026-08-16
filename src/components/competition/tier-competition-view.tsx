@@ -1,7 +1,11 @@
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
-import { SectionHeading, NoteBox, ButtonLink } from "@/components/ui";
+import { ART_ASSETS } from "@/lib/brand/art-manifest";
+import type { NextStepModel } from "@/lib/campaign/world";
+import { NoteBox } from "@/components/ui";
 import { QualificationCard } from "@/components/competition/qualification-card";
+import { NextStepGuide } from "@/components/world/next-step-guide";
+import { SceneHero } from "@/components/world/scene-hero";
 import { qualificationFor } from "@/lib/competition/qualification-service";
 import { tierPolicy, type CompetitionTier } from "@/lib/competition/tiers";
 
@@ -57,59 +61,68 @@ export async function TierCompetitionView({ tier }: { tier: CompetitionTier }) {
     competition && user ? await qualificationFor(competition.id, user.id) : null;
 
   const sourceName = sourcePolicy?.name ?? "";
+  const isAnnual = tier === "ANNUAL";
+  const nextStep: NextStepModel = {
+    eyebrow: "Bước đầu tiên",
+    title: "Xem đường tuyển chọn của tầng trước",
+    body: `Vé vào ${policy.name} đến từ kết quả đã được rà soát của ${sourceName}; tầng này không có đăng ký mở.`,
+    href: isAnnual ? "/duong-thi" : "/nguyet-thi",
+    actionLabel: `Xem ${sourceName}`,
+    entersStudy: false,
+  };
 
   return (
-    <main className="motion-page-entry mx-auto max-w-4xl px-6 py-10">
-      <SectionHeading
-        label={policy.name}
+    <>
+      <SceneHero
+        asset={isAnnual ? ART_ASSETS.generalLuBo : ART_ASSETS.generalMaSieu}
+        eyebrow={policy.name}
         title={
           competition?.name ??
           `${policy.name} chưa mở kỳ nào`
         }
-      />
-
-      <p className="mt-4 max-w-2xl text-[0.95rem] leading-relaxed text-ink-soft">
-        {policy.name} không có đăng ký mở. Chỉ những người được tuyển chọn từ{" "}
-        {sourceName} mới nhận được vé dự thi — mỗi kỳ {sourceName} góp{" "}
-        {policy.topPerSource} người, tối đa {policy.maxSeats} ghế cho cả kỳ.
-      </p>
-
-      {!competition ? (
-        <NoteBox className="mt-8" title="Chưa có kỳ nào được mở">
-          Khi ban tổ chức chốt đủ {policy.sourceCount} kỳ {sourceName} của mùa,
-          vé tuyển chọn sẽ được gửi tới những người đủ điều kiện. Bạn không cần
-          đăng ký gì cả.
-        </NoteBox>
-      ) : offer ? (
-        <div className="mt-8">
-          <QualificationCard
-            qualificationId={offer.id}
-            tierName={policy.name}
-            sourceName={sourceName}
-            sourceRank={offer.sourceRank}
-            route={offer.route}
-            status={offer.status}
-            expiresLabel={formatDate(offer.expiresAt)}
-          />
-        </div>
-      ) : (
-        <NoteBox className="mt-8" title="Bạn chưa có vé cho kỳ này">
-          Con đường vào {policy.name} đi qua {sourceName}: lọt top{" "}
-          {policy.topPerSource} của một kỳ {sourceName}, đạt band thấp nhất từ{" "}
-          <strong>{bandLabel(policy.minLowestBand)}</strong> ở cả ba đề, và kết quả không
-          còn đang rà soát.
-          <div className="mt-5">
-            <ButtonLink href="/nguyet-thi" variant="primary">
-              Xem Nguyệt Thí
-            </ButtonLink>
-          </div>
-        </NoteBox>
-      )}
-
-      <section
-        aria-label="Thể lệ tuyển chọn"
-        className="mt-8 border border-line bg-paper p-7"
+        functionalLabel={`Tuyển chọn từ ${sourceName}`}
       >
+        <p className="text-lg leading-relaxed text-ink-soft">
+          {policy.name} không có đăng ký mở. Chỉ những người được tuyển chọn từ{" "}
+          {sourceName} mới nhận được vé dự thi — mỗi kỳ {sourceName} góp{" "}
+          {policy.topPerSource} người, tối đa {policy.maxSeats} ghế cho cả kỳ.
+        </p>
+      </SceneHero>
+
+      <main className="mx-auto w-full max-w-4xl px-6 py-10">
+        <NextStepGuide step={nextStep} />
+
+        {!competition ? (
+          <NoteBox className="mt-10" title="Chưa có kỳ nào được mở">
+            Khi ban tổ chức chốt đủ {policy.sourceCount} kỳ {sourceName} của mùa,
+            vé tuyển chọn sẽ được gửi tới những người đủ điều kiện. Bạn không cần
+            đăng ký gì cả.
+          </NoteBox>
+        ) : offer ? (
+          <div className="mt-10">
+            <QualificationCard
+              qualificationId={offer.id}
+              tierName={policy.name}
+              sourceName={sourceName}
+              sourceRank={offer.sourceRank}
+              route={offer.route}
+              status={offer.status}
+              expiresLabel={formatDate(offer.expiresAt)}
+            />
+          </div>
+        ) : (
+          <NoteBox className="mt-10" title="Bạn chưa có vé cho kỳ này">
+            Con đường vào {policy.name} đi qua {sourceName}: lọt top{" "}
+            {policy.topPerSource} của một kỳ {sourceName}, đạt band thấp nhất từ{" "}
+            <strong>{bandLabel(policy.minLowestBand)}</strong> ở cả ba đề, và kết quả không
+            còn đang rà soát.
+          </NoteBox>
+        )}
+
+        <section
+          aria-label="Thể lệ tuyển chọn"
+          className="mt-8 border border-line bg-paper p-7"
+        >
         <p className="label-caps">Thể lệ tuyển chọn</p>
         <dl className="mt-4 grid gap-x-8 gap-y-3 sm:grid-cols-2">
           <div>
@@ -147,7 +160,8 @@ export async function TierCompetitionView({ tier }: { tier: CompetitionTier }) {
           chuẩn, kỳ thi sẽ có ít thí sinh hơn mức tối đa — tấm vé giữ nguyên
           giá trị của nó.
         </p>
-      </section>
-    </main>
+        </section>
+      </main>
+    </>
   );
 }

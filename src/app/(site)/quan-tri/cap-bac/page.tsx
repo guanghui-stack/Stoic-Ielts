@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Shield } from "lucide-react";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/session";
 import { features } from "@/lib/features";
 import { RANK_SEEDS, TRIAL_SEEDS, RANK_ERAS, trialByCode } from "@/lib/ranks/catalog";
 import { generalByCode } from "@/lib/story/generals";
 import { RankInsignia } from "@/components/ranks/rank-insignia";
+import { AdminPageShell } from "@/components/admin/admin-page-shell";
 
 export const metadata = { title: "Cấp bậc và thí luyện" };
 export const dynamic = "force-dynamic";
@@ -67,14 +67,7 @@ export default async function RankAdminPage() {
   }
 
   return (
-    <main className="motion-page-entry mx-auto max-w-5xl px-6 py-10">
-      <p className="label-caps flex items-center gap-2">
-        <Shield className="h-3.5 w-3.5" aria-hidden />
-        Quản trị
-      </p>
-      <h1 className="mt-3 font-display text-3xl font-bold text-navy-deep">
-        Cấp bậc và thí luyện
-      </h1>
+    <AdminPageShell eyebrow="Quản trị" title="Cấp bậc và thí luyện">
       <p className="mt-4 max-w-2xl text-[0.95rem] leading-relaxed text-ink-soft">
         Trang này chỉ đọc. Ngưỡng của mỗi cửa ải là luật chơi — đổi nó bằng một
         ô nhập trên production nghĩa là đổi luật giữa chừng cho người đang đi
@@ -218,6 +211,6 @@ export default async function RankAdminPage() {
         giá trị với học viên. Trường hợp sự cố kỹ thuật cần can thiệp thì phải
         đi qua migration có ghi nhật ký, không phải một cú bấm trên trang này.
       </p>
-    </main>
+    </AdminPageShell>
   );
 }
