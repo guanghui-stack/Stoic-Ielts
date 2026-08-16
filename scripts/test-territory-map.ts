@@ -12,6 +12,92 @@ import {
 
 let failures = 0;
 
+type Point = Readonly<{ x: number; y: number }>;
+
+function cubicPoint(start: Point, controlA: Point, controlB: Point, end: Point, t: number): Point {
+  const inverse = 1 - t;
+  return {
+    x:
+      inverse ** 3 * start.x +
+      3 * inverse ** 2 * t * controlA.x +
+      3 * inverse * t ** 2 * controlB.x +
+      t ** 3 * end.x,
+    y:
+      inverse ** 3 * start.y +
+      3 * inverse ** 2 * t * controlA.y +
+      3 * inverse * t ** 2 * controlB.y +
+      t ** 3 * end.y,
+  };
+}
+
+function flattenSvgPath(path: string): readonly Point[] {
+  const tokens = path.match(/[MLCZ]|-?\d+(?:\.\d+)?/gi) ?? [];
+  const points: Point[] = [];
+  let cursor: Point = { x: 0, y: 0 };
+  let command = "";
+  let index = 0;
+
+  const readPoint = (): Point => {
+    const point = { x: Number(tokens[index]), y: Number(tokens[index + 1]) };
+    index += 2;
+    return point;
+  };
+
+  while (index < tokens.length) {
+    const token = tokens[index];
+    if (/^[MLCZ]$/i.test(token)) {
+      command = token.toUpperCase();
+      index += 1;
+    }
+
+    if (command === "M" || command === "L") {
+      cursor = readPoint();
+      points.push(cursor);
+      command = "L";
+      continue;
+    }
+
+    if (command === "C") {
+      const controlA = readPoint();
+      const controlB = readPoint();
+      const end = readPoint();
+      for (let step = 1; step <= 24; step += 1) {
+        points.push(cubicPoint(cursor, controlA, controlB, end, step / 24));
+      }
+      cursor = end;
+      continue;
+    }
+
+    if (command === "Z") break;
+    throw new Error(`Unsupported SVG path command near ${tokens[index] ?? "end"}`);
+  }
+
+  return points;
+}
+
+function pointIsInsidePolygon(point: Point, polygon: readonly Point[]): boolean {
+  let inside = false;
+  for (let index = 0, previous = polygon.length - 1; index < polygon.length; previous = index++) {
+    const currentPoint = polygon[index];
+    const previousPoint = polygon[previous];
+    const crossesRay =
+      currentPoint.y > point.y !== previousPoint.y > point.y &&
+      point.x <
+        ((previousPoint.x - currentPoint.x) * (point.y - currentPoint.y)) /
+          (previousPoint.y - currentPoint.y) +
+          currentPoint.x;
+    if (crossesRay) inside = !inside;
+  }
+  return inside;
+}
+
+function territoryOwnersAtCanvasPoint(point: Point) {
+  const svgPoint = { x: (point.x / 100) * 1672, y: (point.y / 100) * 941 };
+  return LOCKED_TERRITORIES.filter((territory) =>
+    pointIsInsidePolygon(svgPoint, flattenSvgPath(TERRITORY_HIT_PATHS[territory.code])),
+  ).map((territory) => territory.code);
+}
+
 function check(label: string, actual: unknown, expected: unknown) {
   const ok = JSON.stringify(actual) === JSON.stringify(expected);
   console.log(`${ok ? "PASS" : "FAIL"} ${label}`);
@@ -108,6 +194,26 @@ for (const territory of LOCKED_TERRITORIES) {
   );
 }
 check("all hit paths exist", Object.values(TERRITORY_HIT_PATHS).every(Boolean), true);
+for (const { title, point, expectedOwner } of [
+  { title: "Ngụy", point: { x: 70, y: 18 }, expectedOwner: "TERRITORY_WEI" },
+  { title: "Thục", point: { x: 40, y: 52 }, expectedOwner: "TERRITORY_SHU" },
+  { title: "Ngô", point: { x: 75, y: 72 }, expectedOwner: "TERRITORY_WU" },
+] as const) {
+  const owners = territoryOwnersAtCanvasPoint(point);
+  check(`${title} representative interior has exactly one owner`, owners, [expectedOwner]);
+  check(
+    `${title} representative interior resolves to its visible territory`,
+    owners.at(-1),
+    expectedOwner,
+  );
+}
+let overlappingInteriorSamples = 0;
+for (let x = 1; x < 100; x += 2) {
+  for (let y = 1; y < 100; y += 2) {
+    if (territoryOwnersAtCanvasPoint({ x, y }).length > 1) overlappingInteriorSamples += 1;
+  }
+}
+check("sampled territorial interiors never have competing hit owners", overlappingInteriorSamples, 0);
 check(
   "all label positions stay inside the canvas",
   Object.values(TERRITORY_LABEL_POSITIONS).every(

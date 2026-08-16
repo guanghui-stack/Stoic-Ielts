@@ -143,7 +143,7 @@ export function FactionTerritoryMap({
               >
                 <Lock className="size-4" aria-hidden="true" />
                 <span className="font-display font-bold text-navy-deep">{territory.title}</span>
-                <span className="font-ui text-[11px] text-muted">{territory.lockedMessage}</span>
+                <span className="font-ui text-xs text-ink-soft">{territory.lockedMessage}</span>
               </button>
             );
           })}
@@ -177,7 +177,7 @@ export function FactionTerritoryMap({
               <Lock className="size-4" aria-hidden="true" />
               <span>
                 <strong className="block font-display text-navy-deep">{territory.title}</strong>
-                <span className="font-ui text-xs text-muted">{territory.lockedMessage}</span>
+                <span className="font-ui text-xs text-ink-soft">{territory.lockedMessage}</span>
               </span>
             </li>
           ))}
