@@ -8,6 +8,8 @@ import { StudentNav } from "@/components/student/student-nav";
 import { RewardClaimForm } from "@/components/achievements/reward-claim-form";
 import { PublicProfileForm } from "@/components/achievements/public-profile-form";
 import { NarrativeSection } from "@/components/world/narrative-section";
+import { TitleCeremonyMoment } from "@/components/world/ceremony-layer";
+import { isFreshCeremonyEvent } from "@/lib/motion/ceremony";
 
 export const metadata = { title: "Danh hiệu của tôi" };
 export const dynamic = "force-dynamic";
@@ -46,6 +48,11 @@ export default async function MyTitlesPage() {
     byCategory.set(card.categoryLabel, list);
   }
 
+  const latest = overview.latest;
+  const latestIsFresh = Boolean(
+    latest?.earnedAt && isFreshCeremonyEvent(latest.earnedAt),
+  );
+
   return (
     <main>
       <div className="mx-auto max-w-6xl px-6 pt-10">
@@ -59,6 +66,16 @@ export default async function MyTitlesPage() {
         tone="mist"
       >
         <div className="max-w-4xl">
+
+          {latest?.earnedAt && (
+            <TitleCeremonyMoment
+              eventId={`${user.id}:${latest.code}:${latest.earnedAt.toISOString()}`}
+              eligible={latestIsFresh}
+              titleName={latest.name}
+              rarityLabel={latest.rarityLabel}
+              description={latest.description}
+            />
+          )}
 
           <Link
             href="/hoc-vien"
