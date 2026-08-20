@@ -33,6 +33,10 @@
   --color-gold-soft: #d3b264;
   --color-gold-pale: #efe4c8;
 
+  /* Bản trầm của vàng, dùng cho trạng thái nhấn của nút vàng. Trước đây là mã
+     màu cứng `hover:bg-[#9d7223]` nằm rải trong ui.tsx. */
+  --color-gold-deep: #9d7223;
+
   /* ===== Màu chức năng Tam Quốc (Master Spec §8.2) =====
      Mỗi màu gắn với MỘT module và MỘT danh tướng. Không dùng lẫn.
 
@@ -82,6 +86,7 @@
   --color-success: #2e6b4f;
   --color-success-pale: #e7f0ea;
   --color-danger: #b4232a;
+  --color-danger-deep: #8f1c22;
   --color-danger-pale: #f9e9e9;
   --color-info-pale: #e8eef5;
 

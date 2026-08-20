@@ -67,7 +67,7 @@ export function CompetitionRegisterForm({ competitionId }: { competitionId: stri
       <button
         type="submit"
         disabled={pending}
-        className="mt-6 inline-flex cursor-pointer items-center gap-2 border border-gold bg-gold px-7 py-3 font-ui text-[0.8rem] font-semibold uppercase tracking-[0.12em] text-paper transition-colors hover:bg-[#9d7223] disabled:opacity-50"
+        className="mt-6 inline-flex cursor-pointer items-center gap-2 border border-gold bg-gold px-7 py-3 font-ui text-[0.8rem] font-semibold uppercase tracking-[0.12em] text-navy-deep transition-colors hover:border-gold-soft hover:bg-gold-soft disabled:opacity-50"
       >
         {pending ? "Đang đăng ký…" : "Đăng ký dự thi"}
       </button>

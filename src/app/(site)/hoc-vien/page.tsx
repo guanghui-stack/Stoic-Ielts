@@ -302,7 +302,7 @@ export default async function StudentDashboard({
                 </div>
                 <Link
                   href={`/lam-bai/${a.id}`}
-                  className="flex items-center gap-2 border border-gold bg-gold px-5 py-2 font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-paper hover:bg-[#9d7223]"
+                  className="flex items-center gap-2 border border-gold bg-gold px-5 py-2 font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-navy-deep hover:border-gold-soft hover:bg-gold-soft"
                 >
                   <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
                   Tiếp tục làm

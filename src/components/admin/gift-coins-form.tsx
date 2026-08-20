@@ -53,7 +53,7 @@ export function GiftCoinsForm({
         <button
           type="submit"
           disabled={pending}
-          className="w-full cursor-pointer border border-gold bg-gold px-3 py-1.5 font-ui text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-paper disabled:opacity-60"
+          className="w-full cursor-pointer border border-gold bg-gold px-3 py-1.5 font-ui text-[0.7rem] font-semibold uppercase tracking-[0.08em] text-navy-deep disabled:opacity-60"
         >
           {pending ? "Đang tặng…" : "Xác nhận tặng"}
         </button>

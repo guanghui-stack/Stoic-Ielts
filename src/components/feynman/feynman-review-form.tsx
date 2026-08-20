@@ -198,7 +198,7 @@ export function FeynmanStepper({ current }: { current: 1 | 2 | 3 | 4 }) {
             <span
               className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full font-ui text-xs font-bold ${
                 active
-                  ? "bg-gold text-paper"
+                  ? "bg-gold text-navy-deep"
                   : done
                     ? "bg-success text-paper"
                     : "border border-line-strong text-muted"

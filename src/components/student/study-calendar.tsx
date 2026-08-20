@@ -57,7 +57,7 @@ export function StudyCalendar({
               key={day}
               className={`mx-auto flex h-9 w-9 items-center justify-center font-ui text-sm tabular-nums ${
                 active.has(day)
-                  ? "bg-gold font-bold text-paper"
+                  ? "bg-gold font-bold text-navy-deep"
                   : "text-ink-soft"
               } ${day === today ? "ring-2 ring-inset ring-navy" : ""}`}
               aria-label={

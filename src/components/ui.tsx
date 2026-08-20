@@ -62,7 +62,11 @@ export function ButtonLink({
   const styles = {
     primary: "border border-navy bg-navy text-paper hover:bg-navy-deep",
     outline: "border border-navy text-navy hover:bg-navy hover:text-paper",
-    gold: "border border-gold bg-gold text-paper hover:bg-[#9d7223]",
+    // Chữ là navy-deep chứ KHÔNG phải paper: paper trên nền vàng chỉ đạt
+    // 3.19:1, trượt chuẩn AA cho nhãn nút. navy-deep đạt 4.56:1.
+    // Trạng thái nhấn làm SÁNG lên (gold-soft, 7.25:1) chứ không làm trầm đi:
+    // gold-deep sẽ kéo tương phản xuống 3.42:1 và lại trượt chuẩn.
+    gold: "border border-gold bg-gold text-navy-deep hover:border-gold-soft hover:bg-gold-soft",
   }[variant];
   return (
     <Link href={href} className={`${BTN_BASE} ${styles} ${className}`}>
@@ -85,8 +89,12 @@ export function SubmitButton({
   const styles = {
     primary: "border border-navy bg-navy text-paper hover:bg-navy-deep",
     outline: "border border-navy text-navy hover:bg-navy hover:text-paper",
-    gold: "border border-gold bg-gold text-paper hover:bg-[#9d7223]",
-    danger: "border border-danger bg-danger text-paper hover:bg-[#8f1c22]",
+    // Chữ là navy-deep chứ KHÔNG phải paper: paper trên nền vàng chỉ đạt
+    // 3.19:1, trượt chuẩn AA cho nhãn nút. navy-deep đạt 4.56:1.
+    // Trạng thái nhấn làm SÁNG lên (gold-soft, 7.25:1) chứ không làm trầm đi:
+    // gold-deep sẽ kéo tương phản xuống 3.42:1 và lại trượt chuẩn.
+    gold: "border border-gold bg-gold text-navy-deep hover:border-gold-soft hover:bg-gold-soft",
+    danger: "border border-danger bg-danger text-paper hover:bg-danger-deep",
   }[variant];
   return (
     <button

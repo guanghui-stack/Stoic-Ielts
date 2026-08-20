@@ -172,7 +172,7 @@ export default async function AssemblyPage({
                   )}
                   <Link
                     href="/thanh-toan"
-                    className="inline-flex items-center gap-2 border border-gold bg-gold px-6 py-2.5 font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-paper transition-colors hover:bg-[#9d7223]"
+                    className="inline-flex items-center gap-2 border border-gold bg-gold px-6 py-2.5 font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-navy-deep transition-colors hover:border-gold-soft hover:bg-gold-soft"
                   >
                     Nạp xu
                   </Link>
