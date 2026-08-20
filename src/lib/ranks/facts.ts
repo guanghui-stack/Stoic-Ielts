@@ -9,6 +9,9 @@ import {
   type RankFacts,
 } from "@/lib/ranks/rules";
 import { GRACE_TOKEN } from "@/lib/ranks/catalog";
+import { experienceOf } from "@/lib/experience/experience.ts";
+import { qualifiedStudyDayKeys } from "@/lib/merit/merit.ts";
+import { dateKeyOf } from "@/lib/achievements/rules";
 
 /**
  * Đọc dữ liệu thật để nạp cho luật cấp bậc.
@@ -212,6 +215,23 @@ export async function loadRankFacts(
     attempts: attemptFacts,
     qualifiedReviews: reviewFacts,
     studyDays,
+    // Kinh nghiệm tính từ đúng ba bộ dữ liệu vừa tải ở trên, KHÔNG thêm truy
+    // vấn nào và KHÔNG lưu vào cột nào. Ở P1 chưa có trận nên phần tỉ thí bằng
+    // không; P3 chỉ việc truyền thêm duelWins và duelLosses vào đây.
+    experience: experienceOf({
+      validAttempts: attemptFacts.filter((a) => a.valid).length,
+      qualifiedReviews: reviewFacts.length,
+      deepReviews: reviewFacts.filter((r) => r.deep).length,
+      qualifiedStudyDays: qualifiedStudyDayKeys(
+        studyDays,
+        attemptFacts
+          .filter((a) => a.valid)
+          .map((a) => ({ dateKey: dateKeyOf(a.submittedAt) }))
+          .concat(
+            reviewFacts.map((r) => ({ dateKey: dateKeyOf(r.completedAt) })),
+          ),
+      ).length,
+    }).total,
     earnedTitleCodes: new Set(titles.map((t) => t.title.code)),
     // Ba trụ do hệ Danh hiệu quản. Cửa 7 đọc sang chứ không tự tính lại, để
     // hai hệ không bao giờ nói hai con số khác nhau về cùng một việc.

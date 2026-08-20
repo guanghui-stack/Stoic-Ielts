@@ -10,12 +10,14 @@
 import {
   evaluateGate,
   evaluateSuccess,
+  evaluateTrialGate,
   weakestQuestionType,
   type RankAttemptFact,
   type QualifiedReviewFact,
   type RankFacts,
 } from "../src/lib/ranks/rules.ts";
 import { TRIAL_SEEDS } from "../src/lib/ranks/catalog.ts";
+import { gateExperienceFor } from "../src/lib/experience/experience.ts";
 
 let failures = 0;
 function check(label: string, actual: unknown, expected: unknown) {
@@ -65,6 +67,10 @@ function facts(over: Partial<RankFacts> = {}): RankFacts {
     earnedTitleCodes: new Set<string>(),
     pillars: [],
     graceAvailable: 0,
+    // Đặt rất cao theo mặc định để các bài kiểm thử ở file này vẫn đo ĐÚNG THỨ
+    // chúng sinh ra để đo: điều kiện NĂNG LỰC của từng cửa ải. Bài nào muốn đo
+    // riêng ngưỡng kinh nghiệm thì tự truyền `experience` vào.
+    experience: 1_000_000,
     ...over,
   };
 }
@@ -458,6 +464,46 @@ console.log("\n— Bất biến chung của tám cửa ải —");
       ).complete,
   ).map((t) => t.code);
   check("không cửa ải nào tự vượt khi chưa có dữ liệu mới", passing, []);
+}
+
+console.log("\n— Cổng kinh nghiệm: điều kiện CỘNG THÊM, không thay thế —");
+
+{
+  // Lấy một cửa ải THẬT thay vì bịa, để bài này hỏng nếu ai đó đổi cửa ải mà
+  // quên nghĩ tới kinh nghiệm.
+  const trial = TRIAL_SEEDS.find((s) => s.toLevel >= 3);
+  if (!trial) {
+    console.log("  ✗ THẤT BẠI: không tìm thấy cửa ải nào có toLevel >= 3");
+    failures++;
+  } else {
+    const target = gateExperienceFor(trial.toLevel);
+
+    // Thiếu kinh nghiệm thì cửa VẪN ĐÓNG, dù luật năng lực ra sao.
+    const thin = evaluateTrialGate(trial, facts({ experience: 0 }));
+    check("thiếu kinh nghiệm thì cửa không mở", thin.complete, false);
+    check(
+      "tiến độ có nhắc kinh nghiệm, để người học biết còn thiếu gì",
+      thin.progress.some((p) => p.label === "Kinh nghiệm" && p.target === target),
+      true,
+    );
+
+    // Thừa kinh nghiệm KHÔNG tự mở cửa: luật năng lực vẫn phải đạt.
+    const rich = evaluateTrialGate(trial, facts({ experience: 10_000_000 }));
+    const baseOnly = evaluateGate(trial.gateRuleKey, trial.gateConfig, facts());
+    check(
+      "thừa kinh nghiệm không thay thế được điều kiện năng lực",
+      rich.complete,
+      baseOnly.complete,
+    );
+
+    // Ngưỡng phải thấp hơn hẳn công sức mà điều kiện năng lực đòi hỏi, nếu
+    // không thì cấp bậc thoái hoá thành huy hiệu thâm niên.
+    check(
+      "ngưỡng kinh nghiệm dưới 150 ngày học thật, tức chỉ định nhịp",
+      Math.ceil(target / 35) <= 150,
+      true,
+    );
+  }
 }
 
 console.log(

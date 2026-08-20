@@ -1157,6 +1157,38 @@ const DDL = [
     CONSTRAINT \`CoinLedger_orderId_fkey\` FOREIGN KEY (\`orderId\`) REFERENCES \`PaymentOrder\` (\`id\`) ON DELETE SET NULL ON UPDATE CASCADE
   ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
 
+  // Dau truong P1: vi va so cai Quan Cong. Dat ngay canh vi xu vi hai cai la
+  // hai dong tien song song, va nguoi doc file nay can thay ngay rang chung
+  // KHONG co bang nao noi chung.
+  `CREATE TABLE IF NOT EXISTS \`MeritWallet\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`earnedTotal\` INTEGER NOT NULL DEFAULT 0,
+    \`burnedTotal\` INTEGER NOT NULL DEFAULT 0,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`updatedAt\` DATETIME(3) NOT NULL,
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`MeritWallet_userId_key\` (\`userId\`),
+    CONSTRAINT \`MeritWallet_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`MeritLedger\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`kind\` VARCHAR(16) NOT NULL,
+    \`amount\` INTEGER NOT NULL,
+    \`balanceAfter\` INTEGER NOT NULL,
+    \`ledgerKey\` VARCHAR(191) NOT NULL,
+    \`studyDateKey\` VARCHAR(10) NULL,
+    \`ruleVersion\` VARCHAR(32) NOT NULL,
+    \`note\` TEXT NULL,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`MeritLedger_ledgerKey_key\` (\`ledgerKey\`),
+    INDEX \`MeritLedger_userId_createdAt_idx\` (\`userId\`, \`createdAt\`),
+    CONSTRAINT \`MeritLedger_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
   `CREATE TABLE IF NOT EXISTS \`FeynmanAiAttemptState\` (
     \`id\` VARCHAR(191) NOT NULL,
     \`attemptId\` VARCHAR(191) NOT NULL,

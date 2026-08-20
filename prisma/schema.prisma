@@ -93,6 +93,10 @@ model User {
   trials           UserTrial[]
   graceState       UserGraceState?
   trialReflections TrialReflection[]
+
+  // Đấu trường, giai đoạn P1: chỉ kinh tế Quân Công, chưa có trận nào.
+  meritWallet MeritWallet?
+  meritLedger MeritLedger[]
 }
 
 model Exercise {
@@ -1824,4 +1828,74 @@ model ForumReport {
   reporter User @relation(fields: [reporterId], references: [id], onDelete: Cascade)
 
   @@index([status, createdAt])
+}
+
+/// ===== Đấu trường, giai đoạn P1 =====
+///
+/// Ví Quân Công. Cố ý sao chép ĐÚNG hình dạng `CoinWallet`: hai tổng cộng dồn,
+/// số dư là hiệu, không có cột số dư bị ghi đè.
+///
+/// Vì sao là ví riêng chứ không phải một cột của `ArenaProfile` như đặc tả mục
+/// 12 xếp: `ArenaProfile` là khái niệm của P4 (Chiến Lực, ghép cặp, mùa giải),
+/// mà Quân Công phải có ngay từ P1 để P2 tiêu được. Quân Công là chuyện kinh
+/// tế, Chiến Lực là chuyện ghép cặp; hai thứ đổi vì hai lý do khác nhau.
+model MeritWallet {
+  id     String @id @default(cuid())
+  userId String @unique
+
+  /// Tổng Quân Công đã cộng vào: kiếm được, hệ thống phát khi thắng, hoàn cược.
+  earnedTotal Int @default(0)
+  /// Tổng đã trừ ra: đặt cược, bị huỷ khi thua, bị thu hồi.
+  burnedTotal Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+/// Sổ cái Quân Công. Kỷ luật giống hệt `CoinLedger`, và giống là có chủ ý.
+model MeritLedger {
+  id     String @id @default(cuid())
+  userId String
+
+  /// EARN = kiếm được · STAKE = đặt cược · MINT = hệ thống phát cho người thắng
+  /// BURN = huỷ của người thua · REFUND = hoàn cược · REVOKE = thu hồi.
+  ///
+  /// KHÔNG có chiều "chuyển từ người này sang người kia". Khi quyết toán trận,
+  /// Quân Công của người thua bị BURN và của người thắng được MINT. Trải nghiệm
+  /// y hệt, nhưng sổ cái không có giao dịch giữa hai người dùng, nên hai tài
+  /// khoản cày cho nhau thì tổng bằng không.
+  kind String @db.VarChar(16)
+
+  /// LUÔN DƯƠNG. Chiều nằm ở `kind`, không ở dấu của số. Một số âm lọt vào phép
+  /// cộng sẽ làm sai lệch cả sổ cái mà không ai thấy.
+  amount Int
+
+  /// Số dư ngay sau bước này. Thừa so với `earnedTotal - burnedTotal`, và cố ý
+  /// thừa: nó cho phép đối chiếu từng dòng để tìm ra chính xác dòng nào lệch.
+  balanceAfter Int
+
+  /// Khoá chống ghi hai lần, đặt ở tầng database chứ không tầng logic.
+  /// MERIT:STUDY:<userId>:<dateKey> cho ngày học đạt chuẩn
+  /// MERIT:REVIEW:<reviewId> cho phục bàn
+  /// MERIT:TITLE:<userId>:<titleCode> cho danh hiệu
+  /// MERIT:RANKUP:<userId>:<level> cho thăng cấp
+  /// Job chạy lại hay hai cú bấm nhanh thì dòng thứ hai bị chặn ở đây.
+  ledgerKey String @unique @db.VarChar(191)
+
+  /// Ngày học đã ghi công, dạng YYYY-MM-DD giờ Việt Nam. Chỉ có ở kind = EARN
+  /// nguồn ngày học. Thiếu cột này thì sổ chỉ nói "được 5 quân công" mà không
+  /// nói vì ngày nào.
+  studyDateKey String? @db.VarChar(10)
+
+  /// Bản luật lúc ghi dòng này, để tra ngược khi có tranh chấp.
+  ruleVersion String  @db.VarChar(32)
+  note        String? @db.Text
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
 }

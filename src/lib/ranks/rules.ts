@@ -20,6 +20,11 @@ import type {
   SuccessRuleKey,
   TrialDefinitionSeed,
 } from "@/lib/ranks/catalog";
+// Đường dẫn TƯƠNG ĐỐI chứ không phải alias `@/`: file này được `scripts/
+// test-rank-rules.ts` chạy bằng node thuần, nơi không có bộ giải alias. Import
+// kiểu (`import type`) thì bị xoá lúc biên dịch nên alias không sao, còn import
+// giá trị như dòng này thì node phải giải thật.
+import { experienceGate } from "../experience/experience.ts";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -74,6 +79,15 @@ export type RankFacts = {
   pillars: Array<{ code: string; percent: number }>;
   /** Token Hoa Dung đạo còn dùng được không. Chỉ cửa 4 quan tâm. */
   graceAvailable: number;
+  /**
+   * Kinh nghiệm tích luỹ. Tính ra từ chính `attempts`, `qualifiedReviews` và
+   * `studyDays` ở trên, không lưu cột nào. Xem `lib/experience/experience.ts`.
+   *
+   * Trường này BẮT BUỘC chứ không tuỳ chọn, dù để tuỳ chọn thì tiện hơn: mặc
+   * định 0 nghĩa là mọi cửa từ bậc 2 trở lên đều đóng, và nó đóng im lặng.
+   * Bắt buộc thì TypeScript ép mọi nơi dựng facts phải nghĩ tới nó.
+   */
+  experience: number;
 };
 
 export type RuleProgress = { label: string; current: number; target: number };
@@ -598,11 +612,49 @@ export function validateReflection(input: ReflectionInput): ReflectionCheck {
 
 /* ===================== Hàm tiện dụng cho engine ===================== */
 
+/**
+ * Cửa ải mở khi CẢ HAI cùng đạt: luật năng lực của chính nó, VÀ ngưỡng kinh
+ * nghiệm của bậc mà nó dẫn tới.
+ *
+ * Vì sao cộng thêm chứ không phải một `gateRuleKey` mới: mỗi cửa ải có đúng một
+ * `gateRuleKey`. Nếu kinh nghiệm thành một khoá mới thì nó THAY THẾ luật năng
+ * lực chứ không cộng vào, và cửa ải mất đi thứ nó vốn dùng để đo.
+ *
+ * Ngưỡng suy ra từ `trial.toLevel` chứ không phải một cột riêng: bậc đã nằm sẵn
+ * trong định nghĩa cửa ải, nên thêm cột là thêm một chỗ nữa để lệch.
+ *
+ * Nhắc lại ràng buộc ở `experience.ts`: kinh nghiệm chỉ ĐỊNH NHỊP. Nếu có ai
+ * báo "tôi đủ điều kiện mà cửa không mở vì thiếu kinh nghiệm" thì bảng ngưỡng
+ * sai, không phải người đó sai.
+ */
 export function evaluateTrialGate(
   trial: TrialDefinitionSeed,
   facts: RankFacts,
 ): RuleResult {
-  return evaluateGate(trial.gateRuleKey, trial.gateConfig, facts);
+  const base = evaluateGate(trial.gateRuleKey, trial.gateConfig, facts);
+  const exp = experienceGate(trial.toLevel, facts.experience);
+
+  if (exp.target <= 0) return base;
+
+  const progress: RuleProgress[] = [
+    ...base.progress,
+    { label: "Kinh nghiệm", current: exp.current, target: exp.target },
+  ];
+
+  if (base.complete && exp.complete) {
+    return { complete: true, progress, explanation: base.explanation };
+  }
+  if (!exp.complete) {
+    const missing = exp.target - exp.current;
+    return {
+      complete: false,
+      progress,
+      explanation: base.complete
+        ? `Điều kiện năng lực đã đủ. Còn thiếu ${missing} kinh nghiệm, tích luỹ bằng cách làm bài, phục bàn và học đều mỗi ngày.`
+        : `${base.explanation} Ngoài ra còn thiếu ${missing} kinh nghiệm.`,
+    };
+  }
+  return { complete: false, progress, explanation: base.explanation };
 }
 
 export function evaluateTrialSuccess(
