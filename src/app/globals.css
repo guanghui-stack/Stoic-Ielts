@@ -14,7 +14,18 @@
   đề thi thật — không giấy gạo, không mực, không nhân vật. Xem .font-exam.
 */
 
-@theme {
+/*
+  `static` chứ không phải `@theme` trần: Tailwind 4 mặc định LƯỢC BỎ mọi biến
+  trong @theme mà chưa có utility nào dùng tới. Với một hệ thiết kế thì đó là
+  cái bẫy: token màu phe và --shadow-modal đã khai ở đây nhưng biến mất khỏi
+  :root cho tới khi có người viết `bg-faction-wei`, nên bất cứ ai viết
+  `var(--color-faction-wei)` trong CSS thuần đều nhận giá trị rỗng mà không có
+  lỗi nào báo ra.
+
+  BRAND-GUIDELINE.md bảo người ta dùng token, nên token phải luôn tồn tại.
+  Cái giá là vài trăm byte CSS cho những biến chưa dùng.
+*/
+@theme static {
   /* Nền & bề mặt */
   --color-cream: #faf6ef;
   --color-cream-deep: #f3ecdd;
@@ -80,6 +91,32 @@
   --color-ash: #77736c;
   --color-ash-ink: #5f5b54;
 
+  /* ===== Ba phe, NGOẠI LỆ CÓ TÊN của luật một accent =====
+     Chỉ được dùng ở ĐÚNG HAI NƠI: bảng xếp hạng phe, và chú giải bản đồ lãnh
+     địa. Bản đồ KHÔNG tô lãnh địa bằng màu phẳng — nó đã giải xong bằng lớp
+     tranh chồng cộng thang opacity trong territory-map.ts. Xem
+     docs/BRAND-GUIDELINE.md muc 1.5.
+
+     Ngụy cố ý KHÔNG dùng màu lam, dù quy ước quen thuộc là vậy: bảng màu đã có
+     năm token họ lam (navy, azure, silver-blue, indigo, ink), nên mọi ứng viên
+     lam đều rơi vào deltaE 14 tới 19 so với ink-soft hoặc azure-ink, tức là
+     đặt cạnh nhau trên bảng xếp hạng thì người đọc phải dừng lại mà đoán. */
+
+  /* Tía đá — Ngụy, lãnh địa phía bắc. Chữ đạt 5.58 trên kem, 4.62 trên pale. */
+  --color-faction-wei: #705a86;
+  --color-faction-wei-ink: #705a86;
+  --color-faction-wei-pale: #e7e0e0;
+
+  /* Trúc lục — Thục, lãnh địa phía tây. Bản gốc chỉ 4.14 nên chữ PHẢI dùng -ink. */
+  --color-faction-shu: #6a7f3a;
+  --color-faction-shu-ink: #586b2e;
+  --color-faction-shu-pale: #e6e5d6;
+
+  /* Thổ hồng — Ngô, lãnh địa phía đông nam. Chữ đạt 5.66 trên kem, 4.73 trên pale. */
+  --color-faction-wu: #9c5b52;
+  --color-faction-wu-ink: #8f5149;
+  --color-faction-wu-pale: #ede0d9;
+
   /* Ngữ nghĩa */
   --color-line: #e6ddcb;
   --color-line-strong: #cfc3a9;
@@ -99,6 +136,22 @@
 
   --shadow-card: 0 1px 2px rgb(34 48 62 / 0.06), 0 8px 24px rgb(34 48 62 / 0.07);
   --shadow-lift: 0 2px 4px rgb(34 48 62 / 0.08), 0 16px 40px rgb(34 48 62 / 0.12);
+
+  /* Bậc 4 của thang độ cao: hộp thoại và trình đơn thả xuống. Sâu hơn -lift vì
+     nó phải tách hẳn khỏi mặt trang chứ không chỉ nhấc lên khỏi nền. */
+  --shadow-modal: 0 16px 48px -8px rgb(34 48 62 / 0.28);
+
+  /* ===== Bo góc =====
+     Toàn hệ mặc định VUÔNG GÓC. Đây là hình học sổ sách và giấy in, không phải
+     hình học ứng dụng di động. Đúng một token tồn tại, và nó mang đúng một
+     nghĩa: BO GÓC LÀ TÍN HIỆU CỦA ĐỘ CAO.
+
+     Chỉ dùng cho thứ thật sự nổi lên khỏi mặt trang: thẻ mô phỏng trên dải mực
+     tối, hộp thoại, băng bố cáo. Nếu một thứ có rounded-lift mà không đi kèm
+     shadow-lift hoặc shadow-modal thì một trong hai chỗ đã sai.
+
+     Trùng tên với --shadow-lift là có chủ ý: hai token này đi thành cặp. */
+  --radius-lift: 10px;
 }
 
 :root {
