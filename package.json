@@ -46,7 +46,9 @@
     "test:merit-db": "node --experimental-strip-types --import ./scripts/alias-loader.mjs scripts/test-merit-db.ts",
     "test:thibut": "node --experimental-strip-types scripts/test-thibut.ts",
     "test:thibut-db": "node --experimental-strip-types --import ./scripts/alias-loader.mjs scripts/test-thibut-db.ts",
-    "thibut:import": "node scripts/import-thibut-drafts.mjs"
+    "thibut:import": "node scripts/import-thibut-drafts.mjs",
+    "thibut:convert": "node scripts/convert-thibut-docx.mjs",
+    "thibut:publish-batch": "node scripts/publish-thibut-batch.mjs"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",

@@ -32,6 +32,22 @@ function check(label: string, actual: unknown, expected: unknown) {
   }
 }
 
+/**
+ * Tra đáp án ĐÚNG của các câu vừa được phát, đọc thẳng từ database.
+ *
+ * Không được đoán đáp án. Bộ chọn câu lấy từ TOÀN BỘ kho đã phát hành, nên khi
+ * kho có nội dung thật thì lượt thi sẽ gồm câu thật chứ không phải câu do bài
+ * kiểm thử này tạo ra. Bài kiểm thử phải đúng bất kể kho chứa gì.
+ */
+async function correctAnswers(itemIds: readonly string[]) {
+  const rows = await db.thiButItem.findMany({
+    where: { id: { in: [...itemIds] } },
+    select: { id: true, answerIndex: true },
+  });
+  const byId = new Map(rows.map((r) => [r.id, r.answerIndex]));
+  return { byId };
+}
+
 const STAMP = Date.now();
 const BATCH = `test-${STAMP}`;
 let userId = "";
@@ -123,8 +139,11 @@ try {
 
   console.log("\n— Trượt: mất Quân Công mà KHÔNG có hàng —");
 
-  // Chọn sai hết. Đáp án đúng là 1, ta chọn 0.
-  const failAnswers = Object.fromEntries(started.items.map((i) => [i.id, 0]));
+  // Chọn sai hết: lấy đáp án thật rồi cố tình chọn khác đi.
+  const startedKey = await correctAnswers(started.items.map((i) => i.id));
+  const failAnswers = Object.fromEntries(
+    started.items.map((i) => [i.id, ((startedKey.byId.get(i.id) ?? 0) + 1) % 4]),
+  );
   const failed = await submitAttempt({
     userId,
     attemptId: started.attemptId,
@@ -147,7 +166,7 @@ try {
   );
   check(
     "nhưng trượt thành buổi học: có lời giải cho từng câu",
-    failed.result.items.every((g) => g.explanation.startsWith("LOI-GIAI-BI-MAT")),
+    failed.result.items.every((g) => g.explanation.trim().length > 0),
     true,
   );
 
@@ -195,7 +214,10 @@ try {
   if (!second.ok) throw new Error(`Không vào được lượt hai: ${second.reason}`);
   check("lượt hai tốn ít hơn lượt đầu", second.cost < BASE_COST, true);
 
-  const passAnswers = Object.fromEntries(second.items.map((i) => [i.id, 1]));
+  const secondKey = await correctAnswers(second.items.map((i) => i.id));
+  const passAnswers = Object.fromEntries(
+    second.items.map((i) => [i.id, secondKey.byId.get(i.id) ?? 0]),
+  );
   const passed = await submitAttempt({
     userId,
     attemptId: second.attemptId,
