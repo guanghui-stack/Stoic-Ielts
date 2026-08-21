@@ -106,6 +106,15 @@ model User {
   duelSides     DuelSide[]
   duelInvitesTo DuelInvite[] @relation("DuelInviteTo")
   duelInvitesBy DuelInvite[] @relation("DuelInviteFrom")
+
+  // Đấu trường, giai đoạn P4.
+  /// Bot mang danh tính như người thật để sân không bao giờ rỗng. Cờ này để
+  /// loại bot khỏi chat và kết bạn: giấu trong bảng đấu là vô hại, giấu trong
+  /// một cuộc trò chuyện thì không.
+  isBot            Boolean           @default(false)
+  arenaProfile     ArenaProfile?
+  appointmentsTo   DuelAppointment[] @relation("AppointmentTo")
+  appointmentsFrom DuelAppointment[] @relation("AppointmentFrom")
 }
 
 model Exercise {
@@ -2111,4 +2120,89 @@ model DuelInvite {
 
   @@index([toUserId, status, expiresAt])
   @@index([fromUserId, createdAt])
+}
+
+/// ===== Đấu trường, giai đoạn P4 =====
+///
+/// Hồ sơ đấu trường. Tách khỏi `MeritWallet` là có chủ ý: Quân Công là chuyện
+/// kinh tế, Chiến Lực là chuyện ghép cặp, hai thứ đổi vì hai lý do khác nhau.
+model ArenaProfile {
+  id     String @id @default(cuid())
+  userId String @unique
+
+  /// Chiến Lực. Công khai. Lên xuống theo kết quả, dùng để ghép cặp và tính
+  /// điểm phe. KHÔNG dùng cấp bậc để ghép: cấp bậc là hàm của thời gian.
+  chienLuc    Int @default(1000)
+  /// Số trận đã đánh, để biết còn trong giai đoạn biến động mạnh hay không.
+  duelsPlayed Int @default(0)
+
+  wins   Int @default(0)
+  losses Int @default(0)
+  /// Hoà khí. CHỈ đến từ giảng hoà, không đến từ hoà điểm: với độ chính xác
+  /// mili giây thì hoà điểm gần như không xảy ra. Nó không đo sự bế tắc mà đo
+  /// sự nhún nhường.
+  truces Int @default(0)
+
+  /// Tạm rút khỏi đấu trường. Không giới hạn thời gian, giới hạn bằng CÁI GIÁ:
+  /// Chiến Lực chỉ trôi xuống, không bao giờ trôi lên. Xem `quyDienDrift`.
+  quyDienAt DateTime?
+  /// Lần cuối áp phần trôi, để không trừ hai lần cho cùng một ngày.
+  driftedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([chienLuc])
+  @@index([quyDienAt])
+}
+
+/// Ai đang có mặt ở đấu trường.
+///
+/// Theo NHỊP TIM và mốc thời gian, KHÔNG theo trạng thái kết nối. Mạng 4G rớt
+/// thật, cuộc gọi đến cũng làm trình duyệt ngủ, và logic dò mất kết nối rất khó
+/// tin cậy trên Hostinger. Một mốc thời gian thì luôn đọc được, kể cả sau khi
+/// máy chủ khởi động lại. Cùng cách `StudyPresence` đang làm.
+model ArenaPresence {
+  userId     String   @id
+  lastSeenAt DateTime
+  /// IDLE | QUEUED | IN_DUEL
+  status     String   @default("IDLE") @db.VarChar(16)
+
+  @@index([lastSeenAt])
+}
+
+/// Hàng đợi ghép cặp tự động. Dải Chiến Lực nới dần theo thời gian chờ.
+model MatchQueueEntry {
+  userId   String   @id
+  rating   Int
+  /// Mức cược mong muốn. 0 nghĩa là xin hạng không cược.
+  stake    Int      @default(0)
+  joinedAt DateTime @default(now())
+
+  @@index([joinedAt])
+}
+
+/// Hẹn trận. Cách DUY NHẤT để hai người bận vẫn đấu được, khi trận buộc phải
+/// diễn ra đồng thời.
+model DuelAppointment {
+  id          String    @id @default(cuid())
+  fromUserId  String
+  toUserId    String
+  stake       Int       @default(0)
+  scheduledAt DateTime
+  /// PENDING | ACCEPTED | DECLINED | DONE | MISSED
+  status      String    @default("PENDING") @db.VarChar(16)
+  duelId      String?
+  /// Đã nhắc chưa. Cả hai bên đều được nhắc.
+  remindedAt  DateTime?
+
+  createdAt DateTime @default(now())
+
+  fromUser User @relation("AppointmentFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUser   User @relation("AppointmentTo", fields: [toUserId], references: [id], onDelete: Cascade)
+
+  @@index([scheduledAt, status])
+  @@index([toUserId, status])
 }

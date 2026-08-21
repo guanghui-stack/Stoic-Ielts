@@ -1298,6 +1298,60 @@ const DDL = [
     CONSTRAINT \`DuelInvite_toUserId_fkey\` FOREIGN KEY (\`toUserId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
   ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
 
+  // Dau truong P4: Chien Luc, co mat, hang doi ghep cap, hen tran.
+  `CREATE TABLE IF NOT EXISTS \`ArenaProfile\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`chienLuc\` INTEGER NOT NULL DEFAULT 1000,
+    \`duelsPlayed\` INTEGER NOT NULL DEFAULT 0,
+    \`wins\` INTEGER NOT NULL DEFAULT 0,
+    \`losses\` INTEGER NOT NULL DEFAULT 0,
+    \`truces\` INTEGER NOT NULL DEFAULT 0,
+    \`quyDienAt\` DATETIME(3) NULL,
+    \`driftedAt\` DATETIME(3) NULL,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`updatedAt\` DATETIME(3) NOT NULL,
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`ArenaProfile_userId_key\` (\`userId\`),
+    INDEX \`ArenaProfile_chienLuc_idx\` (\`chienLuc\`),
+    INDEX \`ArenaProfile_quyDienAt_idx\` (\`quyDienAt\`),
+    CONSTRAINT \`ArenaProfile_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`ArenaPresence\` (
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`lastSeenAt\` DATETIME(3) NOT NULL,
+    \`status\` VARCHAR(16) NOT NULL DEFAULT 'IDLE',
+    PRIMARY KEY (\`userId\`),
+    INDEX \`ArenaPresence_lastSeenAt_idx\` (\`lastSeenAt\`)
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`MatchQueueEntry\` (
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`rating\` INTEGER NOT NULL,
+    \`stake\` INTEGER NOT NULL DEFAULT 0,
+    \`joinedAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (\`userId\`),
+    INDEX \`MatchQueueEntry_joinedAt_idx\` (\`joinedAt\`)
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`DuelAppointment\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`fromUserId\` VARCHAR(191) NOT NULL,
+    \`toUserId\` VARCHAR(191) NOT NULL,
+    \`stake\` INTEGER NOT NULL DEFAULT 0,
+    \`scheduledAt\` DATETIME(3) NOT NULL,
+    \`status\` VARCHAR(16) NOT NULL DEFAULT 'PENDING',
+    \`duelId\` VARCHAR(191) NULL,
+    \`remindedAt\` DATETIME(3) NULL,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (\`id\`),
+    INDEX \`DuelAppointment_scheduledAt_status_idx\` (\`scheduledAt\`, \`status\`),
+    INDEX \`DuelAppointment_toUserId_status_idx\` (\`toUserId\`, \`status\`),
+    CONSTRAINT \`DuelAppointment_fromUserId_fkey\` FOREIGN KEY (\`fromUserId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`DuelAppointment_toUserId_fkey\` FOREIGN KEY (\`toUserId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
   `CREATE TABLE IF NOT EXISTS \`FeynmanAiAttemptState\` (
     \`id\` VARCHAR(191) NOT NULL,
     \`attemptId\` VARCHAR(191) NOT NULL,
@@ -1340,6 +1394,12 @@ const MIGRATIONS = [
   // Dau truong P3: de danh rieng cho san dau. Bang Exercise da co san nen day
   // phai la ALTER, khong phai CREATE TABLE.
   `ALTER TABLE \`Exercise\` ADD COLUMN \`arenaOnly\` BOOLEAN NOT NULL DEFAULT false`,
+
+  // Dau truong P4: co danh dau bot. Dat tren User chu khong tren ArenaProfile
+  // vi luat "bot bi loai khoi chat va ket ban" phai kiem duoc o ngoai dau
+  // truong. Giau trong bang dau la vo hai, giau trong mot cuoc tro chuyen thi
+  // khong.
+  `ALTER TABLE \`User\` ADD COLUMN \`isBot\` BOOLEAN NOT NULL DEFAULT false`,
 
   // Vi xu: hai cot moi tren don hang co san. Bang CoinWallet/CoinLedger nam o
   // phan CREATE TABLE nen khong can migration.
