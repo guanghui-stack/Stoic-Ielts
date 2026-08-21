@@ -107,6 +107,11 @@ model User {
   duelInvitesTo DuelInvite[] @relation("DuelInviteTo")
   duelInvitesBy DuelInvite[] @relation("DuelInviteFrom")
 
+  // Đấu trường, giai đoạn P5.
+  arenaTitleWatches ArenaTitleWatch[]
+  integrityCases    ArenaIntegrityCase[] @relation("IntegrityCaseSubject")
+  integrityResolved ArenaIntegrityCase[] @relation("IntegrityCaseResolver")
+
   // Đấu trường, giai đoạn P4.
   /// Bot mang danh tính như người thật để sân không bao giờ rỗng. Cờ này để
   /// loại bot khỏi chat và kết bạn: giấu trong bảng đấu là vô hại, giấu trong
@@ -2205,4 +2210,68 @@ model DuelAppointment {
 
   @@index([scheduledAt, status])
   @@index([toUserId, status])
+}
+
+/// ===== Đấu trường, giai đoạn P5 =====
+///
+/// Bộ lọc thời gian của danh hiệu chất vấn.
+///
+/// Chỉ Danh Bất Phù Thực cần bảng này, và nó là phần quan trọng nhất của luật
+/// đó: với ngưỡng "3 thắng trở xuống trong 10 trận", 17,2 phần trăm người NGAY
+/// THẲNG chạm ngưỡng do thuần may rủi. Vận rủi thì thoáng qua, danh không xứng
+/// thực thì kéo dài, nên phải đúng liên tục bảy ngày mới gắn.
+model ArenaTitleWatch {
+  id     String @id @default(cuid())
+  userId String
+  /// Mã danh hiệu đang theo dõi.
+  code   String @db.VarChar(48)
+
+  /// Lần đầu điều kiện chạm ngưỡng. Xoá bản ghi khi điều kiện hết đúng.
+  since         DateTime
+  lastCheckedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, code])
+  @@index([code, since])
+}
+
+/// Hồ sơ liêm chính đấu trường, chờ NGƯỜI xét.
+///
+/// Máy chỉ xếp thứ tự để người xét duyệt xem cái đáng ngờ nhất trước. Không bản
+/// ghi nào ở đây tự đổi trạng thái của ai: gắn danh hiệu hay khoá tài khoản đều
+/// cần một con người bấm nút, và tên người đó được ghi vào `resolvedById`.
+model ArenaIntegrityCase {
+  id String @id @default(cuid())
+
+  /// Người bị nêu trong hồ sơ. Nêu KHÔNG có nghĩa là có tội.
+  userId String
+  /// Đối thủ liên quan, khi tín hiệu là về một CẶP.
+  peerId String?
+  duelId String?
+
+  /// Mảng JSON các tín hiệu, kèm số liệu để người xét duyệt đọc.
+  signalsJson String @db.Text
+  /// 0 tới 1. CHỈ để xếp thứ tự, KHÔNG phải xác suất gian lận.
+  priority    Float  @default(0)
+
+  /// OPEN | CLEARED | CONFIRMED. CLEARED nghĩa là người xét duyệt đã xem và
+  /// kết luận không có gì, và điều đó cũng phải ghi lại.
+  status String @default("OPEN") @db.VarChar(16)
+
+  resolvedById String?
+  resolvedAt   DateTime?
+  resolveNote  String?   @db.Text
+
+  /// Phiên bản chính sách lúc mở hồ sơ, để khi xét khiếu nại thì xét theo đúng
+  /// luật đã công bố lúc xảy ra việc.
+  integrityPolicyVersion String @default("2026-08-v1") @db.VarChar(32)
+
+  createdAt DateTime @default(now())
+
+  user       User  @relation("IntegrityCaseSubject", fields: [userId], references: [id], onDelete: Cascade)
+  resolvedBy User? @relation("IntegrityCaseResolver", fields: [resolvedById], references: [id], onDelete: SetNull)
+
+  @@index([status, priority])
+  @@index([userId, createdAt])
 }

@@ -10,13 +10,14 @@ import { PublicProfileForm } from "@/components/achievements/public-profile-form
 import { NarrativeSection } from "@/components/world/narrative-section";
 import { TitleCeremonyMoment } from "@/components/world/ceremony-layer";
 import { isFreshCeremonyEvent } from "@/lib/motion/ceremony";
+import { questionTitlesOf } from "@/lib/arena/title-service";
 
 export const metadata = { title: "Danh hiệu của tôi" };
 export const dynamic = "force-dynamic";
 
 export default async function MyTitlesPage() {
   const user = await requireUser();
-  const [overview, pendingRewards, profile] = await Promise.all([
+  const [overview, pendingRewards, profile, questionTitles] = await Promise.all([
     titleOverviewFor(user.id),
     db.rewardGrant.findMany({
       where: { userId: user.id, status: { in: ["EARNED", "REQUESTED"] } },
@@ -24,6 +25,7 @@ export default async function MyTitlesPage() {
       include: { titleAward: { include: { title: { select: { name: true } } } } },
     }),
     db.publicProfile.findUnique({ where: { userId: user.id } }),
+    questionTitlesOf(user.id),
   ]);
 
   // Bài đang khóa mà học viên CHƯA có quyền — đó là những bài đổi thưởng được
@@ -167,9 +169,82 @@ export default async function MyTitlesPage() {
           </div>
         </div>
       ))}
+
+      {questionTitles.length > 0 && (
+        <div className="mt-12">
+          <h2 className="font-display text-2xl font-bold text-navy-deep">
+            Lời bàn của thiên hạ
+          </h2>
+          <p className="mt-2 max-w-2xl text-[0.95rem] leading-relaxed text-ink-soft">
+            Chỉ mình bạn thấy khối này. Nó không bao giờ lên bảng công cộng, và
+            không ai khác đọc được. Mỗi lời bàn đều có đường ra, và khi bạn đi
+            hết đường đó thì nó tự rời đi.
+          </p>
+          <div className="mt-5 space-y-4">
+            {questionTitles.map((held) => (
+              <QuestionTitleRow
+                key={held.title.code}
+                name={held.title.name}
+                description={held.title.description}
+                wayOut={wayOutOf(held.progressSnapshotJson)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
         </div>
       </NarrativeSection>
     </main>
+  );
+}
+
+/**
+ * Đường ra, lấy từ ảnh chụp lúc gắn.
+ *
+ * Năm danh hiệu máy gắn đều kèm câu giải thích nói rõ phải làm gì để xoá. Hai
+ * danh hiệu người xử thì không: chúng cần một con người xem lại, nên câu duy
+ * nhất đúng ở đây là chỉ đường khiếu nại.
+ */
+function wayOutOf(snapshotJson: string | null): string {
+  const fallback =
+    "Danh hiệu này do người xét duyệt gắn sau khi xác minh. Nếu bạn cho là sai, hãy nhắn cho ban quản trị kèm mã trận, hồ sơ sẽ được mở lại.";
+  if (!snapshotJson) return fallback;
+  try {
+    const parsed = JSON.parse(snapshotJson) as { explanation?: unknown };
+    return typeof parsed.explanation === "string" && parsed.explanation.trim()
+      ? parsed.explanation
+      : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function QuestionTitleRow({
+  name,
+  description,
+  wayOut,
+}: {
+  name: string;
+  description: string;
+  wayOut: string;
+}) {
+  return (
+    <article className="border border-line-strong bg-cream-deep p-6">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="font-display text-lg font-bold text-navy-deep">{name}</span>
+        {/* Chữ chứ không chỉ màu, và nói thẳng điều học viên cần yên tâm nhất. */}
+        <span className="border border-line-strong px-2 py-0.5 font-ui text-[0.65rem] font-semibold uppercase tracking-[0.06em] text-muted">
+          Chỉ mình bạn thấy
+        </span>
+      </div>
+      <p className="mt-2 text-[0.95rem] leading-relaxed text-ink-soft">
+        {description}
+      </p>
+      <div className="mt-4 border-l-4 border-gold bg-paper px-5 py-3.5">
+        <p className="label-caps">Đường ra</p>
+        <p className="mt-1.5 text-[0.93rem] leading-relaxed text-ink-soft">{wayOut}</p>
+      </div>
+    </article>
   );
 }
 

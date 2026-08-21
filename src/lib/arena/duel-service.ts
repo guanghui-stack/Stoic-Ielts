@@ -671,6 +671,28 @@ export async function settleDuel(input: {
     console.error("[wobridges] Khong cap nhat duoc Chien Luc:", error);
   }
 
+  // Quét liêm chính và xét lại danh hiệu chất vấn. Cùng lý do như trên, và ở
+  // đây còn rõ hơn: một hồ sơ liêm chính không mở được thì người xét duyệt thiếu
+  // một dòng trong hàng chờ, còn quay lui quyết toán thì có người mất Quân Công.
+  //
+  // Xét tới đâu tính tới đó, không job quét: một job im lặng hỏng thì không ai
+  // biết, mà danh hiệu chất vấn là thứ không được phép sai âm thầm.
+  try {
+    const { scanDuelForIntegrity } = await import("@/lib/arena/integrity-service");
+    await scanDuelForIntegrity({ duelId: duel.id, now });
+  } catch (error) {
+    console.error("[wobridges] Khong quet duoc liem chinh tran dau:", error);
+  }
+
+  try {
+    const { evaluateArenaTitles } = await import("@/lib/arena/title-service");
+    for (const side of duel.sides) {
+      await evaluateArenaTitles(side.userId, now);
+    }
+  } catch (error) {
+    console.error("[wobridges] Khong xet duoc danh hieu chat van:", error);
+  }
+
   return { ok: true, verdict, entries };
 }
 

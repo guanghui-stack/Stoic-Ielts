@@ -1352,6 +1352,39 @@ const DDL = [
     CONSTRAINT \`DuelAppointment_toUserId_fkey\` FOREIGN KEY (\`toUserId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
   ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
 
+  // Dau truong P5: danh hieu chat van va ho so liem chinh.
+  `CREATE TABLE IF NOT EXISTS \`ArenaTitleWatch\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`code\` VARCHAR(48) NOT NULL,
+    \`since\` DATETIME(3) NOT NULL,
+    \`lastCheckedAt\` DATETIME(3) NOT NULL,
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`ArenaTitleWatch_userId_code_key\` (\`userId\`, \`code\`),
+    INDEX \`ArenaTitleWatch_code_since_idx\` (\`code\`, \`since\`),
+    CONSTRAINT \`ArenaTitleWatch_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`ArenaIntegrityCase\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`peerId\` VARCHAR(191) NULL,
+    \`duelId\` VARCHAR(191) NULL,
+    \`signalsJson\` TEXT NOT NULL,
+    \`priority\` DOUBLE NOT NULL DEFAULT 0,
+    \`status\` VARCHAR(16) NOT NULL DEFAULT 'OPEN',
+    \`resolvedById\` VARCHAR(191) NULL,
+    \`resolvedAt\` DATETIME(3) NULL,
+    \`resolveNote\` TEXT NULL,
+    \`integrityPolicyVersion\` VARCHAR(32) NOT NULL DEFAULT '2026-08-v1',
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (\`id\`),
+    INDEX \`ArenaIntegrityCase_status_priority_idx\` (\`status\`, \`priority\`),
+    INDEX \`ArenaIntegrityCase_userId_createdAt_idx\` (\`userId\`, \`createdAt\`),
+    CONSTRAINT \`ArenaIntegrityCase_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`ArenaIntegrityCase_resolvedById_fkey\` FOREIGN KEY (\`resolvedById\`) REFERENCES \`User\` (\`id\`) ON DELETE SET NULL ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
   `CREATE TABLE IF NOT EXISTS \`FeynmanAiAttemptState\` (
     \`id\` VARCHAR(191) NOT NULL,
     \`attemptId\` VARCHAR(191) NOT NULL,
@@ -1968,6 +2001,17 @@ export async function initDatabase() {
   } catch (err) {
     // Không chặn khởi động: thiếu bot thì sân vắng, phần còn lại vẫn phải chạy.
     console.error("[wobridges] Khong tao duoc bot dau truong:", err);
+  }
+
+  // Tám danh hiệu của đấu trường. Chạy mỗi lần khởi động để sửa câu chữ trong mã
+  // nguồn là thấy ngay, đúng cách seedTitleCatalog ở trên đang làm. Ngưỡng đã
+  // chỉnh tay trong database KHÔNG bị ghi đè: xem chú thích ở title-catalog.ts.
+  try {
+    const { seedArenaTitles } = await import("@/lib/arena/title-catalog");
+    const count = await seedArenaTitles();
+    console.log(`[wobridges] Dau truong: dong bo ${count} danh hieu.`);
+  } catch (err) {
+    console.error("[wobridges] Khong dong bo duoc danh hieu dau truong:", err);
   }
 
   // Xét danh hiệu MỘT LẦN cho bài làm đã có từ trước.

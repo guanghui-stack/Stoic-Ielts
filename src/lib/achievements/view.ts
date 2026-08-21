@@ -35,6 +35,18 @@ export type TitleCard = {
   hasReward: boolean;
 };
 
+/**
+ * Nhãn nhóm cho danh hiệu đấu trường.
+ *
+ * Để riêng ở đây chứ không nhét vào `CATEGORY_LABELS` của catalog: catalog là
+ * danh mục danh hiệu học tập, còn bốn nhóm này thuộc đấu trường và có luật
+ * riêng. Thiếu bảng này thì tiêu đề nhóm trên trang học viên hiện ra đúng mã
+ * trong database.
+ */
+const ARENA_CATEGORY_LABELS: Record<string, string> = {
+  ARENA_REDEMPTION: "Chuộc lỗi",
+};
+
 /** Danh hiệu chuyển hóa che danh hiệu cảnh tỉnh. */
 const WARNING_CODE = "TRANSFORM_01_LOW_WARNING";
 const RISE_CODE = "TRANSFORM_02_RISE";
@@ -88,6 +100,16 @@ export async function titleOverviewFor(userId: string): Promise<TitleOverview> {
       if (d.code === WARNING_CODE && hasRisen) return false;
       // Danh hiệu riêng tư chưa đạt thì cũng không hiện — nó không phải mục tiêu
       if (d.visibility === "PRIVATE_ONLY" && !earnedAtOf.has(d.id)) return false;
+      // Danh hiệu chất vấn KHÔNG nằm chung lưới với danh hiệu học tập. Chúng
+      // có khối riêng ở cuối trang, nơi mỗi cái đi kèm đường ra cụ thể. Trộn
+      // vào lưới thành tích là biến một lời nhắc riêng thành một tấm huy hiệu.
+      if (d.category === "ARENA_QUESTION" || d.category === "ARENA_MANUAL") {
+        return false;
+      }
+      // Cải Quá Tự Tân công khai, nhưng chưa đạt thì không hiện: một thẻ khóa
+      // mang tên "chuộc lỗi" trước mặt người chưa hề vấp là gợi ý một vết trượt
+      // chưa từng có.
+      if (d.category.startsWith("ARENA_") && !earnedAtOf.has(d.id)) return false;
       return true;
     })
     .map((d) => {
@@ -102,7 +124,10 @@ export async function titleOverviewFor(userId: string): Promise<TitleOverview> {
           quoteSource: d.quoteSource,
         }),
         quoteSourceUrl: d.quoteSourceUrl,
-        categoryLabel: CATEGORY_LABELS[d.category as TitleCategory] ?? d.category,
+        categoryLabel:
+          CATEGORY_LABELS[d.category as TitleCategory] ??
+          ARENA_CATEGORY_LABELS[d.category] ??
+          d.category,
         rarityLabel: RARITY_LABELS[d.rarity as Rarity] ?? d.rarity,
         earned,
         earnedAt: earnedAtOf.get(d.id) ?? null,
