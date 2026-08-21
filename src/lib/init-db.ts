@@ -1815,6 +1815,22 @@ export async function initDatabase() {
     console.error("[wobridges] Không đồng bộ được danh mục danh hiệu:", err);
   }
 
+  // Gieo kho câu Thí Bút. Chạy mỗi lần khởi động và tự biết dừng khi đã đủ,
+  // nên push lên main là kho có mặt trên máy chủ, không phải gõ lệnh nào.
+  try {
+    const { seedThiButBank } = await import("@/lib/thibut/seeds");
+    const { created, published } = await seedThiButBank();
+    if (created > 0) {
+      console.log(
+        `[wobridges] Thi But: nap ${created} cau, phat hanh ${published} cau.`,
+      );
+    }
+  } catch (err) {
+    // Không chặn khởi động: thiếu kho câu thì Thí Bút đóng, phần còn lại của
+    // website vẫn phải chạy.
+    console.error("[wobridges] Khong gieo duoc kho cau Thi But:", err);
+  }
+
   // Xét danh hiệu MỘT LẦN cho bài làm đã có từ trước.
   //
   // Việc dựng lại band ở trên mới chỉ chuẩn bị số liệu; nếu không chạy thêm

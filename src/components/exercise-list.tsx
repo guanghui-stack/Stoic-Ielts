@@ -2,6 +2,7 @@ import Link from "next/link";
 import {
   CalendarClock,
   CheckCircle2,
+  Feather,
   PlayCircle,
   RotateCcw,
   Lock,
@@ -156,6 +157,34 @@ export async function ExerciseList({
                   <p className="font-ui text-xs text-muted">
                     Mở một lần, làm lại không giới hạn
                   </p>
+
+                  {/*
+                    Con đường thứ hai, và nó phải được nói thành lời.
+
+                    Đặc tả mục 00: "Người trả tiền thì mua được binh thư. Người
+                    không trả tiền thì phải đánh mà đoạt lấy." Giá trị đó chỉ
+                    tồn tại nếu người học BIẾT nó tồn tại; để họ tự đoán thì họ
+                    chỉ thấy một hàng rào phí.
+
+                    Không hiện số dư quân công ở đây: màn Thí Bút mới là nơi
+                    gác, và một chỗ chỉ để hiển thị không bao giờ được thành
+                    chốt chặn thứ hai nói khác đi.
+                  */}
+                  <div className="mt-1 flex flex-col items-stretch gap-2 border-t border-line pt-3 md:items-end">
+                    <p className="font-ui text-xs text-ink-soft">
+                      hoặc không trả một đồng nào
+                    </p>
+                    <Link
+                      href={`/hoc-vien/thi-but/EXERCISE/${ex.id}`}
+                      className="inline-flex items-center justify-center gap-2 border border-line-strong px-6 py-2.5 font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-navy transition-colors hover:border-navy hover:bg-navy hover:text-paper"
+                    >
+                      <Feather className="h-4 w-4" aria-hidden="true" />
+                      Đoạt bằng quân công
+                    </Link>
+                    <p className="max-w-[15rem] font-ui text-xs leading-relaxed text-muted md:text-right">
+                      Bốn câu, ba phút. Qua thì mở được đề này.
+                    </p>
+                  </div>
                 </div>
               ) : (
                 <form action={startAttemptAction.bind(null, ex.id)}>
