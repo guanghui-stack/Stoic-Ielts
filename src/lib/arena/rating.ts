@@ -265,6 +265,88 @@ export const BOT_RULES = {
   allowedInChat: false,
 } as const;
 
+/* ===================== Bot đánh như thế nào ===================== */
+
+/**
+ * Độ chính xác của bot, suy từ chính Chiến Lực của nó.
+ *
+ * HỆ SỐ NÀY KHÔNG PHẢI ĐOÁN. Đặc tả mục 06 đòi "thắng bot khó ĐÚNG BẰNG thắng
+ * người cùng Chiến Lực". Với đề 13 câu và điểm phân phối nhị thức, hệ số 0.00068
+ * mỗi điểm cho ra xác suất thắng khớp thang Elo trong sai số dưới 0.5 điểm phần
+ * trăm:
+ *
+ *   chênh Chiến Lực    mô phỏng    Elo kỳ vọng
+ *          0             50.0%        50.0%
+ *         50             56.8%        57.1%
+ *        100             63.5%        64.0%
+ *        200             75.7%        76.0%
+ *        300             85.6%        84.9%
+ *
+ * Đổi hệ số thì phải tính lại bảng trên. Đặt cao hơn thì bot mạnh thành bất khả
+ * chiến bại và lộ ngay; đặt thấp hơn thì Chiến Lực của bot nói dối về sức nó.
+ */
+export const BOT_ACCURACY_PER_RATING = 0.00068;
+export const BOT_ACCURACY_MIN = 0.18;
+export const BOT_ACCURACY_MAX = 0.92;
+
+export function botAccuracy(rating: number): number {
+  const raw = 0.5 + (rating - BASE_RATING) * BOT_ACCURACY_PER_RATING;
+  return Math.max(BOT_ACCURACY_MIN, Math.min(BOT_ACCURACY_MAX, raw));
+}
+
+/**
+ * Điểm bot làm được trên một đề `total` câu.
+ *
+ * `roll` là hàm sinh số ngẫu nhiên, truyền từ ngoài vào để kiểm thử được: bài
+ * kiểm thử truyền hàm tất định, máy chủ thật truyền `Math.random`.
+ */
+export function botScore(
+  rating: number,
+  total: number,
+  roll: () => number,
+): number {
+  const p = botAccuracy(rating);
+  let correct = 0;
+  for (let i = 0; i < total; i++) if (roll() < p) correct++;
+  return correct;
+}
+
+/**
+ * Bot này có online vào giờ này không.
+ *
+ * Mười cái tên luôn có mặt, không bao giờ ngủ, nhịp đều tăm tắp thì lộ trong
+ * một tuần. Nên mỗi bot có một khung giờ RIÊNG, suy từ số thứ tự của nó, và
+ * khung đó lệch nhau giữa các bot.
+ *
+ * Mỗi bot thức khoảng 9 tiếng mỗi ngày, và không bot nào thức cùng khung với
+ * bot liền kề.
+ */
+export function botOnlineAt(botIndex: number, hourVN: number): boolean {
+  const start = (botIndex * 7 + 6) % 24;
+  const span = 9;
+  const offset = (hourVN - start + 24) % 24;
+  return offset < span;
+}
+
+/**
+ * Bot nghĩ bao lâu trước khi nhận chiến thư, và bao lâu trước khi nộp bài.
+ *
+ * Nhận lời tức khắc là dấu hiệu lộ rõ thứ hai sau Chiến Lực trùng nhau. Nộp bài
+ * đúng một mốc thời gian cố định cũng vậy.
+ */
+export function botAcceptDelaySeconds(roll: () => number): number {
+  return 4 + Math.floor(roll() * 22);
+}
+
+export function botSubmitAfterSeconds(
+  durationSeconds: number,
+  roll: () => number,
+): number {
+  // Từ 35% tới 85% thời lượng đề. Không bao giờ nộp ở giây cuối, và không bao
+  // giờ nộp nhanh tới mức không thể đọc hết đề.
+  return Math.floor(durationSeconds * (0.35 + roll() * 0.5));
+}
+
 /* ===================== Hẹn trận ===================== */
 
 /**

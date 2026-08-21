@@ -195,6 +195,39 @@ export async function acceptInvite(input: {
           select: { id: true },
         });
 
+        // Tạo lượt làm bài THẬT cho cả hai bên, ngay trong cùng transaction.
+        //
+        // Nhờ vậy trận dùng đúng phòng thi và đúng đường chấm mà mọi bài luyện
+        // tập đang dùng, thay vì một luồng chấm thứ hai chạy song song. Hai
+        // luồng chấm thì sớm muộn sẽ có một cái sai theo cách cái kia đã sửa
+        // xong từ lâu.
+        //
+        // `validForAchievements` để `false`: bài trong trận không được tính vào
+        // danh hiệu luyện tập, nếu không thì đấu trường thành đường tắt để cày
+        // danh hiệu mà không phải học.
+        for (const userId of [invite.fromUserId, invite.toUserId]) {
+          const previous = await tx.attempt.count({
+            where: { userId, exerciseId: exercise.id },
+          });
+          const attempt = await tx.attempt.create({
+            data: {
+              userId,
+              exerciseId: exercise.id,
+              status: "IN_PROGRESS",
+              answers: "{}",
+              attemptNumber: previous + 1,
+              startedAt: now,
+              deadlineAt,
+              validForAchievements: false,
+            },
+            select: { id: true },
+          });
+          await tx.duelSide.updateMany({
+            where: { duelId: duel.id, userId },
+            data: { attemptId: attempt.id },
+          });
+        }
+
         if (invite.stake > 0) {
           for (const userId of [invite.fromUserId, invite.toUserId]) {
             const wallet = await tx.meritWallet.update({
@@ -259,8 +292,16 @@ export async function declineInvite(input: {
  * `elapsedMs` lấy hiệu giữa `startedAt` của trận và lúc này, KHÔNG nhận từ máy
  * khách. Đồng hồ trình duyệt không phải bằng chứng, và nó là thứ dễ sửa nhất
  * trong cả luồng.
+ *
+ * VỀ THAM SỐ `score`. Nó CHỈ được truyền từ `recordDuelAttemptResult`, tức từ
+ * kết quả `finalizeReadingAttempt` đã chấm ở máy chủ. Không có đường nào từ
+ * máy khách tới đây: `submitSide` không phải server action, không nằm sau một
+ * route API nào, và `scripts/test-economy-invariants.ts` gác điều đó.
+ *
+ * Trước ngày 2026-08-21 hàm này nhận điểm từ tầng gọi bất kỳ, và đó là lỗ hổng
+ * cuối cùng trong chuỗi "máy khách không bao giờ gửi điểm lên".
  */
-export async function submitSide(input: {
+async function submitSide(input: {
   duelId: string;
   userId: string;
   score: number;
@@ -296,6 +337,45 @@ export async function submitSide(input: {
   });
   const bothDone = sides.every((s) => s.submittedAt || s.surrenderedAt);
   return { ok: true, bothSubmitted: bothDone };
+}
+
+/**
+ * Cửa DUY NHẤT để một kết quả bài làm đi vào trận.
+ *
+ * Gọi từ `finalizeReadingAttempt`, tức SAU khi máy chủ đã chấm xong. Điểm ở đây
+ * là `scoreRaw` do chính hàm chấm trả về, không phải con số nào từ trình duyệt.
+ *
+ * Trả về `false` khi lượt làm bài này không thuộc trận nào, và đó là trường hợp
+ * thường gặp nhất: phần lớn bài làm là luyện tập bình thường. Không phải lỗi,
+ * nên không ghi log.
+ */
+export async function recordDuelAttemptResult(input: {
+  attemptId: string;
+  userId: string;
+  scoreRaw: number;
+  now?: Date;
+}): Promise<boolean> {
+  const side = await db.duelSide.findFirst({
+    where: { attemptId: input.attemptId, userId: input.userId, submittedAt: null },
+    select: { duelId: true },
+  });
+  if (!side) return false;
+
+  const result = await submitSide({
+    duelId: side.duelId,
+    userId: input.userId,
+    score: input.scoreRaw,
+    attemptId: input.attemptId,
+    now: input.now,
+  });
+
+  // Cả hai đã xong thì quyết toán ngay, thay vì chờ một job quét. Người vừa nộp
+  // muốn biết kết quả ngay lúc đó, và đợi tới nhịp quét sau là khoảng im lặng
+  // duy nhất trong cả trận mà không ai giải thích được.
+  if (result.ok && result.bothSubmitted) {
+    await settleDuel({ duelId: side.duelId, now: input.now });
+  }
+  return result.ok;
 }
 
 /** Đầu hàng chủ động. Rẻ hơn bỏ mặc về kinh nghiệm, và đó là chủ ý. */
@@ -374,6 +454,16 @@ export async function agreeTruce(input: {
     },
     { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
   );
+
+  // Giảng hoà chỉ ghi MỘT dấu vào cột Hoà khí. Không đụng Chiến Lực, không
+  // kinh nghiệm, không điểm phe. Trung tính ở mọi chiều.
+  try {
+    const { recordTruce } = await import("@/lib/arena/arena-service");
+    await recordTruce(input.duelId);
+  } catch (error) {
+    console.error("[wobridges] Khong ghi duoc Hoa khi:", error);
+  }
+
   return { ok: true };
 }
 
@@ -457,6 +547,22 @@ export async function settleDuel(input: {
     },
     { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
   );
+
+  // Cập nhật Chiến Lực NGOÀI transaction ở trên, và bọc try.
+  //
+  // Hai mức hậu quả khác nhau: Chiến Lực sai thì bảng xếp hạng lệch, Quân Công
+  // sai thì có người mất tiền. Không nên để một lỗi ở tầng nhẹ làm quay lui cả
+  // tầng nặng, mà quyết toán Quân Công thì đã xong và đã đúng.
+  try {
+    const { applyDuelToRatings } = await import("@/lib/arena/arena-service");
+    await applyDuelToRatings({
+      duelId: duel.id,
+      winnerId: verdict.kind === "WIN" ? verdict.winnerId : null,
+      now,
+    });
+  } catch (error) {
+    console.error("[wobridges] Khong cap nhat duoc Chien Luc:", error);
+  }
 
   return { ok: true, verdict, entries };
 }

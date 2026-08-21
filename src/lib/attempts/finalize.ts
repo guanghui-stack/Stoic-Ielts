@@ -155,5 +155,26 @@ export async function finalizeReadingAttempt(
   });
   if (eventId) await processAchievementEvent(eventId);
 
+  // Nếu lượt này thuộc một trận thì đẩy ĐIỂM ĐÃ CHẤM sang đó.
+  //
+  // Đây là cửa duy nhất để một kết quả đi vào trận đấu. Máy khách không có
+  // đường nào tự khai điểm: nó chỉ gửi đáp án, `gradeReading` ở trên chấm, và
+  // con số truyền đi dưới đây là `scoreRaw` do chính hàm chấm trả về.
+  //
+  // Đặt SAU phần danh hiệu và ngoài mọi transaction, cùng lý do: nếu ghi kết
+  // quả trận lỗi thì học viên vẫn phải nộp được bài. Trận là phần thêm, bài làm
+  // mới là sản phẩm chính.
+  try {
+    const { recordDuelAttemptResult } = await import("@/lib/arena/duel-service");
+    await recordDuelAttemptResult({
+      attemptId,
+      userId: attempt.userId,
+      scoreRaw,
+      now,
+    });
+  } catch (err) {
+    console.error("[wobridges] Khong ghi duoc ket qua tran:", err);
+  }
+
   return { finalized: true, status, band, scoreRaw };
 }

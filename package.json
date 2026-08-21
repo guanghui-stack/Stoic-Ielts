@@ -52,7 +52,8 @@
     "test:duel": "node --experimental-strip-types scripts/test-duel.ts",
     "test:duel-db": "node --experimental-strip-types --import ./scripts/alias-loader.mjs scripts/test-duel-db.ts",
     "test:rating": "node --experimental-strip-types scripts/test-rating.ts",
-    "test:arena-db": "node --experimental-strip-types --import ./scripts/alias-loader.mjs scripts/test-arena-db.ts"
+    "test:arena-db": "node --experimental-strip-types --import ./scripts/alias-loader.mjs scripts/test-arena-db.ts",
+    "test:bot-loop-db": "node --experimental-strip-types --import ./scripts/alias-loader.mjs scripts/test-bot-loop-db.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",

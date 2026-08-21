@@ -165,7 +165,9 @@ function pool(n: number): ItemPoolEntry[] {
     difficulty: "MEDIUM" as const,
   }));
 }
-const firstPick = (_max: number) => 0; // tất định, để kiểm thử lặp lại được
+// Tất định, để kiểm thử lặp lại được. Không đọc tham số vì luôn chọn phần tử
+// đầu tiên, nhưng chữ ký vẫn khớp với thứ `selectItems` mong đợi.
+const firstPick = () => 0;
 
 {
   const picked = selectItems(pool(40), new Set(), firstPick);

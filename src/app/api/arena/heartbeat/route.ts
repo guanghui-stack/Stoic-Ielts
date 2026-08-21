@@ -31,6 +31,20 @@ export async function POST(request: Request) {
   }
 
   const accepted = await heartbeat({ userId: user.id, status });
+
+  // Một nhịp của bot, đi ké nhịp tim của người thật.
+  //
+  // Dự án không có bộ định giờ nào và gói Hostinger không cho chạy tiến trình
+  // nền. Bot chỉ cần hoạt động khi có người ở sân, mà lúc đó thì đã có nhịp tim
+  // rồi. Bọc try để một lỗi ở tầng bot không bao giờ làm hỏng nhịp tim của
+  // người thật.
+  try {
+    const { tickBots } = await import("@/lib/arena/bot-loop");
+    await tickBots();
+  } catch (err) {
+    console.error("[wobridges] Nhip bot loi:", err);
+  }
+
   const present = await presentPlayers();
 
   return NextResponse.json({

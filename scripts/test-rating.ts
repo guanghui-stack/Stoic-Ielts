@@ -28,6 +28,11 @@ import {
   QUY_DIEN_DRIFT_PER_DAY,
   RATING_RULE_VERSION,
   applyDuelResult,
+  botAcceptDelaySeconds,
+  botAccuracy,
+  botOnlineAt,
+  botScore,
+  botSubmitAfterSeconds,
   checkAppointment,
   expectedScore,
   findOpponent,
@@ -220,6 +225,49 @@ check("bot KHÔNG sinh điểm phe", BOT_RULES.earnsFactionPoints, false);
 check("nhưng VẪN tính Chiến Lực", BOT_RULES.affectsRating, true);
 check("không đếm vào Danh Bất Phù Thực", BOT_RULES.countsForTitleDanhBatPhuThuc, false);
 check("và bị loại khỏi chat", BOT_RULES.allowedInChat, false);
+
+console.log("\n— Bot đánh như thế nào —");
+
+check("Chiến Lực gốc thì đúng một nửa", botAccuracy(1000), 0.5);
+check("Chiến Lực cao hơn thì chính xác hơn", botAccuracy(1300) > botAccuracy(1000), true);
+check("Chiến Lực thấp hơn thì kém hơn", botAccuracy(700) < botAccuracy(1000), true);
+check("có sàn, không bao giờ về 0", botAccuracy(-9999) > 0, true);
+check("có trần, không bao giờ đúng hết", botAccuracy(99999) < 1, true);
+
+{
+  const roll = () => 0.4;
+  check(
+    "cùng Chiến Lực thì cùng điểm khi cùng may rủi",
+    botScore(1000, 13, roll),
+    botScore(1000, 13, roll),
+  );
+  check("điểm không bao giờ vượt số câu", botScore(9999, 13, () => 0), 13);
+  check("điểm không bao giờ âm", botScore(0, 13, () => 1), 0);
+}
+
+{
+  // Giờ online phải LỆCH NHAU giữa các bot. Ba mươi bot cùng thức một khung là
+  // dấu hiệu lộ rõ ngang với việc Chiến Lực trùng nhau.
+  const at3 = Array.from({ length: 30 }, (_, i) => botOnlineAt(i, 3));
+  const at15 = Array.from({ length: 30 }, (_, i) => botOnlineAt(i, 15));
+  check("không phải bot nào cũng thức lúc 3 giờ sáng", at3.every(Boolean), false);
+  check("nhưng cũng không phải ai cũng ngủ", at3.some(Boolean), true);
+  check(
+    "hai khung giờ khác nhau cho hai tập bot khác nhau",
+    JSON.stringify(at3) !== JSON.stringify(at15),
+    true,
+  );
+  const awake = at15.filter(Boolean).length;
+  check("lúc 15 giờ chỉ một phần bot thức", awake > 0 && awake < 30, true);
+}
+
+{
+  check("bot nghĩ trước khi nhận, không nhận tức khắc", botAcceptDelaySeconds(() => 0) >= 4, true);
+  check("nhưng không nghĩ lâu tới mức thư hết hạn", botAcceptDelaySeconds(() => 0.999) < 90, true);
+  const d = 1200;
+  check("nộp sớm nhất là 35 phần trăm thời lượng", botSubmitAfterSeconds(d, () => 0), Math.floor(d * 0.35));
+  check("nộp muộn nhất vẫn trước khi hết giờ", botSubmitAfterSeconds(d, () => 0.999) < d, true);
+}
 
 console.log("\n— Hẹn trận —");
 

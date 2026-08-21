@@ -17,7 +17,7 @@ import {
   declineInvite,
   sendInvite,
   settleDuel,
-  submitSide,
+  recordDuelAttemptResult,
   surrender,
   voidDuel,
 } from "@/lib/arena/duel-service.ts";
@@ -30,6 +30,27 @@ function check(label: string, actual: unknown, expected: unknown) {
     console.log(`      mong đợi ${JSON.stringify(expected)}, nhận ${JSON.stringify(actual)}`);
     failures++;
   }
+}
+
+/**
+ * Nộp bài qua ĐÚNG đường thật.
+ *
+ * `submitSide` không còn xuất ra ngoài: cửa duy nhất để một kết quả đi vào
+ * trận là `recordDuelAttemptResult`, gọi từ `finalizeReadingAttempt` sau khi
+ * máy chủ đã chấm. Bài kiểm thử phải đi qua đúng cửa đó, nếu không nó gác một
+ * đường mà mã thật không dùng.
+ */
+async function submitFor(duelId: string, userId: string, score: number) {
+  const side = await db.duelSide.findFirst({
+    where: { duelId, userId },
+    select: { attemptId: true },
+  });
+  if (!side?.attemptId) throw new Error("Trận không tạo lượt làm bài cho bên này");
+  return recordDuelAttemptResult({
+    attemptId: side.attemptId,
+    userId,
+    scoreRaw: score,
+  });
 }
 
 const STAMP = Date.now();
@@ -130,15 +151,20 @@ try {
     1,
   );
 
-  await submitSide({ duelId: accepted.duelId, userId: a, score: 11 });
+  await submitFor(accepted.duelId, a, 11);
   const notReady = await settleDuel({ duelId: accepted.duelId });
   check("một bên nộp thì CHƯA quyết toán được", notReady.ok, false);
   if (!notReady.ok) check("lý do đúng", notReady.reason, "NOT_READY");
 
-  await submitSide({ duelId: accepted.duelId, userId: b, score: 9 });
-  const settled = await settleDuel({ duelId: accepted.duelId });
-  if (!settled.ok) throw new Error("Không quyết toán được");
-  check("người điểm cao hơn thắng", settled.verdict.kind === "WIN" && settled.verdict.winnerId, a);
+  // Bên thứ hai nộp xong thì trận TỰ quyết toán ngay, không chờ job quét.
+  await submitFor(accepted.duelId, b, 9);
+  const settledDuel = await db.duel.findUnique({
+    where: { id: accepted.duelId },
+    select: { status: true, winnerId: true, winBy: true },
+  });
+  check("cả hai nộp xong thì trận tự quyết toán", settledDuel?.status, "SETTLED");
+  check("người điểm cao hơn thắng", settledDuel?.winnerId, a);
+  check("thắng theo điểm", settledDuel?.winBy, "SCORE");
 
   const aEnd = await walletVsLedger(a);
   const bEnd = await walletVsLedger(b);
@@ -167,7 +193,8 @@ try {
 
   // Chạy lại: khoá chống ghi hai lần phải chặn.
   const again = await settleDuel({ duelId: accepted.duelId });
-  check("quyết toán lần hai bị từ chối", again.ok, false);
+  check("gọi quyết toán lần nữa bị từ chối", again.ok, false);
+  if (!again.ok) check("lý do là ĐÃ QUYẾT TOÁN", again.reason, "ALREADY_SETTLED");
   const aStill = await walletVsLedger(a);
   check("và số dư KHÔNG đổi", aStill.wallet, 120);
 
@@ -214,16 +241,15 @@ try {
   if (!duel3.ok) throw new Error("Không nhận lời 3");
 
   check("đầu hàng được ghi nhận", await surrender({ duelId: duel3.duelId, userId: e }), true);
-  await submitSide({ duelId: duel3.duelId, userId: f, score: 3 });
+  await submitFor(duel3.duelId, f, 3);
 
-  const settled3 = await settleDuel({ duelId: duel3.duelId });
-  if (!settled3.ok) throw new Error("Không quyết toán được trận 3");
-  check(
-    "người đầu hàng thua, bên kia thắng dù chỉ đúng 3 câu",
-    settled3.verdict.kind === "WIN" && settled3.verdict.winnerId,
-    f,
-  );
-  check("thắng theo hình thức bỏ cuộc", settled3.verdict.kind === "WIN" && settled3.verdict.by, "FORFEIT");
+  const duel3End = await db.duel.findUnique({
+    where: { id: duel3.duelId },
+    select: { status: true, winnerId: true, winBy: true },
+  });
+  check("trận tự quyết toán", duel3End?.status, "SETTLED");
+  check("người đầu hàng thua, bên kia thắng dù chỉ đúng 3 câu", duel3End?.winnerId, f);
+  check("thắng theo hình thức bỏ cuộc", duel3End?.winBy, "FORFEIT");
   check("người đầu hàng mất cược", (await walletVsLedger(e)).wallet, 90);
   check("người kia được cược", (await walletVsLedger(f)).wallet, 110);
 
@@ -295,11 +321,21 @@ try {
   check("và vào trận được", duel6.ok, true);
   if (!duel6.ok) throw new Error("Không nhận lời 6");
 
-  await submitSide({ duelId: duel6.duelId, userId: k, score: 8 });
-  await submitSide({ duelId: duel6.duelId, userId: l, score: 5 });
-  const settled6 = await settleDuel({ duelId: duel6.duelId });
-  check("quyết toán được", settled6.ok, true);
-  check("nhưng KHÔNG sinh dòng sổ cái nào", settled6.ok && settled6.entries.length, 0);
+  await submitFor(duel6.duelId, k, 8);
+  await submitFor(duel6.duelId, l, 5);
+  const duel6End = await db.duel.findUnique({
+    where: { id: duel6.duelId },
+    select: { status: true, winnerId: true },
+  });
+  check("quyết toán được", duel6End?.status, "SETTLED");
+  check("người điểm cao hơn thắng", duel6End?.winnerId, k);
+  check(
+    "nhưng KHÔNG sinh dòng sổ cái nào của trận",
+    await db.meritLedger.count({
+      where: { userId: { in: [k, l] }, ledgerKey: { startsWith: "DUEL:" } },
+    }),
+    0,
+  );
   check("số dư vẫn là 0", (await walletVsLedger(k)).wallet, 0);
 } catch (error) {
   console.error("\n✗ LỖI KHI CHẠY:", error);
