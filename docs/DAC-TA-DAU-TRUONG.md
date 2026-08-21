@@ -824,9 +824,21 @@ Chiến thư, hai hạng trận, chấm ở máy chủ, huỷ / phát Quân Côn
 
 SSE, danh sách người đang có mặt, ghép cặp, thang Chiến Lực, Quy Điền, giờ điểm binh, hẹn trận. Đây là lúc đấu trường thành hình.
 
-### P5. Danh hiệu và liêm chính
+### P5. Danh hiệu và liêm chính · ĐÃ LÀM 2026-08-22
 
 Nhóm tự động trước, nhóm cần người xử sau. Kèm màn hình xét duyệt và đường khiếu nại. Đừng làm sớm hơn, cần dữ liệu trận thật để định ngưỡng.
+
+**Về câu "cần dữ liệu trận thật để định ngưỡng".** Câu đó vẫn đúng, và P5 được làm khi chưa có dữ liệu đó. Cách xử lý: mọi con số nằm trong MỘT khối duy nhất, `ARENA_TITLE_THRESHOLDS` ở `src/lib/arena/titles.ts`, được gieo vào `TitleDefinition.ruleConfigJson` khi khởi động. Chỉnh ngưỡng là sửa một hàng trong database, không phải deploy lại. Khối đó đã đánh dấu rõ đây là SỐ TẠM.
+
+Đã có:
+
+- `src/lib/arena/titles.ts` — năm luật máy tự xét, hàm thuần, kèm bộ lọc bảy ngày cho Danh Bất Phù Thực.
+- `src/lib/arena/integrity.ts` — bốn tín hiệu và phép xếp thứ tự hồ sơ. Không hàm nào ở đây kết luận ai gian lận.
+- `src/lib/arena/title-service.ts` và `integrity-service.ts` — tầng database, gọi từ `settleDuel` ngoài transaction, bọc try.
+- `src/lib/arena/title-catalog.ts` — tám danh hiệu, gieo trong `initDatabase()`.
+- `/quan-tri/liem-chinh` — hàng chờ xét duyệt, nút gắn danh hiệu người xử, nút gỡ.
+- Khối riêng ở cuối trang `/hoc-vien/danh-hieu`, chỉ chính chủ thấy, mỗi danh hiệu kèm đường ra.
+- `npm run test:arena-titles` (luật thuần) và `npm run test:arena-titles-db` (database thật).
 
 ### P6. Mùa giải, lãnh địa, bố cáo
 
@@ -950,3 +962,26 @@ Chi phí không có trần, có độ trễ giữa một luồng bấm giờ, kh
 **Đã xong, không còn chờ:** brand guideline nằm ở `docs/BRAND-GUIDELINE.md` bản 1,
 gồm năm cặp mã màu cho mục 11, tông màu danh hiệu chất vấn, ba màu phe cho mục 09,
 sáu màu trạng thái trận cho mục 04, và bốn chỉ số cho mục 05.
+
+### Đã bác bỏ: đóng hồ sơ liêm chính thì tự gắn danh hiệu
+
+Gộp hai việc vào một nút là cách chắc chắn nhất để một cú bấm lạc tay thành một
+lời buộc tội. Ở `/quan-tri/liem-chinh` chúng là hai biểu mẫu tách rời, và biểu
+mẫu gắn danh hiệu phải mở ra mới thấy. Đóng hồ sơ với kết luận CONFIRMED cũng
+không gắn gì cả: nó chỉ ghi rằng người xét duyệt đã xem và thấy có vi phạm.
+
+### Đã bác bỏ: gỡ danh hiệu người xử thì tự phát Cải Quá Tự Tân
+
+Gỡ một danh hiệu chất vấn do MÁY gắn thì mở đường chuộc lỗi, vì đó là điều đã
+hứa. Gỡ một kết luận gian lận đã được người xác minh mà lập tức trao một danh
+hiệu công khai hạng EPIC thì khác hẳn về mức, và đó là quyết định của chủ nền
+tảng chứ không phải của một dòng mã viết sẵn. `revokeTitleByReviewer` cố ý chỉ
+mở đường chuộc lỗi cho nhóm `ARENA_QUESTION`.
+
+### Đã bác bỏ: hiện danh hiệu chất vấn chưa đạt như một mục tiêu
+
+Lưới danh hiệu ở trang học viên vốn hiện cả thẻ khoá để người học biết còn gì
+phía trước. Áp cách đó cho nhóm này là dựng một danh sách hướng dẫn cách bị chê,
+và với Cải Quá Tự Tân thì còn tệ hơn: một thẻ mang tên "chuộc lỗi" trước mặt
+người chưa hề vấp là gợi ý một vết trượt chưa từng có. Cả bảy danh hiệu chất vấn
+lẫn danh hiệu chuộc lỗi chỉ hiện sau khi đã có.
