@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/session";
 import { heartbeat, presentPlayers } from "@/lib/arena/arena-service.ts";
+import { activeDuelFor, pendingInvitesFor } from "@/lib/arena/duel-service.ts";
 import { PRESENCE_HEARTBEAT_SECONDS } from "@/lib/arena/rating.ts";
 
 /**
@@ -45,7 +46,11 @@ export async function POST(request: Request) {
     console.error("[wobridges] Nhip bot loi:", err);
   }
 
-  const present = await presentPlayers();
+  const [present, invites, active] = await Promise.all([
+    presentPlayers(),
+    pendingInvitesFor(user.id),
+    activeDuelFor(user.id),
+  ]);
 
   return NextResponse.json({
     ok: true,
@@ -53,6 +58,16 @@ export async function POST(request: Request) {
     // trạng thái thay vì im lặng không cập nhật gì.
     present: accepted,
     intervalSeconds: PRESENCE_HEARTBEAT_SECONDS,
+    invites,
+    activeDuel: active
+      ? {
+          duelId: active.duelId,
+          attemptId: active.attemptId,
+          opponentName: active.opponentName,
+          stake: active.stake,
+          submitted: active.submitted,
+        }
+      : null,
     players: present
       // Không lộ userId của người khác ra ngoài nhiều hơn mức cần để thách đấu.
       .map((p) => ({

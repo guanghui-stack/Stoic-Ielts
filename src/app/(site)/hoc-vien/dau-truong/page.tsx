@@ -1,4 +1,4 @@
-import { Tent, TrendingUp } from "lucide-react";
+import { CalendarClock, Tent, TrendingUp } from "lucide-react";
 import { requireUser } from "@/lib/session";
 import { ArenaFloor } from "@/components/arena/arena-floor";
 import { QuyDienToggle } from "@/components/arena/quy-dien-toggle";
@@ -6,6 +6,7 @@ import {
   getArenaProfile,
   isInQuyDien,
   leaderboard,
+  upcomingAppointments,
 } from "@/lib/arena/arena-service.ts";
 import { getMeritWallet } from "@/lib/merit/merit-service.ts";
 import { MUSTER_WINDOWS, MUSTER_XP_BONUS } from "@/lib/arena/rating.ts";
@@ -21,12 +22,22 @@ export const metadata = { title: "Đấu trường" };
  */
 export default async function ArenaPage() {
   const user = await requireUser();
-  const [profile, wallet, quyDien, board] = await Promise.all([
+  const [profile, wallet, quyDien, board, appointments] = await Promise.all([
     getArenaProfile(user.id),
     getMeritWallet(user.id),
     isInQuyDien(user.id),
     leaderboard(10),
+    upcomingAppointments(user.id),
   ]);
+
+  const dateTimeVN = new Intl.DateTimeFormat("vi-VN", {
+    timeZone: "Asia/Ho_Chi_Minh",
+    weekday: "short",
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 
   return (
     <div className="motion-page-entry">
@@ -92,6 +103,48 @@ export default async function ArenaPage() {
             cùng lúc, mà ai cũng học rải rác cả ngày. Dồn vào một khung là cách
             rẻ nhất để sân không rỗng.
           </p>
+        </section>
+
+        {/* Hẹn trận */}
+        <section className="mt-6 border border-line bg-paper p-6">
+          <p className="label-caps flex items-center gap-2">
+            <CalendarClock className="h-3.5 w-3.5" aria-hidden="true" />
+            Hẹn trận
+          </p>
+          <p className="mt-2.5 max-w-2xl text-[0.96rem] leading-relaxed text-ink-soft">
+            Đặt lịch với ai đó vào giờ sau. Đây là cách duy nhất để hai người bận
+            vẫn đấu được, vì trận buộc phải diễn ra đồng thời.
+          </p>
+
+          {appointments.length === 0 ? (
+            <p className="mt-4 font-ui text-sm text-muted">
+              Chưa có lịch hẹn nào.
+            </p>
+          ) : (
+            <ul className="mt-4 flex flex-col gap-px border border-line bg-line">
+              {appointments.map((a) => (
+                <li
+                  key={a.id}
+                  className="flex flex-wrap items-center gap-3 bg-paper px-5 py-3"
+                >
+                  <span className="font-ui text-[0.92rem] font-semibold text-ink">
+                    {a.otherName}
+                  </span>
+                  <span className="font-ui text-xs tabular-nums text-ink-soft">
+                    {dateTimeVN.format(a.scheduledAt)}
+                  </span>
+                  <span className="font-ui text-xs text-ink-soft">
+                    {a.stake > 0 ? `Cược ${a.stake}` : "Không cược"}
+                  </span>
+                  {/* Màu không phải tín hiệu duy nhất: trạng thái hiện bằng chữ. */}
+                  <span className="ml-auto font-ui text-xs text-muted">
+                    {a.status === "ACCEPTED" ? "Đã nhận lời" : "Đang chờ trả lời"}
+                    {a.isMine ? ", bạn đặt" : ", được mời"}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
 
         {/* Quy Điền */}

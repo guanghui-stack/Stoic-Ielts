@@ -18,8 +18,10 @@
 import "server-only";
 import { db } from "@/lib/db";
 import {
+  APPOINTMENT_GRACE_MINUTES,
   BASE_RATING,
   PRESENCE_TTL_SECONDS,
+  checkAppointment,
   applyDuelResult,
   findOpponent,
   quyDienDrift,
@@ -333,6 +335,111 @@ export async function recordTruce(duelId: string): Promise<void> {
       update: { truces: { increment: 1 } },
     });
   }
+}
+
+/* ===================== Hẹn trận ===================== */
+
+export type AppointmentResult =
+  | { ok: true; appointmentId: string }
+  | { ok: false; reason: "SELF" | "TOO_SOON" | "TOO_FAR" | "DUPLICATE" };
+
+/**
+ * Đặt lịch đấu với ai đó vào giờ sau.
+ *
+ * Đây là cách DUY NHẤT để hai người bận vẫn đấu được, khi trận buộc phải diễn
+ * ra đồng thời. Không có nó thì đấu trường chỉ phục vụ những người tình cờ
+ * online cùng lúc, và đó là phần lớn lý do sân rỗng.
+ */
+export async function createAppointment(input: {
+  fromUserId: string;
+  toUserId: string;
+  stake: number;
+  scheduledAt: Date;
+  now?: Date;
+}): Promise<AppointmentResult> {
+  const now = input.now ?? new Date();
+  if (input.fromUserId === input.toUserId) return { ok: false, reason: "SELF" };
+
+  const check = checkAppointment({ at: input.scheduledAt, now });
+  if (!check.ok) return { ok: false, reason: check.reason };
+
+  // Một cặp chỉ được có một lịch đang chờ. Cùng lý do chiến thư chỉ được treo
+  // một lá: không có luật này thì hộp thư của người kia thành bãi rác.
+  const existing = await db.duelAppointment.findFirst({
+    where: {
+      fromUserId: input.fromUserId,
+      toUserId: input.toUserId,
+      status: { in: ["PENDING", "ACCEPTED"] },
+    },
+    select: { id: true },
+  });
+  if (existing) return { ok: false, reason: "DUPLICATE" };
+
+  const row = await db.duelAppointment.create({
+    data: {
+      fromUserId: input.fromUserId,
+      toUserId: input.toUserId,
+      stake: Math.max(0, Math.floor(input.stake)),
+      scheduledAt: input.scheduledAt,
+    },
+    select: { id: true },
+  });
+  return { ok: true, appointmentId: row.id };
+}
+
+export async function respondToAppointment(input: {
+  appointmentId: string;
+  userId: string;
+  accept: boolean;
+}): Promise<boolean> {
+  const result = await db.duelAppointment.updateMany({
+    where: {
+      id: input.appointmentId,
+      toUserId: input.userId,
+      status: "PENDING",
+    },
+    data: { status: input.accept ? "ACCEPTED" : "DECLINED" },
+  });
+  return result.count > 0;
+}
+
+/**
+ * Lịch hẹn sắp tới của một người, cả lịch mình đặt lẫn lịch người khác đặt cho.
+ *
+ * Lọc bỏ những lịch đã quá giờ ân hạn: giữ chúng trên màn hình chỉ làm người ta
+ * tưởng còn kịp.
+ */
+export async function upcomingAppointments(userId: string, now = new Date()) {
+  const cutoff = new Date(now.getTime() - APPOINTMENT_GRACE_MINUTES * 60_000);
+  const rows = await db.duelAppointment.findMany({
+    where: {
+      OR: [{ fromUserId: userId }, { toUserId: userId }],
+      status: { in: ["PENDING", "ACCEPTED"] },
+      scheduledAt: { gt: cutoff },
+    },
+    orderBy: { scheduledAt: "asc" },
+    take: 20,
+    select: {
+      id: true,
+      fromUserId: true,
+      toUserId: true,
+      stake: true,
+      status: true,
+      scheduledAt: true,
+      fromUser: { select: { name: true } },
+      toUser: { select: { name: true } },
+    },
+  });
+
+  return rows.map((r) => ({
+    id: r.id,
+    stake: r.stake,
+    status: r.status,
+    scheduledAt: r.scheduledAt,
+    /** Mình là người đặt lịch hay người được mời. */
+    isMine: r.fromUserId === userId,
+    otherName: r.fromUserId === userId ? r.toUser.name : r.fromUser.name,
+  }));
 }
 
 /* ===================== Bảng xếp hạng ===================== */

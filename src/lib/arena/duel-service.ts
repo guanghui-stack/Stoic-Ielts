@@ -284,6 +284,113 @@ export async function declineInvite(input: {
   return result.count > 0;
 }
 
+/* ===================== Đọc trạng thái cho màn hình ===================== */
+
+export type PendingInvite = {
+  inviteId: string;
+  fromUserId: string;
+  fromName: string;
+  fromChienLuc: number;
+  stake: number;
+  secondsLeft: number;
+};
+
+/**
+ * Chiến thư đang chờ mình trả lời.
+ *
+ * Trả kèm `secondsLeft` chứ không trả `expiresAt`: màn hình cần đếm ngược, và
+ * để nó tự trừ theo đồng hồ trình duyệt là mở đường cho hai bên nhìn thấy hai
+ * con số khác nhau. Máy chủ tính, máy khách chỉ đếm lùi từ con số đó.
+ */
+export async function pendingInvitesFor(
+  userId: string,
+  now = new Date(),
+): Promise<PendingInvite[]> {
+  const rows = await db.duelInvite.findMany({
+    where: { toUserId: userId, status: "PENDING", expiresAt: { gt: now } },
+    orderBy: { createdAt: "asc" },
+    take: 10,
+    select: {
+      id: true,
+      fromUserId: true,
+      stake: true,
+      expiresAt: true,
+      fromUser: { select: { name: true } },
+    },
+  });
+  if (rows.length === 0) return [];
+
+  const profiles = await db.arenaProfile.findMany({
+    where: { userId: { in: rows.map((r) => r.fromUserId) } },
+    select: { userId: true, chienLuc: true },
+  });
+  const ratingById = new Map(profiles.map((p) => [p.userId, p.chienLuc]));
+
+  return rows.map((r) => ({
+    inviteId: r.id,
+    fromUserId: r.fromUserId,
+    fromName: r.fromUser.name,
+    fromChienLuc: ratingById.get(r.fromUserId) ?? 1000,
+    stake: r.stake,
+    secondsLeft: Math.max(
+      0,
+      Math.ceil((r.expiresAt.getTime() - now.getTime()) / 1000),
+    ),
+  }));
+}
+
+export type ActiveDuel = {
+  duelId: string;
+  attemptId: string | null;
+  opponentName: string;
+  stake: number;
+  deadlineAt: Date | null;
+  /** Mình đã nộp chưa. Nộp rồi thì chỉ còn chờ đối thủ. */
+  submitted: boolean;
+};
+
+/**
+ * Trận đang diễn ra của mình, nếu có.
+ *
+ * Cần cho màn đấu trường vì người đóng tab giữa chừng phải tìm được đường quay
+ * lại. Không có nó thì Quân Công đã cược biến mất khỏi tầm mắt họ, và cách duy
+ * nhất để về là nhớ đường dẫn phòng thi.
+ */
+export async function activeDuelFor(userId: string): Promise<ActiveDuel | null> {
+  const side = await db.duelSide.findFirst({
+    where: {
+      userId,
+      submittedAt: null,
+      surrenderedAt: null,
+      duel: { status: "LIVE" },
+    },
+    orderBy: { createdAt: "desc" },
+    select: {
+      attemptId: true,
+      submittedAt: true,
+      duel: {
+        select: {
+          id: true,
+          stake: true,
+          deadlineAt: true,
+          sides: { select: { userId: true, user: { select: { name: true } } } },
+        },
+      },
+    },
+  });
+  if (!side) return null;
+
+  const opponent = side.duel.sides.find((s) => s.userId !== userId);
+  return {
+    duelId: side.duel.id,
+    attemptId: side.attemptId,
+    opponentName: opponent?.user.name ?? "Đối thủ",
+    stake: side.duel.stake,
+    deadlineAt: side.duel.deadlineAt,
+    submitted: Boolean(side.submittedAt),
+  };
+}
+
 /* ===================== Trong trận ===================== */
 
 /**

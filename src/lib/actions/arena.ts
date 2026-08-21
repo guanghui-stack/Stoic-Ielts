@@ -8,7 +8,12 @@ import {
   leaveQueue,
   leaveQuyDien,
 } from "@/lib/arena/arena-service.ts";
-import { sendInvite } from "@/lib/arena/duel-service.ts";
+import {
+  acceptInvite,
+  activeDuelFor,
+  declineInvite,
+  sendInvite,
+} from "@/lib/arena/duel-service.ts";
 
 const ARENA_PATH = "/hoc-vien/dau-truong";
 
@@ -72,6 +77,59 @@ export async function toggleQuyDienAction(
   await leaveQuyDien(user.id);
   revalidatePath(ARENA_PATH);
   return { success: "Đã trở lại đấu trường." };
+}
+
+export type InviteReplyState =
+  | { error: string }
+  | { accepted: true; attemptId: string | null }
+  | { declined: true }
+  | undefined;
+
+/**
+ * Nhận chiến thư.
+ *
+ * Đây là chỗ Quân Công thật sự bị trừ, nên câu lỗi phải nói rõ chuyện gì xảy
+ * ra chứ không chỉ nói "không được".
+ */
+export async function acceptInviteAction(
+  _prev: InviteReplyState,
+  formData: FormData,
+): Promise<InviteReplyState> {
+  const user = await requireUser();
+  const inviteId = String(formData.get("inviteId") ?? "");
+  if (!inviteId) return { error: "Thiếu mã chiến thư." };
+
+  const result = await acceptInvite({ inviteId, userId: user.id });
+  if (!result.ok) {
+    switch (result.reason) {
+      case "EXPIRED":
+        return { error: "Chiến thư đã hết hạn. Thư chỉ sống 90 giây." };
+      case "INSUFFICIENT":
+        return { error: "Không đủ quân công để nhận mức cược này." };
+      case "NO_EXERCISE":
+        return { error: "Chưa có đề nào dùng cho đấu trường." };
+      case "NOT_FOUND":
+        return { error: "Không tìm thấy chiến thư này." };
+    }
+  }
+
+  // Lấy lượt làm bài của chính mình để dẫn thẳng vào phòng thi.
+  const mine = await activeDuelFor(user.id);
+  revalidatePath(ARENA_PATH);
+  return { accepted: true, attemptId: mine?.attemptId ?? null };
+}
+
+export async function declineInviteAction(
+  _prev: InviteReplyState,
+  formData: FormData,
+): Promise<InviteReplyState> {
+  const user = await requireUser();
+  const inviteId = String(formData.get("inviteId") ?? "");
+  if (!inviteId) return { error: "Thiếu mã chiến thư." };
+
+  await declineInvite({ inviteId, userId: user.id });
+  revalidatePath(ARENA_PATH);
+  return { declined: true };
 }
 
 export type ChallengeState = { error?: string; success?: string } | undefined;

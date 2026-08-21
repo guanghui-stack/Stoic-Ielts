@@ -7,7 +7,9 @@ import {
   KeyRound,
   RotateCcw,
   Coins,
+  Handshake,
   MailWarning,
+  TrendingUp,
 } from "lucide-react";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
@@ -15,6 +17,7 @@ import { logoutAction } from "@/lib/actions/auth";
 import { resendVerificationAction } from "@/lib/actions/account";
 import { getCoinWallet } from "@/lib/payments/coin-service";
 import { WELCOME_COINS, formatCoins } from "@/lib/payments/coins";
+import { getMeritWallet } from "@/lib/merit/merit-service";
 import { ButtonLink, NoteBox, SubmitButton } from "@/components/ui";
 import { StudentNav } from "@/components/student/student-nav";
 import { GoalsCard } from "@/components/student/goals-card";
@@ -61,11 +64,19 @@ export default async function StudentDashboard({
   const user = await requireUser();
   const { "xac-minh": verifyResult, "vi-sao": verifyReason } = await searchParams;
 
-  const [wallet, account] = await Promise.all([
+  const [wallet, account, merit, arena] = await Promise.all([
     getCoinWallet(user.id),
     db.user.findUnique({
       where: { id: user.id },
       select: { emailVerifiedAt: true },
+    }),
+    getMeritWallet(user.id),
+    // Đọc thẳng chứ không gọi `getArenaProfile`: hàm đó TẠO hồ sơ nếu chưa có,
+    // và một trang chỉ để xem không nên tự sinh dữ liệu. Người chưa vào đấu
+    // trường lần nào thì khối chỉ số này không hiện, đúng như nó phải thế.
+    db.arenaProfile.findUnique({
+      where: { userId: user.id },
+      select: { chienLuc: true, wins: true, losses: true, truces: true },
     }),
   ]);
   const verified = Boolean(account?.emailVerifiedAt);
@@ -165,6 +176,58 @@ export default async function StudentDashboard({
               <Coins className="h-4 w-4 text-gold" aria-hidden="true" />
               Ví: <span className="tabular-nums">{formatCoins(wallet.balance)}</span>
             </p>
+
+            {/*
+              Bốn chỉ số đặt cạnh nhau, vì CHÍNH SỰ ĐẶT CẠNH NHAU tạo ra câu hỏi.
+              Xem đặc tả mục 05.
+
+              Mỗi chỉ số có hình dạng riêng chứ không chỉ khác màu, theo
+              BRAND-GUIDELINE mục 8.3: quân công đi với con dấu, Chiến Lực đi với
+              mũi tên, Hoà khí đi với cái bắt tay.
+
+              Hoà khí CHỈ đến từ giảng hoà, không đến từ hoà điểm. Nó không đo sự
+              bế tắc mà đo sự nhún nhường, nên nhãn phải nói đúng điều đó.
+            */}
+            {arena ? (
+              <dl className="mt-4 flex flex-wrap gap-px border border-line bg-line">
+                <div className="flex-1 bg-paper px-5 py-3">
+                  <dt className="label-caps">Quân Công</dt>
+                  <dd className="mt-1 flex items-center gap-2">
+                    <span className="seal h-4 w-4" aria-hidden="true" />
+                    <span className="font-display text-xl font-bold tabular-nums text-navy-deep">
+                      {merit.balance}
+                    </span>
+                  </dd>
+                </div>
+                <div className="flex-1 bg-paper px-5 py-3">
+                  <dt className="label-caps">Chiến Lực</dt>
+                  <dd className="mt-1 flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4 text-azure-ink" aria-hidden="true" />
+                    <span className="font-display text-xl font-bold tabular-nums text-navy-deep">
+                      {arena.chienLuc}
+                    </span>
+                  </dd>
+                </div>
+                <div className="flex-1 bg-paper px-5 py-3">
+                  <dt className="label-caps">Chiến tích</dt>
+                  <dd className="mt-1 font-display text-xl font-bold tabular-nums text-navy-deep">
+                    {arena.wins}/{arena.losses}
+                  </dd>
+                </div>
+                <div className="flex-1 bg-paper px-5 py-3">
+                  <dt className="label-caps">Hoà khí</dt>
+                  <dd className="mt-1 flex items-center gap-2">
+                    <Handshake className="h-4 w-4 text-silver-blue-ink" aria-hidden="true" />
+                    <span className="font-display text-xl font-bold tabular-nums text-navy-deep">
+                      {arena.truces}
+                    </span>
+                  </dd>
+                  <p className="mt-0.5 font-ui text-[0.68rem] leading-snug text-muted">
+                    số lần giảng hoà
+                  </p>
+                </div>
+              </dl>
+            ) : null}
           </div>
           <div className="flex items-center gap-2">
             <Link

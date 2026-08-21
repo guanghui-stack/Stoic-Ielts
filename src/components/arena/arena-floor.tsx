@@ -2,14 +2,27 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Swords, Users } from "lucide-react";
+import Link from "next/link";
 import { challengeAction, type ChallengeState } from "@/lib/actions/arena";
 import { useActionState } from "react";
+import {
+  IncomingInvites,
+  type IncomingInvite,
+} from "@/components/arena/incoming-invites";
 
 type Player = {
   userId: string;
   name: string;
   chienLuc: number;
   status: string;
+};
+
+type ActiveDuelView = {
+  duelId: string;
+  attemptId: string | null;
+  opponentName: string;
+  stake: number;
+  submitted: boolean;
 };
 
 const STATUS_LABEL: Record<string, string> = {
@@ -37,6 +50,8 @@ export function ArenaFloor({
   inQuyDien: boolean;
 }) {
   const [players, setPlayers] = useState<Player[]>([]);
+  const [invites, setInvites] = useState<IncomingInvite[]>([]);
+  const [activeDuel, setActiveDuel] = useState<ActiveDuelView | null>(null);
   const [intervalSeconds, setIntervalSeconds] = useState(15);
   const [state, formAction, pending] = useActionState<ChallengeState, FormData>(
     challengeAction,
@@ -54,9 +69,13 @@ export function ArenaFloor({
       if (!res.ok) return;
       const data = (await res.json()) as {
         players?: Player[];
+        invites?: IncomingInvite[];
+        activeDuel?: ActiveDuelView | null;
         intervalSeconds?: number;
       };
       setPlayers(data.players ?? []);
+      setInvites(data.invites ?? []);
+      setActiveDuel(data.activeDuel ?? null);
       if (data.intervalSeconds) setIntervalSeconds(data.intervalSeconds);
     } catch {
       // Mất mạng thoáng qua không phải sự kiện đáng báo: nhịp sau sẽ bù.
@@ -98,7 +117,38 @@ export function ArenaFloor({
   const others = players.filter((p) => p.userId !== selfId);
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-8">
+      {/*
+        Đường quay lại trận đang dở.
+
+        Người đóng tab giữa chừng phải tìm được đường về. Không có khối này thì
+        quân công đã cược biến mất khỏi tầm mắt họ, và cách duy nhất để quay lại
+        là nhớ đường dẫn phòng thi.
+      */}
+      {activeDuel ? (
+        <section className="border-l-4 border-gold bg-cream-deep px-6 py-5">
+          <p className="label-caps">Bạn đang trong trận</p>
+          <p className="mt-2 text-[0.98rem] leading-relaxed text-ink">
+            Đối thủ: <strong className="text-navy-deep">{activeDuel.opponentName}</strong>
+            {activeDuel.stake > 0
+              ? `, cược ${activeDuel.stake} quân công`
+              : ", hạng không cược"}
+            .
+          </p>
+          {activeDuel.attemptId ? (
+            <Link
+              href={`/lam-bai/${activeDuel.attemptId}`}
+              className="mt-4 inline-flex items-center gap-2 border border-navy bg-navy px-6 py-2.5 font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-paper transition-colors hover:bg-navy-deep"
+            >
+              Quay lại phòng thi
+            </Link>
+          ) : null}
+        </section>
+      ) : null}
+
+      <IncomingInvites invites={invites} />
+
+      <div className="flex flex-col gap-5">
       <div className="flex items-center justify-between gap-4">
         <p className="label-caps flex items-center gap-2">
           <Users className="h-3.5 w-3.5" aria-hidden="true" />
@@ -181,6 +231,7 @@ export function ArenaFloor({
           {state.success}
         </p>
       ) : null}
+      </div>
     </div>
   );
 }
