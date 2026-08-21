@@ -101,6 +101,11 @@ model User {
   // Thí Bút, giai đoạn P2.
   thiButAttempts ThiButAttempt[]
   thiButReviews  ThiButItem[]    @relation("ThiButReviewer")
+
+  // Trận đấu, giai đoạn P3.
+  duelSides     DuelSide[]
+  duelInvitesTo DuelInvite[] @relation("DuelInviteTo")
+  duelInvitesBy DuelInvite[] @relation("DuelInviteFrom")
 }
 
 model Exercise {
@@ -121,6 +126,10 @@ model Exercise {
   achievementEligible Boolean @default(false)
   /// Đề chỉ dùng cho Nguyệt Thí — không hiện ở khu luyện tập công khai.
   competitionOnly     Boolean @default(false)
+  /// Đề dành riêng cho đấu trường. Khai theo đúng cách `competitionOnly` đã
+  /// làm, vì logic lọc đã có sẵn và đã chạy đúng. Đây là chỗ hợp lý cho đề cũ
+  /// đã rút khỏi kho bán: rủi ro rò rỉ không quan trọng ở sân đấu.
+  arenaOnly           Boolean @default(false)
   /// EASY | MEDIUM | HARD | UNKNOWN — để ghép đề tự động cân bằng độ khó
   /// theo đúng trình tự đề thi thật (passage 1 dễ nhất, passage 3 khó nhất).
   difficultyTier      String  @default("UNKNOWN")
@@ -131,6 +140,7 @@ model Exercise {
   createdAt        DateTime                 @default(now())
   updatedAt        DateTime                 @updatedAt
   attempts         Attempt[]
+  duels            Duel[]
   access           ExerciseAccess[]
   paymentOrders    PaymentOrder[]
   accessGrants     AccessGrant[]
@@ -1990,4 +2000,115 @@ model ThiButAttempt {
 
   @@index([userId, startedAt])
   @@index([userId, targetKind, targetId])
+}
+
+/// ===== Đấu trường, giai đoạn P3 =====
+///
+/// P3 CỐ Ý CHƯA CÓ: realtime, ghép cặp tự động, Chiến Lực, bot, điểm phe. Đây
+/// là bản chứng minh luật quyết toán chạy đúng TRƯỚC KHI thêm realtime.
+model Duel {
+  id String @id @default(cuid())
+
+  /// Xem DUEL_STATUSES trong lib/arena/duel.ts. Bảng chuyển trạng thái hợp lệ
+  /// nằm ở ALLOWED_TRANSITIONS, không rải if khắp nơi.
+  status String @default("INVITED") @db.VarChar(16)
+  /// STAKED | FREE. Cửa đấu trường luôn mở, chỉ sới cược là đóng.
+  tier   String @db.VarChar(8)
+
+  /// Đề dùng cho trận. Cả hai bên làm CÙNG một đề.
+  exerciseId String
+  /// Quân Công mỗi bên đặt. 0 với hạng không cược.
+  stake      Int    @default(0)
+
+  /// Trừ Quân Công ở bước ARMED, KHÔNG phải lúc quyết toán. Cột này ghi lúc
+  /// đã trừ xong, để job quyết toán biết có phải hoàn cược không.
+  armedAt    DateTime?
+  startedAt  DateTime?
+  /// Đồng hồ là trọng tài. Máy chủ giữ mốc này, không tin đồng hồ trình duyệt.
+  deadlineAt DateTime?
+  settledAt  DateTime?
+
+  winnerId String?
+  /// SCORE | TIME | FORFEIT. Null khi hoà hoặc giảng hoà.
+  winBy    String? @db.VarChar(8)
+
+  /// Bắt buộc điền khi status = VOIDED. Huỷ trận mà không ghi lý do thì không
+  /// tra được khi có khiếu nại.
+  voidReason String? @db.Text
+
+  /// Phiên bản chính sách liêm chính lúc xảy ra trận, đúng cách Competition
+  /// đang làm: khi xét khiếu nại thì xét theo luật đã công bố lúc đó.
+  integrityPolicyVersion String @default("2026-08-v1") @db.VarChar(32)
+  ruleVersion            String @db.VarChar(32)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  exercise Exercise   @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  sides    DuelSide[]
+
+  @@index([status, createdAt])
+  @@index([exerciseId])
+}
+
+/// Một bên của trận. LUÔN đúng hai dòng mỗi trận.
+model DuelSide {
+  id     String @id @default(cuid())
+  duelId String
+  userId String
+
+  /// Lượt làm bài thật, để tra ngược đáp án khi có khiếu nại.
+  attemptId String?
+
+  /// Số câu đúng. MÁY CHỦ chấm. Máy khách không bao giờ gửi điểm lên.
+  score       Int?
+  /// Đo ở máy chủ lúc nhận bài nộp, không tin đồng hồ trình duyệt.
+  elapsedMs   Int?
+  submittedAt DateTime?
+
+  /// Đầu hàng chủ động. Rẻ hơn bỏ mặc về kinh nghiệm, và đó là chủ ý.
+  surrenderedAt DateTime?
+  /// Bỏ mặc tới hết giờ. Chấm theo phần đã làm.
+  abandoned     Boolean   @default(false)
+
+  /// Cờ do hệ liêm chính đánh dấu. CHỈ để xếp thứ tự hồ sơ cho người thật xem,
+  /// không bao giờ tự đổi trạng thái của ai.
+  integrityFlags String? @db.Text
+
+  createdAt DateTime @default(now())
+
+  duel Duel @relation(fields: [duelId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([duelId, userId])
+  @@index([userId, createdAt])
+}
+
+/// Chiến thư đang chờ. Sống 90 giây.
+model DuelInvite {
+  id         String  @id @default(cuid())
+  fromUserId String
+  toUserId   String
+  /// Mức cược đề nghị. 0 nghĩa là mời đấu hạng không cược.
+  stake      Int     @default(0)
+  /// PENDING | ACCEPTED | DECLINED | EXPIRED
+  status     String  @default("PENDING") @db.VarChar(16)
+  /// Trận sinh ra khi thư được nhận.
+  duelId     String?
+
+  /// Người bị thách có đang ở đấu trường lúc thư tới không, và có đang trong
+  /// trận khác không. Hai cột này là hai trong bốn chốt bảo vệ ở mục 04: không
+  /// có chúng thì người mạnh bị phạt vì ĐƯỢC NHIỀU NGƯỜI MUỐN ĐẤU.
+  toWasPresent Boolean @default(false)
+  toWasInDuel  Boolean @default(false)
+
+  expiresAt   DateTime
+  respondedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  fromUser User @relation("DuelInviteFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUser   User @relation("DuelInviteTo", fields: [toUserId], references: [id], onDelete: Cascade)
+
+  @@index([toUserId, status, expiresAt])
+  @@index([fromUserId, createdAt])
 }

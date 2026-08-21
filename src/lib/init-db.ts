@@ -1236,6 +1236,68 @@ const DDL = [
     CONSTRAINT \`ThiButAttempt_retryOfId_fkey\` FOREIGN KEY (\`retryOfId\`) REFERENCES \`ThiButAttempt\` (\`id\`) ON DELETE SET NULL ON UPDATE CASCADE
   ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
 
+  // Dau truong P3: tran dau va quyet toan. Chua co realtime, do la P4.
+  `CREATE TABLE IF NOT EXISTS \`Duel\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`status\` VARCHAR(16) NOT NULL DEFAULT 'INVITED',
+    \`tier\` VARCHAR(8) NOT NULL,
+    \`exerciseId\` VARCHAR(191) NOT NULL,
+    \`stake\` INTEGER NOT NULL DEFAULT 0,
+    \`armedAt\` DATETIME(3) NULL,
+    \`startedAt\` DATETIME(3) NULL,
+    \`deadlineAt\` DATETIME(3) NULL,
+    \`settledAt\` DATETIME(3) NULL,
+    \`winnerId\` VARCHAR(191) NULL,
+    \`winBy\` VARCHAR(8) NULL,
+    \`voidReason\` TEXT NULL,
+    \`integrityPolicyVersion\` VARCHAR(32) NOT NULL DEFAULT '2026-08-v1',
+    \`ruleVersion\` VARCHAR(32) NOT NULL,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`updatedAt\` DATETIME(3) NOT NULL,
+    PRIMARY KEY (\`id\`),
+    INDEX \`Duel_status_createdAt_idx\` (\`status\`, \`createdAt\`),
+    INDEX \`Duel_exerciseId_idx\` (\`exerciseId\`),
+    CONSTRAINT \`Duel_exerciseId_fkey\` FOREIGN KEY (\`exerciseId\`) REFERENCES \`Exercise\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`DuelSide\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`duelId\` VARCHAR(191) NOT NULL,
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`attemptId\` VARCHAR(191) NULL,
+    \`score\` INTEGER NULL,
+    \`elapsedMs\` INTEGER NULL,
+    \`submittedAt\` DATETIME(3) NULL,
+    \`surrenderedAt\` DATETIME(3) NULL,
+    \`abandoned\` BOOLEAN NOT NULL DEFAULT false,
+    \`integrityFlags\` TEXT NULL,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`DuelSide_duelId_userId_key\` (\`duelId\`, \`userId\`),
+    INDEX \`DuelSide_userId_createdAt_idx\` (\`userId\`, \`createdAt\`),
+    CONSTRAINT \`DuelSide_duelId_fkey\` FOREIGN KEY (\`duelId\`) REFERENCES \`Duel\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`DuelSide_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`DuelInvite\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`fromUserId\` VARCHAR(191) NOT NULL,
+    \`toUserId\` VARCHAR(191) NOT NULL,
+    \`stake\` INTEGER NOT NULL DEFAULT 0,
+    \`status\` VARCHAR(16) NOT NULL DEFAULT 'PENDING',
+    \`duelId\` VARCHAR(191) NULL,
+    \`toWasPresent\` BOOLEAN NOT NULL DEFAULT false,
+    \`toWasInDuel\` BOOLEAN NOT NULL DEFAULT false,
+    \`expiresAt\` DATETIME(3) NOT NULL,
+    \`respondedAt\` DATETIME(3) NULL,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (\`id\`),
+    INDEX \`DuelInvite_toUserId_status_expiresAt_idx\` (\`toUserId\`, \`status\`, \`expiresAt\`),
+    INDEX \`DuelInvite_fromUserId_createdAt_idx\` (\`fromUserId\`, \`createdAt\`),
+    CONSTRAINT \`DuelInvite_fromUserId_fkey\` FOREIGN KEY (\`fromUserId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`DuelInvite_toUserId_fkey\` FOREIGN KEY (\`toUserId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
   `CREATE TABLE IF NOT EXISTS \`FeynmanAiAttemptState\` (
     \`id\` VARCHAR(191) NOT NULL,
     \`attemptId\` VARCHAR(191) NOT NULL,
@@ -1275,6 +1337,10 @@ const DDL = [
  * cột đã tồn tại nên từng lệnh được bọc try/catch ở nơi gọi.
  */
 const MIGRATIONS = [
+  // Dau truong P3: de danh rieng cho san dau. Bang Exercise da co san nen day
+  // phai la ALTER, khong phai CREATE TABLE.
+  `ALTER TABLE \`Exercise\` ADD COLUMN \`arenaOnly\` BOOLEAN NOT NULL DEFAULT false`,
+
   // Vi xu: hai cot moi tren don hang co san. Bang CoinWallet/CoinLedger nam o
   // phan CREATE TABLE nen khong can migration.
   `ALTER TABLE \`PaymentOrder\` ADD COLUMN \`orderKind\` VARCHAR(191) NOT NULL DEFAULT 'PACKAGE'`,
