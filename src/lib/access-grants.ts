@@ -113,8 +113,17 @@ export type AdminGrantSummary = {
   readingGift: Set<string>;
   /** Học viên đang được trung tâm tặng quyền Feynman toàn bộ. */
   feynmanGift: Set<string>;
-  /** Số quyền Reading học viên đã TỰ MUA (không tính phần tặng). */
+  /** Số quyền Reading học viên đã TỰ MUA BẰNG TIỀN (không tính phần tặng). */
   readingPurchases: Map<string, number>;
+  /**
+   * Số quyền Reading học viên ĐOẠT ĐƯỢC BẰNG QUÂN CÔNG qua Thí Bút.
+   *
+   * Tách khỏi `readingPurchases` là bắt buộc, không phải cho đẹp: quyền đoạt
+   * bằng công sức KHÔNG đối ứng một đồng nào trong tài khoản ngân hàng. Gộp
+   * chung thì mọi con số doanh thu phồng lên đúng bằng phần cho không, cùng
+   * lỗi mà ví xu đã tránh khi tách `sold` khỏi `gifted`.
+   */
+  readingMerit: Map<string, number>;
   /** Học viên đang có gói Reading 30 ngày do tự mua. */
   readingPackage: Set<string>;
 };
@@ -147,11 +156,14 @@ export async function summarizeGrantsForAdmin(): Promise<AdminGrantSummary> {
     readingGift: new Set(),
     feynmanGift: new Set(),
     readingPurchases: new Map(),
+    readingMerit: new Map(),
     readingPackage: new Set(),
   };
 
   for (const row of live) {
     const gifted = row.source === "ADMIN";
+    // Quyền đoạt được bằng Quân Công. Phải tách riêng khỏi phần mua bằng tiền.
+    const byMerit = row.source === "MERIT";
     if (row.feature === "FEYNMAN") {
       if (gifted && row.scope === "ALL") summary.feynmanGift.add(row.userId);
       continue;
@@ -159,6 +171,13 @@ export async function summarizeGrantsForAdmin(): Promise<AdminGrantSummary> {
     if (row.feature !== "READING") continue;
     if (gifted) {
       if (row.scope === "ALL") summary.readingGift.add(row.userId);
+      continue;
+    }
+    if (byMerit) {
+      summary.readingMerit.set(
+        row.userId,
+        (summary.readingMerit.get(row.userId) ?? 0) + 1
+      );
       continue;
     }
     summary.readingPurchases.set(

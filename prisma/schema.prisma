@@ -97,6 +97,10 @@ model User {
   // Đấu trường, giai đoạn P1: chỉ kinh tế Quân Công, chưa có trận nào.
   meritWallet MeritWallet?
   meritLedger MeritLedger[]
+
+  // Thí Bút, giai đoạn P2.
+  thiButAttempts ThiButAttempt[]
+  thiButReviews  ThiButItem[]    @relation("ThiButReviewer")
 }
 
 model Exercise {
@@ -1898,4 +1902,92 @@ model MeritLedger {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
+}
+
+/// ===== Thí Bút, giai đoạn P2 =====
+///
+/// Kho câu ngắn ĐỘC LẬP. Cố ý KHÔNG dùng câu Reading: câu Reading không đứng
+/// một mình được, muốn hỏi thì phải đưa cả passage, tức cho không đúng cái đề
+/// mà người ta đáng lẽ phải đoạt lấy.
+model ThiButItem {
+  id String @id @default(cuid())
+
+  /// PARAPHRASE | VOCAB_IN_CONTEXT | COLLOCATION | SENTENCE_GRAMMAR
+  type       String @db.VarChar(24)
+  /// EASY | MEDIUM | HARD
+  difficulty String @db.VarChar(8)
+
+  prompt  String @db.Text
+  /// Mảng JSON các phương án. Luôn bốn phương án.
+  options String @db.Text
+
+  /// Chỉ số phương án đúng. CỘT NÀY KHÔNG BAO GIỜ ĐƯỢC GỬI XUỐNG MÁY KHÁCH
+  /// trước khi chấm xong. Xem `publicItem()` trong lib/thibut/thibut.ts.
+  answerIndex Int
+  /// Lời giải, chỉ gửi xuống SAU khi đã chấm.
+  explanation String @db.Text
+
+  /// DRAFT | PUBLISHED | RETIRED.
+  ///
+  /// AI sinh ra câu ở trạng thái DRAFT. Chỉ người duyệt mới đẩy sang PUBLISHED.
+  /// Lý do: một câu sai đáp án sẽ lấy mất Quân Công của người ngay thẳng, và
+  /// không tái lập được để xử tranh chấp.
+  status String @default("DRAFT") @db.VarChar(16)
+
+  /// Mẻ sinh ra câu này, để truy ngược khi phát hiện một mẻ có vấn đề hệ thống.
+  sourceBatch  String?   @db.VarChar(64)
+  reviewedById String?
+  reviewedAt   DateTime?
+  publishedAt  DateTime?
+  /// Ghi chú của người duyệt, giữ cả khi câu bị loại.
+  reviewNote   String?   @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reviewedBy User? @relation("ThiButReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+
+  @@index([status, type])
+  @@index([status, createdAt])
+}
+
+/// Một lượt khảo hạch.
+model ThiButAttempt {
+  id     String @id @default(cuid())
+  userId String
+
+  /// EXERCISE | FEYNMAN
+  targetKind String @db.VarChar(16)
+  /// Đề hoặc lượt Feynman mà lượt này mở ra nếu qua.
+  targetId   String @db.VarChar(191)
+
+  /// Quân Công đã trừ. Trừ ở lúc BẮT ĐẦU, không phải lúc chấm: nếu chờ tới cuối
+  /// mới trừ thì một người mở được nhiều lượt song song bằng số Quân Công họ
+  /// chỉ có một lần.
+  cost Int
+
+  /// Mảng JSON id các câu đã phát. Chốt lúc bắt đầu để đổi câu giữa chừng là
+  /// không thể.
+  itemIds String  @db.Text
+  /// Mảng JSON lựa chọn của học viên, điền lúc nộp.
+  answers String? @db.Text
+
+  correctCount Int?
+  passed       Boolean?
+
+  startedAt   DateTime  @default(now())
+  deadlineAt  DateTime
+  submittedAt DateTime?
+
+  /// Lượt trước đó nếu đây là lần thử lại. Dùng để tính giá giảm dần.
+  retryOfId String?
+
+  ruleVersion String @db.VarChar(32)
+
+  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  retryOf ThiButAttempt?  @relation("ThiButRetry", fields: [retryOfId], references: [id], onDelete: SetNull)
+  retries ThiButAttempt[] @relation("ThiButRetry")
+
+  @@index([userId, startedAt])
+  @@index([userId, targetKind, targetId])
 }

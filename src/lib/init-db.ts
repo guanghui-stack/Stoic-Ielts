@@ -1189,6 +1189,53 @@ const DDL = [
     CONSTRAINT \`MeritLedger_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
   ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
 
+  // Thi But P2: kho cau ngan doc lap va cac luot khao hach.
+  // `answerIndex` va `explanation` KHONG BAO GIO duoc gui xuong may khach
+  // truoc khi cham xong — xem publicItem() trong lib/thibut/thibut.ts.
+  `CREATE TABLE IF NOT EXISTS \`ThiButItem\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`type\` VARCHAR(24) NOT NULL,
+    \`difficulty\` VARCHAR(8) NOT NULL,
+    \`prompt\` TEXT NOT NULL,
+    \`options\` TEXT NOT NULL,
+    \`answerIndex\` INTEGER NOT NULL,
+    \`explanation\` TEXT NOT NULL,
+    \`status\` VARCHAR(16) NOT NULL DEFAULT 'DRAFT',
+    \`sourceBatch\` VARCHAR(64) NULL,
+    \`reviewedById\` VARCHAR(191) NULL,
+    \`reviewedAt\` DATETIME(3) NULL,
+    \`publishedAt\` DATETIME(3) NULL,
+    \`reviewNote\` TEXT NULL,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`updatedAt\` DATETIME(3) NOT NULL,
+    PRIMARY KEY (\`id\`),
+    INDEX \`ThiButItem_status_type_idx\` (\`status\`, \`type\`),
+    INDEX \`ThiButItem_status_createdAt_idx\` (\`status\`, \`createdAt\`),
+    CONSTRAINT \`ThiButItem_reviewedById_fkey\` FOREIGN KEY (\`reviewedById\`) REFERENCES \`User\` (\`id\`) ON DELETE SET NULL ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`ThiButAttempt\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`targetKind\` VARCHAR(16) NOT NULL,
+    \`targetId\` VARCHAR(191) NOT NULL,
+    \`cost\` INTEGER NOT NULL,
+    \`itemIds\` TEXT NOT NULL,
+    \`answers\` TEXT NULL,
+    \`correctCount\` INTEGER NULL,
+    \`passed\` BOOLEAN NULL,
+    \`startedAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`deadlineAt\` DATETIME(3) NOT NULL,
+    \`submittedAt\` DATETIME(3) NULL,
+    \`retryOfId\` VARCHAR(191) NULL,
+    \`ruleVersion\` VARCHAR(32) NOT NULL,
+    PRIMARY KEY (\`id\`),
+    INDEX \`ThiButAttempt_userId_startedAt_idx\` (\`userId\`, \`startedAt\`),
+    INDEX \`ThiButAttempt_userId_targetKind_targetId_idx\` (\`userId\`, \`targetKind\`, \`targetId\`),
+    CONSTRAINT \`ThiButAttempt_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`ThiButAttempt_retryOfId_fkey\` FOREIGN KEY (\`retryOfId\`) REFERENCES \`ThiButAttempt\` (\`id\`) ON DELETE SET NULL ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
   `CREATE TABLE IF NOT EXISTS \`FeynmanAiAttemptState\` (
     \`id\` VARCHAR(191) NOT NULL,
     \`attemptId\` VARCHAR(191) NOT NULL,
