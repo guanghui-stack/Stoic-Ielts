@@ -1957,6 +1957,19 @@ export async function initDatabase() {
     console.error("[wobridges] Khong gieo duoc kho cau Thi But:", err);
   }
 
+  // Ba mươi bot của đấu trường. Chạy mỗi lần khởi động và tự biết dừng khi đã
+  // đủ, nên push lên main là bot có mặt, không phải gõ lệnh nào.
+  try {
+    const { seedArenaBots } = await import("@/lib/arena/bots");
+    const { created } = await seedArenaBots();
+    if (created > 0) {
+      console.log(`[wobridges] Dau truong: tao ${created} bot.`);
+    }
+  } catch (err) {
+    // Không chặn khởi động: thiếu bot thì sân vắng, phần còn lại vẫn phải chạy.
+    console.error("[wobridges] Khong tao duoc bot dau truong:", err);
+  }
+
   // Xét danh hiệu MỘT LẦN cho bài làm đã có từ trước.
   //
   // Việc dựng lại band ở trên mới chỉ chuẩn bị số liệu; nếu không chạy thêm

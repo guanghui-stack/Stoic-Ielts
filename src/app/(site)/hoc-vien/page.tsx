@@ -335,6 +335,9 @@ export default async function StudentDashboard({
           <ButtonLink href="/luyen-tap/reading/general" variant="outline">
             Reading General
           </ButtonLink>
+          <ButtonLink href="/hoc-vien/dau-truong" variant="outline">
+            Đấu trường
+          </ButtonLink>
         </div>
       </section>
     </div>
