@@ -120,6 +120,10 @@ model User {
   arenaProfile     ArenaProfile?
   appointmentsTo   DuelAppointment[] @relation("AppointmentTo")
   appointmentsFrom DuelAppointment[] @relation("AppointmentFrom")
+
+  // Phe phai va mua giai, giai doan P6.
+  factionPoints FactionPointEntry[]
+  bulletins     Bulletin[]
 }
 
 model Exercise {
@@ -2148,6 +2152,16 @@ model ArenaProfile {
   /// sự nhún nhường.
   truces Int @default(0)
 
+  /// WEI | SHU | WU. Null là chưa chọn phe, và đó là trạng thái bình thường
+  /// của mọi người trước cấp bậc 4.
+  ///
+  /// KHOÁ SUỐT MÙA. Cho đổi phe giữa mùa là mở đường chạy sang phe đang thắng
+  /// vào tuần cuối, và khi đó bảng xếp hạng phe không còn đo được điều gì.
+  faction         String?   @db.VarChar(8)
+  factionChosenAt DateTime?
+  /// Mùa lúc chọn phe. Đổi phe chỉ mở lại khi sang mùa mới.
+  factionSeasonId String?
+
   /// Tạm rút khỏi đấu trường. Không giới hạn thời gian, giới hạn bằng CÁI GIÁ:
   /// Chiến Lực chỉ trôi xuống, không bao giờ trôi lên. Xem `quyDienDrift`.
   quyDienAt DateTime?
@@ -2161,6 +2175,7 @@ model ArenaProfile {
 
   @@index([chienLuc])
   @@index([quyDienAt])
+  @@index([faction])
 }
 
 /// Ai đang có mặt ở đấu trường.
@@ -2274,4 +2289,93 @@ model ArenaIntegrityCase {
 
   @@index([status, priority])
   @@index([userId, createdAt])
+}
+
+/// Một mùa giải. Tám tuần, xem `SEASON_LENGTH_DAYS` trong `lib/arena/season.ts`.
+model ArenaSeason {
+  id      String @id @default(cuid())
+  /// Dạng S001. Đọc được, xếp được, và không lộ ngày tháng.
+  code    String @unique @db.VarChar(8)
+  /// Mùa thứ mấy. Tách khỏi `code` để sắp xếp bằng số chứ không bằng chuỗi.
+  ordinal Int    @unique
+
+  startAt DateTime
+  endAt   DateTime
+  /// UPCOMING | ACTIVE | ENDED
+  status  String   @default("ACTIVE") @db.VarChar(12)
+
+  /// Phe thắng mùa này. Null khi mùa chưa đóng, và cũng null khi hai phe đứng
+  /// đầu hoà tuyệt đối: tuyên bố người thắng bằng thứ tự bảng chữ cái sau tám
+  /// tuần là điều tệ nhất có thể làm.
+  winnerFaction String? @db.VarChar(8)
+  closedAt      DateTime?
+  /// Số người bị kéo Chiến Lực về giữa lúc đóng mùa, để đối chiếu về sau.
+  ratingsReset  Int       @default(0)
+
+  ruleVersion String @db.VarChar(32)
+  createdAt   DateTime @default(now())
+
+  points    FactionPointEntry[]
+  bulletins Bulletin[]
+
+  @@index([status, startAt])
+}
+
+/// Sổ điểm phe. Một dòng cho một người trong một trận.
+///
+/// Sao chép đúng kỷ luật của `MeritLedger`: điểm luôn dương, có khoá chống ghi
+/// hai lần ở tầng database. Quyết toán chạy lại là chuyện bình thường, và cộng
+/// điểm phe hai lần thì không ai phát hiện ra cho tới cuối mùa.
+model FactionPointEntry {
+  id       String @id @default(cuid())
+  seasonId String
+  userId   String
+  /// Phe lúc ghi điểm. Chép lại chứ không tra ngược qua `ArenaProfile`: sang
+  /// mùa sau người này đổi phe thì điểm của mùa cũ vẫn phải thuộc phe cũ.
+  faction  String @db.VarChar(8)
+
+  duelId String
+  /// Luôn dương. Không có đường nào trừ điểm phe.
+  points Int
+
+  createdAt DateTime @default(now())
+
+  season ArenaSeason @relation(fields: [seasonId], references: [id], onDelete: Cascade)
+  user   User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([seasonId, duelId, userId])
+  @@index([seasonId, faction, points])
+  @@index([userId, createdAt])
+}
+
+/// Bảng Bố Cáo. Tin vinh danh, ai vào cũng thấy.
+///
+/// KHÔNG BAO GIỜ chứa tin xấu. Xem `canAnnounce` và `BULLETIN_FORBIDDEN_CATEGORIES`
+/// trong `lib/arena/season.ts`.
+model Bulletin {
+  id   String @id @default(cuid())
+  /// RANK_UP | SEASON_RESULT | TITLE_EARNED
+  kind String @db.VarChar(16)
+
+  /// Null với tin của hệ thống, ví dụ tổng kết mùa.
+  userId   String?
+  seasonId String?
+
+  /// Tên hiển thị CHỐT LẠI lúc bố cáo, không tra ngược qua `PublicProfile`.
+  /// Người đổi tên hiển thị về sau không làm sai lệch tin đã đăng, và người
+  /// tắt hiện tên thì tin cũ vẫn phải gỡ được bằng `visible`.
+  displayName String? @db.VarChar(120)
+  headline    String  @db.VarChar(200)
+  detail      String? @db.Text
+
+  /// Gỡ tin mà không xoá hàng, để còn tra được khi có khiếu nại.
+  visible Boolean @default(true)
+
+  createdAt DateTime @default(now())
+
+  user   User?        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  season ArenaSeason? @relation(fields: [seasonId], references: [id], onDelete: SetNull)
+
+  @@index([visible, createdAt])
+  @@index([kind, createdAt])
 }

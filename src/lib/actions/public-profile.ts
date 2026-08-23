@@ -34,12 +34,27 @@ export async function savePublicProfileAction(
     create: { userId: user.id, displayName: displayName || user.name, allowHall },
   });
 
+  // Tắt cờ mà tin cũ vẫn nằm trên Bảng Bố Cáo thì cái nút này chỉ là lời hứa
+  // suông. Gỡ bằng `visible`, không xoá hàng, để còn tra được khi có khiếu nại.
+  let hidden = 0;
+  if (!allowHall) {
+    try {
+      const { hideBulletinsOf } = await import("@/lib/arena/bulletin-service");
+      hidden = await hideBulletinsOf(user.id);
+    } catch (error) {
+      console.error("[wobridges] Khong go duoc tin bo cao cu:", error);
+    }
+  }
+
   revalidatePath("/hoc-vien/danh-hieu");
   revalidatePath("/dien-danh-vong");
+  revalidatePath("/bang-bo-cao");
   return {
     success: allowHall
-      ? "Đã bật hiển thị tên bạn ở Điện Danh Vọng."
-      : "Đã tắt. Danh hiệu của bạn vẫn được tính vào tổng số nhưng ẩn danh.",
+      ? "Đã bật hiển thị tên bạn ở Điện Danh Vọng và Bảng Bố Cáo."
+      : hidden > 0
+        ? `Đã tắt, và gỡ ${hidden} tin cũ khỏi Bảng Bố Cáo. Danh hiệu của bạn vẫn được tính vào tổng số nhưng ẩn danh.`
+        : "Đã tắt. Danh hiệu của bạn vẫn được tính vào tổng số nhưng ẩn danh.",
   };
 }
 

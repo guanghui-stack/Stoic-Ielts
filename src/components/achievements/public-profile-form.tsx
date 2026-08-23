@@ -31,12 +31,14 @@ export function PublicProfileForm({
         Hiển thị công khai
       </p>
       <h2 className="mt-2.5 font-display text-xl font-bold text-navy-deep">
-        Bạn có muốn xuất hiện ở Điện Danh Vọng không?
+        Bạn có muốn xuất hiện ở nơi công cộng không?
       </h2>
       <p className="mt-3 max-w-2xl text-[0.94rem] leading-relaxed text-ink-soft">
-        Không bật thì danh hiệu của bạn vẫn được tính vào tổng số, chỉ là không
-        hiện tên. Email, điểm số và lịch sử học tập không bao giờ công khai —
-        dù bạn có bật hay không.
+        Một nút này áp cho cả Điện Danh Vọng và Bảng Bố Cáo. Không bật thì danh
+        hiệu của bạn vẫn được tính vào tổng số, chỉ là không hiện tên, và không
+        tin nào của bạn lên bảng. Tắt sau khi đã bật thì tin cũ cũng được gỡ.
+        Email, điểm số và lịch sử học tập không bao giờ công khai, dù bạn có bật
+        hay không.
       </p>
 
       <label className="mt-5 flex cursor-pointer items-center gap-3">
@@ -48,7 +50,7 @@ export function PublicProfileForm({
           className="h-5 w-5 cursor-pointer accent-[#1e3a5f]"
         />
         <span className="font-ui text-sm text-ink">
-          Hiện tên tôi ở Điện Danh Vọng
+          Hiện tên tôi ở Điện Danh Vọng và Bảng Bố Cáo
         </span>
       </label>
 

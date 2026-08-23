@@ -1,4 +1,4 @@
-import { CalendarClock, Tent, TrendingUp } from "lucide-react";
+import { CalendarClock, Swords, Tent, TrendingUp } from "lucide-react";
 import { requireUser } from "@/lib/session";
 import { ArenaFloor } from "@/components/arena/arena-floor";
 import { QuyDienToggle } from "@/components/arena/quy-dien-toggle";
@@ -10,6 +10,19 @@ import {
 } from "@/lib/arena/arena-service.ts";
 import { getMeritWallet } from "@/lib/merit/merit-service.ts";
 import { MUSTER_WINDOWS, MUSTER_XP_BONUS } from "@/lib/arena/rating.ts";
+import { FactionChoice } from "@/components/arena/faction-choice";
+import { FactionStandings } from "@/components/arena/faction-standings";
+import {
+  currentSeason,
+  factionChoiceState,
+  myFactionPoints,
+  standingsOf,
+} from "@/lib/arena/season-service";
+import {
+  FACTION_LABEL,
+  TOP_CONTRIBUTORS,
+  daysLeftInSeason,
+} from "@/lib/arena/season.ts";
 
 export const metadata = { title: "Đấu trường" };
 
@@ -29,6 +42,16 @@ export default async function ArenaPage() {
     leaderboard(10),
     upcomingAppointments(user.id),
   ]);
+
+  // Mùa giải phải lấy TRƯỚC hai truy vấn sau, vì `currentSeason` là chỗ tự
+  // chuyển mùa khi hết hạn và hai truy vấn kia cần biết mùa nào.
+  const season = await currentSeason();
+  const [standings, factionState, myPoints] = await Promise.all([
+    standingsOf(season.id),
+    factionChoiceState(user.id),
+    myFactionPoints(user.id, season.id),
+  ]);
+  const daysLeft = daysLeftInSeason(season, new Date());
 
   const dateTimeVN = new Intl.DateTimeFormat("vi-VN", {
     timeZone: "Asia/Ho_Chi_Minh",
@@ -160,6 +183,49 @@ export default async function ArenaPage() {
             thách không trả lời cũng không bị đếm.
           </p>
           <QuyDienToggle inQuyDien={quyDien} />
+        </section>
+
+        {/* Mùa giải và phe phái */}
+        <section className="mt-12">
+          <p className="label-caps flex items-center gap-2">
+            <Swords className="h-3.5 w-3.5" aria-hidden="true" />
+            Mùa {season.code}
+          </p>
+          <h2 className="mt-2 font-display text-2xl font-bold text-navy-deep">
+            Ba phe tranh lãnh địa
+          </h2>
+          <p className="mt-2 max-w-2xl text-[0.94rem] leading-relaxed text-ink-soft">
+            {daysLeft > 0
+              ? `Còn ${daysLeft} ngày là hết mùa.`
+              : "Mùa đang khép lại."}{" "}
+            Phe thắng giữ lãnh địa trên bản đồ cho tới hết mùa sau. Cuối mùa,
+            Chiến Lực của mọi người được kéo về gần mốc gốc, còn cấp bậc, kinh
+            nghiệm và Quân Công thì không đụng tới.
+          </p>
+
+          <FactionChoice
+            current={factionState.faction}
+            canChoose={factionState.canChoose}
+            reason={factionState.reason}
+          />
+
+          {factionState.faction ? (
+            <p className="mt-4 border-l-4 border-gold bg-cream-deep px-5 py-3.5 text-[0.94rem] leading-relaxed text-ink-soft">
+              Mùa này bạn đã góp{" "}
+              <span className="font-semibold tabular-nums text-ink">
+                {myPoints}
+              </span>{" "}
+              điểm cho {FACTION_LABEL[factionState.faction]}. Thắng người mạnh
+              thì được nhiều hơn, thua vẫn được cộng, và trận với bot hoặc trận
+              giảng hoà thì không tính.
+            </p>
+          ) : null}
+
+          <FactionStandings
+            standings={standings}
+            topN={TOP_CONTRIBUTORS}
+            myFaction={factionState.faction}
+          />
         </section>
 
         {/* Bảng xếp hạng */}

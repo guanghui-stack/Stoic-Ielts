@@ -154,6 +154,24 @@ async function promoteAfterPassedRun(input: {
         },
       });
     });
+
+    // Bố cáo toàn cõi. NGOÀI transaction và bọc try: một tin không lên bảng thì
+    // thiếu một dòng, còn quay lui việc thăng cấp thì mất công của cả tháng.
+    //
+    // Ngưỡng cấp bậc và quyền riêng tư đều do `announceRankUp` kiểm, không kiểm
+    // ở đây: gác cùng một luật ở hai nơi là cách chắc chắn để hai nơi lệch nhau.
+    try {
+      const { announceRankUp } = await import("@/lib/arena/bulletin-service");
+      const { rankByLevel } = await import("@/lib/ranks/catalog");
+      await announceRankUp({
+        userId: input.userId,
+        toLevel: input.toLevel,
+        rankName: rankByLevel(input.toLevel)?.name ?? `cấp ${input.toLevel}`,
+      });
+    } catch (error) {
+      console.error("[wobridges] Khong bo cao duoc tin thang cap:", error);
+    }
+
     return true;
   } catch (error) {
     if (String(error).includes("RANK_CHANGED_CONCURRENTLY")) return false;

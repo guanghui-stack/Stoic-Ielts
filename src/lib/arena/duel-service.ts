@@ -693,6 +693,15 @@ export async function settleDuel(input: {
     console.error("[wobridges] Khong xet duoc danh hieu chat van:", error);
   }
 
+  // Điểm phe. Cùng lý do như trên, và chống ghi hai lần nằm ở ràng buộc duy
+  // nhất trong database chứ không ở đây.
+  try {
+    const { recordFactionPoints } = await import("@/lib/arena/season-service");
+    await recordFactionPoints({ duelId: duel.id, now });
+  } catch (error) {
+    console.error("[wobridges] Khong ghi duoc diem phe:", error);
+  }
+
   return { ok: true, verdict, entries };
 }
 

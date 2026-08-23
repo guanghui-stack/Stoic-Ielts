@@ -1385,6 +1385,58 @@ const DDL = [
     CONSTRAINT \`ArenaIntegrityCase_resolvedById_fkey\` FOREIGN KEY (\`resolvedById\`) REFERENCES \`User\` (\`id\`) ON DELETE SET NULL ON UPDATE CASCADE
   ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
 
+  // Dau truong P6: mua giai, so diem phe va Bang Bo Cao.
+  `CREATE TABLE IF NOT EXISTS \`ArenaSeason\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`code\` VARCHAR(8) NOT NULL,
+    \`ordinal\` INTEGER NOT NULL,
+    \`startAt\` DATETIME(3) NOT NULL,
+    \`endAt\` DATETIME(3) NOT NULL,
+    \`status\` VARCHAR(12) NOT NULL DEFAULT 'ACTIVE',
+    \`winnerFaction\` VARCHAR(8) NULL,
+    \`closedAt\` DATETIME(3) NULL,
+    \`ratingsReset\` INTEGER NOT NULL DEFAULT 0,
+    \`ruleVersion\` VARCHAR(32) NOT NULL,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`ArenaSeason_code_key\` (\`code\`),
+    UNIQUE INDEX \`ArenaSeason_ordinal_key\` (\`ordinal\`),
+    INDEX \`ArenaSeason_status_startAt_idx\` (\`status\`, \`startAt\`)
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`FactionPointEntry\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`seasonId\` VARCHAR(191) NOT NULL,
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`faction\` VARCHAR(8) NOT NULL,
+    \`duelId\` VARCHAR(191) NOT NULL,
+    \`points\` INTEGER NOT NULL,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`FactionPointEntry_seasonId_duelId_userId_key\` (\`seasonId\`, \`duelId\`, \`userId\`),
+    INDEX \`FactionPointEntry_seasonId_faction_points_idx\` (\`seasonId\`, \`faction\`, \`points\`),
+    INDEX \`FactionPointEntry_userId_createdAt_idx\` (\`userId\`, \`createdAt\`),
+    CONSTRAINT \`FactionPointEntry_seasonId_fkey\` FOREIGN KEY (\`seasonId\`) REFERENCES \`ArenaSeason\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`FactionPointEntry_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`Bulletin\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`kind\` VARCHAR(16) NOT NULL,
+    \`userId\` VARCHAR(191) NULL,
+    \`seasonId\` VARCHAR(191) NULL,
+    \`displayName\` VARCHAR(120) NULL,
+    \`headline\` VARCHAR(200) NOT NULL,
+    \`detail\` TEXT NULL,
+    \`visible\` BOOLEAN NOT NULL DEFAULT true,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (\`id\`),
+    INDEX \`Bulletin_visible_createdAt_idx\` (\`visible\`, \`createdAt\`),
+    INDEX \`Bulletin_kind_createdAt_idx\` (\`kind\`, \`createdAt\`),
+    CONSTRAINT \`Bulletin_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`Bulletin_seasonId_fkey\` FOREIGN KEY (\`seasonId\`) REFERENCES \`ArenaSeason\` (\`id\`) ON DELETE SET NULL ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
   `CREATE TABLE IF NOT EXISTS \`FeynmanAiAttemptState\` (
     \`id\` VARCHAR(191) NOT NULL,
     \`attemptId\` VARCHAR(191) NOT NULL,
@@ -1541,6 +1593,14 @@ const MIGRATIONS = [
   `ALTER TABLE \`PaymentOrder\` ADD COLUMN \`attemptId\` VARCHAR(191) NULL`,
   // Thieu index nay thi truy van tim don PENDING tai su dung se quet toan bang.
   `CREATE INDEX \`PaymentOrder_userId_attemptId_status_idx\` ON \`PaymentOrder\` (\`userId\`, \`attemptId\`, \`status\`)`,
+
+  // ---- Dau truong P6: phe phai --------------------------------------------
+  // Bang ArenaProfile da co tu P4 nen ba cot nay phai la ALTER, khong phai
+  // CREATE TABLE. Thieu buoc nay thi cot khong ton tai tren may chu that.
+  `ALTER TABLE \`ArenaProfile\` ADD COLUMN \`faction\` VARCHAR(8) NULL`,
+  `ALTER TABLE \`ArenaProfile\` ADD COLUMN \`factionChosenAt\` DATETIME(3) NULL`,
+  `ALTER TABLE \`ArenaProfile\` ADD COLUMN \`factionSeasonId\` VARCHAR(191) NULL`,
+  `CREATE INDEX \`ArenaProfile_faction_idx\` ON \`ArenaProfile\` (\`faction\`)`,
 ];
 
 export async function initDatabase() {
@@ -2012,6 +2072,17 @@ export async function initDatabase() {
     console.log(`[wobridges] Dau truong: dong bo ${count} danh hieu.`);
   } catch (err) {
     console.error("[wobridges] Khong dong bo duoc danh hieu dau truong:", err);
+  }
+
+  // Mua giai. `currentSeason` tu mo mua dau va tu chuyen mua khi het han, nen
+  // goi o day chi la de mua S001 co mat ngay tu lan khoi dong dau tien thay vi
+  // doi nguoi dung dau tien mo trang dau truong.
+  try {
+    const { currentSeason } = await import("@/lib/arena/season-service");
+    const season = await currentSeason();
+    console.log(`[wobridges] Dau truong: mua ${season.code} dang chay.`);
+  } catch (err) {
+    console.error("[wobridges] Khong mo duoc mua giai:", err);
   }
 
   // Xét danh hiệu MỘT LẦN cho bài làm đã có từ trước.

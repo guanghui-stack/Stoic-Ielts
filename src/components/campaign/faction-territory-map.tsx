@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Lock } from "lucide-react";
+import { Flag, Lock } from "lucide-react";
 import { useState, type CSSProperties } from "react";
 import { ART_ASSETS, type ArtAsset } from "@/lib/brand/art-manifest";
 import {
@@ -28,10 +28,24 @@ type LabelStyle = CSSProperties & {
   "--territory-y": string;
 };
 
+/**
+ * Bản đồ ba lãnh địa.
+ *
+ * `ownerCode` là mã lãnh địa của phe thắng mùa TRƯỚC, hoặc null khi chưa mùa
+ * nào khép lại. Bản đồ KHÔNG tô lãnh địa bằng màu phẳng: nó đã giải xong bằng
+ * lớp tranh cộng thang opacity, và đắp thêm màu lên tranh là phá tranh. Màu phe
+ * chỉ xuất hiện ở chú giải phía dưới, đúng brand guideline mục 1.5.
+ */
 export function FactionTerritoryMap({
   territories,
+  ownerCode = null,
+  ownerLabel = null,
+  seasonCode = null,
 }: {
   territories: readonly TerritoryPlace[];
+  ownerCode?: string | null;
+  ownerLabel?: string | null;
+  seasonCode?: string | null;
 }) {
   const [interaction, setInteraction] = useState(TERRITORY_INTERACTION_IDLE);
   const activeCode = territoryActiveCode(interaction);
@@ -41,10 +55,12 @@ export function FactionTerritoryMap({
       <div className="territory-map-heading">
         <p className="label-caps">Lãnh địa Tam Quốc</p>
         <h2 id="faction-territory-title" className="font-display text-2xl font-bold text-navy-deep">
-          Ba cõi chưa khai mở
+          {ownerLabel ? `${ownerLabel} đang giữ lãnh địa` : "Ba cõi chưa khai mở"}
         </h2>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-soft">
-          Ngụy, Thục và Ngô sẽ trở thành lựa chọn phe khi bạn đạt cấp bậc yêu cầu.
+          {ownerLabel
+            ? `${ownerLabel} thắng mùa trước và giữ lãnh địa tới hết mùa ${seasonCode ?? "này"}. Chọn phe ở đấu trường để tranh lãnh địa mùa sau.`
+            : "Ngụy, Thục và Ngô sẽ trở thành lựa chọn phe khi bạn đạt cấp bậc yêu cầu."}
         </p>
       </div>
 
@@ -120,7 +136,11 @@ export function FactionTerritoryMap({
                 key={territory.code}
                 type="button"
                 aria-disabled="true"
-                aria-label={`${territory.title} — ${territory.lockedMessage}`}
+                aria-label={
+                  territory.code === ownerCode
+                    ? `${territory.title}, ${ownerLabel} đang giữ`
+                    : `${territory.title}, ${territory.lockedMessage}`
+                }
                 className="territory-map-label"
                 data-active={layerState.isActive ? "true" : "false"}
                 style={style}
@@ -141,9 +161,17 @@ export function FactionTerritoryMap({
                   setInteraction((state) => territoryInteractionState(state, { type: "blur" }))
                 }
               >
-                <Lock className="size-4" aria-hidden="true" />
+                {territory.code === ownerCode ? (
+                  <Flag className="size-4" aria-hidden="true" />
+                ) : (
+                  <Lock className="size-4" aria-hidden="true" />
+                )}
                 <span className="font-display font-bold text-navy-deep">{territory.title}</span>
-                <span className="font-ui text-xs text-ink-soft">{territory.lockedMessage}</span>
+                <span className="font-ui text-xs text-ink-soft">
+                  {territory.code === ownerCode
+                    ? `${ownerLabel} đang giữ`
+                    : territory.lockedMessage}
+                </span>
               </button>
             );
           })}

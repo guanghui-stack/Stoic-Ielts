@@ -13,6 +13,8 @@ import { buildCampaignWorld } from "@/lib/campaign/world";
 import { ensureUserRank, syncTrialEligibility } from "@/lib/ranks/engine";
 import { loadRankFacts } from "@/lib/ranks/facts";
 import { rankByLevel, RANK_ERAS } from "@/lib/ranks/catalog";
+import { currentSeason, territoryOwner } from "@/lib/arena/season-service";
+import { FACTION_LABEL, FACTION_TERRITORY } from "@/lib/arena/season.ts";
 
 export const metadata = { title: "Chiến Dịch — Bản đồ thăng cấp" };
 export const dynamic = "force-dynamic";
@@ -53,6 +55,10 @@ export default async function CampaignPage() {
 
   const nodes = campaignView(profile.currentLevel, trials);
   const world = buildCampaignWorld({ audience: "STUDENT", nodes });
+
+  // Chủ lãnh địa là phe thắng mùa TRƯỚC, giữ tới hết mùa này. Đây là chỗ duy
+  // nhất bản đồ biết tới khái niệm phe: mọi thứ còn lại vẫn khoá theo cấp bậc.
+  const [season, owner] = await Promise.all([currentSeason(), territoryOwner()]);
   const passed = nodes.filter((node) => node.state === "PASSED").length;
 
   return (
@@ -78,7 +84,13 @@ export default async function CampaignPage() {
           {rank && <> · thời {RANK_ERAS[rank.era].name}</>} · đã vượt {passed}/8 cửa ải.
         </p>
 
-        <CampaignMapStack world={world} variant="student" />
+        <CampaignMapStack
+          world={world}
+          variant="student"
+          territoryOwnerCode={owner ? FACTION_TERRITORY[owner] : null}
+          territoryOwnerLabel={owner ? FACTION_LABEL[owner] : null}
+          seasonCode={season.code}
+        />
         <CampaignTimelineMobile world={world} />
         <div id="dieu-kien">
           <NextStepGuide step={world.nextStep} />
