@@ -840,9 +840,21 @@ Nhóm tự động trước, nhóm cần người xử sau. Kèm màn hình xét
 - Khối riêng ở cuối trang `/hoc-vien/danh-hieu`, chỉ chính chủ thấy, mỗi danh hiệu kèm đường ra.
 - `npm run test:arena-titles` (luật thuần) và `npm run test:arena-titles-db` (database thật).
 
-### P6. Mùa giải, lãnh địa, bố cáo
+### P6. Mùa giải, lãnh địa, bố cáo · ĐÃ LÀM 2026-08-22
 
 Tổng kết mùa, chia điểm phe theo đầu người, mở khoá bản đồ, Bảng Bố Cáo. Chỉ làm sau khi P4 chạy ổn vài tuần với người thật.
+
+**Về câu điều kiện đó.** P6 được làm khi chưa có tuần nào chạy với người thật, cùng cách xử lý như P5: mọi con số nằm trong một khối duy nhất, `FACTION_POINTS`, `TOP_CONTRIBUTORS`, `SEASON_LENGTH_DAYS` và `SEASON_RATING_RETAIN` ở `src/lib/arena/season.ts`, mỗi cái kèm lý do vì sao là con số đó. Riêng độ dài mùa chọn đầu DÀI (tám tuần thay vì sáu) vì rút ngắn một mùa không làm ai mất công đã bỏ ra, còn kéo dài thì có.
+
+Đã có:
+
+- `src/lib/arena/season.ts` — điểm phe, xếp hạng ba phe, cửa sổ mùa, kéo Chiến Lực về giữa, luật lên bảng bố cáo. Hàm thuần.
+- `src/lib/arena/season-service.ts` — mùa tự mở và tự chuyển khi có người đọc tới, KHÔNG job quét. Chốt chặn chống đóng hai lần là `updateMany` kèm điều kiện trạng thái.
+- `src/lib/arena/bulletin-service.ts` — cửa duy nhất ghi vào Bảng Bố Cáo.
+- Khối mùa giải và chọn phe ở cuối `/hoc-vien/dau-truong`; trang công khai `/bang-bo-cao`; bản đồ lãnh địa ở `/hoc-vien/chien-dich` hiện phe đang giữ.
+- `npm run test:season` (luật thuần) và `npm run test:season-db` (database thật).
+
+Còn treo, chờ nhánh nội dung: sáu ký hiệu ở `docs/DAT-HANG-KY-HIEU.md` và đặt lại tranh.
 
 ### Nghị Sự Đường chạy song song
 
@@ -985,3 +997,37 @@ phía trước. Áp cách đó cho nhóm này là dựng một danh sách hướ
 và với Cải Quá Tự Tân thì còn tệ hơn: một thẻ mang tên "chuộc lỗi" trước mặt
 người chưa hề vấp là gợi ý một vết trượt chưa từng có. Cả bảy danh hiệu chất vấn
 lẫn danh hiệu chuộc lỗi chỉ hiện sau khi đã có.
+
+### Đã bác bỏ: chia tổng điểm phe cho số thành viên hoạt động
+
+Đặc tả mục 09 cho hai cách giải vấn đề kinh điển của ba phe. Cách lấy trung bình
+bị bác vì nó tái lập đúng thứ mà luật "thua cộng ít, không trừ" vừa dập tắt: một
+người chơi yếu kéo trung bình phe XUỐNG, nên phe có động cơ bảo họ đừng đấu. Cách
+đang dùng là lấy tổng của năm người đóng góp nhiều nhất, ở đó đóng góp của người
+yếu không bao giờ làm hại phe, chỉ có thể giúp.
+
+### Đã bác bỏ: điểm phe khi THUA cũng tính theo Chiến Lực đối thủ
+
+Nếu tính, đường tối ưu là đi thách người mạnh nhất rồi thua cho nhanh. Phần
+thưởng khi thua tồn tại để người yếu không thấy mình là gánh nặng, không phải để
+thưởng cho việc săn người mạnh. Vì vậy nó là một con số PHẲNG và nhỏ, còn phần
+thắng mới tính theo Chiến Lực đối thủ.
+
+### Đã bác bỏ: kéo Chiến Lực của bot về giữa lúc chuyển mùa
+
+Ba mươi bot tồn tại để mọi mức Chiến Lực đều có đối thủ. Dồn hết bot về mốc gốc
+là lấy mất đối thủ của người mạnh và người yếu ngay tuần đầu mùa mới, tức làm
+hỏng đúng thứ mà bot sinh ra để giải quyết. Chỉ người thật bị kéo.
+
+### Đã bác bỏ: cho đổi phe giữa mùa
+
+Mở đường chạy sang phe đang thắng vào tuần cuối, và khi đó bảng xếp hạng phe
+không còn đo được điều gì. Phe khoá theo mùa, và mở lại đúng lúc sang mùa mới.
+
+### Đã bác bỏ: thêm một cờ riêng cho Bảng Bố Cáo
+
+Đặc tả ghi "dùng đúng cơ chế `PublicProfile` đã có, không làm cờ mới", nên bảng
+dùng `allowHall`. Nhưng câu chữ trên nút bấm khi đó chỉ nói tới Điện Danh Vọng,
+tức người học đồng ý một chỗ mà bị dùng cho hai chỗ. Cách xử: sửa câu chữ cho
+khớp phạm vi thật, và tắt cờ thì gỡ luôn tin cũ khỏi bảng. Một nút hứa mà không
+gỡ tin cũ chỉ là lời hứa suông.
