@@ -2093,7 +2093,7 @@ export async function initDatabase() {
   await applyOnce("EVALUATE_TITLES_BACKFILL_v1", async () => {
     const { evaluateUser } = await import("@/lib/achievements/engine");
     const students = await db.user.findMany({
-      where: { role: "STUDENT", active: true },
+      where: { role: "STUDENT", active: true, isBot: false },
       select: { id: true },
       // Giới hạn phòng khi database lớn: phần còn lại sẽ được xét dần khi họ
       // nộp bài tiếp theo, không ai mất gì.

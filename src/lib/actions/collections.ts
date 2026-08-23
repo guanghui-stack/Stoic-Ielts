@@ -112,7 +112,7 @@ export async function activateCollectionAction(
 
   // Xét lại danh hiệu theo bộ đề cho mọi học viên đang hoạt động
   const students = await db.user.findMany({
-    where: { role: "STUDENT", active: true },
+    where: { role: "STUDENT", active: true, isBot: false },
     select: { id: true },
   });
   for (const student of students) {

@@ -30,7 +30,10 @@ export default async function AdminStudentsPage() {
 
   const [students, restrictedCount, grants, wallets] = await Promise.all([
     db.user.findMany({
-      where: { role: "STUDENT" },
+      // Bot KHONG phai hoc vien. Ba muoi bot cua dau truong deu mang
+      // role STUDENT de dung chung duong ghep cap, nhung o day chung day
+      // hoc vien that xuong duoi ba muoi dong, ngay canh nut Xoa tai khoan.
+      where: { role: "STUDENT", isBot: false },
       orderBy: { createdAt: "desc" },
       include: {
         _count: {

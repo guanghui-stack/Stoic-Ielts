@@ -13,7 +13,9 @@ export default async function AdminOverviewPage() {
 
   const [studentCount, exerciseCount, completedCount, recentAttempts] =
     await Promise.all([
-      db.user.count({ where: { role: "STUDENT" } }),
+      // Khong dem bot: con so nay la de chu trung tam biet minh co bao nhieu
+      // hoc vien that, va cong them ba muoi bot vao la bao sai.
+      db.user.count({ where: { role: "STUDENT", isBot: false } }),
       db.exercise.count({ where: { skill: "READING" } }),
       db.attempt.count({
         where: { status: "GRADED", exercise: { skill: "READING" } },
