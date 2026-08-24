@@ -261,14 +261,28 @@ export function gradeReading(
           const user = Array.isArray(raw)
             ? raw.map((v) => String(v).trim().toUpperCase())
             : [];
+          const uniqueUser = new Set(user);
+          const allowedSet = new Set(
+            (q.options ?? []).map((_, index) =>
+              optionLabel(group.type, index).toUpperCase()
+            )
+          );
           const correctSet = new Set(
             (Array.isArray(q.answer) ? q.answer : []).map((v) =>
               String(v).trim().toUpperCase()
             )
           );
           userAnswer = user.join(", ");
-          score = user.filter((v) => correctSet.has(v)).length;
-          score = Math.min(score, span);
+          // Trình duyệt chỉ cho chọn tối đa `span`, nhưng payload Server Action
+          // vẫn có thể bị sửa tay. Chọn thừa, lặp hoặc bịa nhãn đều làm cả mục
+          // không hợp lệ; nếu không, mỗi đáp án đúng riêng biệt vẫn được 1 điểm.
+          const validSelection =
+            user.length <= span &&
+            uniqueUser.size === user.length &&
+            user.every((value) => allowedSet.has(value));
+          score = validSelection
+            ? [...uniqueUser].filter((value) => correctSet.has(value)).length
+            : 0;
         } else {
           userAnswer = typeof raw === "string" ? raw : "";
           let correct = false;

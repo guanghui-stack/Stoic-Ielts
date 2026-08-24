@@ -3,8 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/session";
-import { revokeGrantsOfOrder } from "@/lib/payments/fulfillment";
-import { revokeCoinsOfOrder } from "@/lib/payments/coin-service";
+import { reversePackageOrder } from "@/lib/payments/fulfillment";
+import { reverseTopupOrder } from "@/lib/payments/coin-service";
 import { reconcileOneOrder } from "@/lib/payments/reconcile";
 
 export type AdminPaymentState = { error?: string; success?: string } | undefined;
@@ -70,54 +70,57 @@ export async function refundOrderAction(
     return { error: `Chỉ hoàn tiền được đơn đã thanh toán (đơn này đang ở trạng thái ${order.status}).` };
   }
 
-  // Đơn NẠP VÍ: phải thu lại xu TRƯỚC khi đánh dấu hoàn tiền. Làm ngược lại
-  // thì đơn đã mang nhãn REFUNDED trong khi xu vẫn nằm nguyên trong ví, và sổ
-  // sách nói một đằng còn thực tế một nẻo.
-  //
-  // Học viên đã tiêu mất thì TỪ CHỐI hẳn: xu đã tiêu là quyền học đã mở, thu
-  // ngược lại là lấy đi thứ họ đang dùng — quyết định đó thuộc về người, không
-  // thuộc về một hàm.
   if (order.orderKind === "TOPUP") {
-    const revoked = await revokeCoinsOfOrder({
+    const revoked = await reverseTopupOrder({
       orderId: order.id,
-      userId: order.userId,
-      coins: order.coinsGranted,
+      targetStatus: "REFUNDED",
       reason: `REFUND:${reason}`,
+      reviewCodePrefix: "REFUND",
     });
     if (!revoked.ok) {
       return {
         error:
-          `Không hoàn được: đơn này đã cộng ${revoked.coins} xu nhưng ví học viên ` +
-          `chỉ còn ${revoked.balance} xu — phần chênh đã tiêu thành quyền học rồi. ` +
-          `Hãy xử lý tay: hoặc thu hồi quyền tương ứng trước, hoặc chấp nhận ` +
-          `hoàn tiền mà không thu lại xu.`,
+          revoked.reason === "ALREADY_SPENT"
+            ? `Không hoàn được: đơn này đã cộng xu nhưng ví học viên ` +
+              `hiện còn ${revoked.balanceAfter} xu — phần chênh đã tiêu thành quyền học rồi. ` +
+              `Hãy xử lý tay: hoặc thu hồi quyền tương ứng trước, hoặc chấp nhận ` +
+              `hoàn tiền mà không thu lại xu.`
+            : "Không hoàn được tự động vì sổ cái xu của đơn này không còn khớp với dữ liệu hiện tại. Hãy đối soát tay trước khi hoàn tiền để tránh trừ nhầm vào lần nạp khác của học viên.",
       };
     }
-
-    await db.paymentOrder.update({
-      where: { id: order.id },
-      data: { status: "REFUNDED", lastError: `REFUND:${reason}` },
-    });
     revalidatePath(ADMIN_PATH);
     return {
-      success:
-        `Đã ghi nhận hoàn tiền đơn ${invoiceNumber} và thu lại ${revoked.coins} xu ` +
-        `(ví còn ${revoked.balanceAfter} xu). Nhớ chuyển tiền lại cho học viên ` +
-        `trên hệ thống SePay hoặc ngân hàng.`,
+      success: revoked.action === "NOOP_FINAL"
+        ? `Đơn ${invoiceNumber} đã ở trạng thái ${revoked.orderStatus}; không cần thu hồi thêm xu.`
+        : `Đã ghi nhận hoàn tiền đơn ${invoiceNumber} và thu lại ${revoked.coinsRevoked} xu ` +
+          `(ví còn ${revoked.balanceAfter} xu). Nhớ chuyển tiền lại cho học viên ` +
+          `trên hệ thống SePay hoặc ngân hàng.`,
     };
   }
 
-  await db.paymentOrder.update({
-    where: { id: order.id },
-    data: { status: "REFUNDED", lastError: `REFUND:${reason}` },
+  const revoked = await reversePackageOrder({
+    orderId: order.id,
+    status: "REFUNDED",
+    revokeReason: `REFUND:${reason}`,
+    lastError: `REFUND:${reason}`,
   });
-  const revoked = await revokeGrantsOfOrder(order.id, `REFUND:${reason}`);
+  if (!revoked.ok) {
+    return {
+      error:
+        revoked.reason === "AI_CREDITS_ALREADY_USED"
+          ? "Không hoàn được tự động vì học viên đã dùng mất một phần lượt AI của gói này. Đơn đã được chuyển sang REQUIRES_REVIEW để quản trị viên quyết định xử lý tay."
+          : `Không hoàn được tự động khi đơn đang ở trạng thái ${order.status}. Hãy kiểm tra lại lịch sử xử lý trước khi tiếp tục.`,
+    };
+  }
 
   revalidatePath(ADMIN_PATH);
   revalidatePath("/luyen-tap/reading");
   revalidatePath("/luyen-tap/reading/general");
   return {
-    success: `Đã ghi nhận hoàn tiền đơn ${invoiceNumber} và thu hồi ${revoked} quyền truy cập. Nhớ chuyển tiền lại cho học viên trên hệ thống SePay hoặc ngân hàng.`,
+    success:
+      `Đã ghi nhận hoàn tiền đơn ${invoiceNumber} và thu hồi ${revoked.revokedGrants} quyền truy cập` +
+      `${revoked.aiCreditsRevoked > 0 ? ` cùng ${revoked.aiCreditsRevoked} lượt AI` : ""}. ` +
+      "Nhớ chuyển tiền lại cho học viên trên hệ thống SePay hoặc ngân hàng.",
   };
 }
 

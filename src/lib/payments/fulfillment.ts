@@ -5,8 +5,10 @@ import { OFFERS, isOfferCode, type Offer } from "@/lib/payments/catalog";
 import { orderCodeLabel } from "@/lib/payments/coins";
 import { creditCoinsForOrder } from "@/lib/payments/coin-service";
 import {
+  canRecoverFulfillmentP2002,
   canTransitionToPaid,
   computeGrantWindow,
+  decidePackageReversal,
 } from "@/lib/payments/payment-rules";
 
 /**
@@ -24,6 +26,49 @@ export type FulfillResult =
   | { ok: true; alreadyPaid: boolean }
   | { ok: false; reason: string };
 
+async function hasExpectedFulfillmentEvidence(order: {
+  id: string;
+  userId: string;
+  orderKind: string;
+  offerCode: string;
+  coinsGranted: number;
+}): Promise<boolean> {
+  if (order.orderKind === "TOPUP") {
+    const ledger = await db.coinLedger.findUnique({
+      where: { ledgerKey: `TOPUP:${order.id}` },
+      select: { userId: true, orderId: true, kind: true, amount: true },
+    });
+    return (
+      ledger?.userId === order.userId &&
+      ledger.orderId === order.id &&
+      ledger.kind === "TOPUP" &&
+      ledger.amount === order.coinsGranted
+    );
+  }
+
+  const offer = isOfferCode(order.offerCode)
+    ? (OFFERS[order.offerCode] as Offer)
+    : null;
+  if (offer?.kind === "AI_TOPUP") {
+    const budget = await db.feynmanAiBudget.findUnique({
+      where: { userId: order.userId },
+      select: { grantedTotal: true },
+    });
+    const credits = offer.aiGradingCredits ?? 0;
+    return credits > 0 && (budget?.grantedTotal ?? 0) >= credits;
+  }
+
+  const grant = await db.accessGrant.findUnique({
+    where: { orderId: order.id },
+    select: { userId: true, grantKey: true, source: true },
+  });
+  return (
+    grant?.userId === order.userId &&
+    grant.grantKey === `ORDER:${order.id}` &&
+    grant.source === "PURCHASE"
+  );
+}
+
 export async function fulfillPaidOrder(input: {
   orderId: string;
   providerOrderId?: string | null;
@@ -31,6 +76,11 @@ export async function fulfillPaidOrder(input: {
   paymentMethod: string;
   paidAt: Date;
   sanitizedPayload: string;
+  eventFinalize?: {
+    eventKey: string;
+    processingLeaseToken: string;
+    errorMessage?: string | null;
+  };
 }): Promise<FulfillResult> {
   try {
     return await db.$transaction(
@@ -87,6 +137,24 @@ export async function fulfillPaidOrder(input: {
               lastError: null,
             },
           });
+
+          if (input.eventFinalize) {
+            const finalized = await tx.paymentEvent.updateMany({
+              where: {
+                eventKey: input.eventFinalize.eventKey,
+                processingStatus: "PROCESSING",
+                processingLeaseToken: input.eventFinalize.processingLeaseToken,
+              },
+              data: {
+                processingStatus: "PROCESSED",
+                errorMessage: input.eventFinalize.errorMessage ?? null,
+                processedAt: input.paidAt,
+              },
+            });
+            if (finalized.count !== 1) {
+              throw new Error("PAYMENT_EVENT_LEASE_LOST");
+            }
+          }
 
           return { ok: true as const, alreadyPaid: false };
         }
@@ -174,19 +242,63 @@ export async function fulfillPaidOrder(input: {
           },
         });
 
+        if (input.eventFinalize) {
+          const finalized = await tx.paymentEvent.updateMany({
+            where: {
+              eventKey: input.eventFinalize.eventKey,
+              processingStatus: "PROCESSING",
+              processingLeaseToken: input.eventFinalize.processingLeaseToken,
+            },
+            data: {
+              processingStatus: "PROCESSED",
+              errorMessage: input.eventFinalize.errorMessage ?? null,
+              processedAt: input.paidAt,
+            },
+          });
+          if (finalized.count !== 1) {
+            throw new Error("PAYMENT_EVENT_LEASE_LOST");
+          }
+        }
+
         return { ok: true as const, alreadyPaid: false };
       },
       { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
     );
   } catch (error) {
-    // Hai IPN chạy song song: cái thua cuộc đụng ràng buộc unique (grantKey
-    // hoặc providerTransactionId). Quyền đã được cấp bởi cái thắng nên coi là
-    // thành công, không được thử cấp lại.
+    // P2002 chỉ nói một unique key bị đụng. Nó có thể là giao dịch đã thuộc về
+    // đơn khác hoặc dữ liệu grant/ledger hỏng, nên phải đọc lại và chứng minh
+    // worker song song đã hoàn tất ĐÚNG đơn trước khi trả idempotent-success.
     if (
       error instanceof Prisma.PrismaClientKnownRequestError &&
       error.code === "P2002"
     ) {
-      return { ok: true, alreadyPaid: true };
+      const order = await db.paymentOrder.findUnique({
+        where: { id: input.orderId },
+        select: {
+          id: true,
+          userId: true,
+          status: true,
+          orderKind: true,
+          offerCode: true,
+          coinsGranted: true,
+          providerTransactionId: true,
+        },
+      });
+      const evidence = order
+        ? await hasExpectedFulfillmentEvidence(order)
+        : false;
+      if (
+        order &&
+        canRecoverFulfillmentP2002({
+          orderStatus: order.status,
+          expectedProviderTransactionId: input.providerTransactionId,
+          actualProviderTransactionId: order.providerTransactionId,
+          hasExpectedFulfillmentEvidence: evidence,
+        })
+      ) {
+        return { ok: true, alreadyPaid: true };
+      }
+      return { ok: false, reason: "FULFILLMENT_UNIQUE_CONFLICT" };
     }
     throw error;
   }
@@ -229,4 +341,194 @@ export async function revokeGrantsOfOrder(
     data: { status: "REVOKED", revokedAt: new Date(), revokeReason: reason },
   });
   return result.count;
+}
+
+export async function reversePackageOrder(input: {
+  orderId: string;
+  status: "REFUNDED" | "VOIDED";
+  revokeReason: string;
+  now?: Date;
+  lastError?: string | null;
+  rawLastPayload?: string | null;
+  eventFinalize?: {
+    eventKey: string;
+    processingLeaseToken: string;
+    errorMessage?: string | null;
+  };
+}): Promise<
+  | {
+      ok: true;
+      action: "REVERSED" | "NOOP_FINAL";
+      orderStatus: string;
+      revokedGrants: number;
+      aiCreditsRevoked: number;
+    }
+  | {
+      ok: false;
+      action: "REVIEW";
+      orderStatus: "REQUIRES_REVIEW";
+      reason: "AI_CREDITS_ALREADY_USED" | "ORDER_NOT_REVERSIBLE";
+      revokedGrants: 0;
+      aiCreditsRevoked: 0;
+    }
+> {
+  const now = input.now ?? new Date();
+
+  return db.$transaction(
+    async (tx) => {
+      const order = await tx.paymentOrder.findUnique({
+        where: { id: input.orderId },
+        select: {
+          id: true,
+          userId: true,
+          offerCode: true,
+          status: true,
+        },
+      });
+      if (!order) {
+        throw new Error(`ORDER_NOT_FOUND:${input.orderId}`);
+      }
+
+      const offer = isOfferCode(order.offerCode)
+        ? (OFFERS[order.offerCode] as Offer)
+        : null;
+      const grantCount = await tx.accessGrant.count({
+        where: { orderId: input.orderId },
+      });
+      const budget = await tx.feynmanAiBudget.findUnique({
+        where: { userId: order.userId },
+        select: { grantedTotal: true, usedTotal: true },
+      });
+      const availableAiCredits = budget
+        ? Math.max(0, budget.grantedTotal - budget.usedTotal)
+        : 0;
+      const decision = decidePackageReversal({
+        orderStatus: order.status,
+        targetStatus: input.status,
+        grantedAiCredits: offer?.aiGradingCredits ?? 0,
+        availableAiCredits,
+        usedTotal: budget?.usedTotal ?? 0,
+        grantCount,
+      });
+
+      if (decision.action === "NOOP_FINAL") {
+        if (input.eventFinalize) {
+          const finalized = await tx.paymentEvent.updateMany({
+            where: {
+              eventKey: input.eventFinalize.eventKey,
+              processingStatus: "PROCESSING",
+              processingLeaseToken: input.eventFinalize.processingLeaseToken,
+            },
+            data: {
+              processingStatus: "PROCESSED",
+              errorMessage: input.eventFinalize.errorMessage ?? null,
+              processedAt: now,
+            },
+          });
+          if (finalized.count !== 1) {
+            throw new Error("PAYMENT_EVENT_LEASE_LOST");
+          }
+        }
+        return {
+          ok: true as const,
+          action: "NOOP_FINAL" as const,
+          orderStatus: order.status,
+          revokedGrants: 0,
+          aiCreditsRevoked: 0,
+        };
+      }
+
+      if (decision.action === "REVIEW") {
+        await tx.paymentOrder.update({
+          where: { id: input.orderId },
+          data: {
+            status: "REQUIRES_REVIEW",
+            lastError: input.lastError ?? decision.reviewReason,
+            rawLastPayload: input.rawLastPayload ?? undefined,
+          },
+        });
+        if (input.eventFinalize) {
+          const finalized = await tx.paymentEvent.updateMany({
+            where: {
+              eventKey: input.eventFinalize.eventKey,
+              processingStatus: "PROCESSING",
+              processingLeaseToken: input.eventFinalize.processingLeaseToken,
+            },
+            data: {
+              processingStatus: "PROCESSED",
+              errorMessage:
+                input.eventFinalize.errorMessage ?? decision.reviewReason,
+              processedAt: now,
+            },
+          });
+          if (finalized.count !== 1) {
+            throw new Error("PAYMENT_EVENT_LEASE_LOST");
+          }
+        }
+        return {
+          ok: false as const,
+          action: "REVIEW" as const,
+          orderStatus: "REQUIRES_REVIEW" as const,
+          reason: decision.reviewReason,
+          revokedGrants: 0,
+          aiCreditsRevoked: 0,
+        };
+      }
+
+      const revoked = await tx.accessGrant.updateMany({
+        where: { orderId: input.orderId, status: "ACTIVE" },
+        data: {
+          status: "REVOKED",
+          revokedAt: now,
+          revokeReason: input.revokeReason,
+        },
+      });
+
+      if (decision.aiCreditsToRevoke > 0) {
+        await tx.feynmanAiBudget.update({
+          where: { userId: order.userId },
+          data: {
+            grantedTotal: { decrement: decision.aiCreditsToRevoke },
+          },
+        });
+      }
+
+      await tx.paymentOrder.update({
+        where: { id: input.orderId },
+        data: {
+          status: decision.orderStatus,
+          lastError: input.lastError ?? null,
+          rawLastPayload: input.rawLastPayload ?? undefined,
+          ...(decision.orderStatus === "VOIDED" ? { voidedAt: now } : {}),
+        },
+      });
+
+      if (input.eventFinalize) {
+        const finalized = await tx.paymentEvent.updateMany({
+          where: {
+            eventKey: input.eventFinalize.eventKey,
+            processingStatus: "PROCESSING",
+            processingLeaseToken: input.eventFinalize.processingLeaseToken,
+          },
+          data: {
+            processingStatus: "PROCESSED",
+            errorMessage: input.eventFinalize.errorMessage ?? null,
+            processedAt: now,
+          },
+        });
+        if (finalized.count !== 1) {
+          throw new Error("PAYMENT_EVENT_LEASE_LOST");
+        }
+      }
+
+      return {
+        ok: true as const,
+        action: "REVERSED" as const,
+        orderStatus: decision.orderStatus,
+        revokedGrants: revoked.count,
+        aiCreditsRevoked: decision.aiCreditsToRevoke,
+      };
+    },
+    { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
+  );
 }

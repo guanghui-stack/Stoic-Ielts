@@ -194,6 +194,448 @@ export function canTransitionToPaid(status: string): boolean {
   return PAYABLE.has(status);
 }
 
+export type PaymentEventClaimDecision =
+  | { kind: "CREATE_AND_CLAIM" }
+  | { kind: "CLAIM_EXISTING" }
+  | { kind: "RECLAIM_STALE" }
+  | { kind: "SKIP_IN_FLIGHT" }
+  | { kind: "SKIP_FINAL" };
+
+export function canFinalizePaymentEventLease(input: {
+  processingStatus: string;
+  processingLeaseToken: string | null;
+  workerLeaseToken: string;
+}): boolean {
+  return (
+    input.processingStatus === "PROCESSING" &&
+    !!input.processingLeaseToken &&
+    input.processingLeaseToken === input.workerLeaseToken
+  );
+}
+
+/**
+ * Một P2002 trong fulfillment chỉ là dấu hiệu một unique key bị đụng, không
+ * phải bằng chứng worker song song đã cấp quyền thành công. Chỉ coi là
+ * idempotent-success khi đọc lại được đúng đơn, đúng giao dịch và side effect
+ * tương ứng đã tồn tại.
+ */
+export function canRecoverFulfillmentP2002(input: {
+  orderStatus: string;
+  expectedProviderTransactionId: string;
+  actualProviderTransactionId: string | null;
+  hasExpectedFulfillmentEvidence: boolean;
+}): boolean {
+  return (
+    input.orderStatus === "PAID" &&
+    input.actualProviderTransactionId === input.expectedProviderTransactionId &&
+    input.hasExpectedFulfillmentEvidence
+  );
+}
+
+function hasNestedMysqlDuplicateColumnCode(value: unknown): boolean {
+  if (value === 1060 || value === "1060" || value === "ER_DUP_FIELDNAME") {
+    return true;
+  }
+  if (typeof value === "string") {
+    return (
+      /(?:\b1060\b|ER_DUP_FIELDNAME)/i.test(value) &&
+      /duplicate\s+column/i.test(value)
+    );
+  }
+  if (!value || typeof value !== "object") return false;
+  return Object.values(value as Record<string, unknown>).some((nested) =>
+    hasNestedMysqlDuplicateColumnCode(nested)
+  );
+}
+
+/** Chỉ nuốt race ADD COLUMN; permission, lock và lỗi kết nối phải nổi lên. */
+export function isDuplicateColumnMigrationError(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const candidate = error as {
+    errno?: unknown;
+    code?: unknown;
+    meta?: unknown;
+  };
+  if (
+    candidate.errno === 1060 ||
+    candidate.code === 1060 ||
+    candidate.code === "1060" ||
+    candidate.code === "ER_DUP_FIELDNAME"
+  ) {
+    return true;
+  }
+  return candidate.code === "P2010" && hasNestedMysqlDuplicateColumnCode(candidate.meta);
+}
+
+export function requirePaymentEventFinalized(finalized: boolean): void {
+  if (!finalized) throw new Error("PAYMENT_EVENT_LEASE_LOST");
+}
+
+export function decidePaymentEventClaim(input: {
+  existing:
+    | {
+        processingStatus: string;
+        receivedAt: Date;
+        processedAt: Date | null;
+      }
+    | null;
+  now: Date;
+  processingTimeoutMs: number;
+}): PaymentEventClaimDecision {
+  if (!input.existing) return { kind: "CREATE_AND_CLAIM" };
+
+  if (input.existing.processingStatus === "PROCESSED") {
+    return { kind: "SKIP_FINAL" };
+  }
+
+  if (input.existing.processingStatus === "PROCESSING") {
+    const claimedAt = input.existing.processedAt ?? input.existing.receivedAt;
+    const stale =
+      claimedAt.getTime() <= input.now.getTime() - input.processingTimeoutMs;
+    return stale ? { kind: "RECLAIM_STALE" } : { kind: "SKIP_IN_FLIGHT" };
+  }
+
+  return { kind: "CLAIM_EXISTING" };
+}
+
+export type VoidOutcome = {
+  orderStatus: "VOIDED" | "REQUIRES_REVIEW";
+  eventStatus: "PROCESSED";
+  revokeGrants: boolean;
+};
+
+export function boundPaymentEventErrorMessage(
+  error: unknown,
+  maxLength = 400
+): string {
+  const text =
+    error instanceof Error
+      ? error.stack || error.message
+      : typeof error === "string"
+        ? error
+        : JSON.stringify(error);
+  return (text || "UNKNOWN_IPN_ERROR").slice(0, maxLength);
+}
+
+export function decideVoidOutcome(input: {
+  orderKind: string;
+  revokeCoins:
+    | { ok: true }
+    | { ok: false; reason: "ALREADY_SPENT" | "CORRUPTED" }
+    | null;
+}): VoidOutcome {
+  if (input.orderKind === "TOPUP") {
+    if (input.revokeCoins?.ok) {
+      return {
+        orderStatus: "VOIDED",
+        eventStatus: "PROCESSED",
+        revokeGrants: false,
+      };
+    }
+    return {
+      orderStatus: "REQUIRES_REVIEW",
+      eventStatus: "PROCESSED",
+      revokeGrants: false,
+    };
+  }
+
+  return {
+    orderStatus: "VOIDED",
+    eventStatus: "PROCESSED",
+    revokeGrants: true,
+  };
+}
+
+export type TopupReversalDecision =
+  | {
+      action: "VOID_NOOP";
+      orderStatus: "VOIDED";
+      eventStatus: "PROCESSED";
+      reviewReason: null;
+      coinsToRevoke: 0;
+    }
+  | {
+      action: "REVOKE_ORIGINAL_CREDIT";
+      orderStatus: "VOIDED";
+      eventStatus: "PROCESSED";
+      reviewReason: null;
+      coinsToRevoke: number;
+    }
+  | {
+      action: "REVIEW";
+      orderStatus: "REQUIRES_REVIEW";
+      eventStatus: "PROCESSED";
+      reviewReason:
+        | "TOPUP_CREDIT_ALREADY_SPENT"
+        | "TOPUP_LEDGER_CORRUPTED"
+        | "TOPUP_LEDGER_MISSING";
+      coinsToRevoke: 0;
+    };
+
+export function decideTopupReversal(input: {
+  orderStatus: string;
+  expectedCoins: number;
+  creditedCoins: number;
+  revokedCoins: number;
+  remainingCreditedCoins: number;
+}): TopupReversalDecision {
+  const expected = Math.max(0, input.expectedCoins);
+  const credited = Math.max(0, input.creditedCoins);
+  const revoked = Math.max(0, input.revokedCoins);
+  const remaining = Math.max(0, input.remainingCreditedCoins);
+
+  if (credited === 0 && revoked === 0) {
+    return input.orderStatus === "PENDING"
+      ? {
+          action: "VOID_NOOP",
+          orderStatus: "VOIDED",
+          eventStatus: "PROCESSED",
+          reviewReason: null,
+          coinsToRevoke: 0,
+        }
+      : {
+          action: "REVIEW",
+          orderStatus: "REQUIRES_REVIEW",
+          eventStatus: "PROCESSED",
+          reviewReason: "TOPUP_LEDGER_MISSING",
+          coinsToRevoke: 0,
+        };
+  }
+
+  if (
+    credited !== expected ||
+    revoked > credited ||
+    remaining > credited ||
+    revoked + remaining > credited
+  ) {
+    return {
+      action: "REVIEW",
+      orderStatus: "REQUIRES_REVIEW",
+      eventStatus: "PROCESSED",
+      reviewReason: "TOPUP_LEDGER_CORRUPTED",
+      coinsToRevoke: 0,
+    };
+  }
+
+  if (remaining === 0) {
+    return revoked === expected
+      ? {
+          action: "VOID_NOOP",
+          orderStatus: "VOIDED",
+          eventStatus: "PROCESSED",
+          reviewReason: null,
+          coinsToRevoke: 0,
+        }
+      : {
+          action: "REVIEW",
+          orderStatus: "REQUIRES_REVIEW",
+          eventStatus: "PROCESSED",
+          reviewReason: "TOPUP_CREDIT_ALREADY_SPENT",
+          coinsToRevoke: 0,
+        };
+  }
+
+  if (remaining === expected && revoked === 0) {
+    return {
+      action: "REVOKE_ORIGINAL_CREDIT",
+      orderStatus: "VOIDED",
+      eventStatus: "PROCESSED",
+      reviewReason: null,
+      coinsToRevoke: expected,
+    };
+  }
+
+  return {
+    action: "REVIEW",
+    orderStatus: "REQUIRES_REVIEW",
+    eventStatus: "PROCESSED",
+    reviewReason: "TOPUP_CREDIT_ALREADY_SPENT",
+    coinsToRevoke: 0,
+  };
+}
+
+export function decideTopupReversalFromLedger(input: {
+  orderId: string;
+  orderStatus: string;
+  expectedCoins: number;
+  ledgerRows: Array<{
+    kind: string;
+    amount: number;
+    orderId: string | null;
+    ledgerKey: string;
+  }>;
+}): TopupReversalDecision {
+  const topupKey = `TOPUP:${input.orderId}`;
+  const revokeKey = `REVOKE:${input.orderId}`;
+  const topupIndex = input.ledgerRows.findIndex((row) => row.ledgerKey === topupKey);
+  const topupEntry = topupIndex >= 0 ? input.ledgerRows[topupIndex] : null;
+
+  if (!topupEntry) {
+    return decideTopupReversal({
+      orderStatus: input.orderStatus,
+      expectedCoins: input.expectedCoins,
+      creditedCoins: 0,
+      revokedCoins: 0,
+      remainingCreditedCoins: 0,
+    });
+  }
+
+  if (
+    topupEntry.kind !== "TOPUP" ||
+    topupEntry.orderId !== input.orderId ||
+    topupEntry.amount !== input.expectedCoins
+  ) {
+    return {
+      action: "REVIEW",
+      orderStatus: "REQUIRES_REVIEW",
+      eventStatus: "PROCESSED",
+      reviewReason: "TOPUP_LEDGER_CORRUPTED",
+      coinsToRevoke: 0,
+    };
+  }
+
+  let originalAvailable = topupEntry.amount;
+  let otherAvailable = 0;
+  let revokedCoins = 0;
+
+  for (const row of input.ledgerRows.slice(0, topupIndex)) {
+    if (row.kind === "TOPUP" || row.kind === "GIFT") {
+      otherAvailable += Math.max(0, row.amount);
+      continue;
+    }
+    if (row.kind === "SPEND" || row.kind === "REVOKE") {
+      otherAvailable = Math.max(0, otherAvailable - Math.max(0, row.amount));
+    }
+  }
+
+  for (const row of input.ledgerRows.slice(topupIndex + 1)) {
+    const amount = Math.max(0, row.amount);
+    if (row.kind === "TOPUP" || row.kind === "GIFT") {
+      otherAvailable += amount;
+      continue;
+    }
+    if (row.kind !== "SPEND" && row.kind !== "REVOKE") continue;
+
+    if (row.ledgerKey === revokeKey) {
+      if (row.kind !== "REVOKE" || row.orderId !== input.orderId || amount > originalAvailable) {
+        return {
+          action: "REVIEW",
+          orderStatus: "REQUIRES_REVIEW",
+          eventStatus: "PROCESSED",
+          reviewReason: "TOPUP_LEDGER_CORRUPTED",
+          coinsToRevoke: 0,
+        };
+      }
+      originalAvailable -= amount;
+      revokedCoins += amount;
+      continue;
+    }
+
+    const useOther = Math.min(otherAvailable, amount);
+    otherAvailable -= useOther;
+    const remainingDebit = amount - useOther;
+    if (remainingDebit > 0) {
+      originalAvailable = Math.max(0, originalAvailable - remainingDebit);
+    }
+  }
+
+  return decideTopupReversal({
+    orderStatus: input.orderStatus,
+    expectedCoins: input.expectedCoins,
+    creditedCoins: topupEntry.amount,
+    revokedCoins,
+    remainingCreditedCoins: originalAvailable,
+  });
+}
+
+export type PackageReversalDecision =
+  | {
+      action: "REVERSE";
+      orderStatus: "VOIDED" | "REFUNDED";
+      eventStatus: "PROCESSED";
+      reviewReason: null;
+      aiCreditsToRevoke: number;
+      revokeGrants: boolean;
+    }
+  | {
+      action: "NOOP_FINAL";
+      orderStatus: string;
+      eventStatus: "PROCESSED";
+      reviewReason: null;
+      aiCreditsToRevoke: 0;
+      revokeGrants: false;
+    }
+  | {
+      action: "REVIEW";
+      orderStatus: "REQUIRES_REVIEW";
+      eventStatus: "PROCESSED";
+      reviewReason: "AI_CREDITS_ALREADY_USED" | "ORDER_NOT_REVERSIBLE";
+      aiCreditsToRevoke: 0;
+      revokeGrants: false;
+    };
+
+export function decidePackageReversal(input: {
+  orderStatus: string;
+  targetStatus: "VOIDED" | "REFUNDED";
+  grantedAiCredits: number;
+  availableAiCredits: number;
+  usedTotal?: number;
+  grantCount?: number;
+}): PackageReversalDecision {
+  if (
+    input.orderStatus === input.targetStatus ||
+    input.orderStatus === "REFUNDED" ||
+    input.orderStatus === "VOIDED" ||
+    input.orderStatus === "CANCELLED" ||
+    input.orderStatus === "FAILED" ||
+    input.orderStatus === "EXPIRED"
+  ) {
+    return {
+      action: "NOOP_FINAL",
+      orderStatus: input.orderStatus,
+      eventStatus: "PROCESSED",
+      reviewReason: null,
+      aiCreditsToRevoke: 0,
+      revokeGrants: false,
+    };
+  }
+
+  if (input.orderStatus !== "PAID") {
+    return {
+      action: "REVIEW",
+      orderStatus: "REQUIRES_REVIEW",
+      eventStatus: "PROCESSED",
+      reviewReason: "ORDER_NOT_REVERSIBLE",
+      aiCreditsToRevoke: 0,
+      revokeGrants: false,
+    };
+  }
+
+  const granted = Math.max(0, input.grantedAiCredits);
+  const available = Math.max(0, input.availableAiCredits);
+  const usedTotal = Math.max(0, input.usedTotal ?? 0);
+  const grantCount = Math.max(0, input.grantCount ?? 0);
+  if (granted > 0 && (grantCount === 0 || usedTotal > 0 || available < granted)) {
+    return {
+      action: "REVIEW",
+      orderStatus: "REQUIRES_REVIEW",
+      eventStatus: "PROCESSED",
+      reviewReason: "AI_CREDITS_ALREADY_USED",
+      aiCreditsToRevoke: 0,
+      revokeGrants: false,
+    };
+  }
+
+  return {
+    action: "REVERSE",
+    orderStatus: input.targetStatus,
+    eventStatus: "PROCESSED",
+    reviewReason: null,
+    aiCreditsToRevoke: granted,
+    revokeGrants: true,
+  };
+}
+
 /**
  * Đơn ở trạng thái này có còn giữ chỗ ưu đãi không.
  *
@@ -296,13 +738,17 @@ export function buildEventKey(input: {
   invoiceNumber: string;
   timestamp: unknown;
 }): string {
-  const type = input.notificationType || "UNKNOWN";
-  const subject = input.transactionId || input.invoiceNumber || "na";
-  const stamp =
-    typeof input.timestamp === "number" || typeof input.timestamp === "string"
-      ? String(input.timestamp)
-      : "na";
-  return `${type}:${subject}:${stamp}`;
+  const compact = (value: string, maxLength: number) => value.slice(0, maxLength);
+  const type = compact(input.notificationType || "UNKNOWN", 60);
+  const transactionId = compact(input.transactionId || "", 120);
+  const invoiceNumber = compact(input.invoiceNumber || "", 120);
+  if (transactionId) {
+    return `${type}:${transactionId}`;
+  }
+  if (invoiceNumber) {
+    return `${type}:${invoiceNumber}`;
+  }
+  return `${type}:MALFORMED`;
 }
 
 /* ------------------------------------------------------------------ */

@@ -126,6 +126,19 @@ model User {
   bulletins     Bulletin[]
 }
 
+/// Bộ đếm chống thử mật khẩu/tạo tài khoản dồn dập. `key` là HMAC một chiều
+/// của IP/email, không lưu địa chỉ thật hay email thô trong bảng này.
+model AuthRateLimit {
+  key             String    @id @db.VarChar(96)
+  attempts        Int       @default(0)
+  windowStartedAt DateTime
+  blockedUntil    DateTime?
+  updatedAt       DateTime  @updatedAt
+
+  @@index([blockedUntil])
+  @@index([updatedAt])
+}
+
 model Exercise {
   id                  String  @id @default(cuid())
   skill               String
@@ -671,6 +684,8 @@ model PaymentEvent {
   providerTransactionId String?
   /// RECEIVED | PROCESSED | FAILED | IGNORED
   processingStatus      String    @default("RECEIVED")
+  /// Lease token cua worker dang giu quyen xu ly event nay.
+  processingLeaseToken  String?   @db.VarChar(64)
   payloadJson           String    @db.LongText
   errorMessage          String?   @db.Text
   receivedAt            DateTime  @default(now())

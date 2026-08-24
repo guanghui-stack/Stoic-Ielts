@@ -11,6 +11,7 @@ export type AdminUser = {
   email: string;
   role: string;
   active: boolean;
+  activeSessionId: string | null;
 };
 
 /** Phần giao diện Prisma tối thiểu mà hàm này cần. */
@@ -101,7 +102,10 @@ export async function ensureAdminAccount(
     if (!wasAdmin) data.role = "ADMIN";
     if (!existing.active) data.active = true;
     const hash = await pendingPasswordHash();
-    if (hash) data.passwordHash = hash;
+    if (hash) {
+      data.passwordHash = hash;
+      data.activeSessionId = null;
+    }
     if (Object.keys(data).length > 0) {
       await db.user.update({ where: { id: existing.id }, data });
       action = wasAdmin ? "unchanged" : "promoted";
@@ -125,7 +129,11 @@ export async function ensureAdminAccount(
     if (legacy) {
       await db.user.update({
         where: { id: legacy.id },
-        data: { email, active: true, ...(hash ? { passwordHash: hash } : {}) },
+        data: {
+          email,
+          active: true,
+          ...(hash ? { passwordHash: hash, activeSessionId: null } : {}),
+        },
       });
       action = "renamed";
       usable = true; // đổi tên chính tài khoản đang dùng → mật khẩu cũ vẫn vào được

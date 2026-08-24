@@ -6,11 +6,16 @@
  * mọi tình huống trong Phụ lục B của đặc tả đều có ít nhất một phép thử.
  */
 import { OFFERS, PRICE_VERSION } from "../src/lib/payments/catalog.ts";
+import * as topupService from "../src/lib/payments/topup-reversal-service.ts";
+import * as paymentRules from "../src/lib/payments/payment-rules.ts";
 import {
   buildEventKey,
   canTransitionToPaid,
   checkIpnPaidPayload,
   checkRetrievedOrderPaid,
+  boundPaymentEventErrorMessage,
+  decidePaymentEventClaim,
+  decideVoidOutcome,
   computeGrantWindow,
   decideGrantAccess,
   introPromoTokenFor,
@@ -20,6 +25,8 @@ import {
   resolveOfferPrice,
   type GrantLike,
 } from "../src/lib/payments/payment-rules.ts";
+
+const reverseTopupOrderWithRepo = topupService.reverseTopupOrderWithRepo;
 
 let failures = 0;
 function check(label: string, actual: unknown, expected: unknown) {
@@ -308,9 +315,39 @@ check("cùng một sự kiện sinh cùng một khóa", key(), key());
 check("giao dịch khác → khóa khác", key() === key({ transactionId: "TX-2" }), false);
 check("loại thông báo khác → khóa khác", key() === key({ notificationType: "TRANSACTION_VOID" }), false);
 check(
+  "cùng transaction_id nhưng khác timestamp vẫn phải cùng khóa để không xử lý lặp lần hai",
+  key(),
+  key({ timestamp: 1_785_999_999 })
+);
+check(
   "thiếu mã giao dịch thì rơi về mã đơn, không sinh khóa rỗng",
   key({ transactionId: "" }),
-  "ORDER_PAID:WB-1:1785000000"
+  "ORDER_PAID:WB-1"
+);
+check(
+  "fallback theo mã đơn phải bị chặn độ dài để payload lỗi không phình khóa unique",
+  buildEventKey({
+    notificationType: "ORDER_PAID",
+    transactionId: "",
+    invoiceNumber: `WB-${"X".repeat(300)}`,
+    timestamp: 1_785_000_000,
+  }).length <= 180,
+  true
+);
+check(
+  "notificationType quá dài vẫn phải cho ra eventKey không vượt VARCHAR(191)",
+  buildEventKey({
+    notificationType: "TYPE-".repeat(80),
+    transactionId: "TX-1",
+    invoiceNumber: "WB-1",
+    timestamp: 1_785_000_000,
+  }).length <= 191,
+  true
+);
+check(
+  "không có transaction_id thì cùng invoice + loại thông báo vẫn phải cùng khóa dù timestamp khác",
+  key({ transactionId: "", timestamp: 1_785_000_000 }),
+  key({ transactionId: "", timestamp: 1_786_000_000 })
 );
 
 console.log("\nCHUYỂN TRẠNG THÁI ĐƠN");
@@ -319,6 +356,737 @@ check("đơn cần đối soát có thể chuyển sang đã trả", canTransiti
 check("đơn đã hủy KHÔNG được tự chuyển sang đã trả", canTransitionToPaid("CANCELLED"), false);
 check("đơn đã hoàn tiền KHÔNG được chuyển sang đã trả", canTransitionToPaid("REFUNDED"), false);
 check("đơn đã void KHÔNG được chuyển sang đã trả", canTransitionToPaid("VOIDED"), false);
+
+/* ---------------------------------------------------------------- */
+console.log("\nLẶP IPN — chỉ PROCESSED là trạng thái cuối");
+const CLAIM_TIMEOUT_MS = 30_000;
+const claim = (
+  existing:
+    | {
+        processingStatus: string;
+        receivedAt: Date;
+        processedAt: Date | null;
+      }
+    | null,
+  now = NOW
+) =>
+  decidePaymentEventClaim({
+    existing,
+    now,
+    processingTimeoutMs: CLAIM_TIMEOUT_MS,
+  });
+
+check("chưa có event → tạo mới và nhận quyền xử lý", claim(null), {
+  kind: "CREATE_AND_CLAIM",
+});
+check(
+  "PROCESSED là cuối cùng, bản lặp không xử lý lại",
+  claim({
+    processingStatus: "PROCESSED",
+    receivedAt: at(-1),
+    processedAt: NOW,
+  }),
+  { kind: "SKIP_FINAL" }
+);
+check(
+  "FAILED phải cho retry",
+  claim({
+    processingStatus: "FAILED",
+    receivedAt: at(-1),
+    processedAt: NOW,
+  }),
+  { kind: "CLAIM_EXISTING" }
+);
+check(
+  "RECEIVED cũ cũng phải cho retry, không bị bỏ luôn",
+  claim({
+    processingStatus: "RECEIVED",
+    receivedAt: at(-1),
+    processedAt: null,
+  }),
+  { kind: "CLAIM_EXISTING" }
+);
+check(
+  "PROCESSING còn mới → giữ nguyên người đang xử lý",
+  claim({
+    processingStatus: "PROCESSING",
+    receivedAt: at(-1),
+    processedAt: new Date(NOW.getTime() - 5_000),
+  }),
+  { kind: "SKIP_IN_FLIGHT" }
+);
+check(
+  "PROCESSING quá hạn → được quyền chiếm lại",
+  claim(
+    {
+      processingStatus: "PROCESSING",
+      receivedAt: at(-1),
+      processedAt: new Date(NOW.getTime() - 45_000),
+    },
+    NOW
+  ),
+  { kind: "RECLAIM_STALE" }
+);
+check(
+  "lỗi IPN được cắt gọn trước khi ghi vào event",
+  boundPaymentEventErrorMessage("X".repeat(500), 32),
+  "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+);
+
+/* ---------------------------------------------------------------- */
+console.log("\nVOID GIAO DỊCH — nạp ví phải thu xu trước khi đóng đơn");
+check(
+  "TOPUP thu xu thành công mới được VOIDED",
+  decideVoidOutcome({
+    orderKind: "TOPUP",
+    revokeCoins: { ok: true },
+  }),
+  {
+    orderStatus: "VOIDED",
+    eventStatus: "PROCESSED",
+    revokeGrants: false,
+  }
+);
+check(
+  "TOPUP đã tiêu mất xu → chuyển REQUIRES_REVIEW, không VOIDED im lặng",
+  decideVoidOutcome({
+    orderKind: "TOPUP",
+    revokeCoins: { ok: false, reason: "ALREADY_SPENT" },
+  }),
+  {
+    orderStatus: "REQUIRES_REVIEW",
+    eventStatus: "PROCESSED",
+    revokeGrants: false,
+  }
+);
+check(
+  "PACKAGE void thì thu hồi grant và đánh dấu PROCESSED",
+  decideVoidOutcome({
+    orderKind: "PACKAGE",
+    revokeCoins: null,
+  }),
+  {
+    orderStatus: "VOIDED",
+    eventStatus: "PROCESSED",
+    revokeGrants: true,
+  }
+);
+
+console.log("\nQUY TẮC HOÀN/VOID — helper thuần cho ca khó");
+const decideTopupReversal = (
+  paymentRules as Record<string, unknown>
+).decideTopupReversal as
+  | undefined
+  | ((input: {
+      orderStatus: string;
+      expectedCoins: number;
+      creditedCoins: number;
+      revokedCoins: number;
+      remainingCreditedCoins: number;
+    }) => unknown);
+check("có helper thuần cho hoàn/void TOPUP", typeof decideTopupReversal, "function");
+if (typeof decideTopupReversal === "function") {
+  check(
+    "đơn TOPUP chưa từng cộng xu thì void sạch mà không trừ ví",
+    decideTopupReversal({
+      orderStatus: "PENDING",
+      expectedCoins: 100,
+      creditedCoins: 0,
+      revokedCoins: 0,
+      remainingCreditedCoins: 0,
+    }),
+    {
+      action: "VOID_NOOP",
+      orderStatus: "VOIDED",
+      eventStatus: "PROCESSED",
+      reviewReason: null,
+      coinsToRevoke: 0,
+    }
+  );
+  check(
+    "chỉ phần xu gốc còn nguyên mới được thu hồi",
+    decideTopupReversal({
+      orderStatus: "PAID",
+      expectedCoins: 100,
+      creditedCoins: 100,
+      revokedCoins: 0,
+      remainingCreditedCoins: 100,
+    }),
+    {
+      action: "REVOKE_ORIGINAL_CREDIT",
+      orderStatus: "VOIDED",
+      eventStatus: "PROCESSED",
+      reviewReason: null,
+      coinsToRevoke: 100,
+    }
+  );
+  check(
+    "học viên đã tiêu mất một phần xu gốc thì phải chuyển review",
+    decideTopupReversal({
+      orderStatus: "PAID",
+      expectedCoins: 100,
+      creditedCoins: 100,
+      revokedCoins: 0,
+      remainingCreditedCoins: 40,
+    }),
+    {
+      action: "REVIEW",
+      orderStatus: "REQUIRES_REVIEW",
+      eventStatus: "PROCESSED",
+      reviewReason: "TOPUP_CREDIT_ALREADY_SPENT",
+      coinsToRevoke: 0,
+    }
+  );
+  check(
+    "đơn đã PAID mà thiếu ledger gốc phải chuyển review, không được coi như PENDING",
+    decideTopupReversal({
+      orderStatus: "PAID",
+      expectedCoins: 100,
+      creditedCoins: 0,
+      revokedCoins: 0,
+      remainingCreditedCoins: 0,
+    }),
+    {
+      action: "REVIEW",
+      orderStatus: "REQUIRES_REVIEW",
+      eventStatus: "PROCESSED",
+      reviewReason: "TOPUP_LEDGER_MISSING",
+      coinsToRevoke: 0,
+    }
+  );
+  check(
+    "đơn REQUIRES_REVIEW thiếu ledger gốc vẫn phải giữ review, không được void sạch",
+    decideTopupReversal({
+      orderStatus: "REQUIRES_REVIEW",
+      expectedCoins: 100,
+      creditedCoins: 0,
+      revokedCoins: 0,
+      remainingCreditedCoins: 0,
+    }),
+    {
+      action: "REVIEW",
+      orderStatus: "REQUIRES_REVIEW",
+      eventStatus: "PROCESSED",
+      reviewReason: "TOPUP_LEDGER_MISSING",
+      coinsToRevoke: 0,
+    }
+  );
+}
+
+const decideTopupReversalFromLedger = (
+  paymentRules as Record<string, unknown>
+).decideTopupReversalFromLedger as
+  | undefined
+  | ((input: {
+      orderId: string;
+      orderStatus: string;
+      expectedCoins: number;
+      ledgerRows: Array<{
+        kind: string;
+        amount: number;
+        orderId: string | null;
+        ledgerKey: string;
+      }>;
+    }) => unknown);
+check(
+  "có helper thuần tính reversal TOPUP theo thứ tự ledger",
+  typeof decideTopupReversalFromLedger,
+  "function"
+);
+if (typeof decideTopupReversalFromLedger === "function") {
+  check(
+    "A tiêu hết rồi mới nạp B thì refund A phải review, không được trừ nhầm của B",
+    decideTopupReversalFromLedger({
+      orderId: "A",
+      orderStatus: "PAID",
+      expectedCoins: 100,
+      ledgerRows: [
+        { kind: "TOPUP", amount: 100, orderId: "A", ledgerKey: "TOPUP:A" },
+        { kind: "SPEND", amount: 100, orderId: null, ledgerKey: "SPEND:X" },
+        { kind: "TOPUP", amount: 100, orderId: "B", ledgerKey: "TOPUP:B" },
+      ],
+    }),
+    {
+      action: "REVIEW",
+      orderStatus: "REQUIRES_REVIEW",
+      eventStatus: "PROCESSED",
+      reviewReason: "TOPUP_CREDIT_ALREADY_SPENT",
+      coinsToRevoke: 0,
+    }
+  );
+  check(
+    "ledger gốc sai kind/orderId/amount thì phải fail-closed sang review",
+    decideTopupReversalFromLedger({
+      orderId: "A",
+      orderStatus: "PAID",
+      expectedCoins: 100,
+      ledgerRows: [
+        { kind: "GIFT", amount: 100, orderId: "A", ledgerKey: "TOPUP:A" },
+      ],
+    }),
+    {
+      action: "REVIEW",
+      orderStatus: "REQUIRES_REVIEW",
+      eventStatus: "PROCESSED",
+      reviewReason: "TOPUP_LEDGER_CORRUPTED",
+      coinsToRevoke: 0,
+    }
+  );
+}
+
+console.log("\nTOPUP ATOMICITY — stale lease/crash không được để side effect lọt ra ngoài");
+type FakeTopupState = {
+  order: {
+    id: string;
+    userId: string;
+    status: string;
+    coinsGranted: number;
+    lastError: string | null;
+  };
+  wallet: { grantedTotal: number; spentTotal: number } | null;
+  ledgerRows: Array<{
+    kind: string;
+    amount: number;
+    orderId: string | null;
+    ledgerKey: string;
+    note?: string | null;
+    balanceAfter?: number;
+  }>;
+  event:
+    | {
+        processingStatus: string;
+        processingLeaseToken: string | null;
+        errorMessage: string | null;
+      }
+    | null;
+};
+
+async function runFakeTopupTx(
+  state: FakeTopupState,
+  o: {
+    failOnUpdateOrder?: boolean;
+    eventLeaseToken?: string;
+    workerLeaseToken?: string;
+  } = {}
+) {
+  const original = structuredClone(state);
+  const draft = structuredClone(state);
+  try {
+    const result = await reverseTopupOrderWithRepo(
+      {
+        getOrder: async () => draft.order,
+        getWallet: async () => draft.wallet,
+        getLedger: async () => draft.ledgerRows,
+        incrementWalletSpent: async (_userId, amount) => {
+          if (!draft.wallet) throw new Error("MISSING_WALLET");
+          draft.wallet.spentTotal += amount;
+        },
+        createRevokeLedger: async (entry) => {
+          draft.ledgerRows.push({
+            kind: "REVOKE",
+            amount: entry.amount,
+            orderId: entry.orderId,
+            ledgerKey: `REVOKE:${entry.orderId}`,
+            note: entry.note,
+            balanceAfter: entry.balanceAfter,
+          });
+        },
+        updateOrder: async (_orderId, data) => {
+          if (o.failOnUpdateOrder) throw new Error("ORDER_WRITE_CRASH");
+          draft.order = {
+            ...draft.order,
+            status: data.status,
+            lastError: data.lastError ?? null,
+          };
+        },
+        finalizeEvent: draft.event
+          ? async (event) => {
+              const ok =
+                draft.event?.processingStatus === "PROCESSING" &&
+                draft.event.processingLeaseToken === event.processingLeaseToken;
+              if (!ok) return false;
+              const currentEvent = draft.event;
+              if (!currentEvent) return false;
+              draft.event = {
+                ...currentEvent,
+                processingStatus: event.processingStatus,
+                processingLeaseToken: currentEvent.processingLeaseToken ?? null,
+                errorMessage: event.errorMessage ?? null,
+              };
+              return true;
+            }
+          : undefined,
+      },
+      {
+        orderId: draft.order.id,
+        targetStatus: "VOIDED",
+        reason: "SEPAY_VOID",
+        reviewCodePrefix: "SEPAY_VOID",
+        now: NOW,
+        ...(draft.event
+          ? {
+              eventFinalize: {
+                eventKey: "ORDER_PAID:TX-1",
+                processingLeaseToken:
+                  o.workerLeaseToken ?? draft.event.processingLeaseToken ?? "lease-A",
+              },
+            }
+          : {}),
+      }
+    );
+    return { committed: true as const, state: draft, result };
+  } catch (error) {
+    return {
+      committed: false as const,
+      state: original,
+      error: error instanceof Error ? error.message : String(error),
+    };
+  }
+}
+
+const atomicBase: FakeTopupState = {
+  order: {
+    id: "ord-A",
+    userId: "u1",
+    status: "PAID",
+    coinsGranted: 100,
+    lastError: null,
+  },
+  wallet: { grantedTotal: 100, spentTotal: 0 },
+  ledgerRows: [{ kind: "TOPUP", amount: 100, orderId: "ord-A", ledgerKey: "TOPUP:ord-A" }],
+  event: {
+    processingStatus: "PROCESSING",
+    processingLeaseToken: "lease-B",
+    errorMessage: null,
+  },
+};
+
+const staleLeaseTx = await runFakeTopupTx(atomicBase, { workerLeaseToken: "lease-A" });
+check("stale lease phải làm cả transaction rollback", staleLeaseTx.committed, false);
+check(
+  "stale lease rollback giữ nguyên wallet/order/ledger",
+  staleLeaseTx.state,
+  atomicBase
+);
+
+const crashWindowTx = await runFakeTopupTx(
+  {
+    ...atomicBase,
+    event: null,
+  },
+  { failOnUpdateOrder: true }
+);
+check("lỗi giữa đường ở admin refund cũng phải rollback cả ví và order", crashWindowTx.committed, false);
+check("admin crash rollback giữ nguyên state", crashWindowTx.state, {
+  ...atomicBase,
+  event: null,
+});
+
+console.log("\nTOPUP RETRY — unique/deadlock phải đọc lại state và chốt đúng lease");
+const runTopupReversalWithRetry = (
+  topupService as Record<string, unknown>
+).runTopupReversalWithRetry as
+  | undefined
+  | (<T>(operation: (attempt: number) => Promise<T>, maxAttempts?: number) => Promise<T>);
+check(
+  "có retry bounded dùng lại cho transaction reversal",
+  typeof runTopupReversalWithRetry,
+  "function"
+);
+if (typeof runTopupReversalWithRetry === "function") {
+  let attempts = 0;
+  const stateAfterConcurrentCommit: FakeTopupState = {
+    ...structuredClone(atomicBase),
+    order: { ...structuredClone(atomicBase.order), status: "VOIDED" },
+    wallet: { grantedTotal: 100, spentTotal: 100 },
+    ledgerRows: [
+      ...structuredClone(atomicBase.ledgerRows),
+      {
+        kind: "REVOKE",
+        amount: 100,
+        orderId: "ord-A",
+        ledgerKey: "REVOKE:ord-A",
+        balanceAfter: 0,
+      },
+    ],
+    event: {
+      processingStatus: "PROCESSING",
+      processingLeaseToken: "lease-A",
+      errorMessage: null,
+    },
+  };
+  const recovered = await runTopupReversalWithRetry(async () => {
+    attempts++;
+    if (attempts === 1) {
+      throw { code: "P2002" };
+    }
+    return runFakeTopupTx(stateAfterConcurrentCommit, { workerLeaseToken: "lease-A" });
+  });
+  check("P2002 chỉ retry đúng một lần rồi đọc terminal state mới", attempts, 2);
+  check("retry chốt event đang giữ lease thay vì trả NOOP giả", recovered, {
+    committed: true,
+    state: {
+      ...stateAfterConcurrentCommit,
+      event: {
+        processingStatus: "PROCESSED",
+        processingLeaseToken: "lease-A",
+        errorMessage: null,
+      },
+    },
+    result: {
+      ok: true,
+      action: "NOOP_FINAL",
+      orderStatus: "VOIDED",
+      coinsRevoked: 0,
+      balanceAfter: 0,
+    },
+  });
+
+  let leaseLostAttempts = 0;
+  const lostLeaseState: FakeTopupState = {
+    ...structuredClone(stateAfterConcurrentCommit),
+    event: {
+      processingStatus: "PROCESSING",
+      processingLeaseToken: "lease-B",
+      errorMessage: null,
+    },
+  };
+  let leaseLostMessage = "";
+  try {
+    await runTopupReversalWithRetry(async () => {
+      leaseLostAttempts++;
+      if (leaseLostAttempts === 1) throw { code: "P2002" };
+      const result = await runFakeTopupTx(lostLeaseState, {
+        workerLeaseToken: "lease-A",
+      });
+      if (!result.committed) throw new Error(result.error);
+      return result;
+    });
+  } catch (error) {
+    leaseLostMessage = error instanceof Error ? error.message : String(error);
+  }
+  check("lease mất sau retry phải throw để webhook thử lại", leaseLostMessage, "PAYMENT_EVENT_LEASE_LOST");
+  check("lease lost không bị retry vô hạn", leaseLostAttempts, 2);
+
+  let deadlockAttempts = 0;
+  let deadlockMessage = "";
+  try {
+    await runTopupReversalWithRetry(async () => {
+      deadlockAttempts++;
+      throw { code: "P2034" };
+    }, 3);
+  } catch (error) {
+    deadlockMessage = String((error as { code?: string }).code ?? error);
+  }
+  check("P2034 dừng đúng giới hạn", deadlockAttempts, 3);
+  check("hết retry phải ném lỗi gốc cho webhook", deadlockMessage, "P2034");
+}
+
+console.log("\nP2002 FULFILLMENT — chỉ success khi chứng minh đúng đơn đã hoàn tất");
+const canRecoverFulfillmentP2002 = (
+  paymentRules as Record<string, unknown>
+).canRecoverFulfillmentP2002 as
+  | undefined
+  | ((input: {
+      orderStatus: string;
+      expectedProviderTransactionId: string;
+      actualProviderTransactionId: string | null;
+      hasExpectedFulfillmentEvidence: boolean;
+    }) => boolean);
+check("có helper fail-closed cho P2002 fulfillment", typeof canRecoverFulfillmentP2002, "function");
+if (typeof canRecoverFulfillmentP2002 === "function") {
+  check("đúng PAID + đúng transaction + đủ evidence mới recover", canRecoverFulfillmentP2002({
+    orderStatus: "PAID",
+    expectedProviderTransactionId: "TX-1",
+    actualProviderTransactionId: "TX-1",
+    hasExpectedFulfillmentEvidence: true,
+  }), true);
+  check("providerTransactionId đụng đơn khác không được false-success", canRecoverFulfillmentP2002({
+    orderStatus: "PENDING",
+    expectedProviderTransactionId: "TX-1",
+    actualProviderTransactionId: null,
+    hasExpectedFulfillmentEvidence: false,
+  }), false);
+  check("PAID cùng transaction nhưng thiếu grant/ledger cũng phải fail-closed", canRecoverFulfillmentP2002({
+    orderStatus: "PAID",
+    expectedProviderTransactionId: "TX-1",
+    actualProviderTransactionId: "TX-1",
+    hasExpectedFulfillmentEvidence: false,
+  }), false);
+  check("PAID bởi transaction khác không được nhận nhầm", canRecoverFulfillmentP2002({
+    orderStatus: "PAID",
+    expectedProviderTransactionId: "TX-1",
+    actualProviderTransactionId: "TX-OTHER",
+    hasExpectedFulfillmentEvidence: true,
+  }), false);
+}
+
+console.log("\nMIGRATION ERROR — chỉ nuốt đúng duplicate-column MySQL");
+const isDuplicateColumnMigrationError = (
+  paymentRules as Record<string, unknown>
+).isDuplicateColumnMigrationError as undefined | ((error: unknown) => boolean);
+check("có helper phân loại lỗi migration", typeof isDuplicateColumnMigrationError, "function");
+if (typeof isDuplicateColumnMigrationError === "function") {
+  check("nhận duplicate top-level mysql errno", isDuplicateColumnMigrationError({ errno: 1060 }), true);
+  check("nhận Prisma P2010 với MySQL code nằm trong meta", isDuplicateColumnMigrationError({
+    code: "P2010",
+    meta: { code: "1060", message: "Duplicate column name 'processingLeaseToken'" },
+  }), true);
+  check("nhận ER_DUP_FIELDNAME nằm sâu trong Prisma meta", isDuplicateColumnMigrationError({
+    code: "P2010",
+    meta: { driverAdapterError: { cause: { code: "ER_DUP_FIELDNAME" } } },
+  }), true);
+  check("nhận MySQL 1060 chỉ xuất hiện trong nested database_error", isDuplicateColumnMigrationError({
+    code: "P2010",
+    meta: {
+      driverAdapterError: {
+        cause: { database_error: "ERROR 1060 (42S21): Duplicate column name" },
+      },
+    },
+  }), true);
+  check("không nuốt lỗi permission", isDuplicateColumnMigrationError({
+    code: "P2010",
+    meta: { code: "1142", message: "ALTER command denied" },
+  }), false);
+  check("không nuốt lỗi lock/deadlock", isDuplicateColumnMigrationError({ code: "P2034" }), false);
+}
+
+const requirePaymentEventFinalized = (
+  paymentRules as Record<string, unknown>
+).requirePaymentEventFinalized as undefined | ((finalized: boolean) => void);
+check("có guard bắt buộc mọi terminal event phải giữ đúng lease", typeof requirePaymentEventFinalized, "function");
+if (typeof requirePaymentEventFinalized === "function") {
+  let leaseGuardMessage = "";
+  try {
+    requirePaymentEventFinalized(false);
+  } catch (error) {
+    leaseGuardMessage = error instanceof Error ? error.message : String(error);
+  }
+  check("terminal CAS miss phải throw cho webhook retry", leaseGuardMessage, "PAYMENT_EVENT_LEASE_LOST");
+  let ownedLeaseThrows = false;
+  try {
+    requirePaymentEventFinalized(true);
+  } catch {
+    ownedLeaseThrows = true;
+  }
+  check("terminal CAS đúng lease không throw", ownedLeaseThrows, false);
+}
+
+const decidePackageReversal = (
+  paymentRules as Record<string, unknown>
+).decidePackageReversal as
+  | undefined
+  | ((input: {
+      orderStatus: string;
+      targetStatus: "VOIDED" | "REFUNDED";
+      grantedAiCredits: number;
+      availableAiCredits: number;
+      usedTotal?: number;
+      grantCount?: number;
+    }) => unknown);
+check("có helper thuần cho hoàn/void PACKAGE", typeof decidePackageReversal, "function");
+if (typeof decidePackageReversal === "function") {
+  check(
+    "thiếu lượt AI còn lại thì không được hoàn sạch, phải đưa đi review",
+    decidePackageReversal({
+      orderStatus: "PAID",
+      targetStatus: "REFUNDED",
+      grantedAiCredits: 10,
+      availableAiCredits: 3,
+    }),
+    {
+      action: "REVIEW",
+      orderStatus: "REQUIRES_REVIEW",
+      eventStatus: "PROCESSED",
+      reviewReason: "AI_CREDITS_ALREADY_USED",
+      aiCreditsToRevoke: 0,
+      revokeGrants: false,
+    }
+  );
+  check(
+    "đã dùng lượt AI của A rồi mới mua B thì refund A phải review, không được trừ nhầm của B",
+    decidePackageReversal({
+      orderStatus: "PAID",
+      targetStatus: "REFUNDED",
+      grantedAiCredits: 10,
+      availableAiCredits: 10,
+      usedTotal: 10,
+      grantCount: 1,
+    }),
+    {
+      action: "REVIEW",
+      orderStatus: "REQUIRES_REVIEW",
+      eventStatus: "PROCESSED",
+      reviewReason: "AI_CREDITS_ALREADY_USED",
+      aiCreditsToRevoke: 0,
+      revokeGrants: false,
+    }
+  );
+  check(
+    "đơn đã REFUNDED mà nhận VOIDED muộn thì NOOP_FINAL, không được regress về review",
+    decidePackageReversal({
+      orderStatus: "REFUNDED",
+      targetStatus: "VOIDED",
+      grantedAiCredits: 10,
+      availableAiCredits: 10,
+      usedTotal: 0,
+      grantCount: 0,
+    }),
+    {
+      action: "NOOP_FINAL",
+      orderStatus: "REFUNDED",
+      eventStatus: "PROCESSED",
+      reviewReason: null,
+      aiCreditsToRevoke: 0,
+      revokeGrants: false,
+    }
+  );
+}
+
+console.log("\nLEASE TOKEN — worker cũ không được chốt event của worker mới");
+const canFinalizePaymentEventLease = (
+  paymentRules as Record<string, unknown>
+).canFinalizePaymentEventLease as
+  | undefined
+  | ((input: {
+      processingStatus: string;
+      processingLeaseToken: string | null;
+      workerLeaseToken: string;
+    }) => boolean);
+check(
+  "có helper thuần chặn worker cũ ghi đè event đã bị chiếm lại",
+  typeof canFinalizePaymentEventLease,
+  "function"
+);
+if (typeof canFinalizePaymentEventLease === "function") {
+  check(
+    "đúng lease đang giữ quyền thì được finalize",
+    canFinalizePaymentEventLease({
+      processingStatus: "PROCESSING",
+      processingLeaseToken: "lease-A",
+      workerLeaseToken: "lease-A",
+    }),
+    true
+  );
+  check(
+    "worker cũ hết lease thì không được ghi đè sang FAILED/PROCESSED",
+    canFinalizePaymentEventLease({
+      processingStatus: "PROCESSING",
+      processingLeaseToken: "lease-B",
+      workerLeaseToken: "lease-A",
+    }),
+    false
+  );
+  check(
+    "event đã PROCESSED thì mọi worker khác đều phải đứng lại",
+    canFinalizePaymentEventLease({
+      processingStatus: "PROCESSED",
+      processingLeaseToken: "lease-A",
+      workerLeaseToken: "lease-A",
+    }),
+    false
+  );
+}
 
 console.log(
   failures === 0

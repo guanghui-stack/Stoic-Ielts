@@ -76,10 +76,11 @@ export async function GET(request: NextRequest) {
   // Hàm này cũng tặng quà chào mừng, và tự chống tặng hai lần bằng khóa riêng.
   await markVerifiedByProvider(user.id);
 
-  await createSession({
+  const sessionCreated = await createSession({
     userId: user.id,
     role: user.role === "ADMIN" ? "ADMIN" : "STUDENT",
   });
+  if (!sessionCreated) return back("tai-khoan-bi-khoa");
 
   const base = process.env.APP_URL || "http://localhost:3000";
   return NextResponse.redirect(

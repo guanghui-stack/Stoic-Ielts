@@ -6,6 +6,7 @@ import {
   isValidAchievementAttempt,
 } from "@/lib/reading-band";
 import { seedRankCatalog, backfillUserRanks } from "@/lib/ranks/seeds";
+import { isDuplicateColumnMigrationError } from "@/lib/payments/payment-rules";
 import seedData from "../../prisma/seed-data.json";
 import readingGameTheory from "../../prisma/reading-game-theory.json";
 import readingPaidPack1 from "../../prisma/reading-paid-pack-1.json";
@@ -76,6 +77,17 @@ const DDL = [
     \`key\` VARCHAR(191) NOT NULL,
     \`value\` TEXT NOT NULL,
     PRIMARY KEY (\`key\`)
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`AuthRateLimit\` (
+    \`key\` VARCHAR(96) NOT NULL,
+    \`attempts\` INTEGER NOT NULL DEFAULT 0,
+    \`windowStartedAt\` DATETIME(3) NOT NULL,
+    \`blockedUntil\` DATETIME(3) NULL,
+    \`updatedAt\` DATETIME(3) NOT NULL,
+    PRIMARY KEY (\`key\`),
+    INDEX \`AuthRateLimit_blockedUntil_idx\` (\`blockedUntil\`),
+    INDEX \`AuthRateLimit_updatedAt_idx\` (\`updatedAt\`)
   ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
 
   `CREATE TABLE IF NOT EXISTS \`FeynmanReview\` (
@@ -194,6 +206,7 @@ const DDL = [
     \`notificationType\` VARCHAR(191) NOT NULL,
     \`providerTransactionId\` VARCHAR(191) NULL,
     \`processingStatus\` VARCHAR(191) NOT NULL DEFAULT 'RECEIVED',
+    \`processingLeaseToken\` VARCHAR(64) NULL,
     \`payloadJson\` LONGTEXT NOT NULL,
     \`errorMessage\` TEXT NULL,
     \`receivedAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -1603,6 +1616,33 @@ const MIGRATIONS = [
   `CREATE INDEX \`ArenaProfile_faction_idx\` ON \`ArenaProfile\` (\`faction\`)`,
 ];
 
+const PAYMENT_EVENT_LEASE_MIGRATION =
+  "ALTER TABLE `PaymentEvent` ADD COLUMN `processingLeaseToken` VARCHAR(64) NULL";
+
+async function hasColumn(table: string, column: string): Promise<boolean> {
+  const rows = await db.$queryRawUnsafe<Array<{ present: number }>>(
+    `SELECT 1 AS present
+       FROM information_schema.COLUMNS
+      WHERE TABLE_SCHEMA = DATABASE()
+        AND TABLE_NAME = ?
+        AND COLUMN_NAME = ?
+      LIMIT 1`,
+    table,
+    column
+  );
+  return rows.length > 0;
+}
+
+async function ensurePaymentEventLeaseMigration() {
+  if (await hasColumn("PaymentEvent", "processingLeaseToken")) return;
+  try {
+    await db.$executeRawUnsafe(PAYMENT_EVENT_LEASE_MIGRATION);
+  } catch (error) {
+    if (isDuplicateColumnMigrationError(error)) return;
+    throw error;
+  }
+}
+
 export async function initDatabase() {
   /**
    * Mỗi lệnh tạo bảng chạy độc lập.
@@ -1630,6 +1670,11 @@ export async function initDatabase() {
       /* cột đã tồn tại — bỏ qua */
     }
   }
+
+  // Lease token cua PaymentEvent la migration BAT BUOC cho an toan tranh
+  // stale worker ghi de. Khong duoc nuot loi permission/lock/transient nhu
+  // vong legacy migration ben tren.
+  await ensurePaymentEventLeaseMigration();
 
   // Tài khoản quản trị: email theo ADMIN_EMAIL (mặc định seed-data.json),
   // mật khẩu CHỈ từ ADMIN_PASSWORD — không bao giờ nằm trong mã nguồn.

@@ -3,7 +3,11 @@
 import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
-import { requireUser } from "@/lib/session";
+import {
+  destroySession,
+  replacePasswordIfCurrentAndRevokeUserSessions,
+  requireUser,
+} from "@/lib/session";
 import { sendVerificationEmail } from "@/lib/auth/email-verification";
 
 export type AccountFormState = { error?: string; success?: string } | undefined;
@@ -81,12 +85,31 @@ export async function changePasswordAction(
     return { error: "Mật khẩu nhập lại không khớp." };
   }
 
-  await db.user.update({
-    where: { id: user.id },
-    data: { passwordHash: await bcrypt.hash(password, 10) },
-  });
+  if (!user.activeSessionId) {
+    await destroySession();
+    return { error: "Phiên đăng nhập không còn hiệu lực. Vui lòng đăng nhập lại." };
+  }
 
-  return { success: "Đã đổi mật khẩu thành công. Hãy dùng mật khẩu mới từ lần đăng nhập sau." };
+  const changed = await replacePasswordIfCurrentAndRevokeUserSessions({
+    userId: user.id,
+    passwordHash: await bcrypt.hash(password, 10),
+    expectedPasswordHash: user.passwordHash,
+    expectedActiveSessionId: user.activeSessionId,
+  });
+  if (!changed) {
+    // Hash, trạng thái hoặc session đã đổi sau bước xác minh phía trên. Xóa
+    // cookie cũ và tuyệt đối không ghi đè thay đổi vừa thắng race.
+    await destroySession();
+    return {
+      error: "Tài khoản vừa thay đổi ở một phiên khác. Vui lòng đăng nhập lại.",
+    };
+  }
+  await destroySession();
+
+  return {
+    success:
+      "Đã đổi mật khẩu và đăng xuất các phiên cũ. Hãy đăng nhập lại bằng mật khẩu mới.",
+  };
 }
 
 /**

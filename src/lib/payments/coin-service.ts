@@ -3,6 +3,10 @@ import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { OFFERS, type OfferCode, type Offer } from "@/lib/payments/catalog";
 import {
+  reverseTopupOrderWithRepo,
+  runTopupReversalWithRetry,
+} from "@/lib/payments/topup-reversal-service";
+import {
   WELCOME_COINS,
   coinBalance,
   decideCoinPurchase,
@@ -380,93 +384,136 @@ export async function grantWelcomeCoins(userId: string): Promise<boolean> {
 
 export type RevokeResult =
   | { ok: true; coins: number; balanceAfter: number }
-  | { ok: false; reason: "ALREADY_SPENT"; coins: number; balance: number };
+  | {
+      ok: false;
+      reason: "ALREADY_SPENT" | "CORRUPTED";
+      coins: number;
+      balance: number;
+    };
 
-/**
- * Thu lại xu của một đơn nạp được hoàn tiền.
- *
- * TỪ CHỐI khi học viên đã tiêu mất phần đó, thay vì để số dư âm hay im lặng
- * thu về 0. Xu đã tiêu là quyền học đã mở — thu ngược lại nghĩa là lấy đi thứ
- * họ đang dùng, và đó phải là quyết định của người, không phải của một hàm.
- * Quản trị viên nhận đúng con số còn thiếu để tự xử.
- *
- * Không dùng `ledgerKey` chống lặp bằng random: khóa là `REVOKE:<orderId>` nên
- * bấm hoàn tiền hai lần cũng chỉ trừ một lần.
- */
-export async function revokeCoinsOfOrder(input: {
+export async function reverseTopupOrder(input: {
   orderId: string;
-  userId: string;
-  coins: number;
+  targetStatus: "VOIDED" | "REFUNDED";
   reason: string;
-}): Promise<RevokeResult> {
-  try {
-    return await db.$transaction(
+  reviewCodePrefix: string;
+  rawLastPayload?: string | null;
+  now?: Date;
+  eventFinalize?: {
+    eventKey: string;
+    processingLeaseToken: string;
+    errorMessage?: string | null;
+  };
+}): Promise<
+  | {
+      ok: true;
+      action: "REVERSED" | "NOOP_FINAL";
+      orderStatus: string;
+      coinsRevoked: number;
+      balanceAfter: number;
+    }
+  | {
+      ok: false;
+      action: "REVIEW";
+      orderStatus: "REQUIRES_REVIEW";
+      reason: "ALREADY_SPENT" | "CORRUPTED" | "TOPUP_NOT_PAYABLE" | "INSUFFICIENT_BALANCE";
+      coinsRevoked: 0;
+      balanceAfter: number;
+    }
+> {
+  return runTopupReversalWithRetry(() =>
+    db.$transaction(
       async (tx) => {
-        const wallet = await tx.coinWallet.findUnique({
-          where: { userId: input.userId },
-        });
-        const balance = wallet ? coinBalance(wallet) : 0;
-
-        // Hỏi "đã thu hồi chưa" TRƯỚC khi xét số dư. Ngược lại thì lần bấm thứ
-        // hai gặp ví đã bị trừ hết và báo nhầm thành "học viên tiêu mất rồi" —
-        // đẩy quản trị viên đi truy một khoản không hề bị tiêu. Ràng buộc
-        // unique không cứu được ở đây vì nhánh số dư trả về trước khi kịp ghi.
-        const already = await tx.coinLedger.findUnique({
-          where: { ledgerKey: `REVOKE:${input.orderId}` },
-          select: { amount: true },
-        });
-        if (already) {
-          return { ok: true as const, coins: 0, balanceAfter: balance };
-        }
-
-        if (balance < input.coins) {
-          return {
-            ok: false as const,
-            reason: "ALREADY_SPENT" as const,
-            coins: input.coins,
-            balance,
-          };
-        }
-
-        // Thu hồi ghi vào `spentTotal` chứ không trừ `grantedTotal`: tổng đã
-        // nạp là sự thật lịch sử, và bóp nó lại sẽ làm mọi báo cáo doanh thu
-        // về sau sai mà không ai lần ra vì sao.
-        await tx.coinWallet.update({
-          where: { userId: input.userId },
-          data: { spentTotal: { increment: input.coins } },
-        });
-
-        await tx.coinLedger.create({
-          data: {
-            userId: input.userId,
-            kind: "REVOKE",
-            amount: input.coins,
-            balanceAfter: balance - input.coins,
-            ledgerKey: `REVOKE:${input.orderId}`,
-            orderId: input.orderId,
-            note: input.reason,
+        return reverseTopupOrderWithRepo(
+          {
+            getOrder: (orderId) =>
+              tx.paymentOrder.findUnique({
+                where: { id: orderId },
+                select: {
+                  id: true,
+                  userId: true,
+                  status: true,
+                  coinsGranted: true,
+                },
+              }),
+            getWallet: (userId) =>
+              tx.coinWallet.findUnique({
+                where: { userId },
+                select: { grantedTotal: true, spentTotal: true },
+              }),
+            getLedger: (userId) =>
+              tx.coinLedger.findMany({
+                where: { userId },
+                orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+                select: {
+                  kind: true,
+                  amount: true,
+                  orderId: true,
+                  ledgerKey: true,
+                },
+              }),
+            incrementWalletSpent: async (userId, amount) => {
+              await tx.coinWallet.update({
+                where: { userId },
+                data: { spentTotal: { increment: amount } },
+              });
+            },
+            createRevokeLedger: async ({
+              userId,
+              orderId,
+              amount,
+              balanceAfter,
+              note,
+            }) => {
+              await tx.coinLedger.create({
+                data: {
+                  userId,
+                  kind: "REVOKE",
+                  amount,
+                  balanceAfter,
+                  ledgerKey: `REVOKE:${orderId}`,
+                  orderId,
+                  note,
+                },
+              });
+            },
+            updateOrder: async (orderId, data) => {
+              await tx.paymentOrder.update({
+                where: { id: orderId },
+                data,
+              });
+            },
+            finalizeEvent: input.eventFinalize
+              ? async (event) => {
+                  const finalized = await tx.paymentEvent.updateMany({
+                    where: {
+                      eventKey: event.eventKey,
+                      processingStatus: "PROCESSING",
+                      processingLeaseToken: event.processingLeaseToken,
+                    },
+                    data: {
+                      processingStatus: event.processingStatus,
+                      errorMessage: event.errorMessage ?? null,
+                      processedAt: event.processedAt,
+                    },
+                  });
+                  return finalized.count === 1;
+                }
+              : undefined,
           },
-        });
-
-        return {
-          ok: true as const,
-          coins: input.coins,
-          balanceAfter: balance - input.coins,
-        };
+          {
+            orderId: input.orderId,
+            targetStatus: input.targetStatus,
+            reason: input.reason,
+            reviewCodePrefix: input.reviewCodePrefix,
+            rawLastPayload: input.rawLastPayload,
+            now: input.now ?? new Date(),
+            eventFinalize: input.eventFinalize,
+          }
+        );
       },
       { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
-    );
-  } catch (error) {
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === "P2002"
-    ) {
-      // Đã thu hồi rồi (bấm hoàn tiền hai lần).
-      const wallet = await getCoinWallet(input.userId);
-      return { ok: true, coins: 0, balanceAfter: wallet.balance };
-    }
-    throw error;
-  }
+    )
+  );
 }
 
 /**

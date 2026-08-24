@@ -9,6 +9,9 @@ const eslintConfig = defineConfig([
   globalIgnores([
     // Default ignores of eslint-config-next:
     ".next/**",
+    // Git worktrees cục bộ có source và build riêng; lint chúng ở đây vừa
+    // trùng lặp vừa kéo cả artefact `.next` của nhánh khác vào kết quả.
+    ".worktrees/**",
     "out/**",
     "build/**",
     "next-env.d.ts",

@@ -4,7 +4,10 @@ import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { requireAdmin } from "@/lib/session";
+import {
+  replacePasswordAndRevokeUserSessions,
+  requireAdmin,
+} from "@/lib/session";
 
 export type AdminFormState = { error?: string; success?: string } | undefined;
 
@@ -235,10 +238,10 @@ export async function resetUserPasswordAction(
   }
   const user = await db.user.findUnique({ where: { id: userId } });
   if (!user) return { error: "Không tìm thấy học viên." };
-  await db.user.update({
-    where: { id: userId },
-    data: { passwordHash: await bcrypt.hash(newPassword, 10) },
-  });
+  await replacePasswordAndRevokeUserSessions(
+    userId,
+    await bcrypt.hash(newPassword, 10)
+  );
   revalidatePath("/quan-tri/hoc-vien");
   return { success: `Đã đặt lại mật khẩu cho ${user.email}.` };
 }

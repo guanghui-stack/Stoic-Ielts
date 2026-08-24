@@ -9,7 +9,11 @@ import {
   type AdminUser,
 } from "../src/lib/admin-account.ts";
 
-type Row = AdminUser & { name: string; passwordHash: string };
+type Row = AdminUser & {
+  name: string;
+  passwordHash: string;
+  activeSessionId: string | null;
+};
 
 function makeDb(users: Row[], config: Record<string, string> = {}) {
   const db = {
@@ -42,7 +46,11 @@ function makeDb(users: Row[], config: Record<string, string> = {}) {
         return u;
       },
       async create({ data }: { data: Record<string, unknown> }) {
-        const u = { id: `u${users.length + 1}`, ...data } as Row;
+        const u = {
+          id: `u${users.length + 1}`,
+          activeSessionId: null,
+          ...data,
+        } as Row;
         users.push(u);
         return u;
       },
@@ -101,6 +109,7 @@ const legacyRow = async (): Promise<Row> => ({
   name: "Quản trị Wobridges",
   role: "ADMIN",
   active: true,
+  activeSessionId: "sid-legacy",
   passwordHash: await bcrypt.hash(OLD_PASSWORD, 10),
 });
 
@@ -110,6 +119,7 @@ const studentRow = async (email: string, pwd: string, id = "u2"): Promise<Row> =
   name: "Học viên",
   role: "STUDENT",
   active: true,
+  activeSessionId: "sid-student",
   passwordHash: await bcrypt.hash(pwd, 10),
 });
 
@@ -146,6 +156,7 @@ console.log("\nTH2 · Đổi email kèm đặt mật khẩu qua ADMIN_PASSWORD")
   check("hành động = renamed", r.action === "renamed", r.action);
   check("đăng nhập được bằng MẬT KHẨU MỚI", await bcrypt.compare(ENV_PASSWORD, admin.passwordHash));
   check("mật khẩu cũ không còn dùng được", !(await bcrypt.compare(OLD_PASSWORD, admin.passwordHash)));
+  check("đặt mật khẩu mới khi đổi tên thu hồi phiên legacy", admin.activeSessionId === null);
   check("đã lưu vân tay mật khẩu", Boolean(cfg.ADMIN_PASSWORD_FINGERPRINT));
 }
 
@@ -166,9 +177,11 @@ console.log("\nTH3 · Triển khai lại: mật khẩu tự đổi trong giao di
     await bcrypt.compare("TuDoiTrongGiaoDien@9", admin.passwordHash));
 
   // đổi giá trị biến môi trường → áp dụng lại
+  admin.activeSessionId = "sid-before-env-reset";
   await ensureAdminAccount(db, { email: NEW_EMAIL, name: "QT", envPassword: "DatLai@2027" });
   check("đổi giá trị biến thì mật khẩu được đặt lại",
     await bcrypt.compare("DatLai@2027", admin.passwordHash));
+  check("đặt mật khẩu mới trên admin hiện có thu hồi phiên", admin.activeSessionId === null);
 }
 
 /* ===== TH4: Email admin mới trùng một tài khoản HỌC VIÊN đã có ===== */
