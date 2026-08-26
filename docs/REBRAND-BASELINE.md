@@ -20,7 +20,7 @@ Tài liệu này ghi trạng thái repo trước khi rebrand và xác định v�
 
 ## Vùng được bảo vệ
 
-Checksum SHA-256 của 19 tệp route, component, logic và dữ liệu phòng thi nằm trong `docs/PROTECTED-SURFACES.sha256`. Lệnh `npm run test:protected-surfaces` phải đạt ở mọi checkpoint và trước bàn giao.
+Checksum SHA-256 của 23 tệp route, component, logic và dữ liệu phòng thi/thí luyện nằm trong `docs/PROTECTED-SURFACES.sha256`. Lệnh `npm run test:protected-surfaces` phải đạt ở mọi checkpoint và trước bàn giao.
 
 Các nhóm được bảo vệ gồm:
 
@@ -29,7 +29,8 @@ Các nhóm được bảo vệ gồm:
 | Route phòng thi | `src/app/(exam)/**` |
 | Route kho luyện/ghép đề | `src/app/(site)/luyen-tap/reading/**` |
 | Route kết quả và chữa bài theo attempt | `src/app/(site)/hoc-vien/bai-lam/**` |
-| Component cốt lõi | `reading-cbt.tsx`, `reading-module-page.tsx` |
+| Route thí luyện/tự vấn | `src/app/(site)/hoc-vien/thi-but/**`, `src/app/(site)/hoc-vien/thi-luyen/**` |
+| Component cốt lõi | `reading-cbt.tsx`, `reading-module-page.tsx`, `trial-reflection-form.tsx`, `thi-but-*` |
 | Logic | attempt actions/finalize, reading band/assembly, exercise content, study heartbeat |
 | Dữ liệu | Hai gói dữ liệu Reading chuyên biệt trong `prisma/` |
 | Chính sách motion | `src/lib/motion/route-policy.ts` |
