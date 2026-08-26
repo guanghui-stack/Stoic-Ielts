@@ -1,3 +1,5 @@
+> **Ghi chú rebrand:** Đây là tài liệu lịch sử của giai đoạn trước STOIC · IELTS. Đặc tả hiện hành nằm tại [STOIC-REBRAND-SPEC.md](./STOIC-REBRAND-SPEC.md), [BRAND-GUIDELINE.md](./BRAND-GUIDELINE.md) và [ART-ASSET-REGISTER.md](./ART-ASSET-REGISTER.md).
+
 # HO PHU · IELTS — Bản đặt hàng ảnh cho Gemini / Midjourney
 
 Nguồn quy tắc: Master System Specification v1.1, muc 8 (Brand Art Bible).

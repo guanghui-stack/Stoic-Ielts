@@ -1,7 +1,7 @@
 import type { GeneralCode } from "@/lib/story/generals";
 
 /**
- * Art manifest — nguồn sự thật duy nhất cho mọi ảnh thủy mặc.
+ * Art manifest — nguồn sự thật duy nhất cho mọi tài sản thị giác STOIC · IELTS.
  *
  * Lý do gom về một chỗ: điểm lấy nét (focal) của một bức tranh chỉ đúng với
  * chính bức đó. Rải `object-position` khắp các component nghĩa là mỗi lần
@@ -22,9 +22,9 @@ import type { GeneralCode } from "@/lib/story/generals";
  *     thấy ảnh vẫn hình dung được cảnh. Ảnh thuần trang trí thì để chuỗi
  *     rỗng — mô tả một hình nền vô nghĩa chỉ làm ồn trình đọc màn hình.
  *
- * Trạng thái: hero trang chủ và sáu chân dung Lục tướng ĐÃ CÓ FILE (04/08/2026).
- * Nền bản đồ và tám ảnh cửa ải vẫn là hợp đồng chốt trước, chưa có file. Giao
- * diện vì vậy vẫn phải chạy đúng khi thiếu ảnh — xem `InkWashHero`.
+ * Trạng thái: bộ SVG Stoic deterministic đã có file; key legacy được giữ để không đổi component consumer.
+ * Các key bản đồ và thử thách vẫn được giữ vì component consumer dùng chúng,
+ * nhưng src hiện trỏ tới SVG Stoic deterministic đã có trong `public/art/stoic`.
  *
  * Chân dung Lục tướng để 16:9 chứ không phải 4:5 như bản đặc tả: ảnh gốc do chủ
  * dự án cung cấp là cảnh hành động ngang, nhân vật lệch phải và chừa sẵn khoảng
@@ -62,10 +62,10 @@ export type ArtAsset = {
 export const ART_ASSETS = {
   /* ===== Trang chủ ===== */
   homeTrieuVan: {
-    src: "/art/home/trieu-van-hero.webp",
-    alt: "Triệu Vân cưỡi ngựa lao qua chiến trường trong tranh thủy mặc, mũi giáo phát sáng lam",
+    src: "/art/stoic/control-circle-hero.svg",
+    alt: "Các vòng tròn mở tượng trưng cho sự tập trung và lựa chọn trong hành trình học",
     ratio: "16:9",
-    focal: { x: 64, y: 47 },
+    focal: { x: 70, y: 46 },
     accent: "BLUE",
     featuredGeneralCode: "TRIEU_VAN",
     containsText: false,
@@ -74,8 +74,8 @@ export const ART_ASSETS = {
 
   /* ===== Chân dung Lục tướng ===== */
   generalTruongPhi: {
-    src: "/art/generals/truong-phi.webp",
-    alt: "Trương Phi cầm xà mâu, thế đứng mở trận, mực chu sa nơi mũi giáo",
+    src: "/art/stoic/quiet-orbit.svg",
+    alt: "Quỹ đạo yên tĩnh quanh một điểm tập trung",
     ratio: "16:9",
     focal: { x: 58, y: 46 },
     accent: "VERMILION",
@@ -84,8 +84,8 @@ export const ART_ASSETS = {
     version: 1,
   },
   generalQuanVu: {
-    src: "/art/generals/quan-vu.webp",
-    alt: "Quan Vũ đứng thẳng với thanh long đao, ánh lục ngọc dọc lưỡi đao",
+    src: "/art/stoic/quiet-orbit.svg",
+    alt: "Quỹ đạo yên tĩnh quanh một điểm tập trung",
     ratio: "16:9",
     focal: { x: 58, y: 46 },
     accent: "JADE",
@@ -94,8 +94,8 @@ export const ART_ASSETS = {
     version: 1,
   },
   generalTrieuVan: {
-    src: "/art/generals/trieu-van.webp",
-    alt: "Triệu Vân trên ngựa trắng, giáo ánh lam điện, nét mực tĩnh giữa trận",
+    src: "/art/stoic/quiet-orbit.svg",
+    alt: "Quỹ đạo yên tĩnh quanh một điểm tập trung",
     ratio: "16:9",
     focal: { x: 58, y: 46 },
     accent: "BLUE",
@@ -104,8 +104,8 @@ export const ART_ASSETS = {
     version: 1,
   },
   generalHoangTrung: {
-    src: "/art/generals/hoang-trung.webp",
-    alt: "Hoàng Trung giương cung trên chiến mã, ánh kim đồng nơi dây cung",
+    src: "/art/stoic/quiet-orbit.svg",
+    alt: "Quỹ đạo yên tĩnh quanh một điểm tập trung",
     ratio: "16:9",
     focal: { x: 58, y: 46 },
     accent: "GOLD",
@@ -114,8 +114,8 @@ export const ART_ASSETS = {
     version: 1,
   },
   generalMaSieu: {
-    src: "/art/generals/ma-sieu.webp",
-    alt: "Mã Siêu đột kích, ngọn thương tạo vòng sáng bạc lam",
+    src: "/art/stoic/quiet-orbit.svg",
+    alt: "Quỹ đạo yên tĩnh quanh một điểm tập trung",
     ratio: "16:9",
     focal: { x: 58, y: 46 },
     accent: "SILVER_BLUE",
@@ -124,8 +124,8 @@ export const ART_ASSETS = {
     version: 1,
   },
   generalLuBo: {
-    src: "/art/generals/lu-bo.webp",
-    alt: "Lữ Bố trên chiến mã, phương thiên họa kích phát sáng hỏa cam",
+    src: "/art/stoic/quiet-orbit.svg",
+    alt: "Quỹ đạo yên tĩnh quanh một điểm tập trung",
     ratio: "16:9",
     focal: { x: 58, y: 46 },
     accent: "FIRE",
@@ -135,7 +135,7 @@ export const ART_ASSETS = {
   },
 
   territoryBase: {
-    src: "/art/territories/base-map.webp",
+    src: "/art/stoic/three-virtues.svg",
     alt: "",
     ratio: "16:9",
     focal: { x: 50, y: 50 },
@@ -144,7 +144,7 @@ export const ART_ASSETS = {
     version: 1,
   },
   territoryWei: {
-    src: "/art/territories/wei.webp",
+    src: "/art/stoic/three-virtues.svg",
     alt: "",
     ratio: "16:9",
     focal: { x: 50, y: 50 },
@@ -153,7 +153,7 @@ export const ART_ASSETS = {
     version: 1,
   },
   territoryShu: {
-    src: "/art/territories/shu.webp",
+    src: "/art/stoic/three-virtues.svg",
     alt: "",
     ratio: "16:9",
     focal: { x: 50, y: 50 },
@@ -162,7 +162,7 @@ export const ART_ASSETS = {
     version: 1,
   },
   territoryWu: {
-    src: "/art/territories/wu.webp",
+    src: "/art/stoic/three-virtues.svg",
     alt: "",
     ratio: "16:9",
     focal: { x: 50, y: 50 },
@@ -173,7 +173,7 @@ export const ART_ASSETS = {
 
   /* ===== Bản đồ Chiến Dịch ===== */
   campaignMap: {
-    src: "/art/campaign/map-loan-the-quan-hung-tam-phan.webp",
+    src: "/art/stoic/three-virtues.svg",
     alt: "",
     ratio: "21:9",
     focal: { x: 50, y: 50 },
@@ -184,8 +184,8 @@ export const ART_ASSETS = {
 
   /* ===== Tám cửa ải ===== */
   trialDaoVien: {
-    src: "/art/trials/trial-01-dao-vien.webp",
-    alt: "Hai bóng người dưới rừng đào, khí thế vừa khởi trong tranh thủy mặc",
+    src: "/art/stoic/three-virtues.svg",
+    alt: "Ba quỹ đạo gặp nhau tạo thành một hệ cân bằng",
     ratio: "16:9",
     focal: { x: 50, y: 50 },
     accent: "VERMILION",
@@ -194,8 +194,8 @@ export const ART_ASSETS = {
     version: 1,
   },
   trialHoangCan: {
-    src: "/art/trials/trial-02-hoang-can.webp",
-    alt: "Trương Phi xông qua rừng cờ trong mưa mực",
+    src: "/art/stoic/three-virtues.svg",
+    alt: "Ba quỹ đạo gặp nhau tạo thành một hệ cân bằng",
     ratio: "16:9",
     focal: { x: 55, y: 50 },
     accent: "GOLD",
@@ -204,8 +204,8 @@ export const ART_ASSETS = {
     version: 1,
   },
   trialHoaHung: {
-    src: "/art/trials/trial-03-hoa-hung.webp",
-    alt: "Quan Vũ lao nhanh, thanh đao phát sáng lục ngọc",
+    src: "/art/stoic/three-virtues.svg",
+    alt: "Ba quỹ đạo gặp nhau tạo thành một hệ cân bằng",
     ratio: "16:9",
     focal: { x: 58, y: 48 },
     accent: "JADE",
@@ -214,8 +214,8 @@ export const ART_ASSETS = {
     version: 1,
   },
   trialNguQuan: {
-    src: "/art/trials/trial-04-ngu-quan.webp",
-    alt: "Quan Vũ đi xuyên nhiều lớp cổng thành trong sương mực",
+    src: "/art/stoic/three-virtues.svg",
+    alt: "Ba quỹ đạo gặp nhau tạo thành một hệ cân bằng",
     ratio: "16:9",
     focal: { x: 50, y: 52 },
     accent: "VERMILION",
@@ -224,8 +224,8 @@ export const ART_ASSETS = {
     version: 1,
   },
   trialTruongBan: {
-    src: "/art/trials/trial-05-truong-ban.webp",
-    alt: "Triệu Vân trên ngựa trắng giữa vòng vây, giáo ánh lam điện",
+    src: "/art/stoic/three-virtues.svg",
+    alt: "Ba quỹ đạo gặp nhau tạo thành một hệ cân bằng",
     ratio: "16:9",
     focal: { x: 62, y: 48 },
     accent: "BLUE",
@@ -234,8 +234,8 @@ export const ART_ASSETS = {
     version: 1,
   },
   trialLaoTuong: {
-    src: "/art/trials/trial-06-hoang-trung.webp",
-    alt: "Hoàng Trung giương cung trên chiến mã, gió kéo áo choàng",
+    src: "/art/stoic/three-virtues.svg",
+    alt: "Ba quỹ đạo gặp nhau tạo thành một hệ cân bằng",
     ratio: "16:9",
     focal: { x: 55, y: 45 },
     accent: "GOLD",
@@ -244,8 +244,8 @@ export const ART_ASSETS = {
     version: 1,
   },
   trialTayLuong: {
-    src: "/art/trials/trial-07-ma-sieu.webp",
-    alt: "Mã Siêu dẫn thiết kỵ đột kích, ngọn thương tạo vòng sáng bạc lam",
+    src: "/art/stoic/three-virtues.svg",
+    alt: "Ba quỹ đạo gặp nhau tạo thành một hệ cân bằng",
     ratio: "16:9",
     focal: { x: 60, y: 50 },
     accent: "SILVER_BLUE",
@@ -254,8 +254,8 @@ export const ART_ASSETS = {
     version: 1,
   },
   trialHoLao: {
-    src: "/art/trials/trial-08-lu-bo.webp",
-    alt: "Lữ Bố trấn cửa Hổ Lao, phương thiên họa kích phát sáng hỏa cam",
+    src: "/art/stoic/three-virtues.svg",
+    alt: "Ba quỹ đạo gặp nhau tạo thành một hệ cân bằng",
     ratio: "16:9",
     focal: { x: 61, y: 50 },
     accent: "FIRE",

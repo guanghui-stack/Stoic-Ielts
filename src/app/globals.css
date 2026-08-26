@@ -1321,3 +1321,43 @@ body {
     animation: none !important;
   }
 }
+
+/* Stoic motion pass — chỉ áp dụng ngoài các route study-static tier 0. */
+.world-shell[data-motion-tier="2"] .world-route-scene > * {
+  animation: stoic-section-reveal var(--world-duration-scene) var(--ease-out) both;
+}
+
+.world-shell[data-motion-tier="2"] .world-route-scene > *:nth-child(2) {
+  animation-delay: 70ms;
+}
+
+.world-shell[data-motion-tier="2"] .world-route-scene > *:nth-child(3) {
+  animation-delay: 140ms;
+}
+
+.world-shell[data-motion-tier="2"] .world-route-scene > *:nth-child(4) {
+  animation-delay: 210ms;
+}
+
+.world-shell[data-motion-tier="1"] .world-action:hover {
+  transform: translateY(-1px);
+}
+
+@keyframes stoic-section-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .world-shell[data-motion-tier="2"] .world-route-scene > *,
+  .world-shell[data-motion-tier="1"] .world-action:hover {
+    animation: none !important;
+    transform: none !important;
+  }
+}
