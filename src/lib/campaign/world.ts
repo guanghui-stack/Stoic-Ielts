@@ -128,7 +128,7 @@ export const LOCKED_TERRITORIES = [
   },
 ] as const satisfies readonly TerritoryPlace[];
 
-const STOIC_TRIAL_TITLES: Record<string, string> = {
+export const STOIC_TRIAL_TITLES: Record<string, string> = {
   TRIAL_01_DAO_VIEN: "Bắt đầu bằng một lời hẹn",
   TRIAL_02_HOANG_CAN: "Giữ nhịp đều đặn",
   TRIAL_03_HOA_HUNG: "Tốc độ có chủ đích",
@@ -139,8 +139,12 @@ const STOIC_TRIAL_TITLES: Record<string, string> = {
   TRIAL_08_HO_LAO: "Tự chủ trước điểm yếu",
 };
 
+export function stoicTrialTitle(node: Pick<CampaignNodeView, "trialCode" | "shortTitle">): string {
+  return STOIC_TRIAL_TITLES[node.trialCode] ?? node.shortTitle;
+}
+
 function trialStep(node: CampaignNodeView, active: boolean): NextStepModel {
-  const stoicTitle = STOIC_TRIAL_TITLES[node.trialCode] ?? node.shortTitle;
+  const stoicTitle = stoicTrialTitle(node);
   return {
     eyebrow: "Bước tiếp theo của bạn",
     title: active ? `Tiếp tục ${stoicTitle}` : `Bước vào ${stoicTitle}`,

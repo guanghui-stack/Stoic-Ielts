@@ -5,7 +5,7 @@ import { ART_ASSETS } from "@/lib/brand/art-manifest";
 import { InkWashArt } from "@/components/brand/ink-wash-art";
 import { WorldLandmarkRail } from "@/components/campaign/world-landmark-rail";
 import { STATE_LABELS, type CampaignNodeView } from "@/lib/campaign/view";
-import type { CampaignWorld } from "@/lib/campaign/world";
+import { stoicTrialTitle, type CampaignWorld } from "@/lib/campaign/world";
 
 const NODE_STYLE: Record<
   CampaignNodeView["state"],
@@ -25,7 +25,7 @@ type MarkerStyle = CSSProperties & { "--world-marker-delay": string };
 
 function nodeLabel(node: CampaignNodeView): string {
   const parts = [
-    `${node.shortTitle} — ${node.functionalLabel}`,
+    `${stoicTrialTitle(node)} — ${node.functionalLabel}`,
     STATE_LABELS[node.state],
   ];
   if (node.hint) parts.push(`Còn thiếu: ${node.hint}`);
@@ -50,7 +50,7 @@ function GateMarkerContent({ node }: { node: CampaignNodeView }) {
         </span>
       ) : null}
       <span className="font-display text-sm font-semibold text-navy-deep">
-        {node.shortTitle}
+        {stoicTrialTitle(node)}
       </span>
       <span className="font-ui text-[11px] leading-tight text-muted">
         {node.functionalLabel}
@@ -103,8 +103,8 @@ export function CampaignMap({
 }) {
   return (
     <div className="world-map-desktop hidden lg:block" data-map-variant={variant}>
-      <section
-        aria-label="Bản đồ tám cửa ải"
+        <section
+        aria-label="Bản đồ tám chặng thực hành"
         className="world-map-stage relative overflow-hidden border border-line bg-paper"
       >
         <div className="world-map-art-layer" aria-hidden="true">
