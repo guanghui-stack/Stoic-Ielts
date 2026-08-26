@@ -20,7 +20,7 @@ import type { GeneralCode } from "@/lib/story/generals";
  *     chấp nhận TrialReflection miễn phí thay cho Feynman trả phí.
  *  4. Cấp bậc và Danh hiệu là hai trục độc lập. Danh hiệu không tự thăng cấp.
  *  5. Không XP, không cửa hàng đổi điểm, không trả tiền để mạnh hơn.
- *  6. Chỉ dùng danh xưng Hán-Việt bằng chữ cái Latin, không ký tự chữ Hán.
+ *  6. Tên hiển thị phải dùng ngôn ngữ Stoic bằng tiếng Việt, không ký tự chữ Hán.
  */
 
 export type RankEra = "LOAN_THE" | "QUAN_HUNG" | "TAM_PHAN";
@@ -42,16 +42,16 @@ export type RankDefinitionSeed = {
  */
 export const RANK_ERAS: Record<RankEra, { name: string; meaning: string }> = {
   LOAN_THE: {
-    name: "Loạn thế",
-    meaning: "Bắt đầu, hình thành thói quen làm bài và phục bàn.",
+    name: "Bắt đầu",
+    meaning: "Nhìn rõ điểm xuất phát và hình thành một nhịp học có thể giữ.",
   },
   QUAN_HUNG: {
-    name: "Quần hùng",
-    meaning: "Quản lý thời gian, giữ ổn định, không bỏ phần khó.",
+    name: "Rèn luyện",
+    meaning: "Làm đều, đối diện phần khó và điều chỉnh bằng bằng chứng.",
   },
   TAM_PHAN: {
-    name: "Tam phân",
-    meaning: "Chiều sâu, tổng hợp ba trụ, sửa điểm yếu cuối cùng.",
+    name: "Tích hợp",
+    meaning: "Kết nối nhận thức, hành động và ý chí thành một hệ bền vững.",
   },
 };
 
@@ -60,87 +60,87 @@ export const RANK_SEEDS: RankDefinitionSeed[] = [
     level: 1,
     code: "RANK_01_BACH_THAN",
     slug: "bach-than",
-    name: "Bạch thân",
+    name: "Người bắt đầu",
     era: "LOAN_THE",
     bandAnchor: "Chưa có bài làm",
     description:
-      "Người áo vải chưa có quân công. Chưa làm bài nào được chấm, và đó là điểm xuất phát bình thường của tất cả mọi người.",
+      "Chưa có bài làm được chấm. Đây không phải phán xét; đó chỉ là điểm xuất phát bình thường của mọi hành trình.",
   },
   {
     level: 2,
     code: "RANK_02_NGHIA_BINH",
     slug: "nghia-binh",
-    name: "Nghĩa binh",
+    name: "Người thực hành",
     era: "LOAN_THE",
     bandAnchor: "Hoàn tất bài đầu tiên",
     description:
-      "Đã bước vào trận lần đầu và đã tự chữa lại bài của mình. Cấp bậc này chứng minh một điều duy nhất nhưng không nhỏ: bạn đã bắt đầu thật.",
+      "Đã làm bài đầu tiên và tự nhìn lại bài của mình. Một bước nhỏ nhưng có thật: bạn đã bắt đầu bằng hành động.",
   },
   {
     level: 3,
     code: "RANK_03_THAP_TRUONG",
     slug: "thap-truong",
-    name: "Thập trưởng",
+    name: "Giữ Nhịp",
     era: "LOAN_THE",
     bandAnchor: "Band 4.5 ổn định",
     description:
-      "Giữ được band 4.5 qua nhiều bài khác nhau chứ không phải một lần may. Thói quen làm bài và chữa bài đã thành nếp.",
+      "Giữ được band 4.5 qua nhiều bài khác nhau. Thói quen làm bài và nhìn lại đã bắt đầu thành nếp.",
   },
   {
     level: 4,
     code: "RANK_04_DO_BA",
     slug: "do-ba",
-    name: "Đô bá",
+    name: "Rõ Ràng",
     era: "QUAN_HUNG",
     bandAnchor: "Band 5.0 - 5.5",
     description:
-      "Đọc nhanh hơn và bắt đầu kiểm soát được đồng hồ. Đây là lúc tốc độ và độ chính xác lần đầu phải thỏa hiệp với nhau.",
+      "Đọc nhanh hơn và bắt đầu kiểm soát được đồng hồ. Tốc độ và độ chính xác được nhìn như hai dữ liệu cần cân bằng.",
   },
   {
     level: 5,
     code: "RANK_05_NHA_TUONG",
     slug: "nha-tuong",
-    name: "Nha tướng",
+    name: "Ổn Định",
     era: "QUAN_HUNG",
     bandAnchor: "Band 5.5 - 6.0",
     description:
-      "Phong độ đã ổn định qua nhiều lượt liên tiếp. Không còn bài rớt sâu bất thường xen giữa các bài tốt.",
+      "Phong độ đã ổn định qua nhiều lượt liên tiếp. Không còn để một kết quả đơn lẻ quyết định cách nhìn về năng lực của mình.",
   },
   {
     level: 6,
     code: "RANK_06_HIEU_UY",
     slug: "hieu-uy",
-    name: "Hiệu úy",
+    name: "Đối Diện",
     era: "QUAN_HUNG",
     bandAnchor: "Band 6.0 - 6.5",
     description:
-      "Làm trọn Full Test mà không bỏ rơi phần yếu nhất. Biết cứu phần khó thay vì dồn hết thời gian cho phần dễ.",
+      "Làm trọn Full Test mà không bỏ rơi phần yếu nhất. Biết quay lại với phần khó thay vì chỉ làm điều dễ chịu.",
   },
   {
     level: 7,
     code: "RANK_07_TRUNG_LANG_TUONG",
     slug: "trung-lang-tuong",
-    name: "Trung lang tướng",
+    name: "Phản Tư",
     era: "TAM_PHAN",
     bandAnchor: "Band 6.5 - 7.0",
     description:
-      "Phục bàn đã có chiều sâu và trải trên nhiều dạng câu. Hiểu vì sao mình sai, không chỉ biết mình sai.",
+      "Phản tư đã có chiều sâu và trải trên nhiều dạng câu. Hiểu vì sao mình sai, không chỉ biết mình sai.",
   },
   {
     level: 8,
     code: "RANK_08_TU_PHUONG_TUONG_QUAN",
     slug: "tu-phuong-tuong-quan",
-    name: "Tứ phương tướng quân",
+    name: "Tích Hợp",
     era: "TAM_PHAN",
     bandAnchor: "Band 7.0 - 7.5",
     description:
-      "Đủ cả ba trụ trong một chiến dịch dài. Ở bậc này được chọn một trong bốn hiệu Trấn Đông, Trấn Tây, Trấn Nam, Trấn Bắc.",
+      "Đủ cả ba trụ trong một hành trình dài. Nhận ra tiến bộ bền vững đến từ việc giữ hệ thống, không chỉ từ một điểm mạnh.",
   },
   {
     level: 9,
     code: "RANK_09_DAI_TUONG_QUAN",
     slug: "dai-tuong-quan",
-    name: "Đại tướng quân",
+    name: "Tự Chủ",
     era: "TAM_PHAN",
     bandAnchor: "Band 8.0 trở lên",
     description:
@@ -155,10 +155,10 @@ export const RANK_SEEDS: RankDefinitionSeed[] = [
  * nhận một cái tên, không phải một nhánh nâng cấp để tối ưu.
  */
 export const CARDINAL_TITLES = [
-  { code: "TRAN_DONG", name: "Trấn Đông tướng quân" },
-  { code: "TRAN_TAY", name: "Trấn Tây tướng quân" },
-  { code: "TRAN_NAM", name: "Trấn Nam tướng quân" },
-  { code: "TRAN_BAC", name: "Trấn Bắc tướng quân" },
+  { code: "TRAN_DONG", name: "Tập trung" },
+  { code: "TRAN_TAY", name: "Bình thản" },
+  { code: "TRAN_NAM", name: "Can đảm" },
+  { code: "TRAN_BAC", name: "Công bằng" },
 ] as const;
 
 export type CardinalTitleCode = (typeof CARDINAL_TITLES)[number]["code"];
@@ -329,7 +329,7 @@ export const TRIAL_SEEDS: TrialDefinitionSeed[] = [
     featuredGeneralCode: "HOANG_TRUNG",
     fromLevel: 6,
     toLevel: 7,
-    skill: "Phục bàn sâu, trải trên nhiều dạng câu",
+    skill: "Phản tư sâu, trải trên nhiều dạng câu",
     rationale:
       "Yêu cầu các lần chữa bài cách nhau ít nhất một ngày là có chủ đích. Ba bài chữa dồn trong một buổi là ba lần đọc lại; ba bài chữa cách ngày là ba lần thật sự nhớ lại, và chỉ cái sau mới đọng lại.",
     narrative:

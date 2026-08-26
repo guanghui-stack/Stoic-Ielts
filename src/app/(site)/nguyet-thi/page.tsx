@@ -375,7 +375,7 @@ function CompetitionStatus({
         <Trophy className="mt-0.5 h-4 w-4 shrink-0 text-gold" aria-hidden="true" />
         Kết quả các kỳ đã khép lại nằm ở{" "}
         <Link href="/bang-vang" className="font-semibold text-navy underline underline-offset-4">
-          Bảng Vàng
+          Thành Quả
         </Link>
         .
       </p>

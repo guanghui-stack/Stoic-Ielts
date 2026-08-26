@@ -243,14 +243,14 @@ export function evaluateGate(
       return done(
         [
           {
-            label: "Lượt phục bàn",
+            label: "Lượt phản tư",
             current: facts.qualifiedReviews.length,
             target: reviewTarget,
           },
           { label: "Dạng câu đã chữa", current: types, target: typeTarget },
         ],
-        "Phục bàn đã trải đủ dạng câu để mở cửa ải.",
-        `Cần ${reviewTarget} lượt phục bàn thuộc ít nhất ${typeTarget} dạng câu.`,
+        "Phản tư đã trải đủ dạng câu để mở chặng tiếp theo.",
+        `Cần ${reviewTarget} lượt phản tư thuộc ít nhất ${typeTarget} dạng câu.`,
       );
     }
 

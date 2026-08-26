@@ -119,9 +119,9 @@ check(
     functionalLabel: item.functionalLabel,
   })),
   [
-    { code: "TERRITORY_WEI", artKey: "wei", title: "Ngụy", functionalLabel: "Lãnh địa phía bắc" },
-    { code: "TERRITORY_SHU", artKey: "shu", title: "Thục", functionalLabel: "Lãnh địa phía tây" },
-    { code: "TERRITORY_WU", artKey: "wu", title: "Ngô", functionalLabel: "Lãnh địa phía đông nam" },
+    { code: "TERRITORY_WEI", artKey: "wei", title: "Nhận thức", functionalLabel: "Vùng nhìn rõ bằng chứng" },
+    { code: "TERRITORY_SHU", artKey: "shu", title: "Hành động", functionalLabel: "Vùng làm đúng bước tiếp theo" },
+    { code: "TERRITORY_WU", artKey: "wu", title: "Ý chí", functionalLabel: "Vùng giữ nhịp bền vững" },
   ],
 );
 check("idle opacity", territoryLayerOpacity(null, "TERRITORY_WEI"), 0.68);
@@ -224,7 +224,7 @@ check(
 check("territories remain inert", LOCKED_TERRITORIES.every((item) => item.href === null), true);
 check(
   "locked copy remains exact",
-  LOCKED_TERRITORIES.every((item) => item.lockedMessage === "Mở khi đạt cấp bậc yêu cầu"),
+  LOCKED_TERRITORIES.every((item) => item.lockedMessage === "Mở khi đạt điều kiện chặng"),
   true,
 );
 

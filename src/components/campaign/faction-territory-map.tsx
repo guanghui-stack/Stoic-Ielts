@@ -29,7 +29,7 @@ type LabelStyle = CSSProperties & {
 };
 
 /**
- * Bản đồ ba lãnh địa.
+ * Bản đồ ba trụ thực hành.
  *
  * `ownerCode` là mã lãnh địa của phe thắng mùa TRƯỚC, hoặc null khi chưa mùa
  * nào khép lại. Bản đồ KHÔNG tô lãnh địa bằng màu phẳng: nó đã giải xong bằng
@@ -53,14 +53,14 @@ export function FactionTerritoryMap({
   return (
     <section className="faction-territory-map" aria-labelledby="faction-territory-title">
       <div className="territory-map-heading">
-        <p className="label-caps">Lãnh địa Tam Quốc</p>
+        <p className="label-caps">Ba trụ thực hành</p>
         <h2 id="faction-territory-title" className="font-display text-2xl font-bold text-navy-deep">
-          {ownerLabel ? `${ownerLabel} đang giữ lãnh địa` : "Ba cõi chưa khai mở"}
+          {ownerLabel ? `${ownerLabel} đang dẫn đầu` : "Ba trụ đang chờ bạn rèn"}
         </h2>
         <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-soft">
           {ownerLabel
-            ? `${ownerLabel} thắng mùa trước và giữ lãnh địa tới hết mùa ${seasonCode ?? "này"}. Chọn phe ở đấu trường để tranh lãnh địa mùa sau.`
-            : "Ngụy, Thục và Ngô sẽ trở thành lựa chọn phe khi bạn đạt cấp bậc yêu cầu."}
+            ? `${ownerLabel} dẫn đầu mùa trước tới hết mùa ${seasonCode ?? "này"}. Chọn trụ ở đấu trường để đối chiếu mùa sau.`
+            : "Nhận thức, Hành động và Ý chí sẽ mở dần khi bạn đạt điều kiện của từng chặng."}
         </p>
       </div>
 

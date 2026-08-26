@@ -9,7 +9,7 @@ import {
 } from "@/components/admin/competition-forms";
 import { AdminPageShell } from "@/components/admin/admin-page-shell";
 
-export const metadata = { title: "Nguyệt Thí" };
+export const metadata = { title: "Thử Thách Tháng" };
 export const dynamic = "force-dynamic";
 
 const STATUS_LABEL: Record<string, string> = {
@@ -64,7 +64,7 @@ export default async function AdminCompetitionPage() {
   ]);
 
   return (
-    <AdminPageShell eyebrow="Cuộc thi" title="Nguyệt Thí">
+    <AdminPageShell eyebrow="Đối chiếu" title="Thử Thách Tháng">
       <p className="mt-5 max-w-3xl text-[0.95rem] leading-relaxed text-ink-soft">
         Mỗi kỳ 7 ngày, 3 đề Reading, mở dần vào ngày 1 · 3 · 5. Giải thưởng
         999.000đ · 499.000đ · 199.000đ. Kết quả <strong>không</strong> tự công

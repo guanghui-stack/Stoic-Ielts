@@ -37,24 +37,24 @@ check(
     {
       code: "LANDMARK_COUNCIL",
       kind: "LANDMARK",
-      title: "Nghị Sự Đường",
-      functionalLabel: "Cộng đồng thảo luận",
+      title: "Diễn Đàn",
+      functionalLabel: "Cộng đồng học tập",
       href: "/nghi-su-duong",
       lockedMessage: null,
     },
     {
       code: "LANDMARK_HONORS",
       kind: "LANDMARK",
-      title: "Điện Danh Vọng",
-      functionalLabel: "Danh hiệu và thành tích",
+      title: "Dấu Mốc Cộng Đồng",
+      functionalLabel: "Tiến bộ đã kiểm chứng",
       href: "/dien-danh-vong",
       lockedMessage: null,
     },
     {
       code: "LANDMARK_RESULTS",
       kind: "LANDMARK",
-      title: "Bảng Vàng",
-      functionalLabel: "Kết quả kỳ thi",
+      title: "Thành Quả",
+      functionalLabel: "Kết quả và dấu mốc",
       href: "/bang-vang",
       lockedMessage: null,
     },
@@ -62,9 +62,9 @@ check(
 );
 
 check(
-  "competitions keep Nguyệt Thí, Dương Thí, Thiên Thí order",
+  "competitions keep monthly, quarterly, annual order",
   WORLD_COMPETITIONS.map((item) => item.title),
-  ["Nguyệt Thí", "Dương Thí", "Thiên Thí"],
+  ["Thử Thách Tháng", "Thử Thách Quý", "Thử Thách Năm"],
 );
 
 check(
@@ -75,28 +75,28 @@ check(
       code: "TERRITORY_WEI",
       kind: "TERRITORY",
       artKey: "wei",
-      title: "Ngụy",
-      functionalLabel: "Lãnh địa phía bắc",
+      title: "Nhận thức",
+      functionalLabel: "Vùng nhìn rõ bằng chứng",
       href: null,
-      lockedMessage: "Mở khi đạt cấp bậc yêu cầu",
+      lockedMessage: "Mở khi đạt điều kiện chặng",
     },
     {
       code: "TERRITORY_SHU",
       kind: "TERRITORY",
       artKey: "shu",
-      title: "Thục",
-      functionalLabel: "Lãnh địa phía tây",
+      title: "Hành động",
+      functionalLabel: "Vùng làm đúng bước tiếp theo",
       href: null,
-      lockedMessage: "Mở khi đạt cấp bậc yêu cầu",
+      lockedMessage: "Mở khi đạt điều kiện chặng",
     },
     {
       code: "TERRITORY_WU",
       kind: "TERRITORY",
       artKey: "wu",
-      title: "Ngô",
-      functionalLabel: "Lãnh địa phía đông nam",
+      title: "Ý chí",
+      functionalLabel: "Vùng giữ nhịp bền vững",
       href: null,
-      lockedMessage: "Mở khi đạt cấp bậc yêu cầu",
+      lockedMessage: "Mở khi đạt điều kiện chặng",
     },
   ],
 );
@@ -108,7 +108,7 @@ check(
 );
 check(
   "all locked territories use the exact locked copy",
-  LOCKED_TERRITORIES.every((item) => item.lockedMessage === "Mở khi đạt cấp bậc yêu cầu"),
+  LOCKED_TERRITORIES.every((item) => item.lockedMessage === "Mở khi đạt điều kiện chặng"),
   true,
 );
 
@@ -117,7 +117,7 @@ check(
   buildCampaignWorld({ audience: "GUEST", nodes: guestNodes }).nextStep,
   {
     eyebrow: "Bước tiếp theo",
-    title: "Bắt đầu từ Bạch thân",
+    title: "Bắt đầu từ điều bạn kiểm soát",
     body: "Tạo tài khoản miễn phí, hiểu ba trụ và chọn đúng kho Reading trước khi làm bài đầu tiên.",
     href: "/dang-ky",
     actionLabel: "Tạo tài khoản",
@@ -136,10 +136,10 @@ check(
   buildCampaignWorld({ audience: "STUDENT", nodes: availableNodes }).nextStep,
   {
     eyebrow: "Bước tiếp theo của bạn",
-    title: "Bước vào Đào viên",
-    body: "Cửa ải đã mở. Xem điều kiện và chủ động bắt đầu khi sẵn sàng.",
+    title: "Bước vào Bắt đầu bằng một lời hẹn",
+    body: "Chặng đã mở. Xem điều kiện và chủ động bắt đầu khi sẵn sàng.",
     href: "/hoc-vien/thi-luyen/TRIAL_01_DAO_VIEN",
-    actionLabel: "Xem cửa ải",
+    actionLabel: "Xem điều kiện",
     entersStudy: false,
   },
 );
@@ -162,10 +162,10 @@ check(
   buildCampaignWorld({ audience: "STUDENT", nodes: completedNodes }).nextStep,
   {
     eyebrow: "Hành trình hiện tại",
-    title: "Tám cửa ải đã hoàn tất",
-    body: "Cấp bậc đã được giữ vĩnh viễn. Tiếp tục xây danh hiệu và chuẩn bị cho các kỳ đại thí.",
+    title: "Tám chặng đã hoàn tất",
+    body: "Cấp bậc đã được giữ vĩnh viễn. Tiếp tục xây dấu mốc và chuẩn bị cho các thử thách đối chiếu.",
     href: "/hoc-vien/danh-hieu",
-    actionLabel: "Xem danh hiệu",
+    actionLabel: "Xem dấu mốc",
     entersStudy: false,
   },
 );
@@ -179,10 +179,10 @@ check(
   buildCampaignWorld({ audience: "STUDENT", nodes: activeAndAvailable }).nextStep,
   {
     eyebrow: "Bước tiếp theo của bạn",
-    title: "Tiếp tục Đào viên",
-    body: "Thí luyện đang dở được giữ nguyên. Tiếp tục từ đúng tiến độ hiện tại.",
+    title: "Tiếp tục Bắt đầu bằng một lời hẹn",
+    body: "Chặng đang dở được giữ nguyên. Tiếp tục từ đúng tiến độ hiện tại.",
     href: "/hoc-vien/thi-luyen/TRIAL_01_DAO_VIEN",
-    actionLabel: "Tiếp tục thí luyện",
+    actionLabel: "Tiếp tục chặng",
     entersStudy: false,
   },
 );
