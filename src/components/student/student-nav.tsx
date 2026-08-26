@@ -7,8 +7,8 @@ import { UI_LABELS, type UiLabelKey } from "@/lib/ui-labels";
  *
  * Là server component chứ không phải client: nó phải đọc được cờ tính năng,
  * mà `features` là server-only. Đổi lại không có trạng thái đang-ở-trang tự
- * động, nên mỗi trang tự truyền `current` — chấp nhận được vì danh sách chỉ
- * có năm mục.
+ * động, nên mỗi trang tự truyền `current` — chấp nhận được vì danh sách vẫn
+ * là một nhóm mục điều hướng ngắn.
  *
  * Nhãn kép theo §3: khi cờ themedLabels bật thì tên cổ phong đứng trên và mô
  * tả chức năng nằm ngay dưới, không bao giờ để tên cổ phong đứng trơ một
@@ -24,6 +24,7 @@ const ITEMS: Item[] = [
   { key: "titles", show: true },
   { key: "weakness", show: true },
   { key: "studyDays", show: true },
+  { key: "messages", show: true },
   { key: "myData", show: true },
 ];
 

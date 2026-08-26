@@ -93,6 +93,11 @@ export const UI_LABELS = {
     themed: "Thành Quả",
     functional: "Kết quả kỳ thi đã chốt",
   },
+  messages: {
+    href: "/hoc-vien/tin-nhan",
+    themed: "Đối Thoại",
+    functional: "Tin nhắn riêng với học viên",
+  },
   myData: {
     href: "/hoc-vien/du-lieu-cua-toi",
     themed: "Hồ Sơ Riêng",
