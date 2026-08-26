@@ -1,23 +1,13 @@
 import Link from "next/link";
 
 /**
- * Logomark HỔ PHÙ · IELTS — binh phù xẻ đôi.
+ * Biểu tượng STOIC · IELTS — Vòng tròn kiểm soát.
  *
- * Hổ phù là binh phù cổ được xẻ làm hai nửa: một nửa giữ ở triều đình, một
- * nửa giao cho tướng ngoài biên. Lệnh chỉ có hiệu lực khi hai nửa khớp vào
- * nhau. Ở đây cũng vậy — một nửa là kết quả đo được (band, độ chính xác,
- * thời gian), nửa còn lại là quá trình kiểm chứng được (phục bàn, ngày học
- * thật, liêm chính). Cấp bậc chỉ được trao khi hai phía cùng hợp lệ.
- *
- * Nửa trái tô đặc: thứ đã đo được, không bàn cãi.
- * Nửa phải để rỗng viền: quá trình — thứ chỉ có giá trị khi tự mình đi qua.
- * Ba khấc răng cưa ăn khớp giữa hai nửa là ba trụ: Chiến trận, Phục bàn,
- * Luyện binh.
- *
- * Không có ký tự nào trong logomark. Quy tắc production cấm chữ Hán ở mọi
- * nơi, kể cả họa tiết con dấu, nên binh phù ở đây thuần túy là hình học.
+ * Tâm điểm là lựa chọn của người học. Hai quỹ đạo mở nhắc rằng kết quả và hoàn
+ * cảnh luôn chuyển động bên ngoài, còn hành động đúng tiếp theo bắt đầu từ tâm.
+ * Ba điểm trên quỹ đạo là ba trụ Nhận thức, Hành động và Ý chí.
  */
-export function HoPhuMark({ className = "h-9 w-9" }: { className?: string }) {
+export function StoicMark({ className = "h-9 w-9" }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 48 48"
@@ -26,39 +16,46 @@ export function HoPhuMark({ className = "h-9 w-9" }: { className?: string }) {
       className={className}
       aria-hidden="true"
     >
-      <circle cx="24" cy="24" r="22" stroke="#1e3a5c" strokeWidth="2" />
-
-      {/* Nửa trái — kết quả đã đo được, tô đặc */}
+      <circle cx="24" cy="24" r="21" fill="white" fillOpacity="0.72" />
       <path
-        d="M24 13H17a4 4 0 0 0-4 4v14a4 4 0 0 0 4 4h7v-3h4v-4h-4v-3h4v-4h-4v-3h4v-4h-4z"
-        fill="#1e3a5c"
+        d="M34.8 8.9A18.7 18.7 0 1 0 40.9 31"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        strokeLinecap="round"
       />
-
-      {/* Nửa phải — quá trình, để rỗng; khấc lõm ăn khớp với khấc lồi bên trái */}
       <path
-        d="M24 13v1h4v4h-4v3h4v4h-4v3h4v4h-4v3h7a4 4 0 0 0 4-4V17a4 4 0 0 0-4-4z"
-        stroke="#b8862b"
-        strokeWidth="1.8"
-        strokeLinejoin="round"
+        d="M30.9 15.3a11.2 11.2 0 1 0 3.8 15.2"
+        stroke="#8f92f5"
+        strokeWidth="2"
+        strokeLinecap="round"
       />
+      <circle cx="24" cy="24" r="4.25" fill="currentColor" />
+      <circle cx="36.2" cy="11.8" r="2.2" fill="#d85b78" />
+      <circle cx="39.6" cy="31.8" r="2.2" fill="#33745a" />
+      <circle cx="11.2" cy="34.3" r="2.2" fill="#d78a58" />
     </svg>
   );
 }
 
+/** Alias tương thích để các import cũ không làm thay đổi cấu trúc code. */
+export const HoPhuMark = StoicMark;
+
 export function BrandLockup({ compact = false }: { compact?: boolean }) {
   return (
-    <Link href="/" className="group flex items-center gap-3">
-      <HoPhuMark className={compact ? "h-8 w-8" : "h-10 w-10"} />
+    <Link href="/" className="group flex items-center gap-3" aria-label="STOIC · IELTS — Trang chủ">
+      <StoicMark
+        className={`${compact ? "h-8 w-8" : "h-10 w-10"} text-stoic-primary transition-transform duration-300 group-hover:rotate-6`}
+      />
       <span className="flex flex-col leading-none">
         <span
-          className={`font-display font-bold tracking-tight text-navy-deep transition-colors group-hover:text-navy ${
+          className={`font-stoic font-medium tracking-[-0.035em] text-stoic-slate-900 transition-colors group-hover:text-stoic-primary ${
             compact ? "text-lg" : "text-xl"
           }`}
         >
-          HỔ PHÙ<span className="text-gold">·</span>IELTS
+          STOIC<span className="mx-1 text-stoic-primary">·</span>IELTS
         </span>
-        <span className="mt-1 font-ui text-[0.62rem] font-semibold uppercase tracking-[0.22em] text-gold-ink">
-          Chiến trận · Phục bàn · Luyện binh
+        <span className="mt-1 font-stoic text-[0.6rem] font-semibold uppercase tracking-[0.17em] text-stoic-primary-deep">
+          Nhận thức · Hành động · Ý chí
         </span>
       </span>
     </Link>

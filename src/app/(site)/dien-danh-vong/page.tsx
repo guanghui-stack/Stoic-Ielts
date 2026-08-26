@@ -22,18 +22,18 @@ import { SceneHero } from "@/components/world/scene-hero";
 import { NoteBox } from "@/components/ui";
 
 export const metadata = {
-  title: "Điện Danh Vọng",
+  title: "Dấu Mốc Cộng Đồng",
   description:
-    "Bảng vinh danh học viên HỔ PHÙ · IELTS — danh hiệu, độ hiếm và số người đã đạt.",
+    "Những dấu mốc học tập đã được kiểm chứng trong cộng đồng STOIC · IELTS, kèm độ hiếm và số người đã đạt.",
 };
 export const dynamic = "force-dynamic";
 
 const HALL_NEXT_STEP: NextStepModel = {
   eyebrow: "Bước đầu tiên",
-  title: "Xem danh hiệu đầu tiên bạn có thể đạt",
-  body: "Mỗi danh hiệu chứng minh một hành vi học thật: làm bài, chữa sai hoặc giữ kỷ luật. Không danh hiệu nào được mua bằng điểm hay tiền.",
+  title: "Xem dấu mốc đầu tiên bạn có thể đạt",
+  body: "Mỗi dấu mốc chứng minh một hành vi học thật: làm bài, chữa sai hoặc giữ kỷ luật. Không dấu mốc nào được mua bằng điểm hay tiền.",
   href: "/hoc-vien/danh-hieu",
-  actionLabel: "Xem danh hiệu của tôi",
+  actionLabel: "Xem dấu mốc của tôi",
   entersStudy: false,
 };
 
@@ -85,14 +85,14 @@ export default async function HallOfFamePage() {
     <div>
       <SceneHero
         asset={ART_ASSETS.generalHoangTrung}
-        eyebrow="Vinh danh"
-        title="Điện Danh Vọng"
-        functionalLabel="Danh hiệu và thành tích học tập"
+        eyebrow="Tiến bộ đã kiểm chứng"
+        title="Dấu Mốc Cộng Đồng"
+        functionalLabel="Dấu mốc và thành quả học tập"
       >
         <p className="text-lg leading-relaxed text-ink-soft">
-          Nơi ghi lại những cột mốc học viên HỔ PHÙ · IELTS đã vượt qua. Danh
-          hiệu không mua được — chỉ có làm bài đàng hoàng, sửa sai có chiều sâu
-          và giữ được kỷ luật.
+          Nơi ghi lại những cột mốc học viên STOIC · IELTS đã thực sự đi qua.
+          Thành quả không mua được: nó đến từ bài đã làm, lỗi đã chữa và một nhịp
+          học đủ bền để kiểm chứng.
         </p>
       </SceneHero>
 
@@ -126,7 +126,7 @@ export default async function HallOfFamePage() {
         )}
 
         <h2 className="mt-12 font-display text-2xl font-bold text-navy-deep">
-          Danh mục danh hiệu
+          Danh mục dấu mốc
         </h2>
         <p className="mt-2 flex items-center gap-2 font-ui text-sm text-muted">
           <Users className="h-4 w-4" aria-hidden="true" />
@@ -134,7 +134,7 @@ export default async function HallOfFamePage() {
         </p>
 
         <p className="mt-1 font-ui text-sm text-muted">
-          Mỗi nhóm xếp từ dễ đến khó. Bấm vào tên danh hiệu để xem điều kiện chi tiết.
+          Mỗi nhóm xếp từ dễ đến khó. Bấm vào tên dấu mốc để xem điều kiện chi tiết.
         </p>
 
         <div className="mt-8 grid gap-x-12 gap-y-6 lg:grid-cols-[190px_minmax(0,1fr)]">
@@ -151,7 +151,7 @@ export default async function HallOfFamePage() {
                   {CATEGORY_LABELS[category as TitleCategory] ?? category}
                 </h3>
                 <span className="font-ui text-xs text-muted">
-                  {items.length} danh hiệu
+                  {items.length} dấu mốc
                 </span>
               </div>
               <p className="mt-3 max-w-2xl text-[0.93rem] leading-relaxed text-ink-soft">
@@ -212,7 +212,7 @@ export default async function HallOfFamePage() {
             href="/hoc-vien/danh-hieu"
             className="font-semibold text-navy underline underline-offset-4"
           >
-            Danh hiệu của tôi
+            Dấu mốc của tôi
           </Link>
           . Người không bật vẫn được tính vào tổng số, nhưng ẩn danh hoàn toàn.
           Email, điểm số chi tiết và lịch sử học tập không bao giờ hiển thị công khai.

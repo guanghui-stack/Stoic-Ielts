@@ -57,7 +57,7 @@ export default async function CheckoutPage({
       <p className="mt-8 flex items-start justify-center gap-2 font-ui text-xs leading-relaxed text-muted">
         <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
         <span>
-          HỔ PHÙ · IELTS không nhìn thấy và không lưu thông tin ngân hàng của bạn.
+          STOIC · IELTS không nhìn thấy và không lưu thông tin ngân hàng của bạn.
           Việc thanh toán diễn ra trên hệ thống của SePay.
         </span>
       </p>

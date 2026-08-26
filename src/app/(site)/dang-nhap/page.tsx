@@ -6,7 +6,7 @@ import { QuietWorldPanel } from "@/components/world/quiet-world-panel";
 
 export const metadata: Metadata = {
   title: "Đăng nhập",
-  description: "Đăng nhập tài khoản học viên HỔ PHÙ · IELTS để vào phòng luyện tập 4 kỹ năng.",
+  description: "Đăng nhập STOIC · IELTS để tiếp tục luyện Reading, xem tiến bộ và giữ nhịp học của bạn.",
 };
 
 export default async function LoginPage() {
@@ -15,9 +15,9 @@ export default async function LoginPage() {
 
   return (
     <QuietWorldPanel
-      eyebrow="Khu vực học viên"
+      eyebrow="Quay về điều đang làm"
       title="Đăng nhập"
-      lede="Tiếp tục hành trình luyện tập của bạn — mọi bài làm và kết quả đều được lưu trong hồ sơ học tập."
+      lede="Tiếp tục từ đúng nơi bạn đã dừng. Bài làm, dữ liệu tiến bộ và những điều cần rèn vẫn được giữ trong hồ sơ của bạn."
     >
       <LoginForm />
     </QuietWorldPanel>

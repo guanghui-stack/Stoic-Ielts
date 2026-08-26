@@ -16,6 +16,7 @@ import {
 } from "@/lib/actions/forum";
 import { BODY_MAX, COMMENT_MAX, TITLE_MAX } from "@/lib/forum/rules";
 import { MarkupEditor } from "@/components/forum/markup-editor";
+import { TagsInput } from "@/components/ui/tags-input";
 
 const FIELD =
   "w-full border border-line-strong bg-paper px-3.5 py-2.5 font-ui text-sm text-ink placeholder:text-muted focus:border-navy focus:outline-none";
@@ -64,6 +65,13 @@ export function NewPostForm({ channelKey }: { channelKey: string }) {
         maxLength={TITLE_MAX}
         placeholder="Tiêu đề — nói thẳng vấn đề bạn muốn bàn"
         className={FIELD}
+      />
+      <TagsInput
+        name="tags"
+        maxTags={5}
+        tone="focus"
+        placeholder="Ví dụ: matching headings"
+        hint="Thêm tối đa 5 chủ đề để người khác tìm đúng cuộc trao đổi."
       />
       <MarkupEditor
         name="body"
