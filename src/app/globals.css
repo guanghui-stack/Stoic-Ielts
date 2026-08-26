@@ -1299,3 +1299,25 @@ body {
     scroll-behavior: auto !important;
   }
 }
+
+/* AI waiting — chỉ được dùng trong WorldShell, không gắn vào route tier 0. */
+.world-shell .stoic-ai-orbit__ring {
+  animation: stoic-orbit 2.8s linear infinite;
+  will-change: transform;
+}
+
+.world-shell .stoic-ai-orbit__ring--reverse {
+  animation-direction: reverse;
+  animation-duration: 3.6s;
+}
+
+@keyframes stoic-orbit {
+  to { transform: rotate(1turn); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .world-shell .stoic-ai-orbit__ring,
+  .world-shell .stoic-ai-orbit__ring--reverse {
+    animation: none !important;
+  }
+}
