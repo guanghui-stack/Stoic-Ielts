@@ -16,7 +16,7 @@ import { rankByLevel, RANK_ERAS } from "@/lib/ranks/catalog";
 import { currentSeason, territoryOwner } from "@/lib/arena/season-service";
 import { FACTION_LABEL, FACTION_TERRITORY } from "@/lib/arena/season.ts";
 
-export const metadata = { title: "Chiến Dịch — Bản đồ thăng cấp" };
+export const metadata = { title: "Hành Trình — Bản đồ tiến bộ" };
 export const dynamic = "force-dynamic";
 
 export default async function CampaignPage() {
@@ -69,19 +69,19 @@ export default async function CampaignPage() {
 
       <NarrativeSection
         id="ban-do-thang-cap"
-        eyebrow="Chiến Dịch"
-        title="Bản đồ thăng cấp"
+        eyebrow="Hành Trình Stoic"
+        title="Bản đồ tiến bộ"
         tone="mist"
       >
         <p className="max-w-3xl text-[0.95rem] leading-relaxed text-ink-soft">
-          Tám cửa ải nối chín cấp bậc. Mỗi cửa chỉ mở khi bạn đã đủ điều kiện,
-          và chỉ vượt được khi bạn chủ động bước vào.
+          Tám chặng nối chín dấu mốc. Mỗi chặng chỉ mở khi bạn đủ điều kiện,
+          và chỉ hoàn tất khi bạn chủ động bước vào.
         </p>
 
         <p className="mb-6 mt-2 text-sm text-muted">
           Bạn đang ở{" "}
-          <strong className="text-navy-deep">{rank?.name ?? "Bạch thân"}</strong>
-          {rank && <> · thời {RANK_ERAS[rank.era].name}</>} · đã vượt {passed}/8 cửa ải.
+          <strong className="text-navy-deep">{rank?.name ?? "Người bắt đầu"}</strong>
+          {rank && <> · chặng {RANK_ERAS[rank.era].name}</>} · đã hoàn tất {passed}/8 chặng.
         </p>
 
         <CampaignMapStack

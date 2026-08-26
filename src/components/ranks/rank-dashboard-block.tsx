@@ -6,7 +6,7 @@ import { TrialProgress } from "@/components/ranks/trial-progress";
 import { CampaignMini } from "@/components/campaign/campaign-mini";
 import { NextStepGuide } from "@/components/world/next-step-guide";
 import { campaignView, type TrialStatusMap } from "@/lib/campaign/view";
-import { buildCampaignWorld } from "@/lib/campaign/world";
+import { buildCampaignWorld, stoicTrialTitle } from "@/lib/campaign/world";
 import { ensureUserRank, syncTrialEligibility } from "@/lib/ranks/engine";
 import { loadRankFacts } from "@/lib/ranks/facts";
 import { evaluateTrialGate, evaluateTrialSuccess } from "@/lib/ranks/rules";
@@ -93,22 +93,22 @@ export async function RankDashboardBlock({ userId }: { userId: string }) {
 
       <NextStepGuide step={world.nextStep} />
 
-      <section aria-label="Chiến Dịch" className="border border-line bg-paper p-7">
+      <section aria-label="Hành Trình" className="border border-line bg-paper p-7">
         <p className="label-caps">Vị trí hiện tại</p>
         <h3 className="mb-4 mt-2.5 font-display text-lg font-bold text-navy-deep">
-          Ba cửa ải quanh bạn
+          Ba chặng quanh bạn
         </h3>
         <CampaignMini nodes={world.gates} />
       </section>
 
       {trial && profile.currentLevel < MAX_RANK_LEVEL && (
         <section
-          aria-label="Cửa ải kế tiếp"
+          aria-label="Chặng kế tiếp"
           className="border border-line bg-paper p-7"
         >
-          <p className="label-caps">Cửa ải kế tiếp</p>
+          <p className="label-caps">Chặng kế tiếp</p>
           <h3 className="mt-2.5 font-display text-lg font-bold text-navy-deep">
-            {trial.name}
+            {stoicTrialTitle({ trialCode: trial.code, shortTitle: trial.name })}
           </h3>
           <p className="mt-2 font-ui text-sm text-muted">
             {trial.skill} · {trial.estimate}

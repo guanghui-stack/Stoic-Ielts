@@ -4,7 +4,7 @@
  * Ba nguyên tắc bắt buộc khi thêm danh hiệu mới:
  *
  * 1. `quoteKind` phải trung thực. EXACT là trích nguyên văn có nguồn kiểm chứng
- *    được; ADAPTED là phỏng theo; ORIGINAL là HỔ PHÙ · IELTS tự viết. Gán một câu tự
+ *    được; ADAPTED là phỏng theo; ORIGINAL là STOIC · IELTS tự viết. Gán một câu tự
  *    sáng tác cho danh nhân lịch sử là bịa nguồn — không bao giờ được làm.
  *
  * 2. Danh hiệu tiêu cực chỉ được `PRIVATE_ONLY`. Bêu tên người học kém trước
@@ -81,7 +81,7 @@ export const TITLE_SEEDS: TitleSeed[] = [
     slug: "nhan-hoc-thuy-tri-dao",
     name: "Nhân học thủy tri đạo",
     description:
-      "Tám bài đọc khác nhau, không bài nào bị bỏ lại phía sau. Đây là trụ Giải đề của điều kiện dự Nguyệt Thí.",
+      "Tám bài đọc khác nhau, không bài nào bị bỏ lại phía sau. Đây là trụ Nhận thức của hành trình thực hành.",
     quoteKind: "EXACT",
     quoteSource: "Mạnh Giao · Khuyến học",
     quoteSourceUrl: THIVIEN_KHUYEN_HOC,
@@ -159,13 +159,11 @@ export const TITLE_SEEDS: TitleSeed[] = [
   {
     code: "PRACTICE_06_SLEEPING_DRAGON",
     slug: "phuc-long-phuong-so",
-    name: "Phục Long, Phượng Sồ; lưỡng nhân đắc nhất, khả an thiên hạ",
+    name: "Năng lực được rèn qua thời gian",
     description:
-      "Danh hiệu huyền thoại: toàn bộ bộ đề đạt từ 8.5 ngay lần đầu, Feynman hoàn tất trọn vẹn, và hai mươi ngày học thật.",
-    quoteKind: "EXACT",
-    quoteSource: "Tam Quốc Diễn Nghĩa · hồi 36",
-    quoteSourceUrl:
-      "https://zh.wikisource.org/zh-hant/%E4%B8%89%E5%9C%8B%E6%BC%94%E7%BE%A9/%E7%AC%AC036%E5%9B%9E",
+      "Danh hiệu huyền thoại: toàn bộ bộ đề đạt từ 8.5 ngay lần đầu, phần phản tư hoàn tất trọn vẹn, và hai mươi ngày học thật.",
+    quoteKind: "ORIGINAL",
+    quoteSource: "STOIC · IELTS — nội dung nguyên bản",
     category: "PRACTICE",
     rarity: "LEGENDARY",
     ruleKey: "COLLECTION_MIN_FIRST_BAND",
@@ -203,7 +201,7 @@ export const TITLE_SEEDS: TitleSeed[] = [
     slug: "doc-can-than",
     name: "Đọc cẩn thận, không dễ hài lòng với hiểu biết sơ bộ",
     description:
-      "Mười hai phiên chữa bài, bốn mươi câu sai, mỗi câu đều có bằng chứng, lời giải đã sửa và quy tắc rút ra. Đây là trụ Sửa đề của điều kiện dự Nguyệt Thí.",
+      "Mười hai phiên phản tư, bốn mươi câu sai, mỗi câu đều có bằng chứng, lời giải đã sửa và quy tắc rút ra.",
     quoteKind: "EXACT",
     quoteSource: "Marcus Aurelius · Meditations 1.7.3",
     quoteSourceUrl:
@@ -292,7 +290,7 @@ export const TITLE_SEEDS: TitleSeed[] = [
     slug: "trong-kha-nang-cua-loai-nguoi",
     name: "Nếu nỗ lực nằm trong khả năng của loài người…",
     description:
-      "Hai mươi lăm ngày học thật, hai mươi giờ, mười hai đề và sáu phiên chữa bài. Đây là trụ Kỷ luật của điều kiện dự Nguyệt Thí.",
+      "Hai mươi lăm ngày học thật, hai mươi giờ, mười hai đề và sáu phiên phản tư.",
     quoteKind: "ADAPTED",
     quoteSource: "Phỏng theo Marcus Aurelius",
     quoteSourceUrl:
@@ -335,12 +333,11 @@ export const TITLE_SEEDS: TitleSeed[] = [
   {
     code: "COMPOSITE_01_EAST_WIND",
     slug: "chi-khiem-dong-phong",
-    name: "Vạn sự cụ bị, chỉ khiếm đông phong",
+    name: "Chỉ còn một trụ cần củng cố",
     description:
-      "Bạn đã có hai trong ba trụ, trụ còn lại đã đi được hơn 80%. Đông phong đã ở rất gần.",
-    quoteKind: "EXACT",
-    quoteSource: "Tam Quốc Diễn Nghĩa · hồi 49",
-    quoteSourceUrl: "https://oldwlps.kl.edu.tw/idiom/10125",
+      "Bạn đã có hai trong ba trụ, trụ còn lại đã đi được hơn 80%. Bước tiếp theo đã rõ.",
+    quoteKind: "ORIGINAL",
+    quoteSource: "STOIC · IELTS — nội dung nguyên bản",
     category: "COMPOSITE",
     rarity: "RARE",
     ruleKey: "NEAR_COMPOSITE",
@@ -360,7 +357,7 @@ export const TITLE_SEEDS: TitleSeed[] = [
     slug: "nhan-thuc-hanh-dong-y-chi",
     name: "Nhận thức — Hành động — Ý chí",
     description:
-      "Bạn đã có đủ năng lực, chiều sâu và kỷ luật để bước vào Nguyệt Thí.",
+      "Bạn đã có đủ nhận thức, hành động và ý chí để bước vào Thử Thách Tháng.",
     quoteKind: "ADAPTED",
     quoteSource: "Phỏng theo Marcus Aurelius",
     quoteSourceUrl: "https://chunghiakhacky.org/ngay-4-thang-1-ba-dieu-lon-nhat/",
@@ -381,11 +378,11 @@ export const TITLE_SEEDS: TitleSeed[] = [
   {
     code: "TRANSFORM_01_LOW_WARNING",
     slug: "ha-nhan-canh-tinh",
-    name: "Ngươi chỉ là một kẻ hạ nhân, sao xứng đáng làm Hoàng đế?",
+    name: "Nhìn thẳng vào điểm yếu",
     description:
-      "Một lời cảnh tỉnh riêng tư, chỉ mình bạn thấy. Đây không phải bản án về năng lực của bạn — nó tồn tại để bạn có cái mà vượt qua.",
+      "Một lời nhắc riêng tư, chỉ mình bạn thấy. Đây không phải bản án về năng lực — nó chỉ giúp bạn chọn đúng điều cần rèn.",
     quoteKind: "ORIGINAL",
-    quoteSource: "Thông điệp của HỔ PHÙ · IELTS",
+    quoteSource: "STOIC · IELTS — nội dung nguyên bản",
     category: "TRANSFORMATION",
     rarity: "PRIVATE",
     visibility: "PRIVATE_ONLY",
@@ -396,11 +393,11 @@ export const TITLE_SEEDS: TitleSeed[] = [
   {
     code: "TRANSFORM_02_RISE",
     slug: "anh-hung-mot-gioi",
-    name: "Ta là anh hùng một giới, sao lại không thể làm đế vương?",
+    name: "Trở lại với kỷ luật",
     description:
-      "Từ đáy vực đi lên: hai bài Full Test liên tiếp đạt từ 7.0 sau giai đoạn sa sút. Phân cửu tất hợp.",
+      "Từ giai đoạn sa sút trở lại bằng hai bài Full Test liên tiếp đạt từ 7.0. Tiến bộ bắt đầu khi bạn quay lại.",
     quoteKind: "ORIGINAL",
-    quoteSource: "Thông điệp của HỔ PHÙ · IELTS",
+    quoteSource: "STOIC · IELTS — nội dung nguyên bản",
     category: "TRANSFORMATION",
     rarity: "EPIC",
     ruleKey: "RECOVERY_CHAIN",
@@ -409,7 +406,7 @@ export const TITLE_SEEDS: TitleSeed[] = [
   },
 ];
 
-/** Ba trụ của điều kiện dự Nguyệt Thí. */
+/** Ba trụ của hành trình thực hành Stoic. */
 export const PILLAR_CODES = [
   "PRACTICE_02_LEARN_THE_WAY",
   "FEYNMAN_02_READ_CAREFULLY",

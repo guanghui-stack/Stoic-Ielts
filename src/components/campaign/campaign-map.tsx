@@ -5,7 +5,7 @@ import { ART_ASSETS } from "@/lib/brand/art-manifest";
 import { InkWashArt } from "@/components/brand/ink-wash-art";
 import { WorldLandmarkRail } from "@/components/campaign/world-landmark-rail";
 import { STATE_LABELS, type CampaignNodeView } from "@/lib/campaign/view";
-import { stoicTrialTitle, type CampaignWorld } from "@/lib/campaign/world";
+import { stoicTrialLabel, stoicTrialTitle, type CampaignWorld } from "@/lib/campaign/world";
 
 const NODE_STYLE: Record<
   CampaignNodeView["state"],
@@ -25,7 +25,7 @@ type MarkerStyle = CSSProperties & { "--world-marker-delay": string };
 
 function nodeLabel(node: CampaignNodeView): string {
   const parts = [
-    `${stoicTrialTitle(node)} — ${node.functionalLabel}`,
+    `${stoicTrialTitle(node)} — ${stoicTrialLabel(node)}`,
     STATE_LABELS[node.state],
   ];
   if (node.hint) parts.push(`Còn thiếu: ${node.hint}`);
@@ -53,7 +53,7 @@ function GateMarkerContent({ node }: { node: CampaignNodeView }) {
         {stoicTrialTitle(node)}
       </span>
       <span className="font-ui text-[11px] leading-tight text-muted">
-        {node.functionalLabel}
+        {stoicTrialLabel(node)}
       </span>
     </>
   );

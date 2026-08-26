@@ -7,13 +7,13 @@ import { features } from "@/lib/features";
 import { tierPolicy, type CompetitionTier } from "@/lib/competition/tiers";
 import { AdminPageShell } from "@/components/admin/admin-page-shell";
 
-export const metadata = { title: "Tuyển chọn Dương Thí — Thiên Thí" };
+export const metadata = { title: "Tuyển chọn Thử Thách Quý — Thử Thách Năm" };
 export const dynamic = "force-dynamic";
 
 /**
  * Danh sách kỳ thi hai tầng trên, để quản trị viên chọn kỳ cần cấu hình nguồn.
  *
- * Nguyệt Thí không xuất hiện ở đây: nó dùng đăng ký mở, không có nguồn tuyển
+ * Thử Thách Tháng không xuất hiện ở đây: nó dùng đăng ký mở, không có nguồn tuyển
  * chọn nào để quản.
  */
 export default async function QualificationAdminPage() {
@@ -36,14 +36,14 @@ export default async function QualificationAdminPage() {
   return (
     <AdminPageShell eyebrow="Quản trị" title="Nguồn tuyển chọn">
       <p className="mt-4 max-w-2xl text-[0.95rem] leading-relaxed text-ink-soft">
-        Dương Thí và Thiên Thí không có đăng ký mở. Thí sinh đến từ kết quả của
-        tầng dưới, nên ở đây bạn chỉ gắn kỳ nguồn và sinh vé — không có cách nào
+        Thử Thách Quý và Thử Thách Năm không có đăng ký mở. Thí sinh đến từ kết quả
+        của tầng dưới, nên ở đây bạn chỉ gắn kỳ nguồn và sinh vé — không có cách nào
         thêm một người vào kỳ thi bằng tay.
       </p>
 
       {competitions.length === 0 ? (
         <p className="mt-8 border border-line bg-cream-deep p-7 font-ui text-sm text-ink-soft">
-          Chưa có kỳ Dương Thí hoặc Thiên Thí nào. Hãy tạo ở trang Cuộc thi, chọn
+          Chưa có kỳ Thử Thách Quý hoặc Thử Thách Năm nào. Hãy tạo ở trang Cuộc thi, chọn
           đúng tier và seasonKey.
         </p>
       ) : (

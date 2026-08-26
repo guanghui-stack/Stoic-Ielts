@@ -5,13 +5,13 @@ import { ARENA_TITLE_THRESHOLDS } from "@/lib/arena/titles.ts";
 /**
  * Tám danh hiệu của đấu trường.
  *
- * VỀ CÂU CHỮ. Dùng thành ngữ bốn chữ Hán Việt, VIẾT BẰNG CHỮ LATIN. Thể này
- * đúng chất Tam Quốc hơn một câu chửi, giữ được phẩm giá nền tảng, và không cũ
- * đi sau vài tháng. Chất châm biếm dồn vào dòng mô tả, nơi nó có sức nặng mà
- * không thành sỉ nhục.
+ * VỀ CÂU CHỮ. Dùng nhãn tiếng Việt ngắn, trực diện và có tính phản tư. Ngôn ngữ
+ * phải giúp người học nhìn vào hành vi và dữ liệu, không biến một kết luận vận hành
+ * thành lời phán xét về con người. Chất nhắc nhở dồn vào dòng mô tả, nơi nó có
+ * sức nặng mà không thành sỉ nhục.
  *
  * VỀ HIỂN THỊ. Cả năm danh hiệu chất vấn đều `PRIVATE_ONLY`. Chúng nằm im trên
- * hồ sơ cho ai xem hồ sơ thì thấy, và KHÔNG BAO GIỜ lên Bảng Bố Cáo: đẩy lên
+ * hồ sơ cho ai xem hồ sơ thì thấy, và KHÔNG BAO GIỜ lên Thông Báo: đẩy lên
  * bảng công cộng là bêu riếu, và mất luôn phần nhân từ.
  *
  * VỀ NGƯỠNG. Mọi con số nằm trong `ruleConfig`, gieo vào `ruleConfigJson`, nên
@@ -37,9 +37,9 @@ export const ARENA_TITLE_SEEDS: readonly ArenaTitleSeed[] = [
   {
     code: "ARENA_Q01_DANH_BAT_PHU_THUC",
     slug: "danh-bat-phu-thuc",
-    name: "Danh Bất Phù Thực",
+    name: "Tên gọi chưa khớp dữ liệu",
     description:
-      "Ấn triện thì cao, chiến tích thì thấp. Thiên hạ đã có lời bàn. Đây không phải bản án về năng lực: nó chỉ ra chỗ tên gọi và sự thật đang lệch nhau, và nó xoá được.",
+      "Hồ sơ đang cho thấy khoảng cách giữa tên gọi và kết quả thực tế. Đây không phải bản án về năng lực; nó chỉ ra chỗ cần kiểm tra lại.",
     category: "ARENA_QUESTION",
     rarity: "PRIVATE",
     visibility: "PRIVATE_ONLY",
@@ -50,9 +50,9 @@ export const ARENA_TITLE_SEEDS: readonly ArenaTitleSeed[] = [
   {
     code: "ARENA_Q02_AN_TAI_DAI_GIA",
     slug: "an-tai-dai-gia",
-    name: "Ẩn Tài Đãi Giá",
+    name: "Năng lực đang chờ được dùng",
     description:
-      "Sức đủ vượt Vũ Môn từ lâu, mà cố nán lại chốn thấp để tìm phần dễ. Cửa đang mở, và nó chờ bạn.",
+      "Bạn đã có nền tảng để bước lên nhưng vẫn đang chọn vùng dễ. Hãy thử một nhiệm vụ nằm ngay ngoài thói quen.",
     category: "ARENA_QUESTION",
     rarity: "PRIVATE",
     visibility: "PRIVATE_ONLY",
@@ -63,9 +63,9 @@ export const ARENA_TITLE_SEEDS: readonly ArenaTitleSeed[] = [
   {
     code: "ARENA_Q03_AN_BINH_BAT_DONG",
     slug: "an-binh-bat-dong",
-    name: "Án Binh Bất Động",
+    name: "Trì hoãn lựa chọn",
     description:
-      "Mười lần trống giục, mười lần cửa doanh khép chặt. Chỉ đếm những lời thách tới khi bạn đang ở sân và đang rảnh, và mỗi người thách chỉ tính một lần mỗi ngày.",
+      "Nhiều lời mời đã đến khi bạn đang có thể tham gia nhưng chưa phản hồi. Chỉ ghi nhận lời mời phù hợp và mỗi người một lần mỗi ngày.",
     category: "ARENA_QUESTION",
     rarity: "PRIVATE",
     visibility: "PRIVATE_ONLY",
@@ -76,9 +76,9 @@ export const ARENA_TITLE_SEEDS: readonly ArenaTitleSeed[] = [
   {
     code: "ARENA_Q04_LAM_TRAN_THOAT_DAO",
     slug: "lam-tran-thoat-dao",
-    name: "Lâm Trận Thoát Đào",
+    name: "Rời khỏi cam kết",
     description:
-      "Trống chưa dứt hồi, bóng người đã khuất sau trại. Bỏ mặc tới hết giờ, không phải thua: thua thì không ai trách, bỏ mặc thì đối thủ ngồi chờ vô ích.",
+      "Bạn rời phiên trước khi hoàn tất. Thua là một kết quả có thể học từ đó; bỏ mặc khiến người còn lại phải chờ vô ích.",
     category: "ARENA_QUESTION",
     rarity: "PRIVATE",
     visibility: "PRIVATE_ONLY",
@@ -89,9 +89,9 @@ export const ARENA_TITLE_SEEDS: readonly ArenaTitleSeed[] = [
   {
     code: "ARENA_Q05_Y_CUONG_LANG_NHUOC",
     slug: "y-cuong-lang-nhuoc",
-    name: "Ỷ Cường Lăng Nhược",
+    name: "Chọn thử thách quá dễ",
     description:
-      "Đao chỉ hướng kẻ yếu, chưa từng ngước nhìn lên trên. Chỉ đếm những trận do chính bạn gửi chiến thư: trận tự ghép do máy chọn đối thủ, không phải lỗi của ai.",
+      "Các thử thách bạn chủ động gửi thường thấp hơn đáng kể so với năng lực hiện tại. Trận tự ghép do máy chọn đối thủ không bị tính vào tín hiệu này.",
     category: "ARENA_QUESTION",
     rarity: "PRIVATE",
     visibility: "PRIVATE_ONLY",
@@ -104,9 +104,9 @@ export const ARENA_TITLE_SEEDS: readonly ArenaTitleSeed[] = [
   {
     code: "ARENA_M01_NGUY_TAO_QUAN_CONG",
     slug: "nguy-tao-quan-cong",
-    name: "Ngụy Tạo Quân Công",
+    name: "Tín hiệu chưa nhất quán",
     description:
-      "Công trạng ghi trong sổ, mà chiến trường chưa từng thấy mặt. Chỉ gắn khi có người xét duyệt xác minh và lưu bằng chứng. Xoá sau một mùa giải không tái phạm.",
+      "Dữ liệu trong hồ sơ chưa khớp với các bằng chứng đang có. Chỉ gắn khi người xét duyệt xác minh và lưu bằng chứng; xóa sau một mùa giải không tái phạm.",
     category: "ARENA_MANUAL",
     rarity: "PRIVATE",
     visibility: "PRIVATE_ONLY",
@@ -119,9 +119,9 @@ export const ARENA_TITLE_SEEDS: readonly ArenaTitleSeed[] = [
   {
     code: "ARENA_M02_NOI_UNG_NGOAI_HOP",
     slug: "noi-ung-ngoai-hop",
-    name: "Nội Ứng Ngoại Hợp",
+    name: "Phối hợp không minh bạch",
     description:
-      "Hai quân giao tranh mà cùng một lòng, thắng bại đã định trước khi gióng trống. Chỉ gắn khi thông đồng đã được xác minh. Xoá sau một mùa giải không tái phạm.",
+      "Nhiều tín hiệu cho thấy kết quả cần được rà soát thêm. Chỉ gắn khi phối hợp không minh bạch đã được xác minh; xóa sau một mùa giải không tái phạm.",
     category: "ARENA_MANUAL",
     rarity: "PRIVATE",
     visibility: "PRIVATE_ONLY",
@@ -134,9 +134,9 @@ export const ARENA_TITLE_SEEDS: readonly ArenaTitleSeed[] = [
   {
     code: "ARENA_R01_CAI_QUA_TU_TAN",
     slug: "cai-qua-tu-tan",
-    name: "Cải Quá Tự Tân",
+    name: "Sửa mình bằng hành động",
     description:
-      "Từng có lời bàn sau lưng, nay đã tự mình rửa sạch. Chỉ người từng vấp mới có được danh hiệu này, và nó ở lại vĩnh viễn.",
+      "Bạn đã nhìn lại tín hiệu cũ và tạo ra thay đổi có bằng chứng. Chỉ người từng vấp mới có danh hiệu này, và nó ở lại vĩnh viễn.",
     // CÔNG KHAI, và giữ vĩnh viễn. Đây là điểm mấu chốt: nó biến vết trượt
     // thành một thứ đáng kể, và là lời hứa cụ thể rằng nền tảng không đóng đinh
     // ai vĩnh viễn.
@@ -166,7 +166,7 @@ export async function seedArenaTitles(): Promise<number> {
         name: seed.name,
         description: seed.description,
         quoteKind: "ORIGINAL",
-        quoteSource: "Thông điệp của HỔ PHÙ · IELTS",
+        quoteSource: "STOIC · IELTS — nội dung nguyên bản",
         category: seed.category,
         rarity: seed.rarity,
         visibility: seed.visibility,

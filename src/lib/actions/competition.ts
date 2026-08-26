@@ -274,7 +274,7 @@ export async function finalizeCompetitionAction(
     revalidatePath(ADMIN_PATH);
     revalidatePath("/bang-vang");
     return {
-      success: `Đã chốt: ${result.ranked} thí sinh lên Bảng Vàng, ${result.winners} giải được duyệt. Nhớ chuyển tiền thủ công cho người thắng.`,
+      success: `Đã chốt: ${result.ranked} thí sinh được ghi vào Thành Quả, ${result.winners} giải được duyệt. Nhớ chuyển tiền thủ công cho người thắng.`,
     };
   } catch (error) {
     return { error: String(error instanceof Error ? error.message : error).slice(0, 200) };

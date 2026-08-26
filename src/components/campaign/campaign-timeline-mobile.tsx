@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Check, Flag, Lock, Play } from "lucide-react";
 import { STATE_LABELS, type CampaignNodeView } from "@/lib/campaign/view";
-import { stoicTrialTitle, type CampaignWorld, type WorldPlace } from "@/lib/campaign/world";
+import { stoicTrialLabel, stoicTrialTitle, type CampaignWorld, type WorldPlace } from "@/lib/campaign/world";
 
 const NODE_STYLE: Record<
   CampaignNodeView["state"],
@@ -18,7 +18,7 @@ function GateDetails({ node }: { node: CampaignNodeView }) {
     <>
       <span className="flex flex-wrap items-baseline gap-x-2">
         <span className="font-display font-semibold text-navy-deep">{stoicTrialTitle(node)}</span>
-        <span className="font-ui text-xs text-muted">{node.functionalLabel}</span>
+        <span className="font-ui text-xs text-muted">{stoicTrialLabel(node)}</span>
         {node.isCurrent ? (
           <span className="flex items-center gap-1 font-ui text-[11px] font-semibold text-vermilion-ink">
             <Flag className="size-3" aria-hidden />

@@ -12,7 +12,7 @@ import { loadRankFacts } from "@/lib/ranks/facts";
 /**
  * Bản đồ công khai luôn có một thế giới khách an toàn. Khi cá nhân hóa được
  * bật, mọi truy vấn phiên và tiến độ đều nằm trong cùng một ranh giới lỗi để
- * sự cố dữ liệu không làm biến mất cổng vào Chiến Dịch trên trang chủ.
+ * sự cố dữ liệu không làm biến mất cổng vào Hành Trình trên trang chủ.
  */
 export async function CampaignHomeBlock() {
   const guestNodes = campaignView(1, {

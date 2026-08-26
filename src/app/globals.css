@@ -1,17 +1,16 @@
 @import "tailwindcss";
 
 /*
-  HỔ PHÙ · IELTS — Chiến trận · Phục bàn · Luyện binh
-  Hệ thiết kế thủy mặc Đông Á: nền giấy gạo, mực navy-đen, con dấu chu sa,
-  tiêu đề serif, nhãn in hoa giãn cách.
+  STOIC · IELTS — Nhận thức · Hành động · Ý chí
+  Hệ thiết kế vòng tròn kiểm soát: nền sáng có khoảng thở, mực xanh đậm,
+  violet làm điểm tập trung, accent ruby/sage tiết chế và nhãn rõ ràng.
 
-  Một quyết định thị giác duy nhất, lặp lại nhất quán: TRANH MỰC TRÊN GIẤY.
-  80–90% bề mặt là đen, xám và kem; mỗi module chỉ được dùng ĐÚNG MỘT màu
-  accent. Trộn nhiều accent trên cùng một màn hình là lỗi thiết kế, không
-  phải lựa chọn phong cách.
+  Một quyết định thị giác duy nhất, lặp lại nhất quán: FOCUS THROUGH CLARITY.
+  Bề mặt ưu tiên khoảng trống, dữ liệu dễ đọc và một điểm nhấn có chủ đích;
+  tránh dùng quá nhiều accent hoặc chuyển động cùng lúc.
 
   Ngoại lệ tuyệt đối: phòng thi Reading CBT giữ giao diện trung tính mô phỏng
-  đề thi thật — không giấy gạo, không mực, không nhân vật. Xem .font-exam.
+  đề thi thật — không nhận diện Stoic, không animation trang trí. Xem .font-exam.
 */
 
 /*
@@ -48,71 +47,69 @@
      màu cứng `hover:bg-[#9d7223]` nằm rải trong ui.tsx. */
   --color-gold-deep: #9d7223;
 
-  /* ===== Màu chức năng Tam Quốc (Master Spec §8.2) =====
-     Mỗi màu gắn với MỘT module và MỘT danh tướng. Không dùng lẫn.
+  /* ===== Token compatibility cho các route protected =====
+     Các alias dưới đây giữ nguyên để vùng thi và dữ liệu lịch sử không thay đổi;
+     route ngoài protected dùng token Stoic scoped ở cuối file.
 
      Hậu tố -ink là biến thể đã tối đủ để làm CHỮ trên nền kem (tương phản
      WCAG AA ≥ 4.5:1). Bản gốc chỉ dùng cho viền, nền, biểu tượng và mảng
      đồ họa — dùng nó làm chữ nhỏ là không đạt chuẩn tiếp cận. */
 
-  /* Chu sa — Phục bàn, con dấu, cấp bậc cao. Trương Phi. */
+  /* Compatibility ruby — chỉ giữ cho route protected và dữ liệu lịch sử. */
   --color-vermilion: #a33a2b;
   --color-vermilion-ink: #8e3125;
   --color-vermilion-pale: #f4e6e2;
 
-  /* Lam điện — Chiến trận. Triệu Vân. */
+  /* Compatibility azure — chỉ giữ cho route protected và dữ liệu lịch sử. */
   --color-azure: #3a7fc4;
   --color-azure-ink: #2c6099;
   --color-azure-pale: #e6eef7;
 
-  /* Lục ngọc — chính đạo, liêm chính. Quan Vũ. */
+  /* Compatibility jade — chỉ giữ cho route protected và dữ liệu lịch sử. */
   --color-jade: #2e6b4f;
   --color-jade-ink: #275c44;
   --color-jade-pale: #e7f0ea;
 
-  /* Kim đồng — Luyện binh, kỷ luật, lương thảo. Hoàng Trung.
-     (Trùng --color-gold; -ink là bản đạt chuẩn chữ.) */
+  /* Compatibility gold — giữ alias cũ; --color-gold-ink là bản đạt chuẩn chữ. */
   --color-gold-ink: #8a6318;
 
-  /* Bạc lam — biến hóa, thích nghi. Mã Siêu. */
+  /* Compatibility silver-blue — chỉ giữ cho route protected và dữ liệu lịch sử. */
   --color-silver-blue: #7d97ac;
   --color-silver-blue-ink: #4e6e8c;
 
-  /* Hỏa cam — đối thủ phản chiếu, thử thách cuối. Lữ Bố. */
+  /* Compatibility fire — chỉ giữ cho route protected và dữ liệu lịch sử. */
   --color-fire: #c2591f;
   --color-fire-ink: #a94d1b;
   --color-fire-pale: #f8ebe2;
 
-  /* Bạc trăng & indigo — Nguyệt Thí và các tầng đại thí. */
+  /* Compatibility moon/indigo — chỉ giữ cho route protected và dữ liệu lịch sử. */
   --color-moon-silver: #c3cbd5;
   --color-indigo: #273a63;
 
-  /* Tro — huy hiệu tướng quân: sức bền, không bóng bẩy. */
+  /* Compatibility ash — chỉ giữ cho route protected và dữ liệu lịch sử. */
   --color-ash: #77736c;
   --color-ash-ink: #5f5b54;
 
-  /* ===== Ba phe, NGOẠI LỆ CÓ TÊN của luật một accent =====
-     Chỉ được dùng ở ĐÚNG HAI NƠI: bảng xếp hạng phe, và chú giải bản đồ lãnh
-     địa. Bản đồ KHÔNG tô lãnh địa bằng màu phẳng — nó đã giải xong bằng lớp
-     tranh chồng cộng thang opacity trong territory-map.ts. Xem
-     docs/BRAND-GUIDELINE.md muc 1.5.
+  /* ===== Alias màu legacy giữ cho các bề mặt dữ liệu protected =====
+     Không dùng cho bề mặt Stoic mới. Chỉ giữ để render dữ liệu legacy mà không
+     đổi checksum hoặc màu của vùng protected. Bề mặt mới dùng các token scoped
+     Stoic ở cuối file.
 
-     Ngụy cố ý KHÔNG dùng màu lam, dù quy ước quen thuộc là vậy: bảng màu đã có
-     năm token họ lam (navy, azure, silver-blue, indigo, ink), nên mọi ứng viên
-     lam đều rơi vào deltaE 14 tới 19 so với ink-soft hoặc azure-ink, tức là
-     đặt cạnh nhau trên bảng xếp hạng thì người đọc phải dừng lại mà đoán. */
+     Các alias này không được dùng để đặt tên module Stoic mới; chỉ tồn tại nhằm
+     tương thích với dữ liệu và route protected. Mọi bề mặt mới dùng palette
+     vòng tròn kiểm soát ở block theme scoped phía cuối file. */
 
-  /* Tía đá — Ngụy, lãnh địa phía bắc. Chữ đạt 5.58 trên kem, 4.62 trên pale. */
+  /* Legacy faction alias — không dùng cho nội dung Stoic mới. */
   --color-faction-wei: #705a86;
   --color-faction-wei-ink: #705a86;
   --color-faction-wei-pale: #e7e0e0;
 
-  /* Trúc lục — Thục, lãnh địa phía tây. Bản gốc chỉ 4.14 nên chữ PHẢI dùng -ink. */
+  /* Legacy faction alias — không dùng cho nội dung Stoic mới. */
   --color-faction-shu: #6a7f3a;
   --color-faction-shu-ink: #586b2e;
   --color-faction-shu-pale: #e6e5d6;
 
-  /* Thổ hồng — Ngô, lãnh địa phía đông nam. Chữ đạt 5.66 trên kem, 4.73 trên pale. */
+  /* Legacy faction alias — không dùng cho nội dung Stoic mới. */
   --color-faction-wu: #9c5b52;
   --color-faction-wu-ink: #8f5149;
   --color-faction-wu-pale: #ede0d9;
@@ -321,9 +318,8 @@ body {
 }
 
 /*
-  Nhãn kép: tên cổ phong ở trên, chức năng thật ở dưới (Master Spec §3).
-  Tên Tam Quốc để ghi nhớ, dòng chức năng để người mới không lạc đường —
-  người chưa biết "Phục Bàn" là gì vẫn phải đọc được "Feynman Review".
+  Nhãn kép: tên chủ đề ở trên, chức năng thật ở dưới.
+  Tên Stoic tạo định hướng; dòng chức năng giữ cho người mới hiểu ngay bước tiếp theo.
 */
 .dual-label__function {
   font-family: var(--font-ui);

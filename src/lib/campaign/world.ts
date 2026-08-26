@@ -139,8 +139,24 @@ export const STOIC_TRIAL_TITLES: Record<string, string> = {
   TRIAL_08_HO_LAO: "Tự chủ trước điểm yếu",
 };
 
+export const STOIC_TRIAL_LABELS: Record<string, string> = {
+  TRIAL_01_DAO_VIEN: "Bắt đầu có chủ đích",
+  TRIAL_02_HOANG_CAN: "Rèn nhịp đều đặn",
+  TRIAL_03_HOA_HUNG: "Quản trị sự chú ý",
+  TRIAL_04_NGU_QUAN: "Giữ phong độ ổn định",
+  TRIAL_05_TRUONG_BAN: "Củng cố phần yếu",
+  TRIAL_06_LAO_TUONG: "Phản tư có chiều sâu",
+  TRIAL_07_TAY_LUONG: "Linh hoạt trong khuôn khổ",
+  TRIAL_08_HO_LAO: "Tích hợp ba trụ",
+};
+
 export function stoicTrialTitle(node: Pick<CampaignNodeView, "trialCode" | "shortTitle">): string {
+
   return STOIC_TRIAL_TITLES[node.trialCode] ?? node.shortTitle;
+}
+
+export function stoicTrialLabel(node: Pick<CampaignNodeView, "trialCode" | "functionalLabel">): string {
+  return STOIC_TRIAL_LABELS[node.trialCode] ?? node.functionalLabel;
 }
 
 function trialStep(node: CampaignNodeView, active: boolean): NextStepModel {
