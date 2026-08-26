@@ -152,6 +152,37 @@
 
      Trùng tên với --shadow-lift là có chủ ý: hai token này đi thành cặp. */
   --radius-lift: 10px;
+
+  /* ===== STOIC · IELTS — chỉ dùng dưới .world-shell ===== */
+  --color-stoic-canvas: #ffffff;
+  --color-stoic-canvas-soft: #f7f8fc;
+  --color-stoic-canvas-cream: #f6eedf;
+  --color-stoic-slate-950: #11182c;
+  --color-stoic-slate-900: #202a44;
+  --color-stoic-ink: #172033;
+  --color-stoic-ink-secondary: #35425a;
+  --color-stoic-ink-muted: #66738a;
+  --color-stoic-line: #e2e7f0;
+  --color-stoic-line-strong: #aab9cc;
+  --color-stoic-primary: #5b5fef;
+  --color-stoic-primary-deep: #494cc4;
+  --color-stoic-primary-press: #35377f;
+  --color-stoic-primary-soft: #d9dbff;
+  --color-stoic-lavender: #b8a8f8;
+  --color-stoic-ruby: #d85b78;
+  --color-stoic-sherbet: #d78a58;
+  --color-stoic-sage: #33745a;
+  --color-stoic-danger: #b4233b;
+  --color-stoic-warning: #8a6318;
+
+  --font-stoic: var(--font-inter), var(--font-be-vietnam), system-ui, sans-serif;
+  --radius-stoic-sm: 6px;
+  --radius-stoic-md: 10px;
+  --radius-stoic-lg: 16px;
+  --radius-stoic-pill: 9999px;
+  --shadow-stoic-1: 0 1px 3px rgb(23 32 51 / 0.08);
+  --shadow-stoic-2: 0 8px 28px rgb(23 32 51 / 0.10);
+  --shadow-stoic-3: 0 20px 60px rgb(17 24 44 / 0.18);
 }
 
 :root {
@@ -1100,5 +1131,171 @@ body {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
+  }
+}
+
+/* ========================================================================== */
+/* STOIC · IELTS — scoped brand layer                                         */
+/*
+  Các biến legacy được ánh xạ lại CHỈ bên trong WorldShell. Route học/làm bài
+  protected không render WorldShell, vì vậy tiếp tục nhận nguyên CSS baseline.
+*/
+.world-shell {
+  --color-cream: var(--color-stoic-canvas-soft);
+  --color-cream-deep: #eef0f8;
+  --color-paper: var(--color-stoic-canvas);
+  --color-ink: var(--color-stoic-ink);
+  --color-ink-soft: var(--color-stoic-ink-secondary);
+  --color-muted: var(--color-stoic-ink-muted);
+  --color-navy: var(--color-stoic-primary);
+  --color-navy-deep: var(--color-stoic-slate-900);
+  --color-teal: var(--color-stoic-sage);
+  --color-gold: var(--color-stoic-primary);
+  --color-gold-soft: var(--color-stoic-lavender);
+  --color-gold-pale: var(--color-stoic-primary-soft);
+  --color-gold-deep: var(--color-stoic-primary-deep);
+  --color-gold-ink: var(--color-stoic-primary-deep);
+  --color-vermilion: var(--color-stoic-ruby);
+  --color-vermilion-ink: #a73f5b;
+  --color-vermilion-pale: #fae8ee;
+  --color-azure: var(--color-stoic-primary);
+  --color-azure-ink: var(--color-stoic-primary-deep);
+  --color-azure-pale: var(--color-stoic-primary-soft);
+  --color-jade: var(--color-stoic-sage);
+  --color-jade-ink: #285e49;
+  --color-jade-pale: #e5f2ec;
+  --color-fire: var(--color-stoic-sherbet);
+  --color-fire-ink: #985936;
+  --color-fire-pale: #faede5;
+  --color-silver-blue: #91a2bc;
+  --color-silver-blue-ink: #586a84;
+  --color-moon-silver: #dfe3ef;
+  --color-indigo: var(--color-stoic-slate-900);
+  --color-ash: #7b8190;
+  --color-ash-ink: #5d6370;
+  --color-line: var(--color-stoic-line);
+  --color-line-strong: var(--color-stoic-line-strong);
+  --color-success: var(--color-stoic-sage);
+  --color-success-pale: #e5f2ec;
+  --color-danger: var(--color-stoic-danger);
+  --color-danger-deep: #8f1c31;
+  --color-danger-pale: #fae9ee;
+  --color-info-pale: #eceeff;
+  --color-faction-wei: var(--color-stoic-primary);
+  --color-faction-wei-ink: var(--color-stoic-primary-deep);
+  --color-faction-wei-pale: var(--color-stoic-primary-soft);
+  --color-faction-shu: var(--color-stoic-sage);
+  --color-faction-shu-ink: #285e49;
+  --color-faction-shu-pale: #e5f2ec;
+  --color-faction-wu: var(--color-stoic-ruby);
+  --color-faction-wu-ink: #a73f5b;
+  --color-faction-wu-pale: #fae8ee;
+  --font-display: var(--font-stoic);
+  --font-body: var(--font-stoic);
+  --font-ui: var(--font-stoic);
+  --tracking-label: 0.09em;
+  --shadow-card: var(--shadow-stoic-1);
+  --shadow-lift: var(--shadow-stoic-2);
+  --shadow-modal: var(--shadow-stoic-3);
+  --radius-lift: var(--radius-stoic-lg);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  position: relative;
+  isolation: isolate;
+  background: var(--color-stoic-canvas-soft);
+  color: var(--color-stoic-ink);
+  font-family: var(--font-stoic);
+  font-feature-settings: "ss01" 1;
+}
+
+.world-shell .paper-grain {
+  background-color: var(--color-stoic-canvas-soft);
+  background-image:
+    radial-gradient(circle at 14% 4%, rgb(216 91 120 / 0.08), transparent 26rem),
+    radial-gradient(circle at 50% -8%, rgb(91 95 239 / 0.13), transparent 34rem),
+    radial-gradient(circle at 88% 2%, rgb(215 138 88 / 0.10), transparent 28rem);
+  background-attachment: scroll;
+}
+
+.world-shell .label-caps {
+  color: var(--color-stoic-primary-deep);
+  font-family: var(--font-stoic);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+}
+
+.world-shell .seal {
+  border-color: var(--color-stoic-primary);
+  border-radius: 9999px;
+  color: var(--color-stoic-primary-deep);
+}
+
+.world-shell .rule-gold,
+.world-shell .rule-ink {
+  border-radius: 9999px;
+  background: linear-gradient(90deg, var(--color-stoic-primary), var(--color-stoic-lavender));
+}
+
+.world-shell :where(button, a, input, select, textarea):focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--color-stoic-primary) 28%, transparent);
+  outline-offset: 3px;
+}
+
+.world-shell :where(button, [role="button"], a[class*="bg-navy"], a[class*="bg-gold"]) {
+  transition:
+    transform 120ms var(--ease-out),
+    border-color 180ms var(--ease-out),
+    background-color 180ms var(--ease-out),
+    color 180ms var(--ease-out),
+    box-shadow 180ms var(--ease-out);
+}
+
+.world-shell :where(a[class*="bg-navy"], a[class*="bg-gold"], button[class*="bg-navy"], button[class*="bg-gold"]) {
+  border-radius: var(--radius-stoic-pill);
+}
+
+.world-shell :where(.shadow-card, [class*="shadow-card"]) {
+  border-radius: var(--radius-stoic-md);
+}
+
+.world-shell .tabular-nums,
+.world-shell [data-numeric="true"],
+.world-shell table {
+  font-variant-numeric: tabular-nums;
+}
+
+.world-shell[data-route-area="world"]::before {
+  content: "";
+  position: fixed;
+  z-index: -1;
+  inset: 0 0 auto;
+  height: min(38rem, 62vh);
+  pointer-events: none;
+  background:
+    radial-gradient(42% 80% at 18% 8%, rgb(246 238 223 / 0.95), transparent 70%),
+    radial-gradient(36% 72% at 42% 0%, rgb(215 138 88 / 0.20), transparent 72%),
+    radial-gradient(42% 78% at 65% -4%, rgb(184 168 248 / 0.28), transparent 72%),
+    radial-gradient(36% 70% at 82% 6%, rgb(91 95 239 / 0.22), transparent 72%),
+    radial-gradient(24% 60% at 96% 0%, rgb(216 91 120 / 0.16), transparent 74%);
+  filter: saturate(0.92);
+}
+
+@media (max-width: 767px) {
+  .world-shell[data-route-area="world"]::before {
+    height: 30rem;
+    background:
+      radial-gradient(68% 58% at 12% 2%, rgb(246 238 223 / 0.95), transparent 72%),
+      radial-gradient(70% 62% at 58% -8%, rgb(184 168 248 / 0.25), transparent 72%),
+      radial-gradient(58% 54% at 96% 4%, rgb(91 95 239 / 0.18), transparent 76%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .world-shell *,
+  .world-shell *::before,
+  .world-shell *::after {
+    scroll-behavior: auto !important;
   }
 }
