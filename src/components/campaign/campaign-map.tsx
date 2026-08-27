@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { Check, Flag, Lock, Play } from "lucide-react";
 import type { CSSProperties } from "react";
-import { ART_ASSETS } from "@/lib/brand/art-manifest";
-import { InkWashArt } from "@/components/brand/ink-wash-art";
 import { WorldLandmarkRail } from "@/components/campaign/world-landmark-rail";
 import { ThreeAmbientCanvas } from "@/components/motion/three-ambient-canvas";
 import { STATE_LABELS, type CampaignNodeView } from "@/lib/campaign/view";
@@ -95,6 +93,18 @@ function campaignPath(nodes: CampaignNodeView[]): string {
   return nodes.map((node, index) => `${index === 0 ? "M" : "L"} ${node.x} ${node.y}`).join(" ");
 }
 
+function OrbitField() {
+  return (
+    <div className="world-map-orbit-field">
+      <div className="world-map-orbit-grid" />
+      <span className="world-map-orbit world-map-orbit--attention" />
+      <span className="world-map-orbit world-map-orbit--practice" />
+      <span className="world-map-orbit world-map-orbit--integration" />
+      <span className="world-map-orbit-core" />
+    </div>
+  );
+}
+
 export function CampaignMap({
   world,
   variant,
@@ -109,8 +119,7 @@ export function CampaignMap({
         className="world-map-stage relative overflow-hidden border border-line bg-paper"
       >
         <div className="world-map-art-layer" aria-hidden="true">
-          <div className="world-map-art-fallback" />
-          <InkWashArt asset={ART_ASSETS.campaignMap} className="object-cover opacity-70" />
+          <OrbitField />
         </div>
 
         <ThreeAmbientCanvas variant="campaign" />
