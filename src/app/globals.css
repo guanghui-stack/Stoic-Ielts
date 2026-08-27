@@ -1357,3 +1357,129 @@ body {
     transform: none !important;
   }
 }
+
+
+/* ===== STOIC SPOTLIGHT CARDS — scoped ngoài khu thi ===== */
+.world-shell .stoic-spotlight-card {
+  --spotlight-x: 50%;
+  --spotlight-y: 0%;
+  --spotlight-opacity: 0;
+  --spotlight-color: var(--color-stoic-primary);
+  position: relative;
+  isolation: isolate;
+  min-height: 22rem;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--spotlight-color) 24%, var(--color-stoic-line));
+  border-radius: var(--radius-stoic-lg);
+  background:
+    radial-gradient(
+      15rem 15rem at var(--spotlight-x) var(--spotlight-y),
+      color-mix(in srgb, var(--spotlight-color) 20%, transparent),
+      transparent 70%
+    ),
+    linear-gradient(145deg, var(--color-stoic-canvas) 0%, var(--color-stoic-canvas-soft) 100%);
+  box-shadow: 0 1.25rem 2.75rem -2rem color-mix(in srgb, var(--color-stoic-slate-950) 48%, transparent);
+  cursor: default;
+  outline: none;
+  transition: border-color 220ms ease, box-shadow 220ms ease, transform 220ms ease;
+}
+
+.world-shell .stoic-spotlight-card::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border: 1px solid color-mix(in srgb, var(--spotlight-color) 78%, white);
+  border-radius: inherit;
+  background: radial-gradient(
+    11rem 11rem at var(--spotlight-x) var(--spotlight-y),
+    color-mix(in srgb, var(--spotlight-color) 76%, white),
+    transparent 68%
+  );
+  content: "";
+  opacity: var(--spotlight-opacity);
+  pointer-events: none;
+  transition: opacity 220ms ease;
+}
+
+.world-shell .stoic-spotlight-card::after {
+  position: absolute;
+  right: -4rem;
+  bottom: -5rem;
+  z-index: -1;
+  width: 13rem;
+  height: 13rem;
+  border: 1px solid color-mix(in srgb, var(--spotlight-color) 28%, transparent);
+  border-radius: 50%;
+  box-shadow: 0 0 0 1.5rem color-mix(in srgb, var(--spotlight-color) 8%, transparent), 0 0 0 3rem color-mix(in srgb, var(--spotlight-color) 5%, transparent);
+  content: "";
+  opacity: 0.8;
+  pointer-events: none;
+  transform: rotate(-12deg);
+}
+
+.world-shell .stoic-spotlight-card:hover,
+.world-shell .stoic-spotlight-card:focus-visible {
+  border-color: color-mix(in srgb, var(--spotlight-color) 58%, var(--color-stoic-line));
+  box-shadow: 0 1.5rem 3rem -2rem color-mix(in srgb, var(--spotlight-color) 42%, var(--color-stoic-slate-950));
+  transform: translateY(-3px);
+}
+
+.world-shell .stoic-spotlight-card:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--spotlight-color) 35%, transparent);
+  outline-offset: 4px;
+}
+
+.world-shell .stoic-spotlight-card__wash {
+  position: absolute;
+  top: -5rem;
+  left: -4rem;
+  width: 12rem;
+  height: 12rem;
+  border: 1px solid color-mix(in srgb, var(--spotlight-color) 20%, transparent);
+  border-radius: 50%;
+  opacity: 0.75;
+  pointer-events: none;
+}
+
+.world-shell .stoic-spotlight-card__content {
+  position: relative;
+  display: flex;
+  min-height: 22rem;
+  flex-direction: column;
+  padding: 2rem;
+}
+
+.world-shell .stoic-spotlight-card__index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid color-mix(in srgb, var(--spotlight-color) 42%, var(--color-stoic-line));
+  border-radius: 999px;
+  color: var(--color-stoic-primary-deep);
+  font-family: var(--font-stoic);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+@media (max-width: 639px) {
+  .world-shell .stoic-spotlight-card__content {
+    min-height: 19rem;
+    padding: 1.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .world-shell .stoic-spotlight-card,
+  .world-shell .stoic-spotlight-card::before,
+  .world-shell .stoic-spotlight-card svg {
+    transition: none;
+  }
+
+  .world-shell .stoic-spotlight-card:hover,
+  .world-shell .stoic-spotlight-card:focus-visible {
+    transform: none;
+  }
+}

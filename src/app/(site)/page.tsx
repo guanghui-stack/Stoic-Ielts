@@ -2,10 +2,8 @@ import Link from "next/link";
 import {
   ArrowRight,
   Award,
-  Brain,
   BookOpen,
   Layers,
-  Repeat,
   Trophy,
 } from "lucide-react";
 import { ART_ASSETS } from "@/lib/brand/art-manifest";
@@ -15,25 +13,29 @@ import { CampaignHomeBlock } from "@/components/campaign/campaign-home-block";
 import { NarrativeSection } from "@/components/world/narrative-section";
 import { SceneHero } from "@/components/world/scene-hero";
 import { ButtonLink, NoteBox } from "@/components/ui";
+import { StoicSpotlightCard } from "@/components/ui/spotlight-card";
 
 const PILLARS = [
   {
-    icon: Brain,
+    icon: "brain" as const,
     title: "Nhận thức",
     functional: "Nhìn đúng dữ kiện",
     body: "Đọc đúng yêu cầu, tách dữ kiện khỏi suy đoán và biết rõ mình sai ở đâu. Một lỗi được gọi đúng tên sẽ dễ sửa hơn một band điểm mơ hồ.",
+    tone: "lavender" as const,
   },
   {
-    icon: BookOpen,
+    icon: "book-open" as const,
     title: "Hành động",
     functional: "Làm và chữa bằng bằng chứng",
     body: "Làm bài trong điều kiện thật, rồi quay lại passage để tìm bằng chứng. Phản hồi chỉ có giá trị khi nó dẫn tới một việc cụ thể cho lần tiếp theo.",
+    tone: "sage" as const,
   },
   {
-    icon: Repeat,
+    icon: "repeat" as const,
     title: "Ý chí",
     functional: "Giữ ngày học thật",
     body: "Năng lực ổn định đến từ một nhịp học có thể lặp lại. Hệ thống chỉ ghi nhận thời gian bạn thực sự học, không tính tab mở quên tắt.",
+    tone: "gold" as const,
   },
 ];
 
@@ -193,18 +195,17 @@ function LearningPath() {
 function Pillars() {
   return (
     <>
-      <div className="grid gap-px overflow-hidden rounded-stoic-lg border border-line bg-line md:grid-cols-3">
-        {PILLARS.map((pillar) => (
-          <article key={pillar.title} className="bg-paper p-8">
-            <pillar.icon className="h-6 w-6 text-navy" aria-hidden="true" />
-            <h3 className="mt-5 font-display text-xl font-medium text-navy-deep">
-              {pillar.title}
-            </h3>
-            <p className="dual-label__function mt-1">{pillar.functional}</p>
-            <p className="mt-3 text-[0.92rem] leading-relaxed text-ink-soft">
-              {pillar.body}
-            </p>
-          </article>
+      <div className="grid gap-5 md:grid-cols-3">
+        {PILLARS.map((pillar, index) => (
+          <StoicSpotlightCard
+            key={pillar.title}
+            index={String(index + 1).padStart(2, "0")}
+            title={pillar.title}
+            functional={pillar.functional}
+            body={pillar.body}
+            tone={pillar.tone}
+            icon={pillar.icon}
+          />
         ))}
       </div>
       <p className="mx-auto mt-10 max-w-2xl text-center text-[0.98rem] leading-relaxed text-ink-soft">
