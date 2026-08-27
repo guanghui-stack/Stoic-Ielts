@@ -136,7 +136,7 @@ check(
   buildCampaignWorld({ audience: "STUDENT", nodes: availableNodes }).nextStep,
   {
     eyebrow: "Bước tiếp theo của bạn",
-    title: "Bước vào Bắt đầu bằng một lời hẹn",
+    title: "Bước vào Chủ động bắt đầu",
     body: "Chặng đã mở. Xem điều kiện và chủ động bắt đầu khi sẵn sàng.",
     href: "/hoc-vien/thi-luyen/TRIAL_01_DAO_VIEN",
     actionLabel: "Xem điều kiện",
@@ -149,8 +149,8 @@ check(
   buildCampaignWorld({ audience: "STUDENT", nodes: lockedCurrentNodes }).nextStep,
   {
     eyebrow: "Bước tiếp theo của bạn",
-    title: "Chuẩn bị cho Đào viên",
-    body: "Hoàn thành điều kiện còn thiếu để mở cửa ải kế tiếp.",
+    title: "Chuẩn bị cho Chủ động bắt đầu",
+    body: "Hoàn thành điều kiện còn thiếu để mở chặng kế tiếp.",
     href: "/hoc-vien/chien-dich#dieu-kien",
     actionLabel: "Xem điều kiện",
     entersStudy: false,
@@ -179,7 +179,7 @@ check(
   buildCampaignWorld({ audience: "STUDENT", nodes: activeAndAvailable }).nextStep,
   {
     eyebrow: "Bước tiếp theo của bạn",
-    title: "Tiếp tục Bắt đầu bằng một lời hẹn",
+    title: "Tiếp tục Chủ động bắt đầu",
     body: "Chặng đang dở được giữ nguyên. Tiếp tục từ đúng tiến độ hiện tại.",
     href: "/hoc-vien/thi-luyen/TRIAL_01_DAO_VIEN",
     actionLabel: "Tiếp tục chặng",

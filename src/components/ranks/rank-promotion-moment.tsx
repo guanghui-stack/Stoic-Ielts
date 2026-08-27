@@ -46,14 +46,14 @@ export function RankPromotionMoment({
             <div className="world-ceremony__copy min-w-0 flex-1">
               <p className="label-caps flex items-center gap-2 text-vermilion-ink">
                 <Flag className="h-3.5 w-3.5" aria-hidden="true" />
-                Khải hoàn · ấn triện mới
+                Tiến bộ · dấu mốc mới
               </p>
               <h2 className="mt-2 font-display text-2xl font-bold text-navy-deep">
                 Đã thăng bậc: {rankName}
               </h2>
               <p className="mt-2 max-w-2xl text-[0.95rem] leading-relaxed text-ink-soft">
-                Cửa ải đã vượt. Ấn triện mới đã được ghi vào hồ sơ; chiến tuyến
-                kế tiếp đang chờ bạn, nhưng cấp bậc này sẽ không bao giờ bị mất.
+                Chặng đã hoàn thành. Dấu mốc mới đã được ghi vào hồ sơ; bước tiếp
+                theo đang chờ bạn, nhưng cấp bậc này sẽ không bao giờ bị mất.
               </p>
             </div>
             <span className="world-ceremony__seal inline-flex items-center gap-1.5 border border-vermilion px-3 py-1.5 font-ui text-xs font-semibold uppercase tracking-[0.08em] text-vermilion-ink">

@@ -20,17 +20,17 @@ Tài liệu này ghi trạng thái repo trước khi rebrand và xác định v�
 
 ## Vùng được bảo vệ
 
-Checksum SHA-256 của 23 tệp route, component, logic và dữ liệu phòng thi/thí luyện nằm trong `docs/PROTECTED-SURFACES.sha256`. Lệnh `npm run test:protected-surfaces` phải đạt ở mọi checkpoint và trước bàn giao.
+Checksum SHA-256 của 16 tệp route, component, logic và dữ liệu phòng thi/thí luyện nằm trong `docs/PROTECTED-SURFACES.sha256`. Lệnh `npm run test:protected-surfaces` phải đạt ở mọi checkpoint và trước bàn giao. Các trang Hành Trình/chặng và form phục bàn nằm ngoài checksum vì chỉ là bề mặt nội dung, không phải runtime thi tính giờ.
 
 Các nhóm được bảo vệ gồm:
 
 | Nhóm | Phạm vi |
 |---|---|
 | Route phòng thi | `src/app/(exam)/**` |
-| Route kho luyện/ghép đề | `src/app/(site)/luyen-tap/reading/**` |
+| Route kho luyện/ghép đề | Các shell catalog/ghép đề được phép rebrand; runtime làm bài vẫn thuộc nhóm phòng thi được bảo vệ. |
 | Route kết quả và chữa bài theo attempt | `src/app/(site)/hoc-vien/bai-lam/**` |
-| Route thí luyện/tự vấn | `src/app/(site)/hoc-vien/thi-but/**`, `src/app/(site)/hoc-vien/thi-luyen/**` |
-| Component cốt lõi | `reading-cbt.tsx`, `reading-module-page.tsx`, `trial-reflection-form.tsx`, `thi-but-*` |
+| Route thí luyện/tự vấn | `src/app/(site)/hoc-vien/thi-but/**` và runtime attempt liên quan; trang mô tả chặng/phục bàn ngoài timer được phép rebrand. |
+| Component cốt lõi | `reading-cbt.tsx`, `thi-but-*` và các component attempt/timer được bảo vệ; component chặng ngoài timer được phép rebrand. |
 | Logic | attempt actions/finalize, reading band/assembly, exercise content, study heartbeat |
 | Dữ liệu | Hai gói dữ liệu Reading chuyên biệt trong `prisma/` |
 | Chính sách motion | `src/lib/motion/route-policy.ts` |

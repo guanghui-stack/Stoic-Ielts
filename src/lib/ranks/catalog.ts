@@ -201,9 +201,11 @@ export type TrialDefinitionSeed = {
   featuredGeneralCode: GeneralCode;
   fromLevel: number;
   toLevel: number;
-  /** Năng lực mà cửa ải này thật sự đo. */
+  /** Năng lực mà chặng này thật sự đo. */
   skill: string;
-  /** Vì sao cửa ải tồn tại — phải nói được hành vi học thật nào đang rèn. */
+  /** Điểm tựa Khắc kỷ hiển thị trên các bề mặt rebrand. */
+  stoicAnchor: string;
+  /** Vì sao chặng tồn tại — phải nói được hành vi học thật nào đang rèn. */
   rationale: string;
   /** Giọng kể cổ phong. Không đặt lời thoại giả vào miệng nhân vật. */
   narrative: string;
@@ -220,15 +222,16 @@ export const TRIAL_SEEDS: TrialDefinitionSeed[] = [
   {
     code: "TRIAL_01_DAO_VIEN",
     slug: "dao-vien-ket-nghia",
-    name: "Đào viên kết nghĩa",
+    name: "Chủ động bắt đầu",
     featuredGeneralCode: "TRUONG_PHI",
     fromLevel: 1,
     toLevel: 2,
-    skill: "Bắt đầu và tự chữa bài lần đầu",
+    skill: "Bắt đầu có chủ đích và tự chữa bài lần đầu",
+    stoicAnchor: "Chủ động trong điều có thể kiểm soát",
     rationale:
-      "Cửa đầu tiên cố tình dễ về ngưỡng nhưng không bỏ qua bước phục bàn. Người chỉ làm bài mà không bao giờ chữa lại sẽ lặp đúng một lỗi suốt nhiều tháng, nên thói quen chữa bài phải hình thành ngay từ bài đầu.",
+      "Mọi thực hành bắt đầu bằng việc phân biệt điều có thể kiểm soát. Chặng đầu không đòi hỏi một kết quả lớn, nhưng đòi hỏi người học thật sự bắt đầu và nhìn lại bằng chứng từ bài làm của mình.",
     narrative:
-      "Lấy cảm hứng từ điển tích kết nghĩa vườn đào: việc lớn bắt đầu bằng một lời hẹn giữ được, không bằng một trận thắng.",
+      "Không chờ động lực hoàn hảo. Một bài làm được bắt đầu và một lỗi được gọi đúng tên là lời cam kết đầu tiên với con đường của chính mình.",
     gateRuleKey: "NONE",
     gateConfig: {},
     successRuleKey: "GRADED_PLUS_REVIEW",
@@ -239,15 +242,16 @@ export const TRIAL_SEEDS: TrialDefinitionSeed[] = [
   {
     code: "TRIAL_02_HOANG_CAN",
     slug: "truong-phi-pha-hoang-can",
-    name: "Trương Phi phá Hoàng Cân",
+    name: "Giữ nhịp đều đặn",
     featuredGeneralCode: "TRUONG_PHI",
     fromLevel: 2,
     toLevel: 3,
-    skill: "Giữ nhịp làm bài đều đặn",
+    skill: "Duy trì một nhịp học có thể lặp lại",
+    stoicAnchor: "Kỷ luật của việc quay lại",
     rationale:
-      "Đo tính bền chứ không đo đỉnh cao. Năm bài khác nhau đều đạt band 4.5 nói lên nhiều hơn một bài 6.0 duy nhất rồi nghỉ hai tuần.",
+      "Chặng này đo tính bền chứ không đo một ngày bùng nổ. Nhiều bài đạt ngưỡng ổn định nói lên nhiều hơn một kết quả cao rồi biến mất khỏi bàn học trong nhiều tuần.",
     narrative:
-      "Lấy cảm hứng từ điển tích dẹp loạn Khăn Vàng: đối thủ đông nhưng chưa mạnh, thứ cần là đánh liên tục chứ không phải một đòn quyết định.",
+      "Mỗi lần quay lại là một lựa chọn nhỏ nhưng có thật. Nhịp học bền không đến từ việc ép mình thắng một lần, mà từ việc giữ lời hẹn với ngày tiếp theo.",
     gateRuleKey: "DISTINCT_ATTEMPTS",
     gateConfig: { distinctExercises: 3 },
     successRuleKey: "DISTINCT_BAND_WITH_REVIEWS",
@@ -258,15 +262,16 @@ export const TRIAL_SEEDS: TrialDefinitionSeed[] = [
   {
     code: "TRIAL_03_HOA_HUNG",
     slug: "quan-vu-on-tuu-tram-hoa-hung",
-    name: "Quan Vũ ôn tửu trảm Hoa Hùng",
+    name: "Quản trị sự chú ý",
     featuredGeneralCode: "QUAN_VU",
     fromLevel: 3,
     toLevel: 4,
-    skill: "Tốc độ đi cùng độ chính xác",
+    skill: "Giữ tốc độ và độ chính xác trong giới hạn thời gian",
+    stoicAnchor: "Tập trung vào bước kế tiếp",
     rationale:
-      "Cửa duy nhất ép cả hai chiều cùng lúc. Có sàn thời gian tối thiểu là cố ý: làm xong trong hai phút nghĩa là đoán bừa chứ không phải đọc nhanh, và hệ thống phải phân biệt được hai việc đó.",
+      "Thời gian là một dữ kiện cần quản trị, không phải đối thủ để hoảng sợ. Chặng này buộc tốc độ đi cùng độ chính xác để người học phân biệt đọc nhanh có chủ đích với đoán vội.",
     narrative:
-      "Lấy cảm hứng từ điển tích chén rượu còn ấm: giá trị nằm ở chỗ việc khó được làm gọn, không ở chỗ làm vội.",
+      "Khi sự chú ý có mặt trọn vẹn, việc khó được làm gọn mà không cần hấp tấp. Người học chỉ cần trở về với câu hỏi đang ở trước mắt.",
     gateRuleKey: "ATTEMPTS_AND_REVIEWS",
     gateConfig: { validAttempts: 5, qualifiedReviews: 3 },
     successRuleKey: "TIMED_ACCURACY_RUN",
@@ -282,15 +287,16 @@ export const TRIAL_SEEDS: TrialDefinitionSeed[] = [
   {
     code: "TRIAL_04_NGU_QUAN",
     slug: "quan-vu-qua-ngu-quan",
-    name: "Quan Vũ quá ngũ quan",
+    name: "Ổn định qua biến động",
     featuredGeneralCode: "QUAN_VU",
     fromLevel: 4,
     toLevel: 5,
-    skill: "Ổn định phong độ qua nhiều lượt liên tiếp",
+    skill: "Giữ phong độ ổn định qua nhiều lượt liên tiếp",
+    stoicAnchor: "Bình thản trước kết quả",
     rationale:
-      "Đo độ ổn định, thứ mà điểm trung bình che giấu rất giỏi. Năm lượt liên tiếp không tụt dưới ngưỡng khó hơn nhiều so với năm lượt tốt nằm rải rác giữa những lượt hỏng.",
+      "Ổn định không có nghĩa là lần nào cũng hoàn hảo. Đó là khả năng giữ một ngưỡng đáng tin qua nhiều lượt, không để một kết quả đơn lẻ quyết định cách nhìn về năng lực của mình.",
     narrative:
-      "Lấy cảm hứng từ điển tích qua năm cửa ải: mỗi cửa là một lần phải giữ được đúng phong độ của cửa trước.",
+      "Điều nằm ngoài kiểm soát có thể đổi từ lượt này sang lượt khác. Điều người học giữ được là cách chuẩn bị, cách đọc dữ kiện và cách quay lại sau một lần chệch nhịp.",
     gateRuleKey: "BAND_ATTEMPTS_IN_WINDOW",
     gateConfig: { minBand: 5.5, count: 2, windowDays: 30 },
     successRuleKey: "CONSECUTIVE_BAND_STREAK",
@@ -306,15 +312,16 @@ export const TRIAL_SEEDS: TrialDefinitionSeed[] = [
   {
     code: "TRIAL_05_TRUONG_BAN",
     slug: "trieu-van-don-ky-cuu-chua",
-    name: "Triệu Vân đơn kỵ cứu chúa",
+    name: "Không bỏ rơi phần khó",
     featuredGeneralCode: "TRIEU_VAN",
     fromLevel: 5,
     toLevel: 6,
-    skill: "Làm trọn Full Test, không bỏ rơi phần yếu nhất",
+    skill: "Làm trọn Full Test và quay lại phần yếu nhất",
+    stoicAnchor: "Can đảm nhìn vào phần yếu",
     rationale:
-      "Có sàn cho phần yếu nhất là điểm mấu chốt. Không có nó, người học sẽ tối ưu bằng cách dồn hết thời gian vào phần dễ và bỏ hẳn một phần, mà đề thi thật thì không cho phép làm vậy.",
+      "Một người học không chỉ chọn vùng mình đã giỏi. Sàn cho phần yếu nhất buộc ta phân bổ sự chú ý công bằng hơn và quay lại nơi đang cần hành động nhất.",
     narrative:
-      "Lấy cảm hứng từ điển tích một mình phá vòng vây để cứu người bị bỏ lại: phần khó nhất mới là phần phải quay lại đón.",
+      "Phần khó không phải kẻ thù cần né tránh. Nó là nơi dữ liệu nói rõ nhất việc tiếp theo mà người học có thể làm.",
     gateRuleKey: "FULL_TESTS_COMPLETED",
     gateConfig: { count: 1 },
     successRuleKey: "FULL_TEST_WITH_FLOOR",
@@ -325,15 +332,16 @@ export const TRIAL_SEEDS: TrialDefinitionSeed[] = [
   {
     code: "TRIAL_06_LAO_TUONG",
     slug: "hoang-trung-lao-tuong-khai-cung",
-    name: "Hoàng Trung lão tướng khai cung",
+    name: "Phản tư có chiều sâu",
     featuredGeneralCode: "HOANG_TRUNG",
     fromLevel: 6,
     toLevel: 7,
-    skill: "Phản tư sâu, trải trên nhiều dạng câu",
+    skill: "Phản tư cách làm qua nhiều dạng câu",
+    stoicAnchor: "Học từ điều đã xảy ra",
     rationale:
-      "Yêu cầu các lần chữa bài cách nhau ít nhất một ngày là có chủ đích. Ba bài chữa dồn trong một buổi là ba lần đọc lại; ba bài chữa cách ngày là ba lần thật sự nhớ lại, và chỉ cái sau mới đọng lại.",
+      "Khoảng cách giữa các lần chữa bài là có chủ đích. Nhiều ngày khác nhau giúp người học thật sự nhớ lại cách mình đã suy luận, thay vì chỉ đọc lại đáp án ngay sau khi vừa làm xong.",
     narrative:
-      "Lấy cảm hứng từ điển tích lão tướng giương cung: sức bền tích lũy chậm nhưng không ai lấy đi được.",
+      "Mỗi lần nhìn lại là một lần biến trải nghiệm thành hiểu biết. Sức bền của người học được tích lũy lặng lẽ qua những điều đã được gọi đúng tên.",
     gateRuleKey: "REVIEWS_ACROSS_TYPES",
     gateConfig: { qualifiedReviews: 5, distinctQuestionTypes: 2 },
     successRuleKey: "SPACED_DEEP_REVIEWS",
@@ -344,15 +352,16 @@ export const TRIAL_SEEDS: TrialDefinitionSeed[] = [
   {
     code: "TRIAL_07_TAY_LUONG",
     slug: "ma-sieu-thiet-ky-tay-luong",
-    name: "Mã Siêu thiết kỵ Tây Lương",
+    name: "Tích hợp ba trụ",
     featuredGeneralCode: "MA_SIEU",
     fromLevel: 7,
     toLevel: 8,
-    skill: "Tổng hợp cả ba trụ trong một chiến dịch dài",
+    skill: "Kết nối nhận thức, hành động và ý chí trong hành trình dài",
+    stoicAnchor: "Nhận thức · Hành động · Ý chí",
     rationale:
-      "Cửa dài nhất, và là cửa duy nhất bắt cả ba trụ cùng có mặt. Người mạnh một trụ mà bỏ hai trụ còn lại sẽ dừng ở đây, đúng như ngoài phòng thi thật.",
+      "Chặng dài nhất yêu cầu cả ba trụ cùng có mặt. Nhìn rõ mà không hành động, hành động mà không phản tư, hoặc có ý chí nhưng không điều chỉnh đều chưa tạo thành một hệ thống bền vững.",
     narrative:
-      "Lấy cảm hứng từ điển tích thiết kỵ Tây Lương: sức mạnh đến từ việc chuyển đội hình liên tục mà vẫn giữ được nhịp.",
+      "Khi nhìn rõ, làm đúng và quay lại đủ lâu, năng lực không còn phụ thuộc vào một ngày thuận lợi. Ba trụ bắt đầu nâng đỡ lẫn nhau.",
     gateRuleKey: "TITLE_OR_PILLARS",
     gateConfig: { pillarsComplete: 2, remainingPillarPercent: 80 },
     successRuleKey: "COMPOSITE_CAMPAIGN",
@@ -368,15 +377,16 @@ export const TRIAL_SEEDS: TrialDefinitionSeed[] = [
   {
     code: "TRIAL_08_HO_LAO",
     slug: "lu-bo-ho-lao-quyet-chien",
-    name: "Lữ Bố Hổ Lao quyết chiến",
+    name: "Tự chủ trước điểm yếu",
     featuredGeneralCode: "LU_BO",
     fromLevel: 8,
     toLevel: 9,
     skill: "Sửa dứt điểm dạng câu yếu nhất của chính mình",
+    stoicAnchor: "Tự chủ trước điều có thể sửa",
     rationale:
-      "Cửa cuối không đo band mà đo một điểm yếu cụ thể. Dạng câu yếu nhất được chốt lại tại thời điểm bắt đầu và không đổi giữa chừng, nếu không người học có thể lách bằng cách để một dạng khác tụt xuống thấp hơn.",
+      "Tự chủ không có nghĩa là không bao giờ sai. Đó là khả năng chốt đúng điểm yếu, làm việc với nó đủ lâu và không lách sang một mục tiêu dễ chịu hơn khi tiến bộ trở nên khó.",
     narrative:
-      "Lấy cảm hứng từ điển tích quyết chiến ở cửa Hổ Lao: đối thủ cuối là phép thử xem thiên phú có đi cùng kỷ luật hay không.",
+      "Đối diện điểm yếu là một hành động bình tĩnh. Mỗi lần sửa đúng cùng một kiểu sai, người học lấy lại một phần quyền chủ động của mình.",
     gateRuleKey: "WEAKEST_TYPE_SAMPLE",
     gateConfig: { minSamples: 20 },
     successRuleKey: "WEAKEST_TYPE_STREAK",
@@ -391,7 +401,7 @@ export const TRIAL_SEEDS: TrialDefinitionSeed[] = [
 ];
 
 /**
- * Hoa Dung đạo — một lần miễn trừ đứt chuỗi, chỉ cho thí luyện Quá ngũ quan.
+ * Khoảng Thở Có Kỷ Luật — một lần bảo toàn chuỗi, chỉ cho chặng Ổn định qua biến động.
  *
  * Ranh giới đã chốt: token NGĂN chuỗi bị đặt lại, nó KHÔNG biến một lượt
  * dưới ngưỡng thành lượt đạt. Nói cách khác nó tha thứ cho một ngày mất
@@ -399,12 +409,12 @@ export const TRIAL_SEEDS: TrialDefinitionSeed[] = [
  */
 export const GRACE_TOKEN = {
   code: "HOA_DUNG_DAO",
-  name: "Hoa Dung đạo",
+  name: "Khoảng Thở Có Kỷ Luật",
   appliesToTrialCode: "TRIAL_04_NGU_QUAN",
   maxAvailable: 1,
   cooldownDays: 30,
   description:
-    "Một lần bỏ qua lượt làm dưới ngưỡng để chuỗi không bị đặt lại. Dùng xong phải chờ 30 ngày mới được cấp lại, và mọi lần dùng đều được ghi nhật ký.",
+    "Một lần bảo toàn chuỗi sau một lượt dưới ngưỡng. Dùng xong phải chờ 30 ngày mới được cấp lại, và mọi lần sử dụng đều được ghi nhật ký.",
 } as const;
 
 /* ===================== Tra cứu ===================== */

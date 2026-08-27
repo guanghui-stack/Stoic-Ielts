@@ -28,8 +28,8 @@ export default async function CampaignPage() {
   const profile = await ensureUserRank(user.id);
   const rank = rankByLevel(profile.currentLevel);
 
-  // Cập nhật trạng thái cửa ải kế tiếp ngay khi mở bản đồ, để người vừa đủ
-  // điều kiện không phải chờ một lượt nộp bài nữa mới thấy cửa mở.
+  // Cập nhật trạng thái chặng kế tiếp ngay khi mở bản đồ, để người vừa đủ
+  // điều kiện không phải chờ một lượt nộp bài nữa mới thấy chặng mở.
   const facts = await loadRankFacts(user.id);
   await syncTrialEligibility(user.id, facts, profile.currentLevel);
 

@@ -129,10 +129,10 @@ export const LOCKED_TERRITORIES = [
 ] as const satisfies readonly TerritoryPlace[];
 
 export const STOIC_TRIAL_TITLES: Record<string, string> = {
-  TRIAL_01_DAO_VIEN: "Bắt đầu bằng một lời hẹn",
+  TRIAL_01_DAO_VIEN: "Chủ động bắt đầu",
   TRIAL_02_HOANG_CAN: "Giữ nhịp đều đặn",
-  TRIAL_03_HOA_HUNG: "Tốc độ có chủ đích",
-  TRIAL_04_NGU_QUAN: "Ổn định qua nhiều lượt",
+  TRIAL_03_HOA_HUNG: "Quản trị sự chú ý",
+  TRIAL_04_NGU_QUAN: "Ổn định qua biến động",
   TRIAL_05_TRUONG_BAN: "Không bỏ rơi phần khó",
   TRIAL_06_LAO_TUONG: "Phản tư có chiều sâu",
   TRIAL_07_TAY_LUONG: "Tích hợp ba trụ",
@@ -141,13 +141,13 @@ export const STOIC_TRIAL_TITLES: Record<string, string> = {
 
 export const STOIC_TRIAL_LABELS: Record<string, string> = {
   TRIAL_01_DAO_VIEN: "Bắt đầu có chủ đích",
-  TRIAL_02_HOANG_CAN: "Rèn nhịp đều đặn",
-  TRIAL_03_HOA_HUNG: "Quản trị sự chú ý",
-  TRIAL_04_NGU_QUAN: "Giữ phong độ ổn định",
-  TRIAL_05_TRUONG_BAN: "Củng cố phần yếu",
-  TRIAL_06_LAO_TUONG: "Phản tư có chiều sâu",
-  TRIAL_07_TAY_LUONG: "Linh hoạt trong khuôn khổ",
-  TRIAL_08_HO_LAO: "Tích hợp ba trụ",
+  TRIAL_02_HOANG_CAN: "Kỷ luật quay lại",
+  TRIAL_03_HOA_HUNG: "Tập trung vào bước kế tiếp",
+  TRIAL_04_NGU_QUAN: "Bình thản trước kết quả",
+  TRIAL_05_TRUONG_BAN: "Can đảm nhìn vào phần yếu",
+  TRIAL_06_LAO_TUONG: "Học từ điều đã xảy ra",
+  TRIAL_07_TAY_LUONG: "Nhận thức · Hành động · Ý chí",
+  TRIAL_08_HO_LAO: "Tự chủ trước điều có thể sửa",
 };
 
 export function stoicTrialTitle(node: Pick<CampaignNodeView, "trialCode" | "shortTitle">): string {
@@ -201,8 +201,8 @@ export function buildCampaignWorld({
         : lockedCurrent
           ? {
               eyebrow: "Bước tiếp theo của bạn",
-              title: `Chuẩn bị cho ${lockedCurrent.shortTitle}`,
-              body: lockedCurrent.hint ?? "Hoàn thành điều kiện còn thiếu để mở cửa ải kế tiếp.",
+              title: `Chuẩn bị cho ${stoicTrialTitle(lockedCurrent)}`,
+              body: lockedCurrent.hint ?? "Hoàn thành điều kiện còn thiếu để mở chặng kế tiếp.",
               href: "/hoc-vien/chien-dich#dieu-kien",
               actionLabel: "Xem điều kiện",
               entersStudy: false,

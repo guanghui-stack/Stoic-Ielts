@@ -116,7 +116,7 @@ export default async function StudentRankTimelinePage({
           Bậc {profile.currentLevel} · <strong>{rank?.name}</strong> · thăng cấp lần
           cuối {fmt(profile.promotedAt)} · phiên bản {profile.version}
           {grace && (
-            <> · Hoa Dung đạo: còn {grace.availableCount}
+            <> · Khoảng Thở Có Kỷ Luật: còn {grace.availableCount}
               {grace.lastUsedAt && <> (dùng lần cuối {fmt(grace.lastUsedAt)})</>}
             </>
           )}

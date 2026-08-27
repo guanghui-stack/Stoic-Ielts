@@ -1,14 +1,14 @@
 "use client";
 
 import { useActionState } from "react";
-import { Lock, Swords, Hourglass } from "lucide-react";
+import { Lock, ArrowRight, Hourglass } from "lucide-react";
 import { startTrialAction } from "@/lib/actions/ranks";
 import { TrialProgress } from "@/components/ranks/trial-progress";
 import { ErrorBanner, SubmitButton } from "@/components/ui";
 import type { RuleProgress } from "@/lib/ranks/rules";
 
 /**
- * Thẻ cửa ải: điều kiện mở, và nút Khởi thí luyện.
+ * Thẻ chặng: điều kiện mở, và nút Khởi thí luyện.
  *
  * Nút này là ranh giới quan trọng nhất của cả hệ cấp bậc, nên nó phải là một
  * hành động rõ ràng chứ không phải thứ tự xảy ra. Người học phải hiểu mình
@@ -46,7 +46,7 @@ export function TrialGateCard({
   if (status === "ACTIVE") {
     return (
       <section
-        aria-label="Trạng thái cửa ải"
+        aria-label="Trạng thái chặng"
         className="border border-azure bg-azure-pale p-7"
       >
         <p className="label-caps flex items-center gap-2">
@@ -67,12 +67,12 @@ export function TrialGateCard({
   if (!gateComplete) {
     return (
       <section
-        aria-label="Điều kiện mở cửa ải"
+        aria-label="Điều kiện mở chặng"
         className="border border-line bg-cream-deep p-7"
       >
         <p className="label-caps flex items-center gap-2">
           <Lock className="h-3.5 w-3.5" aria-hidden />
-          Cửa ải chưa mở
+          Chặng chưa mở
         </p>
         <h2 className="mt-2.5 font-display text-xl font-bold text-navy-deep">
           {trialName}
@@ -89,12 +89,12 @@ export function TrialGateCard({
 
   return (
     <section
-      aria-label="Cửa ải đã mở"
+      aria-label="Chặng đã mở"
       className="border border-gold bg-gold-pale p-7"
     >
       <p className="label-caps flex items-center gap-2">
-        <Swords className="h-3.5 w-3.5" aria-hidden />
-        Cửa ải đã mở
+        <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+        Chặng đã mở
       </p>
       <h2 className="mt-2.5 font-display text-xl font-bold text-navy-deep">
         {trialName}
@@ -106,8 +106,8 @@ export function TrialGateCard({
 
       <p className="mt-3 max-w-2xl border-l-4 border-gold bg-cream px-4 py-3 text-sm leading-relaxed text-ink-soft">
         Lưu ý trước khi bắt đầu: chỉ những bài làm và lượt phục bàn <strong>sau
-        khi bấm nút</strong> mới được tính cho cửa ải này. Những gì bạn đã làm
-        trước đó dùng để mở cửa, không dùng để vượt cửa.
+        khi bấm nút</strong> mới được tính cho chặng này. Những gì bạn đã làm
+        trước đó dùng để mở chặng, không dùng để hoàn thành chặng.
       </p>
 
       {state?.error && (
