@@ -226,11 +226,11 @@ Loader gồm vòng quỹ đạo mảnh quanh wordmark nhỏ hoặc dấu control
 | 1 | Auth, thanh toán, admin | Press, focus, skeleton, dialog, feedback. |
 | 2 | Marketing, community, profile | Scene fade/translate nhẹ, stagger, mesh drift rất chậm. |
 
-Mọi motion phải có fallback `prefers-reduced-motion: reduce`. Không animate width/height khi có thể dùng transform/opacity. Không trì hoãn CTA để chờ animation.
+Mọi motion phải có fallback `prefers-reduced-motion: reduce`. Không animate width/height khi có thể dùng transform/opacity. Không trì hoãn CTA để chờ animation. Logo dùng micro-interaction chủ động: hover/focus nghiêng và nâng rất nhẹ, `:active` co nhẹ cho phản hồi khi chạm, không tự chạy và luôn tắt transform/filter trong reduced-motion.
 
 ## 14. Tài sản hình ảnh
 
-Logo, icon, mesh và diagram ưu tiên SVG deterministic. Illustration raster phải có safe area cho copy, không chứa chữ, không có watermark và được nén WebP/AVIF. Tránh tượng La Mã, mũ chiến binh, cột đá hoặc cosplay như biểu tượng mặc định; chúng dễ biến Stoicism thành phong cách lịch sử sáo mòn thay vì phương pháp sống hiện đại.
+Logo chính là mark vuông do người dùng cung cấp, được lưu tại `/public/art/stoic/stoic-control-logo.png` với bản WebP lossless đi kèm. Bản gốc 1254×1254 được giữ ngoài repo; các bản trong repo chỉ downscale/compress deterministic, không thay đổi nội dung hoặc tỷ lệ. Icon ứng dụng dùng cùng mark tại `src/app/icon.png`. Illustration raster phải có safe area cho copy, không chứa chữ, không có watermark và được nén WebP/AVIF. Tránh tượng La Mã, mũ chiến binh, cột đá hoặc cosplay như biểu tượng mặc định; chúng dễ biến Stoicism thành phong cách lịch sử sáo mòn thay vì phương pháp sống hiện đại.
 
 **Prompt hero tổng quát:**
 

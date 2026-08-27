@@ -1239,6 +1239,33 @@ body {
   outline-offset: 3px;
 }
 
+/* Logo interaction: chỉ phản hồi khi người dùng chủ động tương tác; không tự chạy. */
+.world-shell .stoic-logo-link {
+  border-radius: var(--radius-stoic-md);
+}
+
+.world-shell .stoic-logo-mark {
+  transform-origin: 50% 50%;
+  transition: transform 180ms var(--ease-out), filter 180ms var(--ease-out);
+  will-change: transform;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .world-shell .stoic-logo-link:hover .stoic-logo-mark {
+    transform: translateY(-1px) rotate(4deg) scale(1.04);
+    filter: drop-shadow(0 5px 7px rgb(23 32 51 / 0.16));
+  }
+}
+
+.world-shell .stoic-logo-link:active .stoic-logo-mark {
+  transform: translateY(1px) rotate(-3deg) scale(0.94);
+  filter: none;
+}
+
+.world-shell .stoic-logo-link:focus-visible .stoic-logo-mark {
+  transform: rotate(2deg) scale(1.02);
+}
+
 .world-shell :where(button, [role="button"], a[class*="bg-navy"], a[class*="bg-gold"]) {
   transition:
     transform 120ms var(--ease-out),
@@ -1293,6 +1320,15 @@ body {
   .world-shell *::before,
   .world-shell *::after {
     scroll-behavior: auto !important;
+  }
+
+  .world-shell .stoic-logo-mark,
+  .world-shell .stoic-logo-link:hover .stoic-logo-mark,
+  .world-shell .stoic-logo-link:active .stoic-logo-mark,
+  .world-shell .stoic-logo-link:focus-visible .stoic-logo-mark {
+    transform: none !important;
+    filter: none !important;
+    transition: none !important;
   }
 }
 
