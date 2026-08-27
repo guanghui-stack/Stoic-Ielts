@@ -2,7 +2,7 @@ import { Check } from "lucide-react";
 import type { RuleProgress } from "@/lib/ranks/rules";
 
 /**
- * Danh sách tiến độ của một cửa ải.
+ * Danh sách tiến độ của một chặng.
  *
  * Dùng `<progress>` thật thay vì div tô màu: trình đọc màn hình đọc được giá
  * trị và ngưỡng mà không cần thêm aria nào, còn người dùng vẫn thấy con số

@@ -13,31 +13,6 @@ import { CampaignHomeBlock } from "@/components/campaign/campaign-home-block";
 import { NarrativeSection } from "@/components/world/narrative-section";
 import { SceneHero } from "@/components/world/scene-hero";
 import { ButtonLink, NoteBox } from "@/components/ui";
-import { StoicSpotlightCard } from "@/components/ui/spotlight-card";
-
-const PILLARS = [
-  {
-    icon: "brain" as const,
-    title: "Nhận thức",
-    functional: "Nhìn đúng dữ kiện",
-    body: "Đọc đúng yêu cầu, tách dữ kiện khỏi suy đoán và biết rõ mình sai ở đâu. Một lỗi được gọi đúng tên sẽ dễ sửa hơn một band điểm mơ hồ.",
-    tone: "lavender" as const,
-  },
-  {
-    icon: "book-open" as const,
-    title: "Hành động",
-    functional: "Làm và chữa bằng bằng chứng",
-    body: "Làm bài trong điều kiện thật, rồi quay lại passage để tìm bằng chứng. Phản hồi chỉ có giá trị khi nó dẫn tới một việc cụ thể cho lần tiếp theo.",
-    tone: "sage" as const,
-  },
-  {
-    icon: "repeat" as const,
-    title: "Ý chí",
-    functional: "Giữ ngày học thật",
-    body: "Năng lực ổn định đến từ một nhịp học có thể lặp lại. Hệ thống chỉ ghi nhận thời gian bạn thực sự học, không tính tab mở quên tắt.",
-    tone: "gold" as const,
-  },
-];
 
 export default async function HomePage() {
   return (
@@ -82,15 +57,6 @@ export default async function HomePage() {
         tone="paper"
       >
         <LearningPath />
-      </NarrativeSection>
-
-      <NarrativeSection
-        id="ba-tru"
-        eyebrow="Ba trụ thực hành"
-        title="Nhìn đúng, làm đúng, giữ được nhịp"
-        tone="mist"
-      >
-        <Pillars />
       </NarrativeSection>
 
       <NarrativeSection
@@ -189,30 +155,6 @@ function LearningPath() {
         </div>
       </div>
     </div>
-  );
-}
-
-function Pillars() {
-  return (
-    <>
-      <div className="grid gap-5 md:grid-cols-3">
-        {PILLARS.map((pillar, index) => (
-          <StoicSpotlightCard
-            key={pillar.title}
-            index={String(index + 1).padStart(2, "0")}
-            title={pillar.title}
-            functional={pillar.functional}
-            body={pillar.body}
-            tone={pillar.tone}
-            icon={pillar.icon}
-          />
-        ))}
-      </div>
-      <p className="mx-auto mt-10 max-w-2xl text-center text-[0.98rem] leading-relaxed text-ink-soft">
-        Ba trụ không phải ba giai đoạn tách rời. Mỗi lần học tốt đều cần đủ
-        <strong className="text-ink"> nhận thức để thấy đúng, hành động để sửa và ý chí để quay lại.</strong>
-      </p>
-    </>
   );
 }
 

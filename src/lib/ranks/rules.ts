@@ -1,5 +1,5 @@
 /**
- * Luật mở và vượt cửa ải — hàm thuần, không chạm database.
+ * Luật mở và hoàn thành chặng — hàm thuần, không chạm database.
  *
  * Tách riêng khỏi engine vì một lý do rất thực tế: máy phát triển không có
  * MySQL, nên đây là tầng duy nhất kiểm chứng được bằng kiểm thử tự động. Mọi
@@ -8,7 +8,7 @@
  *
  * Ranh giới quan trọng nhất trong cả hệ cấp bậc nằm ở file này:
  *
- *   GATE  đọc TOÀN BỘ lịch sử — trả lời "cửa ải đã hiện ra chưa".
+ *   GATE  đọc TOÀN BỘ lịch sử — trả lời "chặng đã hiện ra chưa".
  *   SUCCESS chỉ đọc sự kiện xảy ra SAU `startedAt` — trả lời "đã vượt chưa".
  *
  * Nếu success đọc cả lịch sử cũ, học viên sẽ tự thăng cấp ngay khoảnh khắc
@@ -29,7 +29,7 @@ import { experienceGate } from "../experience/experience.ts";
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 /**
- * Ba trụ và danh hiệu Đông phong, lấy nguyên mã từ catalog danh hiệu.
+ * Ba trụ và dấu mốc tổng hợp, lấy nguyên mã từ catalog danh hiệu.
  *
  * Cố ý tham chiếu sang hệ Danh hiệu thay vì định nghĩa lại ngưỡng ba trụ ở
  * đây: hai hệ mà tự tính riêng thì sớm muộn sẽ nói hai con số khác nhau về
@@ -77,7 +77,7 @@ export type RankFacts = {
   earnedTitleCodes: Set<string>;
   /** Tiến độ ba trụ, để cửa 7 xét "hai trụ xong, trụ còn lại đạt 80%". */
   pillars: Array<{ code: string; percent: number }>;
-  /** Token Hoa Dung đạo còn dùng được không. Chỉ cửa 4 quan tâm. */
+  /** Khoảng Thở Có Kỷ Luật còn dùng được không. Chỉ chặng 4 quan tâm. */
   graceAvailable: number;
   /**
    * Kinh nghiệm tích luỹ. Tính ra từ chính `attempts`, `qualifiedReviews` và
@@ -179,14 +179,14 @@ export function evaluateGate(
 
   switch (ruleKey) {
     case "NONE":
-      return { complete: true, progress: [], explanation: "Cửa ải này luôn mở." };
+      return { complete: true, progress: [],         explanation: "Chặng này luôn mở." };
 
     case "DISTINCT_ATTEMPTS": {
       const target = num(config, "distinctExercises");
       const current = distinctCount(valid, (a) => a.exerciseId);
       return done(
         [{ label: "Đề khác nhau đã làm", current, target }],
-        "Đã đủ số đề để mở cửa ải.",
+        "Đã đủ số đề để mở chặng.",
         `Cần làm đủ ${target} đề khác nhau, hiện có ${current}.`,
       );
     }
@@ -203,7 +203,7 @@ export function evaluateGate(
             target: reviewTarget,
           },
         ],
-        "Đã đủ bài và phục bàn để mở cửa ải.",
+        "Đã đủ bài và phục bàn để mở chặng.",
         `Cần ${attemptTarget} bài hợp lệ và ${reviewTarget} lượt phục bàn.`,
       );
     }
@@ -218,7 +218,7 @@ export function evaluateGate(
       ).length;
       return done(
         [{ label: `Bài đạt band ${minBand} trong ${windowDays} ngày`, current, target }],
-        "Phong độ gần đây đã đủ để mở cửa ải.",
+        "Phong độ gần đây đã đủ để mở chặng.",
         `Cần ${target} bài đạt band ${minBand} trong ${windowDays} ngày gần nhất, hiện có ${current}.`,
       );
     }
@@ -228,7 +228,7 @@ export function evaluateGate(
       const current = valid.filter((a) => a.isFullTest).length;
       return done(
         [{ label: "Full Test đã hoàn thành", current, target }],
-        "Đã có Full Test để mở cửa ải.",
+        "Đã có Full Test để mở chặng.",
         `Cần hoàn thành ${target} Full Test, hiện có ${current}.`,
       );
     }
@@ -255,7 +255,7 @@ export function evaluateGate(
     }
 
     case "TITLE_OR_PILLARS": {
-      // Hai đường vào tương đương: có danh hiệu Đông phong, HOẶC đủ trụ.
+      // Hai đường vào tương đương: có dấu mốc tổng hợp, HOẶC đủ trụ.
       // Cố ý không bắt buộc danh hiệu — Danh hiệu và Cấp bậc là hai trục độc lập.
       const pillarsTarget = num(config, "pillarsComplete");
       const remaining = num(config, "remainingPillarPercent");
@@ -280,14 +280,14 @@ export function evaluateGate(
           complete: true,
           progress: [{ label: "Trụ đã hoàn thành", current: complete, target: pillarsTarget }],
           explanation: hasTitle
-            ? "Đã có danh hiệu Đông phong nên cửa ải mở."
-            : "Ba trụ đã đủ để mở cửa ải.",
+            ? "Đã có dấu mốc ba trụ nên chặng mở."
+            : "Ba trụ đã đủ để mở chặng.",
         };
       }
       return {
         complete: false,
         progress: [{ label: "Trụ đã hoàn thành", current: complete, target: pillarsTarget }],
-        explanation: `Cần danh hiệu Đông phong, hoặc ${pillarsTarget} trụ hoàn thành và trụ còn lại đạt ${remaining}%.`,
+        explanation: `Cần dấu mốc ba trụ, hoặc ${pillarsTarget} trụ hoàn thành và trụ còn lại đạt ${remaining}%.`,
       };
     }
 
@@ -306,7 +306,7 @@ export function evaluateGate(
       return {
         complete: false,
         progress: [],
-        explanation: "Luật mở cửa ải chưa được cài đặt.",
+        explanation:         "Luật mở chặng chưa được cài đặt.",
       };
   }
 }
@@ -337,7 +337,7 @@ export function evaluateSuccess(
           { label: "Bài đã chấm", current: attempts.length, target: attemptTarget },
           { label: "Lượt phục bàn", current: reviews.length, target: reviewTarget },
         ],
-        "Đã vượt cửa ải.",
+        "Đã hoàn thành chặng.",
         `Từ lúc khởi thí luyện, cần ${attemptTarget} bài được chấm và ${reviewTarget} lượt phục bàn.`,
       );
     }
@@ -353,7 +353,7 @@ export function evaluateSuccess(
           { label: `Đề khác nhau đạt band ${minBand}`, current, target: exerciseTarget },
           { label: "Lượt phục bàn", current: reviews.length, target: reviewTarget },
         ],
-        "Đã vượt cửa ải.",
+        "Đã hoàn thành chặng.",
         `Cần ${exerciseTarget} đề khác nhau đạt band ${minBand} và ${reviewTarget} lượt phục bàn.`,
       );
     }
@@ -396,7 +396,7 @@ export function evaluateSuccess(
       const from = facts.now.getTime() - windowDays * DAY_MS;
       const inWindow = attempts.filter((a) => a.submittedAt.getTime() >= from);
 
-      // Hoa Dung đạo tha MỘT lần đứt chuỗi, và chỉ khi token còn. Nó không
+      // Khoảng Thở Có Kỷ Luật bảo toàn MỘT lần đứt chuỗi, và chỉ khi token còn. Nó không
       // biến lượt dưới ngưỡng thành lượt đạt — lượt đó vẫn không được đếm.
       let streak = 0;
       let best = 0;
@@ -510,7 +510,7 @@ export function evaluateSuccess(
         return {
           complete: false,
           progress: [],
-          explanation: "Chưa chốt được dạng câu yếu nhất cho cửa ải này.",
+          explanation: "Chưa chốt được dạng câu yếu nhất cho chặng này.",
         };
       }
 
@@ -548,7 +548,7 @@ export function evaluateSuccess(
       return {
         complete: false,
         progress: [],
-        explanation: "Luật vượt cửa ải chưa được cài đặt.",
+        explanation:         "Luật vượt chặng chưa được cài đặt.",
       };
   }
 }
@@ -558,7 +558,7 @@ export function evaluateSuccess(
 /**
  * Bốn trường tối thiểu của một TrialReflection, theo đặc tả §4.3.
  *
- * Đây là đường phục bàn KHÔNG MẤT TIỀN. Nó tồn tại để mọi cửa ải có yêu cầu
+ * Đây là đường phục bàn KHÔNG MẤT TIỀN. Nó tồn tại để mọi chặng có yêu cầu
  * chữa bài đều đi qua được mà không phải mua Feynman — nếu chỗ này lỏng lẻo
  * thì hoặc học viên viết một chữ cho xong và cấp bậc mất giá trị, hoặc nó
  * khắt khe tới mức người ta bỏ tiền mua cho nhanh, và cả hai đều phá vỡ lời

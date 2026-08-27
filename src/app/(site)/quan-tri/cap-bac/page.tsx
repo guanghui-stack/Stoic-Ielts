@@ -4,7 +4,6 @@ import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/session";
 import { features } from "@/lib/features";
 import { RANK_SEEDS, TRIAL_SEEDS, RANK_ERAS, trialByCode } from "@/lib/ranks/catalog";
-import { generalByCode } from "@/lib/story/generals";
 import { RankInsignia } from "@/components/ranks/rank-insignia";
 import { AdminPageShell } from "@/components/admin/admin-page-shell";
 
@@ -21,12 +20,12 @@ const STATUS_LABEL: Record<string, string> = {
 /**
  * Trang quản trị cấp bậc — CHỈ ĐỌC, theo đúng đặc tả §11.1.
  *
- * Cố ý không có form sửa `ruleConfig`. Ngưỡng của một cửa ải là luật chơi;
+ * Cố ý không có form sửa `ruleConfig`. Ngưỡng của một chặng là luật chơi;
  * đổi nó bằng một ô nhập trên production nghĩa là đổi luật giữa chừng cho
  * những người đang đi dở, mà không ai review và không có kiểm thử nào chạy.
  * Muốn đổi ngưỡng thì sửa `src/lib/ranks/catalog.ts`, chạy kiểm thử, mở PR.
  *
- * Cũng không có nút "tăng cấp nhanh". Cấp bậc chỉ đến từ việc vượt cửa ải.
+ * Cũng không có nút "tăng cấp nhanh". Cấp bậc chỉ đến từ việc hoàn thành chặng.
  */
 export default async function RankAdminPage() {
   if (!features.ranks) notFound();
@@ -69,7 +68,7 @@ export default async function RankAdminPage() {
   return (
     <AdminPageShell eyebrow="Quản trị" title="Cấp bậc và thí luyện">
       <p className="mt-4 max-w-2xl text-[0.95rem] leading-relaxed text-ink-soft">
-        Trang này chỉ đọc. Ngưỡng của mỗi cửa ải là luật chơi — đổi nó bằng một
+        Trang này chỉ đọc. Ngưỡng của mỗi chặng là luật chơi — đổi nó bằng một
         ô nhập trên production nghĩa là đổi luật giữa chừng cho người đang đi
         dở, không ai review và không kiểm thử nào chạy. Muốn đổi thì sửa{" "}
         <code className="text-xs">src/lib/ranks/catalog.ts</code> rồi mở PR.
@@ -128,19 +127,19 @@ export default async function RankAdminPage() {
       </section>
 
       <section
-        aria-label="Tám cửa ải"
+        aria-label="Tám chặng rèn luyện"
         className="mt-6 overflow-hidden rounded-[var(--radius-stoic-lg)] border border-line bg-paper p-4 sm:p-6 lg:p-7"
       >
         <h2 className="font-display text-lg font-bold text-navy-deep">
-          Tám cửa ải
+          Tám chặng rèn luyện
         </h2>
         <p className="mt-1 font-ui text-sm text-muted">
-          Hoa Dung đạo: {graceCount} học viên còn token
+          Khoảng Thở Có Kỷ Luật: {graceCount} học viên còn token
         </p>
 
         <div className="mt-5 max-w-full overflow-x-auto rounded-[var(--radius-stoic-md)] border border-line/80 bg-cream/20 [overscroll-behavior-inline:contain]">
           <table className="w-full min-w-[700px] table-fixed border-collapse text-left">
-            <caption className="sr-only">Thống kê trạng thái tám cửa ải</caption>
+            <caption className="sr-only">Thống kê trạng thái tám chặng rèn luyện</caption>
             <colgroup>
               <col className="w-[13%]" />
               <col className="w-[27%]" />
@@ -151,9 +150,9 @@ export default async function RankAdminPage() {
             </colgroup>
             <thead>
               <tr className="border-b border-line bg-cream/35">
-                <th scope="col" className="px-3 py-2.5 font-ui text-[0.68rem] uppercase tracking-wide text-muted">Cửa</th>
+                <th scope="col" className="px-3 py-2.5 font-ui text-[0.68rem] uppercase tracking-wide text-muted">Chặng</th>
                 <th scope="col" className="px-3 py-2.5 font-ui text-[0.68rem] uppercase tracking-wide text-muted">Tên</th>
-                <th scope="col" className="px-3 py-2.5 font-ui text-[0.68rem] uppercase tracking-wide text-muted">Nhân vật</th>
+                <th scope="col" className="px-3 py-2.5 font-ui text-[0.68rem] uppercase tracking-wide text-muted">Điểm tựa</th>
                 <th scope="col" className="px-3 py-2.5 text-right font-ui text-[0.68rem] uppercase tracking-wide text-muted">Đã mở</th>
                 <th scope="col" className="px-3 py-2.5 text-right font-ui text-[0.68rem] uppercase tracking-wide text-muted">Đang làm</th>
                 <th scope="col" className="px-3 py-2.5 text-right font-ui text-[0.68rem] uppercase tracking-wide text-muted">Đã vượt</th>
@@ -172,7 +171,7 @@ export default async function RankAdminPage() {
                       <span className="block text-xs font-normal text-muted">{trial.skill}</span>
                     </td>
                     <td className="break-words px-3 py-3 align-middle font-ui text-sm text-ink-soft">
-                      {generalByCode(trial.featuredGeneralCode).name}
+                      {trial.stoicAnchor}
                     </td>
                     <td className="whitespace-nowrap px-3 py-3 text-right align-middle font-ui text-sm tabular-nums text-ink-soft">
                       {stats.ELIGIBLE ?? 0}
@@ -231,8 +230,8 @@ export default async function RankAdminPage() {
 
       <p className="mt-6 border-l-4 border-gold bg-cream-deep px-6 py-5 text-sm leading-relaxed text-ink-soft">
         Không có nút tăng cấp nhanh, và sẽ không bao giờ có. Cấp bậc chỉ đến từ
-        việc vượt cửa ải bằng dữ liệu học thật — đó là toàn bộ thứ khiến nó có
-        giá trị với học viên. Trường hợp sự cố kỹ thuật cần can thiệp thì phải
+        việc hoàn thành chặng bằng dữ liệu học thật — đó là toàn bộ thứ khiến nó
+        có giá trị với học viên. Trường hợp sự cố kỹ thuật cần can thiệp thì phải
         đi qua migration có ghi nhật ký, không phải một cú bấm trên trang này.
       </p>
     </AdminPageShell>

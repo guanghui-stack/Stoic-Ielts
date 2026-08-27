@@ -12,8 +12,8 @@ import type { RankEra } from "@/lib/ranks/catalog";
  * thử không cần database.
  *
  * Tọa độ theo phần trăm chiều rộng và chiều cao của ảnh nền, đi từ góc dưới
- * bên trái lên góc trên bên phải đúng như bố cục ảnh bản đồ: đồng bằng loạn
- * lạc ở dưới, đỉnh núi cô độc ở trên.
+ * bên trái lên góc trên bên phải, biểu thị một hành trình từ bước đầu có chủ
+ * đích tới năng lực tự chủ.
  */
 
 export type CampaignNode = {
@@ -40,8 +40,8 @@ export const CAMPAIGN_NODES: CampaignNode[] = [
     x: 8,
     y: 78,
     artKey: "trialDaoVien",
-    shortTitle: "Đào viên",
-    functionalLabel: "Bắt đầu",
+    shortTitle: "Chủ động bắt đầu",
+    functionalLabel: "Bắt đầu có chủ đích",
   },
   {
     code: "NODE_02",
@@ -51,8 +51,8 @@ export const CAMPAIGN_NODES: CampaignNode[] = [
     x: 20,
     y: 66,
     artKey: "trialHoangCan",
-    shortTitle: "Hoàng Cân",
-    functionalLabel: "Tạo thói quen",
+    shortTitle: "Giữ nhịp đều đặn",
+    functionalLabel: "Kỷ luật quay lại",
   },
   {
     code: "NODE_03",
@@ -62,8 +62,8 @@ export const CAMPAIGN_NODES: CampaignNode[] = [
     x: 34,
     y: 58,
     artKey: "trialHoaHung",
-    shortTitle: "Hoa Hùng",
-    functionalLabel: "Quản lý thời gian",
+    shortTitle: "Quản trị sự chú ý",
+    functionalLabel: "Tập trung vào bước kế tiếp",
   },
   {
     code: "NODE_04",
@@ -73,8 +73,8 @@ export const CAMPAIGN_NODES: CampaignNode[] = [
     x: 47,
     y: 68,
     artKey: "trialNguQuan",
-    shortTitle: "Ngũ quan",
-    functionalLabel: "Ổn định phong độ",
+    shortTitle: "Ổn định qua biến động",
+    functionalLabel: "Bình thản trước kết quả",
   },
   {
     code: "NODE_05",
@@ -84,8 +84,8 @@ export const CAMPAIGN_NODES: CampaignNode[] = [
     x: 59,
     y: 52,
     artKey: "trialTruongBan",
-    shortTitle: "Trường Bản",
-    functionalLabel: "Cứu phần yếu",
+    shortTitle: "Không bỏ rơi phần khó",
+    functionalLabel: "Can đảm nhìn vào phần yếu",
   },
   {
     code: "NODE_06",
@@ -95,8 +95,8 @@ export const CAMPAIGN_NODES: CampaignNode[] = [
     x: 70,
     y: 38,
     artKey: "trialLaoTuong",
-    shortTitle: "Khai cung",
-    functionalLabel: "Phục bàn sâu",
+    shortTitle: "Phản tư có chiều sâu",
+    functionalLabel: "Học từ điều đã xảy ra",
   },
   {
     code: "NODE_07",
@@ -106,8 +106,8 @@ export const CAMPAIGN_NODES: CampaignNode[] = [
     x: 83,
     y: 28,
     artKey: "trialTayLuong",
-    shortTitle: "Tây Lương",
-    functionalLabel: "Biến hóa",
+    shortTitle: "Tích hợp ba trụ",
+    functionalLabel: "Nhận thức · Hành động · Ý chí",
   },
   {
     code: "NODE_08",
@@ -117,8 +117,8 @@ export const CAMPAIGN_NODES: CampaignNode[] = [
     x: 93,
     y: 15,
     artKey: "trialHoLao",
-    shortTitle: "Hổ Lao",
-    functionalLabel: "Tổng hợp cuối",
+    shortTitle: "Tự chủ trước điểm yếu",
+    functionalLabel: "Tự chủ trước điều có thể sửa",
   },
 ];
 
