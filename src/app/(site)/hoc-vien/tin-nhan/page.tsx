@@ -49,6 +49,7 @@ export default async function StudentMessagesPage({ searchParams }: Props) {
       ? { ...item.lastMessage, createdAt: item.lastMessage.createdAt.toISOString() }
       : null,
     lastMessageAt: item.lastMessageAt?.toISOString() ?? null,
+    unreadCount: item.unreadCount,
   }));
 
   return (
