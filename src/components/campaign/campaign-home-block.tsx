@@ -63,6 +63,7 @@ function CampaignWorldSection({ world }: { world: CampaignWorld }) {
         <CampaignMapStack
           world={world}
           variant={world.audience === "STUDENT" ? "student" : "portal"}
+          showPillarCards
         />
         <CampaignTimelineMobile world={world} />
         <NextStepGuide step={world.nextStep} />
