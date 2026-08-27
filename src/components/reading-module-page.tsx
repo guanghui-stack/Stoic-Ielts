@@ -32,17 +32,17 @@ export function ReadingModulePage({
           dạng khác?
           <Link
             href={other.href}
-            className="font-semibold text-navy underline underline-offset-4 hover:text-gold"
+            className="font-semibold text-navy underline underline-offset-4 transition-colors hover:text-stoic-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/40"
           >
             Chuyển sang {other.label}
           </Link>
         </p>
 
-        <div className="mb-10 flex flex-wrap items-center justify-between gap-5 border border-gold bg-gold-pale p-7">
+        <div className="mb-10 flex flex-wrap items-center justify-between gap-5 rounded-2xl border border-stoic-primary/35 bg-stoic-primary-soft/55 p-7 shadow-card">
           <div className="min-w-0">
             <p className="label-caps flex items-center gap-2">
-              <Layers className="h-3.5 w-3.5" aria-hidden="true" />
-              Đề Full Test
+              <Layers className="h-3.5 w-3.5 text-stoic-primary-deep" aria-hidden="true" />
+              Vùng luyện Full Test
             </p>
             <h2 className="mt-2.5 font-display text-xl font-bold text-navy-deep">
               Ghép ba bài đọc thành một đề 60 phút
@@ -53,18 +53,18 @@ export function ReadingModulePage({
               tính vào danh hiệu.
             </p>
           </div>
-          <ButtonLink
-            href={`/luyen-tap/reading/ghep-de?dang=${module}`}
-            variant="gold"
-          >
-            <Layers className="h-4 w-4" aria-hidden="true" />
-            Ghép đề
-          </ButtonLink>
+            <ButtonLink
+              href={`/luyen-tap/reading/ghep-de?dang=${module}`}
+              variant="primary"
+            >
+              <Layers className="h-4 w-4" aria-hidden="true" />
+              Ghép đề
+            </ButtonLink>
         </div>
 
         <ExerciseList readingType={module} />
 
-        <NoteBox className="mt-10" title="Cách luyện cho hiệu quả">
+        <NoteBox className="mt-10 rounded-2xl" title="Cách luyện cho hiệu quả">
           Đọc câu hỏi trước khi đọc bài để biết mình cần tìm gì. Với dạng
           TRUE/FALSE/NOT GIVEN, bám sát nghĩa đen của câu — đừng suy diễn từ
           kiến thức bên ngoài. Làm xong đừng vội đóng trang: phần chữa bài mới

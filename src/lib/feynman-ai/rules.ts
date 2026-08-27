@@ -104,7 +104,7 @@ export function decideAiAccess(input: {
 }
 
 /* ------------------------------------------------------------------ */
-/* 3. Nguyệt Thí — khóa kín cho tới khi cuộc thi kết thúc                */
+/* 3. Thử thách tháng — khóa kín cho tới khi cuộc thi kết thúc              */
 /* ------------------------------------------------------------------ */
 
 export type CompetitionLockReason =
@@ -112,7 +112,7 @@ export type CompetitionLockReason =
   | "COMPETITION_ENDS_AT_MISSING";
 
 /**
- * Lượt làm bài thuộc Nguyệt Thí bị khóa CẢ BA: đáp án chi tiết, Feynman, và
+ * Lượt làm bài thuộc Thử thách tháng bị khóa CẢ BA: đáp án chi tiết, Feynman, và
  * toàn bộ AI — cho tới khi `endsAt` của cuộc thi trôi qua.
  *
  * Vì sao: thí sinh dự thi vào các thời điểm khác nhau trong cùng khung giờ.
@@ -337,7 +337,7 @@ export function messageForDenial(reason: GradingDenial): string {
     case "NO_ACCESS":
       return "Lượt làm bài này chưa được mở. Bạn cần mua gói cho lượt làm bài này.";
     case "COMPETITION_LOCKED":
-      return "Đề đang trong kỳ Nguyệt Thí. Đáp án chi tiết, Feynman và AI sẽ mở sau khi kỳ thi kết thúc.";
+      return "Đề đang trong kỳ Thử thách tháng. Đáp án chi tiết, Feynman và AI sẽ mở sau khi kỳ thi kết thúc.";
     case "REVIEW_NOT_COMPLETED":
       return "Bạn cần hoàn thành phần tự giảng lại trước khi nhờ AI chấm.";
     case "ALREADY_GRADED":

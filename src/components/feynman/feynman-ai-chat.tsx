@@ -94,10 +94,10 @@ export function FeynmanAiChat({
   };
 
   return (
-    <section className="mt-8 border border-line-strong bg-paper">
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-6 py-4">
+    <section className="mt-8 overflow-hidden rounded-2xl border border-line-strong bg-paper shadow-card">
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-line bg-stoic-canvas-soft/55 px-6 py-4">
         <p className="flex items-center gap-2 font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-ink">
-          <MessageCircle className="h-3.5 w-3.5" aria-hidden="true" />
+          <MessageCircle className="h-3.5 w-3.5 text-stoic-primary-deep" aria-hidden="true" />
           Hỏi thêm về bài này
         </p>
         <p className="font-ui text-sm text-muted">
@@ -107,7 +107,7 @@ export function FeynmanAiChat({
 
       <div className="px-6 py-5">
         {turns.length === 0 && (
-          <p className="text-[0.95rem] leading-relaxed text-muted">
+          <p className="rounded-xl border border-dashed border-line-strong bg-stoic-canvas-soft/45 px-4 py-4 text-[0.95rem] leading-relaxed text-muted">
             Bạn hỏi được về đoạn văn, đáp án, hoặc chỗ mình còn chưa thông trong
             phần chữa bài vừa rồi.
           </p>
@@ -115,12 +115,12 @@ export function FeynmanAiChat({
 
         <ul className="space-y-5">
           {turns.map((turn) => (
-            <li key={turn.id}>
-              <p className="font-ui text-[0.9rem] font-semibold text-navy-deep">
+            <li key={turn.id} className="rounded-xl border border-line bg-stoic-canvas-soft/35 p-4">
+              <p className="font-ui text-[0.9rem] font-semibold leading-relaxed text-navy-deep">
                 {turn.question}
               </p>
               <p
-                className={`mt-2 text-[0.95rem] leading-relaxed ${
+                className={`mt-3 rounded-lg border-l-2 border-stoic-primary/55 pl-3 text-[0.95rem] leading-relaxed ${
                   turn.rejected ? "text-muted italic" : "text-ink-soft"
                 }`}
               >
@@ -138,23 +138,23 @@ export function FeynmanAiChat({
               rows={3}
               disabled={busy}
               placeholder="Ví dụ: vì sao đáp án câu 14 không phải NOT GIVEN?"
-              className="w-full border border-line-strong bg-paper px-4 py-3 font-body text-[0.95rem] leading-relaxed text-ink placeholder:text-muted focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/20 disabled:opacity-60"
+              className="w-full rounded-xl border border-line-strong bg-paper px-4 py-3 font-body text-[0.95rem] leading-relaxed text-ink placeholder:text-muted outline-none transition-colors focus:border-stoic-primary focus:ring-2 focus:ring-stoic-primary/20 disabled:opacity-60"
             />
             {error && (
-              <p className="mt-2 font-ui text-sm text-danger">{error}</p>
+              <p className="mt-2 font-ui text-sm text-danger" role="alert">{error}</p>
             )}
             <button
               type="button"
               onClick={send}
               disabled={!canAsk}
-              className="mt-3 inline-flex items-center gap-2 border border-navy px-5 py-2.5 font-ui text-[0.75rem] font-semibold uppercase tracking-[0.1em] text-navy transition-colors hover:bg-navy hover:text-paper disabled:opacity-40"
+              className="mt-3 inline-flex items-center gap-2 rounded-xl border border-stoic-primary bg-stoic-primary px-5 py-2.5 font-ui text-[0.75rem] font-semibold uppercase tracking-[0.1em] text-white transition-colors hover:border-stoic-primary-deep hover:bg-stoic-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/40 disabled:cursor-not-allowed disabled:opacity-40"
             >
               <Send className="h-3.5 w-3.5" aria-hidden="true" />
               {busy ? "Đang hỏi..." : "Gửi câu hỏi"}
             </button>
           </div>
         ) : (
-          <p className="mt-6 border-t border-line pt-5 font-ui text-sm text-muted">
+              <p className="mt-6 rounded-xl border-t border-line bg-stoic-canvas-soft/55 px-4 py-4 font-ui text-sm text-muted">
             Bạn đã dùng hết số câu hỏi của lượt chấm này.
           </p>
         )}

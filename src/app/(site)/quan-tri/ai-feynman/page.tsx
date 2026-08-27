@@ -23,7 +23,7 @@ export const dynamic = "force-dynamic";
 
 const SEVERITY_STYLE: Record<string, string> = {
   HIGH: "border-danger bg-danger-pale text-danger",
-  MEDIUM: "border-gold bg-gold-pale text-ink",
+  MEDIUM: "border-stoic-primary/40 bg-stoic-primary-soft text-stoic-primary-deep",
   LOW: "border-line-strong bg-cream-deep text-ink-soft",
 };
 
@@ -82,7 +82,7 @@ export default async function AdminFeynmanAiPage() {
   ];
 
   return (
-    <section className="mx-auto max-w-6xl px-6 py-10">
+    <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <p className="label-caps">Quản trị</p>
       <h1 className="mt-3 font-display text-3xl font-bold text-navy-deep">
         Feynman AI
@@ -90,7 +90,7 @@ export default async function AdminFeynmanAiPage() {
       <div className="rule-gold mt-5" />
 
       {!config.enabled && (
-        <p className="mt-6 flex items-center gap-2.5 border-l-4 border-gold bg-gold-pale px-5 py-4 font-ui text-sm text-ink">
+        <p className="mt-6 flex items-center gap-2.5 rounded-r-xl border-l-4 border-stoic-primary bg-stoic-primary-soft px-5 py-4 font-ui text-sm text-ink">
           <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />
           Tính năng đang TẮT với học viên. Số liệu bên dưới là của giai đoạn đã
           chạy trước đó.
@@ -165,7 +165,7 @@ export default async function AdminFeynmanAiPage() {
           {alerts.map((alert) => (
             <li
               key={alert.id}
-              className={`border-l-4 px-5 py-4 ${
+              className={`rounded-r-xl border-l-4 px-5 py-4 shadow-card ${
                 SEVERITY_STYLE[alert.severity] ?? SEVERITY_STYLE.LOW
               }`}
             >
@@ -225,8 +225,8 @@ function Stat({
 }) {
   return (
     <div
-      className={`border px-5 py-4 ${
-        tone === "warn" ? "border-gold bg-gold-pale" : "border-line-strong bg-paper"
+        className={`rounded-2xl border px-5 py-4 shadow-card ${
+        tone === "warn" ? "border-stoic-primary/40 bg-stoic-primary-soft" : "border-line-strong bg-paper"
       }`}
     >
       <dt className="flex items-center gap-2 font-ui text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-muted">

@@ -42,10 +42,10 @@ export function FeynmanAiEvaluation({ data }: { data: AiEvaluationView }) {
   const passed = data.verdict === "DAT";
 
   return (
-    <section className="mt-8 border border-line-strong bg-paper">
+    <section className="mt-8 overflow-hidden rounded-2xl border border-line-strong bg-paper shadow-card">
       <header
         className={`flex flex-wrap items-center justify-between gap-4 px-6 py-5 ${
-          passed ? "bg-success-pale" : "bg-gold-pale"
+          passed ? "bg-success-pale" : "bg-stoic-primary-soft"
         }`}
       >
         <p
@@ -83,7 +83,7 @@ export function FeynmanAiEvaluation({ data }: { data: AiEvaluationView }) {
         {data.perQuestion.length > 0 && (
           <ul className="mt-7 space-y-5">
             {data.perQuestion.map((row) => (
-              <li key={row.maCau} className="border-l-2 border-line-strong pl-5">
+              <li key={row.maCau} className="rounded-r-xl border-l-2 border-stoic-primary/45 bg-stoic-canvas-soft/45 py-3 pl-5 pr-4">
                 <p className="font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-ink">
                   {data.labels[row.maCau] ?? row.maCau}
                   <span className="ml-3 font-normal normal-case tracking-normal text-muted">
@@ -104,7 +104,7 @@ export function FeynmanAiEvaluation({ data }: { data: AiEvaluationView }) {
                   </p>
                 )}
                 {row.trichDan && (
-                  <p className="mt-2 flex gap-2 border-l-2 border-gold bg-gold-pale px-4 py-2.5 text-[0.9rem] italic leading-relaxed text-ink-soft">
+                  <p className="mt-2 flex gap-2 rounded-r-lg border-l-2 border-stoic-primary bg-stoic-primary-soft px-4 py-2.5 text-[0.9rem] italic leading-relaxed text-ink-soft">
                     <Quote className="mt-1 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                     {row.trichDan}
                   </p>
@@ -144,7 +144,7 @@ function FeedbackForm({ evaluationId }: { evaluationId: string }) {
 
   if (sent) {
     return (
-      <p className="mt-7 border-t border-line pt-5 font-ui text-sm text-muted">
+      <p className="mt-7 rounded-xl border-t border-line bg-stoic-canvas-soft/55 px-4 py-4 font-ui text-sm text-muted">
         Đã ghi nhận. Giáo viên sẽ xem lại bản chấm này.
       </p>
     );
@@ -155,7 +155,7 @@ function FeedbackForm({ evaluationId }: { evaluationId: string }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="mt-7 flex items-center gap-2 border-t border-line pt-5 font-ui text-sm text-muted hover:text-navy"
+        className="mt-7 flex items-center gap-2 rounded-lg border-t border-line pt-5 font-ui text-sm text-muted transition-colors hover:text-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/40"
       >
         <Flag className="h-3.5 w-3.5" aria-hidden="true" />
         Bản chấm này có chỗ chưa đúng
@@ -183,14 +183,14 @@ function FeedbackForm({ evaluationId }: { evaluationId: string }) {
   };
 
   return (
-    <div className="mt-7 border-t border-line pt-5">
+    <div className="mt-7 rounded-xl border-t border-line bg-stoic-canvas-soft/55 px-4 pt-5">
       <p className="font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-ink">
         Báo lỗi bản chấm
       </p>
       <select
         value={kind}
         onChange={(e) => setKind(e.target.value)}
-        className="mt-3 w-full border border-line-strong bg-paper px-4 py-2.5 font-ui text-sm text-ink focus:border-navy focus:outline-none"
+        className="mt-3 w-full rounded-xl border border-line-strong bg-paper px-4 py-2.5 font-ui text-sm text-ink outline-none transition-colors focus:border-stoic-primary focus:ring-2 focus:ring-stoic-primary/20"
       >
         {FEEDBACK_KINDS.map((item) => (
           <option key={item.value} value={item.value}>
@@ -203,14 +203,14 @@ function FeedbackForm({ evaluationId }: { evaluationId: string }) {
         onChange={(e) => setNote(e.target.value.slice(0, 1000))}
         rows={3}
         placeholder="Mô tả ngắn chỗ chưa đúng (không bắt buộc)"
-        className="mt-3 w-full border border-line-strong bg-paper px-4 py-3 font-body text-[0.95rem] text-ink placeholder:text-muted focus:border-navy focus:outline-none"
+        className="mt-3 w-full rounded-xl border border-line-strong bg-paper px-4 py-3 font-body text-[0.95rem] text-ink placeholder:text-muted outline-none transition-colors focus:border-stoic-primary focus:ring-2 focus:ring-stoic-primary/20"
       />
       <div className="mt-3 flex gap-3">
         <button
           type="button"
           onClick={submit}
           disabled={busy}
-          className="border border-navy px-5 py-2 font-ui text-[0.75rem] font-semibold uppercase tracking-[0.1em] text-navy transition-colors hover:bg-navy hover:text-paper disabled:opacity-50"
+          className="rounded-xl border border-stoic-primary px-5 py-2 font-ui text-[0.75rem] font-semibold uppercase tracking-[0.1em] text-stoic-primary-deep transition-colors hover:bg-stoic-primary hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/40 disabled:opacity-50"
         >
           {busy ? "Đang gửi..." : "Gửi báo lỗi"}
         </button>

@@ -65,11 +65,11 @@ export default async function AssemblyPage({
         title="Ghép ba bài đọc thành một đề Full Test"
       />
 
-      <p className="mt-5 flex flex-wrap items-center gap-x-2 gap-y-1 border-l-4 border-line-strong bg-cream-deep px-5 py-3.5 font-ui text-sm text-ink-soft">
+      <p className="mt-5 flex flex-wrap items-center gap-x-2 gap-y-1 rounded-xl border-l-4 border-stoic-primary bg-stoic-canvas-soft px-5 py-3.5 font-ui text-sm text-ink-soft">
         Đang ghép từ kho <strong className="text-ink">{moduleLabel}</strong>.
         <Link
           href={`/luyen-tap/reading/ghep-de?dang=${otherType}`}
-          className="font-semibold text-navy underline underline-offset-4 hover:text-gold"
+          className="font-semibold text-navy underline underline-offset-4 transition-colors hover:text-stoic-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/40"
         >
           Chuyển sang {MODULE_LABELS[otherType]}
         </Link>
@@ -87,7 +87,7 @@ export default async function AssemblyPage({
       )}
 
       {/* ===== Chế độ tự động ===== */}
-      <article className="mt-10 border border-line bg-paper p-8 shadow-card">
+      <article className="mt-10 rounded-2xl border border-line bg-paper p-8 shadow-card">
         <p className="label-caps flex items-center gap-2">
           <Shuffle className="h-3.5 w-3.5" aria-hidden="true" />
           Chế độ 1 · Hệ thống ghép
@@ -100,11 +100,11 @@ export default async function AssemblyPage({
           {TARGET_QUESTIONS} câu nhất có thể.
         </p>
 
-        <p className="mt-4 flex items-start gap-2 border-l-4 border-gold bg-gold-pale px-5 py-4 font-ui text-sm leading-relaxed text-ink">
-          <Trophy className="mt-0.5 h-4 w-4 shrink-0 text-gold" aria-hidden="true" />
+        <p className="mt-4 flex items-start gap-2 rounded-xl border-l-4 border-stoic-primary bg-stoic-primary-soft px-5 py-4 font-ui text-sm leading-relaxed text-ink">
+          <Trophy className="mt-0.5 h-4 w-4 shrink-0 text-stoic-primary-deep" aria-hidden="true" />
           <span>
             <strong>Chỉ đề ở chế độ này được tính danh hiệu</strong> và điều kiện
-            dự Nguyệt Thí. Bạn tự chọn bài thì kết quả chỉ để luyện tập — nếu
+            dự Thử thách tháng. Bạn tự chọn bài thì kết quả chỉ để luyện tập — nếu
             không, ai cũng có thể gom ba bài dễ để lấy band cao.
           </span>
         </p>
@@ -114,7 +114,7 @@ export default async function AssemblyPage({
             <ol className="mt-6 divide-y divide-line border-y border-line">
               {autoPlan.parts.map((part, index) => (
                 <li key={part.exerciseId} className="flex flex-wrap items-baseline gap-x-3 gap-y-1 py-3">
-                  <span className="font-ui text-sm font-bold tabular-nums text-gold">
+                  <span className="font-ui text-sm font-bold tabular-nums text-stoic-primary-deep">
                     Passage {index + 1}
                   </span>
                   <span className="min-w-0 flex-1 text-ink">{part.title}</span>
@@ -172,7 +172,7 @@ export default async function AssemblyPage({
                   )}
                   <Link
                     href="/thanh-toan"
-                    className="inline-flex items-center gap-2 border border-gold bg-gold px-6 py-2.5 font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-navy-deep transition-colors hover:border-gold-soft hover:bg-gold-soft"
+                    className="inline-flex items-center gap-2 rounded-xl border border-stoic-primary bg-stoic-primary px-6 py-2.5 font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-white transition-colors hover:border-stoic-primary-deep hover:bg-stoic-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/40"
                   >
                     Nạp xu
                   </Link>
@@ -198,7 +198,7 @@ export default async function AssemblyPage({
       </article>
 
       {/* ===== Chế độ tự chọn ===== */}
-      <article className="mt-8 border border-line bg-paper p-8 shadow-card">
+      <article className="mt-8 rounded-2xl border border-line bg-paper p-8 shadow-card">
         <p className="label-caps flex items-center gap-2">
           <SquareCheck className="h-3.5 w-3.5" aria-hidden="true" />
           Chế độ 2 · Bạn tự chọn
@@ -236,7 +236,7 @@ export default async function AssemblyPage({
       <p className="mt-8 text-center">
         <Link
           href={readingType === "GENERAL" ? "/luyen-tap/reading/general" : "/luyen-tap/reading"}
-          className="font-ui text-sm font-semibold text-navy underline-offset-4 hover:text-gold hover:underline"
+          className="font-ui text-sm font-semibold text-navy underline-offset-4 transition-colors hover:text-stoic-primary-deep hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/40"
         >
           Quay lại kho Reading {moduleLabel}
         </Link>
