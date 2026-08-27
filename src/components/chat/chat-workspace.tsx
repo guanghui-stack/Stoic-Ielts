@@ -204,10 +204,28 @@ function ConversationPanel({
   currentUserId: string;
   conversation: ChatConversation;
 }) {
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const messagesRef = useRef<HTMLDivElement>(null);
+  const previousConversationRef = useRef<string | null>(null);
+  const previousMessageCountRef = useRef(0);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ block: "nearest" });
+    const container = messagesRef.current;
+    if (!container) return;
+
+    const conversationChanged = previousConversationRef.current !== conversation.id;
+    const receivedNewMessage = conversation.messages.length > previousMessageCountRef.current;
+    previousConversationRef.current = conversation.id;
+    previousMessageCountRef.current = conversation.messages.length;
+
+    if (!conversationChanged && !receivedNewMessage) return;
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    requestAnimationFrame(() => {
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: reducedMotion || conversationChanged ? "auto" : "smooth",
+      });
+    });
   }, [conversation.id, conversation.messages.length]);
 
   return (
@@ -221,7 +239,7 @@ function ConversationPanel({
           <p className="font-ui text-xs text-muted">Đối thoại riêng giữa hai học viên</p>
         </div>
       </header>
-      <div className="flex-1 space-y-3 overflow-y-auto px-4 py-5 sm:px-6" aria-live="polite">
+      <div ref={messagesRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-5 sm:px-6" aria-live="polite">
         {conversation.messages.length === 0 ? (
           <div className="flex min-h-64 items-center justify-center text-center">
             <p className="max-w-xs font-ui text-sm leading-relaxed text-muted">
@@ -244,7 +262,6 @@ function ConversationPanel({
             );
           })
         )}
-        <div ref={bottomRef} />
       </div>
       <MessageComposer conversationId={conversation.id} />
     </section>
