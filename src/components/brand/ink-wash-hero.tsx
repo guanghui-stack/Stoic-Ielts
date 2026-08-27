@@ -1,5 +1,6 @@
 import { ACCENT_WASH_CLASS, type ArtAsset } from "@/lib/brand/art-manifest";
 import { InkWashArt } from "@/components/brand/ink-wash-art";
+import { ThreeAmbientCanvas } from "@/components/motion/three-ambient-canvas";
 
 /**
  * Hero thủy mặc — khối mở đầu chuẩn cho mọi trang lớn ngoài phòng thi.
@@ -66,6 +67,8 @@ export function InkWashHero({
         </>
       )}
 
+      <ThreeAmbientCanvas variant="hero" className="world-ambient-canvas--hero" />
+
       {/* Có video thì hero là LƯỚI HAI CỘT thật, không phải video thả nổi phía
           sau rồi lấy padding đẩy chữ tránh ra. Cách cũ bóp cột chữ tới mức vỡ
           dòng, vì `padding` tính theo bề rộng khung chứa còn video lại neo
@@ -74,7 +77,7 @@ export function InkWashHero({
         className={
           videoSrc
             ? "relative md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,42%)] md:items-center"
-            : "relative mx-auto max-w-6xl px-6 py-16 md:py-24"
+            : "world-hero-content relative mx-auto max-w-6xl px-6 py-16 md:py-24"
         }
       >
         {/* Lưới trải hết bề ngang để video chạm được mép phải màn hình. Cột
@@ -84,7 +87,7 @@ export function InkWashHero({
         <div
           className={
             videoSrc
-              ? "px-6 py-16 md:py-24 md:pl-[max(1.5rem,calc((100vw-72rem)/2+1.5rem))] md:pr-8"
+              ? "world-hero-content px-6 py-16 md:py-24 md:pl-[max(1.5rem,calc((100vw-72rem)/2+1.5rem))] md:pr-8"
               : ""
           }
         >

@@ -1483,3 +1483,59 @@ body {
     transform: none;
   }
 }
+
+
+/* ===== THREE.JS AMBIENT LAYERS — visual-only, desktop public surfaces ===== */
+.world-shell .world-ambient-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0.82;
+}
+
+.world-shell .world-ambient-canvas canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.world-shell .world-hero-content {
+  position: relative;
+  z-index: 2;
+}
+
+.world-shell .world-ambient-canvas--hero {
+  mix-blend-mode: multiply;
+  opacity: 0.72;
+}
+
+.world-shell .world-map-stage > .world-ambient-canvas {
+  z-index: 1;
+}
+
+.world-shell .world-map-stage > .world-map-route-layer {
+  z-index: 2;
+}
+
+.world-shell .territory-map-canvas > .world-ambient-canvas {
+  z-index: 2;
+  opacity: 0.74;
+}
+
+.world-shell .territory-map-canvas > .territory-map-hit-layer {
+  z-index: 3;
+}
+
+@media (max-width: 1023px) {
+  .world-shell .world-ambient-canvas {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .world-shell .world-ambient-canvas {
+    display: none;
+  }
+}
