@@ -22,14 +22,14 @@ function GoogleAuthButton({ label }: { label: string }) {
     <>
       <div className="flex items-center gap-3" aria-hidden="true">
         <span className="h-px flex-1 bg-line" />
-        <span className="font-ui text-xs uppercase tracking-[0.14em] text-muted">
-          hoặc
+        <span className="font-ui text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-muted">
+          hoặc tiếp tục với
         </span>
         <span className="h-px flex-1 bg-line" />
       </div>
       <a
         href="/api/auth/google"
-        className="motion-press flex w-full items-center justify-center gap-3 border border-line-strong bg-paper px-4 py-3 font-ui text-sm font-semibold text-ink hover:border-navy hover:bg-cream"
+        className="motion-press flex w-full items-center justify-center gap-3 rounded-xl border border-line-strong bg-paper px-4 py-3 font-ui text-sm font-semibold text-ink transition-colors hover:border-navy hover:bg-cream"
       >
         <svg className="h-4 w-4" viewBox="0 0 48 48" aria-hidden="true">
           <path fill="#4285F4" d="M45.1 24.5c0-1.6-.1-3.1-.4-4.5H24v8.5h11.8c-.5 2.7-2 5-4.4 6.6v5.5h7.1c4.1-3.8 6.6-9.4 6.6-16.1z" />
@@ -43,30 +43,64 @@ function GoogleAuthButton({ label }: { label: string }) {
   );
 }
 
+function AuthBrandMark() {
+  return (
+    <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-line bg-paper shadow-lift">
+      <span className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-gold text-navy" aria-hidden="true">
+        <span className="h-2 w-2 rounded-full bg-gold" />
+      </span>
+    </div>
+  );
+}
+
 export function LoginForm() {
   const [state, action, pending] = useActionState(loginAction, undefined);
   return (
-    <form action={action} className="space-y-5">
-      <ErrorBanner message={state?.error} />
-      <Field
-        label="Email"
-        name="email"
-        type="email"
-        required
-        autoComplete="email"
-        placeholder="ban@email.com"
-      />
-      <Field
-        label="Mật khẩu"
-        name="password"
-        type="password"
-        required
-        autoComplete="current-password"
-        placeholder="••••••••"
-      />
-      <SubmitButton disabled={pending} className="motion-press w-full">
+    <form action={action} className="space-y-5" aria-busy={pending}>
+      <div className="mb-7 text-center">
+        <AuthBrandMark />
+        <p className="label-caps mt-6">Quay về điều đang làm</p>
+        <h1 className="mt-2 font-display text-3xl font-bold text-navy-deep">Đăng nhập</h1>
+        <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-ink-soft">
+          Tiếp tục rèn luyện với sự bình tĩnh, rõ ràng và một bước tiến có chủ đích.
+        </p>
+      </div>
+
+      <div className="space-y-4">
+        <Field
+          label="Email"
+          name="email"
+          type="email"
+          required
+          autoComplete="email"
+          placeholder="ban@email.com"
+        />
+        <Field
+          label="Mật khẩu"
+          name="password"
+          type="password"
+          required
+          autoComplete="current-password"
+          placeholder="••••••••"
+        />
+      </div>
+
+      <div className="flex justify-end">
+        <p className="font-ui text-xs text-muted">
+          Quên mật khẩu? Liên hệ trung tâm qua hotline 0901 234 567.
+        </p>
+      </div>
+
+      <div className="rounded-xl">
+        <ErrorBanner message={state?.error} />
+      </div>
+
+      <SubmitButton
+        disabled={pending}
+        className="motion-press w-full rounded-xl border-0 bg-gradient-to-b from-navy to-navy-deep py-3 text-paper shadow-lift hover:brightness-110"
+      >
         <LogIn className="h-4 w-4" aria-hidden="true" />
-        {pending ? "Đang đăng nhập…" : "Đăng nhập"}
+        {pending ? "Đang đăng nhập…" : "Bắt đầu"}
       </SubmitButton>
 
       <GoogleAuthButton label="Đăng nhập với Google" />
@@ -79,9 +113,6 @@ export function LoginForm() {
         >
           Đăng ký miễn phí
         </Link>
-      </p>
-      <p className="text-center font-ui text-xs text-muted">
-        Quên mật khẩu? Liên hệ trung tâm qua hotline 0901 234 567 để được cấp lại.
       </p>
     </form>
   );
