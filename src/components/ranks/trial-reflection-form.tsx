@@ -5,6 +5,8 @@ import { PenLine } from "lucide-react";
 import { submitTrialReflectionAction, type ReflectionState } from "@/lib/actions/ranks";
 import { ErrorBanner, SubmitButton } from "@/components/ui";
 import { REFLECTION_MIN_LENGTH } from "@/lib/ranks/rules";
+import { ReflectionSourcePicker } from "@/components/ranks/reflection-source-picker";
+import type { ReflectionSourceQuestion } from "@/lib/ranks/reflection-reference";
 
 /**
  * Phục bàn miễn phí trong một chặng thực hành.
@@ -44,9 +46,11 @@ const FIELDS = [
 export function TrialReflectionForm({
   trialCode,
   questionTypes = [],
+  sourceQuestions = [],
 }: {
   trialCode: string;
   questionTypes?: string[];
+  sourceQuestions?: ReflectionSourceQuestion[];
 }) {
   const [state, formAction, pending] = useActionState<ReflectionState, FormData>(
     submitTrialReflectionAction,
@@ -84,7 +88,9 @@ export function TrialReflectionForm({
       <form action={formAction} className="mt-5 space-y-5">
         <input type="hidden" name="trialCode" value={trialCode} />
 
-        {questionTypes.length > 0 && (
+        <ReflectionSourcePicker sources={sourceQuestions} />
+
+        {questionTypes.length > 0 && sourceQuestions.length === 0 && (
           <label className="block">
             <span className="font-ui text-sm font-medium text-navy-deep">
               Dạng câu

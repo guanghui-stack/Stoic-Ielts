@@ -13,11 +13,8 @@ import {
 } from "@/lib/ranks/catalog";
 import { ensureUserRank, startTrial, syncTrialEligibility } from "@/lib/ranks/engine";
 import { loadRankFacts } from "@/lib/ranks/facts";
-import {
-  evaluateTrialGate,
-  evaluateTrialSuccess,
-  validateReflection,
-} from "@/lib/ranks/rules";
+import { evaluateTrialGate, evaluateTrialSuccess, validateReflection } from "@/lib/ranks/rules";
+import { isValidReflectionSource } from "@/lib/ranks/reflection-reference";
 
 /**
  * Server Action của hệ cấp bậc.
@@ -136,6 +133,21 @@ export async function submitTrialReflectionAction(
 
   const questionType = String(formData.get("questionType") ?? "").trim();
   const sourceAttemptId = String(formData.get("sourceAttemptId") ?? "").trim();
+  const sourceQuestionId = String(formData.get("sourceQuestionId") ?? "").trim();
+
+  if (sourceAttemptId || sourceQuestionId) {
+    if (!sourceAttemptId || !sourceQuestionId) {
+      return { error: "Thiếu tham chiếu câu sai, hãy chọn lại câu cần phục bàn." };
+    }
+    const validSource = await isValidReflectionSource({
+      userId: user.id,
+      attemptId: sourceAttemptId,
+      questionId: sourceQuestionId,
+    });
+    if (!validSource) {
+      return { error: "Câu tham chiếu không hợp lệ hoặc không thuộc bài của bạn." };
+    }
+  }
 
   await db.trialReflection.create({
     data: {
@@ -143,6 +155,7 @@ export async function submitTrialReflectionAction(
       userTrialId: userTrial.id,
       questionType: questionType || null,
       sourceAttemptId: sourceAttemptId || null,
+      sourceQuestionId: sourceQuestionId || null,
       evidenceText: input.evidenceText.trim(),
       explanation: input.explanation.trim(),
       lessonRule: input.lessonRule.trim(),
