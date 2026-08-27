@@ -2,6 +2,7 @@
 
 import { useId, useMemo, useState } from "react";
 import { Tag, X } from "lucide-react";
+import { cleanTag, normalizeTags, tagKey } from "@/lib/forum/tags";
 
 export type StoicTagTone =
   | "focus"
@@ -42,12 +43,12 @@ export function TagsInput({
   const id = useId();
   const hintId = `${id}-hint`;
   const statusId = `${id}-status`;
-  const [tags, setTags] = useState(() => normalizeInitial(defaultValue, maxTags));
+  const [tags, setTags] = useState(() => normalizeTags(defaultValue, maxTags));
   const [draft, setDraft] = useState("");
   const [message, setMessage] = useState("");
 
   const normalizedTags = useMemo(
-    () => new Set(tags.map((tag) => normalizeForCompare(tag))),
+    () => new Set(tags.map(tagKey)),
     [tags],
   );
 
@@ -57,13 +58,13 @@ export function TagsInput({
     onChange?.(next);
   }
 
-  function commitDraft() {
-    const value = cleanTag(draft);
+  function commitDraft(rawValue = draft) {
+    const value = cleanTag(rawValue);
     if (!value) {
       setDraft("");
       return;
     }
-    if (normalizedTags.has(normalizeForCompare(value))) {
+    if (normalizedTags.has(tagKey(value))) {
       setMessage(`Chủ đề “${value}” đã có.`);
       setDraft("");
       return;
@@ -121,14 +122,14 @@ export function TagsInput({
           onChange={(event) => {
             const value = event.target.value;
             if (value.endsWith(",")) {
-              setDraft(value.slice(0, -1));
-              queueMicrotask(commitDraft);
+              commitDraft(value.slice(0, -1));
+              setDraft("");
               return;
             }
             setDraft(value);
             if (message) setMessage("");
           }}
-          onBlur={commitDraft}
+          onBlur={() => commitDraft()}
           onKeyDown={(event) => {
             if (event.key === "Enter" || event.key === ",") {
               event.preventDefault();
@@ -168,26 +169,4 @@ export function TagsInput({
       ) : null}
     </div>
   );
-}
-
-function normalizeInitial(values: string[], maxTags: number): string[] {
-  const seen = new Set<string>();
-  const result: string[] = [];
-  for (const raw of values) {
-    const value = cleanTag(raw);
-    const key = normalizeForCompare(value);
-    if (!value || seen.has(key)) continue;
-    seen.add(key);
-    result.push(value);
-    if (result.length >= maxTags) break;
-  }
-  return result;
-}
-
-function cleanTag(value: string): string {
-  return value.trim().replace(/\s+/g, " ").slice(0, 36);
-}
-
-function normalizeForCompare(value: string): string {
-  return value.normalize("NFC").toLocaleLowerCase("vi-VN");
 }

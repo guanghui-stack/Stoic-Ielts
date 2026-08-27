@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Flag, Lock } from "lucide-react";
 import { useState, type CSSProperties } from "react";
 import { ART_ASSETS, type ArtAsset } from "@/lib/brand/art-manifest";
+import { ThreeAmbientCanvas } from "@/components/motion/three-ambient-canvas";
 import {
   TERRITORY_HIT_PATHS,
   TERRITORY_INTERACTION_IDLE,
@@ -97,6 +98,8 @@ export function FactionTerritoryMap({
             />
           );
         })}
+
+        <ThreeAmbientCanvas variant="territory" activeKey={activeCode} />
 
         <svg
           className="territory-map-hit-layer territory-interaction-layer"

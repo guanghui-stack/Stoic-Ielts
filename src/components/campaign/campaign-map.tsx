@@ -4,6 +4,7 @@ import type { CSSProperties } from "react";
 import { ART_ASSETS } from "@/lib/brand/art-manifest";
 import { InkWashArt } from "@/components/brand/ink-wash-art";
 import { WorldLandmarkRail } from "@/components/campaign/world-landmark-rail";
+import { ThreeAmbientCanvas } from "@/components/motion/three-ambient-canvas";
 import { STATE_LABELS, type CampaignNodeView } from "@/lib/campaign/view";
 import { stoicTrialLabel, stoicTrialTitle, type CampaignWorld } from "@/lib/campaign/world";
 
@@ -111,6 +112,8 @@ export function CampaignMap({
           <div className="world-map-art-fallback" />
           <InkWashArt asset={ART_ASSETS.campaignMap} className="object-cover opacity-70" />
         </div>
+
+        <ThreeAmbientCanvas variant="campaign" />
 
         <div className="world-map-route-layer">
           <svg

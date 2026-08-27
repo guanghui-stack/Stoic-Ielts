@@ -25,6 +25,8 @@ import {
 } from "@/components/forum/forum-forms";
 import { VoteButtons } from "@/components/forum/vote-buttons";
 import { RichText } from "@/components/forum/rich-text";
+import { ForumTags } from "@/components/forum/forum-tags";
+import { extractTagsFromBody } from "@/lib/forum/tags";
 import { NoteBox } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -83,6 +85,7 @@ export default async function PostPage({
   // phòng trong URL là đọc được bài của phòng bậc trên.
   if (!post || post.channelId !== channel.id) notFound();
   if (post.status !== "VISIBLE" && !viewer.isAdmin) notFound();
+  const postContent = extractTagsFromBody(post.body);
 
   const rows = await db.forumComment.findMany({
     where: { postId: post.id },
@@ -162,6 +165,7 @@ export default async function PostPage({
         <p className="mt-2 font-ui text-xs text-muted">
           {post.author.name} · {fmt(post.createdAt)}
         </p>
+        <ForumTags tags={postContent.tags} />
         <div className="rule-gold mt-4" />
 
         {/*
@@ -170,7 +174,7 @@ export default async function PostPage({
           để hiểu vì sao đó là điều kiện an toàn, không phải lựa chọn phong cách.
         */}
         <RichText
-          text={post.body}
+          text={postContent.content}
           className="mt-5 text-[0.98rem] leading-relaxed text-ink"
         />
 
