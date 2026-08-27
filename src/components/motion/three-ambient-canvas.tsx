@@ -64,7 +64,6 @@ function createScene(variant: AmbientVariant, activeKey: string | null) {
       color: PALETTE.primary,
       opacity: 0.66,
       speed: 0.055,
-      rotation: new THREE.Euler(0.22, -0.32, 0.2),
     });
     addRing(scene, animated, {
       radius: 1.88,
@@ -73,7 +72,6 @@ function createScene(variant: AmbientVariant, activeKey: string | null) {
       color: PALETTE.lavender,
       opacity: 0.5,
       speed: -0.035,
-      rotation: new THREE.Euler(-0.32, 0.24, -0.1),
     });
     const points = new THREE.BufferGeometry();
     const positions = new Float32Array(42 * 3);

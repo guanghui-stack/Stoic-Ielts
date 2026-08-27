@@ -2223,3 +2223,195 @@ body {
     transition: none;
   }
 }
+
+
+/* ===== LINEAR STOIC JOURNEY — thay orbit map cũ ===== */
+.world-shell .world-linear-stage {
+  aspect-ratio: auto;
+  min-height: 24rem;
+  border-color: var(--color-stoic-line, var(--color-line));
+  border-radius: var(--radius-stoic-lg, 1rem);
+  background:
+    radial-gradient(circle at 86% 22%, rgb(184 168 248 / 0.16), transparent 18rem),
+    radial-gradient(circle at 8% 88%, rgb(215 138 88 / 0.1), transparent 17rem),
+    var(--color-stoic-canvas, var(--color-paper));
+  box-shadow: 0 1.5rem 3.5rem -2.5rem rgb(23 32 51 / 0.4);
+}
+
+.world-shell .world-linear-header {
+  position: relative;
+  z-index: 2;
+  padding: 1.25rem 1.5rem 0;
+}
+
+.world-shell .world-linear-caption {
+  margin-top: 0.35rem;
+  color: var(--color-stoic-muted, var(--color-muted));
+  font-family: var(--font-inter, var(--font-ui));
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.world-shell .world-linear-track-wrap {
+  position: relative;
+  z-index: 1;
+  overflow-x: auto;
+  padding: 5rem 1.5rem 1.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--color-stoic-primary, var(--color-azure)) 45%, transparent) transparent;
+}
+
+.world-shell .world-linear-track {
+  position: absolute;
+  top: 6.15rem;
+  right: 4.5rem;
+  left: 4.5rem;
+  height: 0.2rem;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    var(--color-stoic-primary, var(--color-azure)),
+    var(--color-stoic-sage, var(--color-jade)),
+    var(--color-stoic-ruby, var(--color-vermilion))
+  );
+  opacity: 0.62;
+}
+
+.world-shell .world-linear-gates {
+  display: grid;
+  min-width: 64rem;
+  grid-template-columns: repeat(8, minmax(7.5rem, 1fr));
+  gap: 0.55rem;
+}
+
+.world-shell .world-linear-gate {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 16.25rem;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.world-shell .world-linear-step {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  width: 1.15rem;
+  height: 1.15rem;
+  place-items: center;
+  border: 0.2rem solid var(--color-stoic-canvas, var(--color-paper));
+  border-radius: 999px;
+  background: var(--color-stoic-muted, var(--color-muted));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-stoic-muted, var(--color-muted)) 45%, transparent);
+}
+
+.world-shell .world-linear-step__dot {
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.world-shell .world-linear-gate[data-state="AVAILABLE"] .world-linear-step,
+.world-shell .world-linear-gate[data-state="ACTIVE"] .world-linear-step {
+  background: var(--color-stoic-primary, var(--color-azure));
+  color: white;
+}
+
+.world-shell .world-linear-gate[data-state="PASSED"] .world-linear-step {
+  background: var(--color-stoic-sage, var(--color-jade));
+  color: white;
+}
+
+.world-shell .world-linear-gate .world-map-marker {
+  width: min(100%, 8.5rem);
+  min-height: 6.6rem;
+  border-color: color-mix(in srgb, var(--color-stoic-primary, var(--color-azure)) 20%, var(--color-line));
+  border-radius: var(--radius-stoic-md, 0.75rem);
+  background: rgb(255 255 255 / 0.78);
+  box-shadow: 0 0.9rem 2rem -1.3rem rgb(23 32 51 / 0.44);
+}
+
+.world-shell .world-linear-gate .world-map-marker-seal {
+  width: 2rem;
+  height: 2rem;
+  border-width: 1px;
+  box-shadow: none;
+}
+
+.world-shell .world-linear-gate .world-map-marker-current {
+  order: -1;
+}
+
+.world-shell .world-linear-gate .world-map-marker:not(.is-locked):hover {
+  transform: translateY(-3px);
+  border-color: var(--color-stoic-primary, var(--color-azure));
+  box-shadow: 0 1.2rem 2.5rem -1.5rem rgb(91 95 239 / 0.42);
+}
+
+@media (max-width: 1023px) {
+  .world-shell .world-linear-stage {
+    min-height: 0;
+  }
+
+  .world-shell .world-linear-track-wrap {
+    overflow: visible;
+    padding: 1.25rem 1rem 1.25rem 3.25rem;
+  }
+
+  .world-shell .world-linear-track {
+    top: 1.75rem;
+    bottom: 1.75rem;
+    left: 1.9rem;
+    width: 0.18rem;
+    height: auto;
+    background: linear-gradient(
+      180deg,
+      var(--color-stoic-primary, var(--color-azure)),
+      var(--color-stoic-sage, var(--color-jade)),
+      var(--color-stoic-ruby, var(--color-vermilion))
+    );
+  }
+
+  .world-shell .world-linear-gates {
+    min-width: 0;
+    grid-template-columns: 1fr;
+    gap: 0.7rem;
+  }
+
+  .world-shell .world-linear-gate {
+    min-height: 0;
+    min-width: 0;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 0.85rem;
+  }
+
+  .world-shell .world-linear-step {
+    flex: 0 0 auto;
+    margin-top: 0.95rem;
+  }
+
+  .world-shell .world-linear-gate .world-map-marker {
+    width: min(100%, 22rem);
+    min-height: 5.5rem;
+    align-items: flex-start;
+    padding: 0.7rem 0.8rem;
+    text-align: left;
+  }
+
+  .world-shell .world-linear-gate .world-map-marker-current {
+    align-self: flex-start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .world-shell .world-linear-gate .world-map-marker,
+  .world-shell .world-linear-gate .world-map-marker:not(.is-locked):hover {
+    animation: none;
+    transform: none;
+    transition: none;
+  }
+}
