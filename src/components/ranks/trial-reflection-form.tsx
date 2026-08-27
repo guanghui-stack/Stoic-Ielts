@@ -7,9 +7,9 @@ import { ErrorBanner, SubmitButton } from "@/components/ui";
 import { REFLECTION_MIN_LENGTH } from "@/lib/ranks/rules";
 
 /**
- * Phục bàn miễn phí trong thí luyện.
+ * Phục bàn miễn phí trong một chặng thực hành.
  *
- * Đây là đường KHÔNG MẤT TIỀN để thỏa điều kiện chữa bài của mọi cửa ải. Nó
+ * Đây là đường KHÔNG MẤT TIỀN để thỏa điều kiện chữa bài của mọi chặng. Nó
  * phải luôn tồn tại và luôn dùng được, kể cả với tài khoản chưa mua Feynman —
  * nếu không, hệ cấp bậc trở thành trả tiền để mạnh hơn, thứ mà quyết định số
  * 7 và số 10 của đặc tả cấm.
@@ -66,7 +66,7 @@ export function TrialReflectionForm({
         Tự chữa một câu sai
       </h2>
       <p className="mt-3 max-w-2xl text-[0.95rem] leading-relaxed text-ink-soft">
-        Lượt phục bàn này hoàn toàn miễn phí và được tính cho cửa ải y như một
+        Lượt phục bàn này hoàn toàn miễn phí và được tính cho chặng y như một
         lượt Feynman. Bạn không cần mua gì để thăng cấp.
       </p>
 

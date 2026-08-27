@@ -15,7 +15,6 @@ import { ensureUserRank, syncTrialEligibility } from "@/lib/ranks/engine";
 import { loadRankFacts } from "@/lib/ranks/facts";
 import { evaluateTrialGate, evaluateTrialSuccess } from "@/lib/ranks/rules";
 import { trialByCode, rankByLevel } from "@/lib/ranks/catalog";
-import { generalByCode } from "@/lib/story/generals";
 
 export const dynamic = "force-dynamic";
 
@@ -56,7 +55,6 @@ export default async function TrialPage({
     : null;
 
   const node = campaignNodeByTrial(trialCode);
-  const general = generalByCode(trial.featuredGeneralCode);
   const fromRank = rankByLevel(trial.fromLevel);
   const toRank = rankByLevel(trial.toLevel);
 
@@ -79,7 +77,7 @@ export default async function TrialPage({
           className="mb-8 inline-flex items-center gap-2 text-sm text-muted hover:text-navy"
         >
           <ArrowLeft className="size-4" aria-hidden />
-          Chiến Dịch
+          Hành Trình
         </Link>
       </div>
 
@@ -87,10 +85,10 @@ export default async function TrialPage({
         asset={node ? ART_ASSETS[node.artKey] : ART_ASSETS.campaignMap}
         eyebrow={node?.functionalLabel ?? "Thí luyện"}
         title={trial.name}
-        functionalLabel="Cửa ải thăng cấp cá nhân"
+        functionalLabel="Chặng thăng cấp cá nhân"
       >
         <p className="font-ui text-sm text-muted">
-          {fromRank?.name} → {toRank?.name} · {general.name} · {trial.estimate}
+          {fromRank?.name} → {toRank?.name} · {trial.stoicAnchor} · {trial.estimate}
         </p>
         <p className="mt-4 text-[0.95rem] leading-relaxed text-ink-soft">
           {trial.narrative}
@@ -102,7 +100,7 @@ export default async function TrialPage({
       <div className="mt-6 border-l-4 border-gold bg-cream-deep px-6 py-5">
         <p className="label-caps flex items-center gap-2">
           <ScrollText className="h-3.5 w-3.5" aria-hidden />
-          Cửa ải này rèn điều gì
+          Chặng này rèn điều gì
         </p>
         <p className="mt-2 font-ui text-sm font-semibold text-navy-deep">
           {trial.skill}
@@ -115,22 +113,22 @@ export default async function TrialPage({
       <div className="mt-8 space-y-6">
         {passed ? (
           <section
-            aria-label="Trạng thái cửa ải"
+            aria-label="Trạng thái chặng"
             className="border border-vermilion bg-vermilion-pale p-7"
           >
-            <p className="label-caps">Đã vượt</p>
+            <p className="label-caps">Đã hoàn thành</p>
             <h2 className="mt-2.5 font-display text-xl font-bold text-navy-deep">
-              Bạn đã qua cửa ải này
+              Bạn đã qua chặng này
             </h2>
             <p className="mt-3 text-[0.95rem] leading-relaxed text-ink-soft">
-              Cấp bậc chỉ tăng, không bao giờ tụt — cửa ải đã vượt thì vượt vĩnh viễn.
+              Cấp bậc chỉ tăng, không bao giờ tụt — chặng đã vượt thì vượt vĩnh viễn.
             </p>
           </section>
         ) : !ownLevel ? (
-          <NoteBox title="Chưa tới lượt cửa ải này">
-            Bạn đang ở bậc {profile.currentLevel}, còn cửa ải này đi ra từ bậc{" "}
-            {trial.fromLevel}. Hãy vượt các cửa trước đã — bản đồ Chiến Dịch cho
-            bạn thấy đường đi.
+          <NoteBox title="Chưa tới lượt chặng này">
+            Bạn đang ở bậc {profile.currentLevel}, còn chặng này đi ra từ bậc{" "}
+            {trial.fromLevel}. Hãy hoàn thành các chặng trước đã — bản đồ Hành Trình
+            cho bạn thấy đường đi.
           </NoteBox>
         ) : (
           <TrialGateCard
@@ -146,7 +144,7 @@ export default async function TrialPage({
 
         {isActive && progress && (
           <section
-            aria-label="Tiến độ vượt cửa ải"
+            aria-label="Tiến độ hoàn thành chặng"
             className="border border-line bg-paper p-7"
           >
             <p className="label-caps">Tiến độ</p>
