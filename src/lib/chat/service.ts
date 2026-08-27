@@ -25,6 +25,7 @@ export type InboxItem = {
   lastMessage: { body: string; createdAt: Date; senderId: string } | null;
   lastMessageAt: Date | null;
   unread: boolean;
+  unreadCount: number;
 };
 
 export type ConversationView = {
@@ -59,22 +60,6 @@ function isParticipant(
   return conversation.participantAId === userId || conversation.participantBId === userId;
 }
 
-function unreadFor(
-  conversation: {
-    participantAId: string;
-    participantAReadAt: Date | null;
-    participantBReadAt: Date | null;
-    lastMessageAt: Date | null;
-  },
-  userId: string,
-): boolean {
-  if (!conversation.lastMessageAt) return false;
-  const readAt = conversation.participantAId === userId
-    ? conversation.participantAReadAt
-    : conversation.participantBReadAt;
-  return !readAt || readAt < conversation.lastMessageAt;
-}
-
 export async function listInbox(userId: string): Promise<ChatResult<InboxItem[]>> {
   const account = await studentAccount(userId);
   if (!accountIsStudent(account)) return { ok: false, error: "Chỉ học viên mới dùng được hộp chat." };
@@ -94,22 +79,38 @@ export async function listInbox(userId: string): Promise<ChatResult<InboxItem[]>
     },
   });
 
-  return {
-    ok: true,
-    value: conversations.reduce<InboxItem[]>((items, conversation) => {
+  const inboxItems = await Promise.all(
+    conversations.map(async (conversation): Promise<InboxItem | null> => {
       const other = conversation.participantAId === userId
         ? conversation.participantB
         : conversation.participantA;
-      if (other.role !== "STUDENT" || !other.active || other.isBot) return items;
-      items.push({
+      if (other.role !== "STUDENT" || !other.active || other.isBot) return null;
+
+      const readAt = conversation.participantAId === userId
+        ? conversation.participantAReadAt
+        : conversation.participantBReadAt;
+      const unreadCount = await db.directMessage.count({
+        where: {
+          conversationId: conversation.id,
+          senderId: { not: userId },
+          ...(readAt ? { createdAt: { gt: readAt } } : {}),
+        },
+      });
+
+      return {
         id: conversation.id,
         other: { id: other.id, name: other.name },
         lastMessage: conversation.messages[0] ?? null,
         lastMessageAt: conversation.lastMessageAt,
-        unread: unreadFor(conversation, userId),
-      });
-      return items;
-    }, []),
+        unread: unreadCount > 0,
+        unreadCount,
+      };
+    }),
+  );
+
+  return {
+    ok: true,
+    value: inboxItems.filter((item): item is InboxItem => item !== null),
   };
 }
 

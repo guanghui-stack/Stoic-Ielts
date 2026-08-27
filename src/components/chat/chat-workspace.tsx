@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
-import { MessageCircle, RefreshCw, Search, Send, UserRound } from "lucide-react";
+import { MessageCircle, Plus, RefreshCw, Search, Send, UserRound } from "lucide-react";
 import {
   searchStudentsAction,
   sendMessageAction,
@@ -20,6 +20,7 @@ export type ChatInboxItem = {
   lastMessage: { body: string; createdAt: string; senderId: string } | null;
   lastMessageAt: string | null;
   unread: boolean;
+  unreadCount: number;
 };
 
 export type ChatConversation = {
@@ -100,7 +101,7 @@ function SearchStudents() {
   );
 
   return (
-    <div className="border border-line bg-paper p-5">
+    <div id="student-search-panel" className="border border-line bg-paper p-5 scroll-mt-6">
       <div className="flex items-start gap-3">
         <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center bg-stoic-lavender-pale text-navy-deep">
           <UserRound className="size-4" aria-hidden />
@@ -251,49 +252,106 @@ function ConversationPanel({
 }
 
 function Inbox({ items, activeId }: { items: ChatInboxItem[]; activeId?: string }) {
+  const [search, setSearch] = useState("");
+  const normalizedSearch = search.trim().toLocaleLowerCase("vi-VN");
+  const filteredItems = normalizedSearch
+    ? items.filter((item) =>
+        `${item.other.name} ${item.lastMessage?.body ?? ""}`
+          .toLocaleLowerCase("vi-VN")
+          .includes(normalizedSearch),
+      )
+    : items;
+  const unreadTotal = items.reduce((total, item) => total + item.unreadCount, 0);
+
+  function focusNewChat() {
+    const input = document.getElementById("student-search");
+    input?.scrollIntoView({ behavior: "smooth", block: "center" });
+    input?.focus();
+  }
+
   return (
-    <aside className="w-full border border-line bg-paper lg:w-[21rem] lg:shrink-0" aria-label="Hộp thư">
-      <div className="border-b border-line px-5 py-4">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <h2 className="font-display text-lg font-bold text-navy-deep">Hộp thư</h2>
-            <p className="mt-1 font-ui text-xs text-muted">{items.length} cuộc đối thoại</p>
-          </div>
-          <MessageCircle className="size-5 text-stoic-primary" aria-hidden />
+    <aside className="flex w-full flex-col overflow-hidden rounded-2xl border border-line bg-paper lg:w-[21rem] lg:shrink-0" aria-label="Danh sách thông báo chat">
+      <header className="flex items-center justify-between gap-3 border-b border-line px-4 py-3.5">
+        <div className="min-w-0">
+          <h2 className="font-display text-lg font-bold text-navy-deep">Tin nhắn</h2>
+          <p className="mt-1 font-ui text-xs text-muted">
+            {unreadTotal > 0 ? `${unreadTotal} tin chưa đọc` : `${items.length} cuộc đối thoại`}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={focusNewChat}
+          aria-label="Bắt đầu cuộc trò chuyện mới"
+          className="world-action inline-flex size-9 shrink-0 items-center justify-center rounded-xl border border-line text-navy-deep transition-colors hover:border-stoic-primary hover:bg-stoic-lavender-pale focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/40"
+        >
+          <Plus className="size-4" aria-hidden="true" />
+        </button>
+      </header>
+
+      <div className="border-b border-line px-4 py-3">
+        <label htmlFor="chat-inbox-search" className="sr-only">Tìm trong tin nhắn</label>
+        <div className="relative">
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" aria-hidden="true" />
+          <input
+            id="chat-inbox-search"
+            type="search"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Tìm người hoặc tin nhắn…"
+            autoComplete="off"
+            spellCheck={false}
+            className="min-h-10 w-full rounded-xl border border-line bg-canvas py-2 pl-9 pr-3 font-ui text-sm text-ink outline-none transition-colors placeholder:text-muted/70 focus:border-stoic-primary"
+          />
         </div>
       </div>
+
       <div className="max-h-[32rem] overflow-y-auto">
-        {items.length === 0 ? (
-          <p className="px-5 py-8 font-ui text-sm leading-relaxed text-muted">
-            Hộp thư đang trống. Hãy tìm một học viên để bắt đầu đối thoại.
+        {filteredItems.length === 0 ? (
+          <p className="px-4 py-8 font-ui text-sm leading-relaxed text-muted">
+            {items.length === 0 ? "Chưa có đối thoại. Hãy bấm dấu cộng để tìm một học viên." : "Không tìm thấy cuộc đối thoại phù hợp."}
           </p>
         ) : (
-          items.map((item) => (
-            <Link
-              key={item.id}
-              href={`/hoc-vien/tin-nhan?conversation=${encodeURIComponent(item.id)}`}
-              className={`world-action block border-b border-line/80 px-5 py-4 transition-colors hover:bg-cream ${activeId === item.id ? "bg-stoic-lavender-pale" : ""}`}
-              aria-current={activeId === item.id ? "page" : undefined}
-            >
-              <div className="flex items-start gap-3">
-                <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-cream-deep font-display text-sm font-bold text-navy-deep">
-                  {item.other.name.slice(0, 1).toUpperCase()}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className={`truncate font-ui text-sm ${item.unread ? "font-bold text-navy-deep" : "font-semibold text-ink"}`}>{item.other.name}</p>
-                    {item.unread && <span className="size-2 shrink-0 rounded-full bg-stoic-primary" aria-label="Tin chưa đọc" />}
-                  </div>
-                  <p className={`mt-1 truncate font-ui text-xs ${item.unread ? "font-medium text-ink" : "text-muted"}`}>
-                    {item.lastMessage?.body ?? "Chưa có tin nhắn"}
-                  </p>
-                  <time dateTime={item.lastMessageAt ?? undefined} className="mt-1 block font-ui text-[10px] text-muted">
-                    {formatTime(item.lastMessageAt)}
-                  </time>
-                </div>
-              </div>
-            </Link>
-          ))
+          <section aria-labelledby="direct-chat-list-label">
+            <h3 id="direct-chat-list-label" className="px-4 pb-2 pt-3 font-ui text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-muted">
+              Đối thoại riêng
+            </h3>
+            <ul>
+              {filteredItems.map((item) => (
+                <li key={item.id}>
+                  <Link
+                    href={`/hoc-vien/tin-nhan?conversation=${encodeURIComponent(item.id)}`}
+                    className={`world-action block border-t border-line/70 px-4 py-3 transition-colors hover:bg-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-stoic-primary/50 ${activeId === item.id ? "bg-stoic-lavender-pale" : ""}`}
+                    aria-current={activeId === item.id ? "page" : undefined}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-cream-deep font-display text-sm font-bold text-navy-deep">
+                        {item.other.name.slice(0, 1).toUpperCase()}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className={`truncate font-ui text-sm ${item.unread ? "font-bold text-navy-deep" : "font-semibold text-ink"}`}>{item.other.name}</p>
+                          <time dateTime={item.lastMessageAt ?? undefined} className="shrink-0 font-ui text-[10px] text-muted">
+                            {formatTime(item.lastMessageAt)}
+                          </time>
+                        </div>
+                        <p className={`mt-1 truncate font-ui text-xs ${item.unread ? "font-medium text-ink" : "text-muted"}`}>
+                          {item.lastMessage?.body ?? "Chưa có tin nhắn"}
+                        </p>
+                      </div>
+                      {item.unreadCount > 0 ? (
+                        <span
+                          className="inline-flex min-w-5 shrink-0 items-center justify-center rounded-full bg-stoic-primary px-1.5 py-0.5 font-ui text-[10px] font-bold text-paper"
+                          aria-label={`${item.unreadCount} tin chưa đọc`}
+                        >
+                          {item.unreadCount > 99 ? "99+" : item.unreadCount}
+                        </span>
+                      ) : null}
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
         )}
       </div>
     </aside>

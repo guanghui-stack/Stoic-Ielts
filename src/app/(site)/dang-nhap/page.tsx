@@ -18,6 +18,7 @@ export default async function LoginPage() {
       eyebrow="Quay về điều đang làm"
       title="Đăng nhập"
       lede="Tiếp tục từ đúng nơi bạn đã dừng. Bài làm, dữ liệu tiến bộ và những điều cần rèn vẫn được giữ trong hồ sơ của bạn."
+      variant="auth"
     >
       <LoginForm />
     </QuietWorldPanel>
