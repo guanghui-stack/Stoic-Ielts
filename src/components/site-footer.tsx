@@ -10,7 +10,7 @@ export function SiteFooter() {
       <div className="mx-auto grid max-w-6xl gap-10 px-6 py-14 md:grid-cols-[1.4fr_1fr_1fr]">
         <div>
           <div className="flex items-center gap-3">
-            <StoicMark className="h-10 w-10 text-stoic-lavender [&>circle:first-child]:fill-white/10" />
+            <StoicMark className="h-10 w-10" />
             <div className="leading-none">
               <p className="font-stoic text-xl font-medium tracking-[-0.035em] text-white">
                 STOIC<span className="mx-1 text-stoic-lavender">·</span>IELTS

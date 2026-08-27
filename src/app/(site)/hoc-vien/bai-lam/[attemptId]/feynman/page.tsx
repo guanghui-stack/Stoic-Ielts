@@ -99,12 +99,12 @@ export default async function FeynmanPage({
   });
 
   return (
-    <section className="mx-auto max-w-4xl px-6 py-12 md:py-14">
+    <section className="mx-auto max-w-4xl px-4 py-10 sm:px-6 md:py-14">
       {/* Chữa bài là học thật — thời gian ở đây được tính vào danh hiệu kỷ luật */}
       <StudyHeartbeat kind="FEYNMAN" />
       <Link
         href={`/hoc-vien/bai-lam/${attemptId}`}
-        className="inline-flex items-center gap-2 font-ui text-sm font-semibold text-navy hover:text-gold"
+        className="inline-flex items-center gap-2 rounded-lg font-ui text-sm font-semibold text-navy transition-colors hover:text-stoic-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/40"
       >
         <ArrowLeft className="h-4 w-4" aria-hidden="true" />
         Kết quả bài làm
@@ -112,7 +112,7 @@ export default async function FeynmanPage({
 
       <div className="mt-6">
         <p className="label-caps">
-          Chữa bài theo phương pháp Feynman ·{" "}
+          Tự giảng · Feynman AI ·{" "}
           {review.mode === "DEEP" ? "Chữa sâu" : "Chữa nhanh"}
         </p>
         <h1 className="mt-3 font-display text-3xl font-bold leading-tight text-navy-deep md:text-4xl">

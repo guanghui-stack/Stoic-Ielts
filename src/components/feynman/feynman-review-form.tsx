@@ -133,14 +133,14 @@ function ConfidenceScale({
         {[1, 2, 3, 4, 5].map((v) => (
           <label
             key={v}
-            className="flex min-h-11 cursor-pointer items-center gap-2 border border-line bg-paper px-3 py-2 font-ui text-sm text-ink transition-colors hover:border-navy has-[:checked]:border-gold has-[:checked]:bg-gold-pale has-[:checked]:font-semibold"
+            className="flex min-h-11 cursor-pointer items-center gap-2 border border-line bg-paper px-3 py-2 font-ui text-sm text-ink transition-colors hover:border-stoic-primary has-[:checked]:border-stoic-primary has-[:checked]:bg-stoic-primary-soft has-[:checked]:font-semibold"
           >
             <input
               type="radio"
               name={name}
               value={v}
               defaultChecked={defaultValue === v}
-              className="h-4 w-4 shrink-0 accent-[#b8862b]"
+              className="h-4 w-4 shrink-0 accent-[var(--color-stoic-primary)]"
             />
             <span>
               <span className="font-bold tabular-nums">{v}</span>
@@ -158,7 +158,7 @@ function MistakeHeader({ m }: { m: FeynmanMistakeView }) {
   return (
     <div className="border-b border-line bg-cream-deep px-5 py-4">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="border border-gold bg-gold-pale px-2.5 py-0.5 font-ui text-xs font-bold text-navy-deep">
+        <span className="rounded-full border border-stoic-primary bg-stoic-primary-soft px-2.5 py-0.5 font-ui text-xs font-bold text-stoic-primary-deep">
           Câu {m.numberLabel}
         </span>
         <span className="font-ui text-xs text-muted">
@@ -198,7 +198,7 @@ export function FeynmanStepper({ current }: { current: 1 | 2 | 3 | 4 }) {
             <span
               className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full font-ui text-xs font-bold ${
                 active
-                  ? "bg-gold text-navy-deep"
+                  ? "bg-stoic-primary text-white"
                   : done
                     ? "bg-success text-paper"
                     : "border border-line-strong text-muted"
@@ -319,14 +319,14 @@ export function FeynmanDraftForm({
                         {FEYNMAN_ERROR_TYPES.map((t) => (
                           <label
                             key={t}
-                            className="flex min-h-11 cursor-pointer items-start gap-2.5 border border-line bg-cream px-3 py-2.5 font-ui text-[0.85rem] leading-snug text-ink transition-colors hover:border-navy has-[:checked]:border-gold has-[:checked]:bg-gold-pale"
+                            className="flex min-h-11 cursor-pointer items-start gap-2.5 border border-line bg-cream px-3 py-2.5 font-ui text-[0.85rem] leading-snug text-ink transition-colors hover:border-stoic-primary has-[:checked]:border-stoic-primary has-[:checked]:bg-stoic-primary-soft"
                           >
                             <input
                               type="radio"
                               name={`errorType_${m.id}`}
                               value={t}
                               defaultChecked={m.errorType === t}
-                              className="mt-0.5 h-4 w-4 shrink-0 accent-[#b8862b]"
+                              className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--color-stoic-primary)]"
                             />
                             {FEYNMAN_ERROR_LABELS[t]}
                           </label>
@@ -373,7 +373,7 @@ export function FeynmanDraftForm({
         )}
       </section>
 
-      <div className="border-l-4 border-gold bg-cream-deep px-6 py-5">
+      <div className="rounded-r-xl border-l-4 border-stoic-primary bg-stoic-canvas-soft px-6 py-5">
         <p className="font-ui text-sm leading-relaxed text-ink-soft">
           Nộp xong bước này, hệ thống mới mở lời giải mẫu và đáp án đúng. Bạn sẽ
           không sửa được phần đã viết ở trên — đó là điểm mấu chốt để so sánh
@@ -569,7 +569,7 @@ export function FeynmanRevealedForm({
         </div>
       </section>
 
-      <div className="border-l-4 border-gold bg-cream-deep px-6 py-5">
+      <div className="rounded-r-xl border-l-4 border-stoic-primary bg-stoic-canvas-soft px-6 py-5">
         <p className="font-ui text-sm leading-relaxed text-ink-soft">
           Hoàn thành xong, toàn bộ đáp án đúng của bài sẽ được mở ở trang kết
           quả, và bản chữa bài này được lưu lại để bạn xem lại bất cứ lúc nào.

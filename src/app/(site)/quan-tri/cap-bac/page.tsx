@@ -75,7 +75,10 @@ export default async function RankAdminPage() {
         <code className="text-xs">src/lib/ranks/catalog.ts</code> rồi mở PR.
       </p>
 
-      <section aria-label="Phân bố cấp bậc" className="mt-8 border border-line bg-paper p-7">
+      <section
+        aria-label="Phân bố cấp bậc"
+        className="mt-8 overflow-hidden rounded-[var(--radius-stoic-lg)] border border-line bg-paper p-4 sm:p-6 lg:p-7"
+      >
         <h2 className="font-display text-lg font-bold text-navy-deep">
           Học viên theo cấp bậc
         </h2>
@@ -83,29 +86,38 @@ export default async function RankAdminPage() {
           Tổng {totalStudents} hồ sơ cấp bậc
         </p>
 
-        <div className="mt-5 overflow-x-auto">
-          <table className="w-full border-collapse text-left">
+        <div className="mt-5 max-w-full overflow-x-auto rounded-[var(--radius-stoic-md)] border border-line/80 bg-cream/20 [overscroll-behavior-inline:contain]">
+          <table className="w-full min-w-[760px] table-fixed border-collapse text-left">
+            <caption className="sr-only">Phân bố học viên theo chín cấp bậc STOIC</caption>
+            <colgroup>
+              <col className="w-[7%]" />
+              <col className="w-[13%]" />
+              <col className="w-[20%]" />
+              <col className="w-[16%]" />
+              <col className="w-[30%]" />
+              <col className="w-[14%]" />
+            </colgroup>
             <thead>
-              <tr className="border-b border-line">
-                <th scope="col" className="py-2 font-ui text-xs uppercase tracking-wide text-muted">Bậc</th>
-                <th scope="col" className="py-2 font-ui text-xs uppercase tracking-wide text-muted">Huy hiệu</th>
-                <th scope="col" className="py-2 font-ui text-xs uppercase tracking-wide text-muted">Tên</th>
-                <th scope="col" className="py-2 font-ui text-xs uppercase tracking-wide text-muted">Thời đại</th>
-                <th scope="col" className="py-2 font-ui text-xs uppercase tracking-wide text-muted">Neo năng lực</th>
-                <th scope="col" className="py-2 text-right font-ui text-xs uppercase tracking-wide text-muted">Học viên</th>
+              <tr className="border-b border-line bg-cream/35">
+                <th scope="col" className="px-3 py-2.5 font-ui text-[0.68rem] uppercase tracking-wide text-muted">Bậc</th>
+                <th scope="col" className="px-3 py-2.5 font-ui text-[0.68rem] uppercase tracking-wide text-muted">Huy hiệu</th>
+                <th scope="col" className="px-3 py-2.5 font-ui text-[0.68rem] uppercase tracking-wide text-muted">Tên</th>
+                <th scope="col" className="px-3 py-2.5 font-ui text-[0.68rem] uppercase tracking-wide text-muted">Thời đại</th>
+                <th scope="col" className="px-3 py-2.5 font-ui text-[0.68rem] uppercase tracking-wide text-muted">Neo năng lực</th>
+                <th scope="col" className="px-3 py-2.5 text-right font-ui text-[0.68rem] uppercase tracking-wide text-muted">Học viên</th>
               </tr>
             </thead>
             <tbody>
               {RANK_SEEDS.map((rank) => (
-                <tr key={rank.code} className="border-b border-line last:border-0">
-                  <td className="py-2 font-ui text-sm tabular-nums text-ink-soft">{rank.level}</td>
-                  <td className="py-2">
-                    <RankInsignia level={rank.level} className="h-10 w-10" />
+                <tr key={rank.code} className="border-b border-line last:border-0 hover:bg-cream/25">
+                  <td className="whitespace-nowrap px-3 py-3 align-middle font-ui text-sm tabular-nums text-ink-soft">{rank.level}</td>
+                  <td className="px-3 py-3 align-middle">
+                    <RankInsignia level={rank.level} className="h-9 w-9" />
                   </td>
-                  <td className="py-2 font-ui text-sm font-medium text-navy-deep">{rank.name}</td>
-                  <td className="py-2 font-ui text-sm text-ink-soft">{RANK_ERAS[rank.era].name}</td>
-                  <td className="py-2 font-ui text-sm text-muted">{rank.bandAnchor}</td>
-                  <td className="py-2 text-right font-ui text-sm tabular-nums text-navy-deep">
+                  <td className="break-words px-3 py-3 align-middle font-ui text-sm font-medium text-navy-deep">{rank.name}</td>
+                  <td className="break-words px-3 py-3 align-middle font-ui text-sm text-ink-soft">{RANK_ERAS[rank.era].name}</td>
+                  <td className="break-words px-3 py-3 align-middle font-ui text-sm leading-snug text-muted">{rank.bandAnchor}</td>
+                  <td className="whitespace-nowrap px-3 py-3 text-right align-middle font-ui text-sm tabular-nums text-navy-deep">
                     {byLevel.get(rank.level) ?? 0}
                   </td>
                 </tr>
@@ -115,7 +127,10 @@ export default async function RankAdminPage() {
         </div>
       </section>
 
-      <section aria-label="Tám cửa ải" className="mt-6 border border-line bg-paper p-7">
+      <section
+        aria-label="Tám cửa ải"
+        className="mt-6 overflow-hidden rounded-[var(--radius-stoic-lg)] border border-line bg-paper p-4 sm:p-6 lg:p-7"
+      >
         <h2 className="font-display text-lg font-bold text-navy-deep">
           Tám cửa ải
         </h2>
@@ -123,40 +138,49 @@ export default async function RankAdminPage() {
           Hoa Dung đạo: {graceCount} học viên còn token
         </p>
 
-        <div className="mt-5 overflow-x-auto">
-          <table className="w-full border-collapse text-left">
+        <div className="mt-5 max-w-full overflow-x-auto rounded-[var(--radius-stoic-md)] border border-line/80 bg-cream/20 [overscroll-behavior-inline:contain]">
+          <table className="w-full min-w-[700px] table-fixed border-collapse text-left">
+            <caption className="sr-only">Thống kê trạng thái tám cửa ải</caption>
+            <colgroup>
+              <col className="w-[13%]" />
+              <col className="w-[27%]" />
+              <col className="w-[25%]" />
+              <col className="w-[11.66%]" />
+              <col className="w-[11.66%]" />
+              <col className="w-[11.66%]" />
+            </colgroup>
             <thead>
-              <tr className="border-b border-line">
-                <th scope="col" className="py-2 font-ui text-xs uppercase tracking-wide text-muted">Cửa</th>
-                <th scope="col" className="py-2 font-ui text-xs uppercase tracking-wide text-muted">Tên</th>
-                <th scope="col" className="py-2 font-ui text-xs uppercase tracking-wide text-muted">Nhân vật</th>
-                <th scope="col" className="py-2 text-right font-ui text-xs uppercase tracking-wide text-muted">Đã mở</th>
-                <th scope="col" className="py-2 text-right font-ui text-xs uppercase tracking-wide text-muted">Đang làm</th>
-                <th scope="col" className="py-2 text-right font-ui text-xs uppercase tracking-wide text-muted">Đã vượt</th>
+              <tr className="border-b border-line bg-cream/35">
+                <th scope="col" className="px-3 py-2.5 font-ui text-[0.68rem] uppercase tracking-wide text-muted">Cửa</th>
+                <th scope="col" className="px-3 py-2.5 font-ui text-[0.68rem] uppercase tracking-wide text-muted">Tên</th>
+                <th scope="col" className="px-3 py-2.5 font-ui text-[0.68rem] uppercase tracking-wide text-muted">Nhân vật</th>
+                <th scope="col" className="px-3 py-2.5 text-right font-ui text-[0.68rem] uppercase tracking-wide text-muted">Đã mở</th>
+                <th scope="col" className="px-3 py-2.5 text-right font-ui text-[0.68rem] uppercase tracking-wide text-muted">Đang làm</th>
+                <th scope="col" className="px-3 py-2.5 text-right font-ui text-[0.68rem] uppercase tracking-wide text-muted">Đã vượt</th>
               </tr>
             </thead>
             <tbody>
               {TRIAL_SEEDS.map((trial) => {
                 const stats = byTrial.get(trial.code) ?? {};
                 return (
-                  <tr key={trial.code} className="border-b border-line last:border-0">
-                    <td className="py-2 font-ui text-sm tabular-nums text-ink-soft">
+                  <tr key={trial.code} className="border-b border-line last:border-0 hover:bg-cream/25">
+                    <td className="whitespace-nowrap px-3 py-3 align-middle font-ui text-sm tabular-nums text-ink-soft">
                       {trial.fromLevel}→{trial.toLevel}
                     </td>
-                    <td className="py-2 font-ui text-sm font-medium text-navy-deep">
+                    <td className="break-words px-3 py-3 align-middle font-ui text-sm font-medium text-navy-deep">
                       {trial.name}
                       <span className="block text-xs font-normal text-muted">{trial.skill}</span>
                     </td>
-                    <td className="py-2 font-ui text-sm text-ink-soft">
+                    <td className="break-words px-3 py-3 align-middle font-ui text-sm text-ink-soft">
                       {generalByCode(trial.featuredGeneralCode).name}
                     </td>
-                    <td className="py-2 text-right font-ui text-sm tabular-nums text-ink-soft">
+                    <td className="whitespace-nowrap px-3 py-3 text-right align-middle font-ui text-sm tabular-nums text-ink-soft">
                       {stats.ELIGIBLE ?? 0}
                     </td>
-                    <td className="py-2 text-right font-ui text-sm tabular-nums text-azure-ink">
+                    <td className="whitespace-nowrap px-3 py-3 text-right align-middle font-ui text-sm tabular-nums text-azure-ink">
                       {stats.ACTIVE ?? 0}
                     </td>
-                    <td className="py-2 text-right font-ui text-sm tabular-nums text-jade-ink">
+                    <td className="whitespace-nowrap px-3 py-3 text-right align-middle font-ui text-sm tabular-nums text-jade-ink">
                       {stats.PASSED ?? 0}
                     </td>
                   </tr>

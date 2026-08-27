@@ -82,9 +82,10 @@ export default function RankPreviewPage() {
 
       <Block title="Chín dấu mốc — huy hiệu cấp bậc">
         <p className="mb-5 max-w-2xl font-ui text-sm leading-relaxed text-ink-soft">
-          Núm ấn đổi theo thời đại (thanh ngang · vòng · vòng kép), số vạch
-          trong lòng ấn là bậc trong thời đại đó. Dải nhỏ bên dưới là cỡ thật
-          khi huy hiệu nằm cạnh tên trong bảng — đó mới là chỗ dễ vỡ.
+          Tâm điểm và quỹ đạo mở là ngôn ngữ chung của STOIC · IELTS. Màu accent
+          thay đổi theo thời đại, còn một, hai hoặc ba nút tiến bộ cho biết bậc
+          trong từng chặng. Dải nhỏ bên dưới là cỡ thật khi huy hiệu nằm cạnh
+          tên trong bảng — đó mới là chỗ dễ vỡ.
         </p>
         <div className="flex flex-wrap gap-5">
           {RANK_SEEDS.map((rank) => (

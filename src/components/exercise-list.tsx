@@ -25,7 +25,7 @@ export async function ExerciseList({
 }) {
   const user = await getCurrentUser();
   const exercises = await db.exercise.findMany({
-    // Đề Nguyệt Thí bị loại khỏi khu luyện tập: luyện trước bằng chính đề thi
+    // Đề Thử thách tháng bị loại khỏi khu luyện tập: luyện trước bằng chính đề thi
     // thì cuộc thi mất hết ý nghĩa.
     where: {
       skill: "READING",
@@ -82,11 +82,11 @@ export async function ExerciseList({
         return (
           <article
             key={ex.id}
-            className="flex flex-col gap-5 border border-line bg-paper p-7 shadow-card md:flex-row md:items-center md:justify-between"
+            className="flex flex-col gap-5 rounded-2xl border border-line bg-paper p-7 shadow-card transition-[border-color,box-shadow] duration-200 hover:border-stoic-primary/45 md:flex-row md:items-center md:justify-between"
           >
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-3">
-                <span className="font-ui text-sm font-bold tabular-nums text-gold">
+                <span className="font-ui text-sm font-bold tabular-nums text-stoic-primary-deep">
                   {String(idx + 1).padStart(2, "0")}
                 </span>
                 <h3 className="font-display text-xl font-bold text-navy-deep">
@@ -94,7 +94,7 @@ export async function ExerciseList({
                 </h3>
                 {ex.accessLevel === "RESTRICTED" && (
                   <span
-                    className={`inline-flex items-center gap-1.5 border px-2.5 py-0.5 font-ui text-[0.68rem] font-semibold uppercase tracking-[0.08em] ${
+                      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-ui text-[0.68rem] font-semibold uppercase tracking-[0.08em] ${
                       canDo(ex)
                         ? "border-success bg-success-pale text-success"
                         : "border-line-strong bg-cream-deep text-ink-soft"
@@ -126,7 +126,7 @@ export async function ExerciseList({
               {!user ? (
                 <Link
                   href="/dang-nhap"
-                  className="inline-flex items-center gap-2 border border-navy px-6 py-2.5 font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-navy transition-colors hover:bg-navy hover:text-paper"
+                  className="inline-flex items-center gap-2 rounded-xl border border-navy px-6 py-2.5 font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-navy transition-colors hover:bg-navy hover:text-paper focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/40"
                 >
                   <PlayCircle className="h-4 w-4" aria-hidden="true" />
                   Đăng nhập để làm bài
@@ -148,7 +148,7 @@ export async function ExerciseList({
                   ) : (
                     <Link
                       href="/thanh-toan"
-                      className="inline-flex items-center justify-center gap-2 border border-gold bg-gold px-6 py-2.5 font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-navy-deep transition-colors hover:border-gold-soft hover:bg-gold-soft"
+                      className="inline-flex items-center justify-center gap-2 rounded-xl border border-stoic-primary bg-stoic-primary px-6 py-2.5 font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-white transition-colors hover:border-stoic-primary-deep hover:bg-stoic-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/40"
                     >
                       <Lock className="h-4 w-4" aria-hidden="true" />
                       Nạp xu để mở · {formatCoins(unlockCost)}
@@ -176,10 +176,10 @@ export async function ExerciseList({
                     </p>
                     <Link
                       href={`/hoc-vien/thi-but/EXERCISE/${ex.id}`}
-                      className="inline-flex items-center justify-center gap-2 border border-line-strong px-6 py-2.5 font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-navy transition-colors hover:border-navy hover:bg-navy hover:text-paper"
+                      className="inline-flex items-center justify-center gap-2 rounded-xl border border-line-strong px-6 py-2.5 font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-navy transition-colors hover:border-navy hover:bg-navy hover:text-paper focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/40"
                     >
                       <Feather className="h-4 w-4" aria-hidden="true" />
-                      Đoạt bằng quân công
+                      Mở bằng nỗ lực
                     </Link>
                     <p className="max-w-[15rem] font-ui text-xs leading-relaxed text-muted md:text-right">
                       Bốn câu, ba phút. Qua thì mở được đề này.

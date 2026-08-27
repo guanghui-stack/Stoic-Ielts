@@ -58,7 +58,7 @@ export function FeynmanAiPanel({
 
   if (!reviewCompleted) {
     return (
-      <section className="mt-8 border border-line bg-paper px-6 py-5">
+      <section className="mt-8 rounded-2xl border border-line bg-stoic-canvas-soft/70 px-6 py-5 shadow-card">
         <p className="font-ui text-sm text-muted">
           Hoàn thành phần tự giảng lại ở trên, rồi bạn nhờ AI chấm được.
         </p>
@@ -94,9 +94,9 @@ export function FeynmanAiPanel({
   const empty = walletRemaining <= 0;
 
   return (
-    <section className="mt-8 border border-gold bg-gold-pale p-7">
+    <section className="mt-8 rounded-2xl border border-stoic-primary/35 bg-stoic-primary-soft p-7 shadow-card">
       <p className="flex items-center gap-2 font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-ink">
-        <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+        <Sparkles className="h-3.5 w-3.5 text-stoic-primary-deep" aria-hidden="true" />
         Nhờ AI chấm phần tự giảng
       </p>
       <h2 className="mt-2.5 font-display text-xl font-bold text-navy-deep md:text-2xl">
@@ -113,13 +113,13 @@ export function FeynmanAiPanel({
         Ví lượt AI: <strong className="text-ink">{walletRemaining}</strong> lượt
       </p>
 
-      {error && <p className="mt-3 font-ui text-sm text-danger">{error}</p>}
+      {error && <p className="mt-3 font-ui text-sm text-danger" role="alert">{error}</p>}
 
       <div className="mt-5 flex flex-wrap gap-3">
         {empty ? (
           <a
             href={topUpHref}
-            className="border border-navy bg-navy px-6 py-3 font-ui text-[0.75rem] font-semibold uppercase tracking-[0.1em] text-paper transition-opacity hover:opacity-90"
+            className="rounded-xl border border-stoic-primary bg-stoic-primary px-6 py-3 font-ui text-[0.75rem] font-semibold uppercase tracking-[0.1em] text-white transition-colors hover:border-stoic-primary-deep hover:bg-stoic-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/40"
           >
             Nạp thêm lượt AI
           </a>
@@ -128,7 +128,7 @@ export function FeynmanAiPanel({
             type="button"
             onClick={grade}
             disabled={busy}
-            className="border border-navy bg-navy px-6 py-3 font-ui text-[0.75rem] font-semibold uppercase tracking-[0.1em] text-paper transition-opacity hover:opacity-90 disabled:opacity-50"
+            className="rounded-xl border border-stoic-primary bg-stoic-primary px-6 py-3 font-ui text-[0.75rem] font-semibold uppercase tracking-[0.1em] text-white transition-colors hover:border-stoic-primary-deep hover:bg-stoic-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/40 disabled:cursor-wait disabled:opacity-50"
           >
             {busy ? "AI đang chấm..." : "Nhờ AI chấm (1 lượt)"}
           </button>
