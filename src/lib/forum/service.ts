@@ -149,9 +149,9 @@ export type ActionResult<T = undefined> =
 const BLOCK_MESSAGES: Record<string, string> = {
   RANK: "Phòng này dành cho bậc cao hơn bậc hiện tại của bạn.",
   COMPETITION:
-    "Nguyệt Thí đang diễn ra nên Nghị Sự Đường tạm khóa phần viết. Bạn vẫn đọc được, và viết lại được ngay sau khi kỳ thi kết thúc.",
+    "Thử thách tháng đang diễn ra nên Diễn đàn tạm khóa phần viết. Bạn vẫn đọc được, và viết lại được ngay sau khi kỳ thi kết thúc.",
   CHANNEL_LOCKED: "Phòng này đang được quản trị viên khóa.",
-  BANNED: "Tài khoản của bạn đang bị hạn chế đăng bài trên Nghị Sự Đường.",
+  BANNED: "Tài khoản của bạn đang bị hạn chế đăng bài trên Diễn đàn.",
 };
 
 function blockMessage(access: ForumAccess): string {

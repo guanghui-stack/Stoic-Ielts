@@ -24,7 +24,7 @@ export function mailEnabled(): boolean {
 function mailFrom(): string {
   return (
     process.env.MAIL_FROM ||
-    `HỔ PHÙ · IELTS <${process.env.SMTP_USER ?? "no-reply@localhost"}>`
+    `STOIC · IELTS <${process.env.SMTP_USER ?? "no-reply@localhost"}>`
   );
 }
 

@@ -76,7 +76,7 @@ export default async function ChannelPage({
 
       <div className="mt-6">
         <SectionHeading
-          label={`Bậc ${channel.level}`}
+          label={`Chặng ${channel.level}`}
           title={`Phòng ${channel.name}`}
         />
         <p className="mt-5 max-w-2xl text-[0.95rem] leading-relaxed text-ink-soft">
@@ -87,7 +87,7 @@ export default async function ChannelPage({
       {!channel.access.canWrite && (
         <NoteBox className="mt-8" title="Đang chỉ đọc">
           {live
-            ? "Nguyệt Thí đang diễn ra nên phần viết tạm khóa. Mở lại ngay sau khi kỳ thi kết thúc."
+            ? "Thử thách tháng đang diễn ra nên phần viết tạm khóa. Mở lại ngay sau khi kỳ thi kết thúc."
             : channel.locked
               ? "Quản trị viên đang khóa phòng này."
               : "Tài khoản của bạn đang bị hạn chế đăng bài."}
@@ -103,7 +103,7 @@ export default async function ChannelPage({
       {posts.length === 0 ? (
         <NoteBox className="mt-10" title="Phòng này chưa có chủ đề nào">
           {channel.access.canWrite
-            ? "Bạn mở chủ đề đầu tiên đi — một câu hỏi thật, một câu sai mình chưa hiểu, đều được."
+            ? "Hãy mở chủ đề đầu tiên: một câu hỏi thật hoặc một lỗi bạn chưa hiểu đều là điểm bắt đầu tốt."
             : "Chưa ai đăng gì ở đây."}
         </NoteBox>
       ) : (

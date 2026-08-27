@@ -1,5 +1,5 @@
 /**
- * Ba huy hiệu Nguyệt Thí.
+ * Ba huy hiệu Thử Thách Tháng.
  *
  * Huy hiệu KHÁC danh hiệu: danh hiệu là chữ và giữ vĩnh viễn, huy hiệu là hình
  * và chỉ sống 30 ngày. Vinh quang của tháng này không nên che mờ người giỏi của
@@ -9,9 +9,9 @@
  * lượt tải nào, và đổi màu theo hệ thiết kế được.
  */
 
-const NAVY = "#1e3a5c";
-const GOLD = "#b8862b";
-const CREAM = "#f6f1e7";
+const NAVY = "#202a44";
+const GOLD = "#5b5fef";
+const CREAM = "#f7f8fc";
 
 type BadgeProps = { className?: string };
 
@@ -80,28 +80,28 @@ export const BADGE_INFO = [
     code: "MONTHLY_CROWN",
     rank: 1,
     Badge: CrownBadge,
-    title: "Nguyệt Vương · Nguyệt Hậu",
+    title: "Rõ Ràng",
     prizeLabel: "999.000đ",
     requirement: "Cả ba đề đạt từ band 8.5",
-    note: "Huy hiệu Vương miện, hiệu lực 30 ngày",
+    note: "Huy hiệu Nhận thức, hiệu lực 30 ngày",
   },
   {
     code: "MONTHLY_CHANCELLOR",
     rank: 2,
     Badge: ChancellorBadge,
-    title: "Tể tướng Nguyệt Thí",
+    title: "Vững Vàng",
     prizeLabel: "499.000đ",
     requirement: "Cả ba đề đạt từ band 8.0",
-    note: "Huy hiệu Tể tướng, hiệu lực 30 ngày",
+    note: "Huy hiệu Hành động, hiệu lực 30 ngày",
   },
   {
     code: "MONTHLY_GENERAL",
     rank: 3,
     Badge: GeneralBadge,
-    title: "Tướng quân Nguyệt Thí",
+    title: "Bền Bỉ",
     prizeLabel: "199.000đ",
     requirement: "Cả ba đề đạt từ band 7.5",
-    note: "Huy hiệu Tướng quân, hiệu lực 30 ngày",
+    note: "Huy hiệu Ý chí, hiệu lực 30 ngày",
   },
 ] as const;
 

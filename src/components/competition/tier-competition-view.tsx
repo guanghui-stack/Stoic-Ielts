@@ -10,7 +10,7 @@ import { qualificationFor } from "@/lib/competition/qualification-service";
 import { tierPolicy, type CompetitionTier } from "@/lib/competition/tiers";
 
 /**
- * Khối dùng chung cho trang Dương Thí và Thiên Thí.
+ * Khối dùng chung cho trang Thử Thách Quý và Thử Thách Năm.
  *
  * Hai trang chỉ khác nhau đúng một tham số tier, nên viết hai bản gần giống
  * nhau là cách chắc chắn nhất để sau này sửa một bên mà quên bên kia.
@@ -64,8 +64,8 @@ export async function TierCompetitionView({ tier }: { tier: CompetitionTier }) {
   const isAnnual = tier === "ANNUAL";
   const nextStep: NextStepModel = {
     eyebrow: "Bước đầu tiên",
-    title: "Xem đường tuyển chọn của tầng trước",
-    body: `Vé vào ${policy.name} đến từ kết quả đã được rà soát của ${sourceName}; tầng này không có đăng ký mở.`,
+    title: "Xem lộ trình tuyển chọn từ cấp trước",
+    body: `Quyền tham gia ${policy.name} đến từ kết quả đã được rà soát của ${sourceName}; cấp này không có đăng ký mở.`,
     href: isAnnual ? "/duong-thi" : "/nguyet-thi",
     actionLabel: `Xem ${sourceName}`,
     entersStudy: false,
@@ -83,9 +83,9 @@ export async function TierCompetitionView({ tier }: { tier: CompetitionTier }) {
         functionalLabel={`Tuyển chọn từ ${sourceName}`}
       >
         <p className="text-lg leading-relaxed text-ink-soft">
-          {policy.name} không có đăng ký mở. Chỉ những người được tuyển chọn từ{" "}
-          {sourceName} mới nhận được vé dự thi — mỗi kỳ {sourceName} góp{" "}
-          {policy.topPerSource} người, tối đa {policy.maxSeats} ghế cho cả kỳ.
+          {policy.name} không có đăng ký mở. Chỉ người được tuyển chọn từ{" "}
+          {sourceName} mới nhận quyền tham gia — mỗi kỳ nguồn đóng góp{" "}
+          {policy.topPerSource} người, tối đa {policy.maxSeats} người cho cả kỳ.
         </p>
       </SceneHero>
 
@@ -95,8 +95,8 @@ export async function TierCompetitionView({ tier }: { tier: CompetitionTier }) {
         {!competition ? (
           <NoteBox className="mt-10" title="Chưa có kỳ nào được mở">
             Khi ban tổ chức chốt đủ {policy.sourceCount} kỳ {sourceName} của mùa,
-            vé tuyển chọn sẽ được gửi tới những người đủ điều kiện. Bạn không cần
-            đăng ký gì cả.
+            lời mời sẽ được gửi tới những người đủ điều kiện. Bạn không cần đăng
+            ký thêm.
           </NoteBox>
         ) : offer ? (
           <div className="mt-10">
@@ -111,8 +111,8 @@ export async function TierCompetitionView({ tier }: { tier: CompetitionTier }) {
             />
           </div>
         ) : (
-          <NoteBox className="mt-10" title="Bạn chưa có vé cho kỳ này">
-            Con đường vào {policy.name} đi qua {sourceName}: lọt top{" "}
+          <NoteBox className="mt-10" title="Bạn chưa được tuyển chọn cho kỳ này">
+            Lộ trình vào {policy.name} đi qua {sourceName}: lọt top{" "}
             {policy.topPerSource} của một kỳ {sourceName}, đạt band thấp nhất từ{" "}
             <strong>{bandLabel(policy.minLowestBand)}</strong> ở cả ba đề, và kết quả không
             còn đang rà soát.
@@ -132,7 +132,7 @@ export async function TierCompetitionView({ tier }: { tier: CompetitionTier }) {
             </dd>
           </div>
           <div>
-            <dt className="font-ui text-xs uppercase tracking-wide text-muted">Số ghế tối đa</dt>
+            <dt className="font-ui text-xs uppercase tracking-wide text-muted">Số người tối đa</dt>
             <dd className="mt-0.5 font-ui text-sm text-ink-soft">{policy.maxSeats} người</dd>
           </div>
           <div>
@@ -142,7 +142,7 @@ export async function TierCompetitionView({ tier }: { tier: CompetitionTier }) {
             </dd>
           </div>
           <div>
-            <dt className="font-ui text-xs uppercase tracking-wide text-muted">Hạn nhận vé</dt>
+            <dt className="font-ui text-xs uppercase tracking-wide text-muted">Hạn xác nhận</dt>
             <dd className="mt-0.5 font-ui text-sm text-ink-soft">
               {policy.offerExpiryDays} ngày kể từ khi được mời
             </dd>
@@ -157,8 +157,8 @@ export async function TierCompetitionView({ tier }: { tier: CompetitionTier }) {
 
         <p className="mt-5 border-l-4 border-gold bg-cream-deep px-4 py-3 text-sm leading-relaxed text-ink-soft">
           Ban tổ chức không hạ ngưỡng để lấp đủ ghế. Nếu không đủ người đạt
-          chuẩn, kỳ thi sẽ có ít thí sinh hơn mức tối đa — tấm vé giữ nguyên
-          giá trị của nó.
+          chuẩn, kỳ thi sẽ có ít thí sinh hơn mức tối đa. Tiêu chuẩn không thay
+          đổi chỉ để lấp đủ danh sách.
         </p>
         </section>
       </main>

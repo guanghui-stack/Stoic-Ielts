@@ -1,3 +1,5 @@
+> **Ghi chú rebrand:** Đây là tài liệu lịch sử của giai đoạn trước STOIC · IELTS. Đặc tả hiện hành nằm tại [STOIC-REBRAND-SPEC.md](./STOIC-REBRAND-SPEC.md), [BRAND-GUIDELINE.md](./BRAND-GUIDELINE.md) và [ART-ASSET-REGISTER.md](./ART-ASSET-REGISTER.md).
+
 # Đặc tả Đấu Trường Hổ Phù
 
 > Bản 6, ngày 2026-08-20. Hệ tỷ thí, kinh tế Quân Công, thang kinh nghiệm,

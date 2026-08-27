@@ -1,53 +1,43 @@
 /**
- * Nhãn kép Tam Quốc cho toàn site.
+ * Nhãn kép STOIC · IELTS cho toàn site.
  *
- * Quy tắc gốc: tên cổ phong giúp GHI NHỚ, nó không được phép làm người mới
- * LẠC ĐƯỜNG. Nên mọi màn hình trọng yếu hiển thị hai lớp — tên chủ đề ở
- * trên, mô tả chức năng ngay bên dưới. Lần đầu xuất hiện trong một trang
- * phải đọc được thành "Phục Bàn — Chữa bài Feynman", không bao giờ chỉ có
- * "Phục Bàn" đứng trơ một mình.
- *
- * Ba chỗ TUYỆT ĐỐI không được dùng từ cổ phong đơn độc, vì hiểu nhầm ở đây
- * gây thiệt hại thật chứ không chỉ khó chịu:
- *  - nút giao dịch và mọi thứ liên quan tới tiền,
- *  - thông báo lỗi hệ thống,
- *  - văn bản chính sách và pháp lý.
- *
- * URL giữ nguyên. Đổi tên là việc của lớp giao diện; đổi route sẽ phá liên
- * kết đã chia sẻ, dữ liệu lịch sử, SEO và Server Actions đang chạy.
+ * URL, mã dữ liệu và hành vi giữ nguyên. Lớp này chỉ đổi cách gọi ở giao diện.
+ * Tên chủ đề luôn đi cùng mô tả chức năng để người mới không phải đoán.
  */
 
 export type UiLabel = {
   /** Đường dẫn hiện hữu — không đổi. */
   href: string;
-  /** Tên Tam Quốc hiển thị. */
+  /** Tên Stoic hiển thị. */
   themed: string;
   /** Mô tả chức năng bắt buộc đi kèm. */
   functional: string;
 };
 
 export const UI_LABELS = {
-  home: { href: "/", themed: "Cổng Doanh", functional: "Trang chủ HỔ PHÙ · IELTS" },
+  home: { href: "/", themed: "Điểm Khởi Tâm", functional: "Trang chủ STOIC · IELTS" },
   student: {
     href: "/hoc-vien",
-    themed: "Trung Quân Trướng",
+    themed: "Nội Tâm",
     functional: "Hồ sơ và tổng quan học tập",
   },
   readingAcademic: {
     href: "/luyen-tap/reading",
-    themed: "Chiến Trận",
+    themed: "Thực Hành",
     functional: "Kho đề Reading Academic",
   },
   readingGeneral: {
     href: "/luyen-tap/reading/general",
-    themed: "Chiến Trận",
+    themed: "Thực Hành",
     functional: "Kho đề Reading General",
   },
   readingAssembly: {
     href: "/luyen-tap/reading/ghep-de",
-    themed: "Đại Chiến",
+    themed: "Bài Thi Đầy Đủ",
     functional: "Ghép Full Test 60 phút",
   },
+  // Hai nhãn dưới thuộc route kết quả/chữa bài được khóa bằng checksum. Giữ
+  // nguyên để shared label không làm thay đổi bề mặt protected.
   attempt: {
     href: "/hoc-vien/bai-lam",
     themed: "Chiến Ký",
@@ -60,48 +50,53 @@ export const UI_LABELS = {
   },
   titles: {
     href: "/hoc-vien/danh-hieu",
-    themed: "Chiến Công",
-    functional: "Danh hiệu đã đạt và tiến độ",
+    themed: "Dấu Mốc",
+    functional: "Thành quả đã đạt và tiến độ",
   },
   campaign: {
     href: "/hoc-vien/chien-dich",
-    themed: "Chiến Dịch",
-    functional: "Bản đồ cấp bậc và thí luyện",
+    themed: "Hành Trình",
+    functional: "Bản đồ chặng rèn luyện và thử thách",
   },
   weakness: {
     href: "/hoc-vien/so-so-ho",
-    themed: "Sổ Sơ Hở",
+    themed: "Điểm Cần Rèn",
     functional: "Dạng câu yếu và lỗi lặp lại",
   },
   studyDays: {
     href: "/hoc-vien/nhat-khoa",
-    themed: "Nhật Khóa",
-    functional: "Ngày học thật và kỷ luật",
+    themed: "Kỷ Luật Ngày",
+    functional: "Ngày học thật và nhịp học",
   },
   payments: {
     href: "/thanh-toan",
-    themed: "Quân Nhu",
-    functional: "Bảng giá và mở khóa học liệu",
+    themed: "Học Liệu",
+    functional: "Bảng giá và mở khóa nội dung",
   },
   monthly: {
     href: "/nguyet-thi",
-    themed: "Nguyệt Thí",
+    themed: "Thử Thách Tháng",
     functional: "Cuộc thi Reading hằng tháng",
   },
   quarterly: {
     href: "/duong-thi",
-    themed: "Dương Thí",
-    functional: "Cuộc thi Reading hằng quý dành cho người được chọn từ Nguyệt Thí",
+    themed: "Thử Thách Quý",
+    functional: "Cuộc thi Reading hằng quý dành cho người được chọn từ vòng tháng",
   },
   annual: {
     href: "/thien-thi",
-    themed: "Thiên Thí",
-    functional: "Cuộc thi Reading hằng năm dành cho người được chọn từ Dương Thí",
+    themed: "Thử Thách Năm",
+    functional: "Cuộc thi Reading hằng năm dành cho người được chọn từ vòng quý",
   },
   results: {
     href: "/bang-vang",
-    themed: "Bảng Vàng",
+    themed: "Thành Quả",
     functional: "Kết quả kỳ thi đã chốt",
+  },
+  messages: {
+    href: "/hoc-vien/tin-nhan",
+    themed: "Đối Thoại",
+    functional: "Tin nhắn riêng với học viên",
   },
   myData: {
     href: "/hoc-vien/du-lieu-cua-toi",
@@ -110,30 +105,20 @@ export const UI_LABELS = {
   },
   hallOfFame: {
     href: "/dien-danh-vong",
-    themed: "Điện Danh Vọng",
-    functional: "Danh hiệu và người công khai thành tích",
+    themed: "Dấu Mốc Cộng Đồng",
+    functional: "Hồ sơ công khai và thành tích",
   },
 } as const satisfies Record<string, UiLabel>;
 
 export type UiLabelKey = keyof typeof UI_LABELS;
 
-/**
- * Dạng một dòng cho tiêu đề trang: "Chiến Dịch — Bản đồ cấp bậc và thí luyện".
- *
- * Dùng gạch ngang dài chứ không phải gạch nối: đây là hai mệnh đề ngang
- * hàng, không phải một từ ghép.
- */
 export function dualLabel(key: UiLabelKey): string {
   const label = UI_LABELS[key];
   return `${label.themed} — ${label.functional}`;
 }
 
-/**
- * Ba trụ — dùng chung cho dashboard, trang chủ và bản đồ chiến dịch để
- * không nơi nào gọi khác tên cùng một hoạt động.
- */
 export const PILLAR_LABELS = {
-  BATTLE: { themed: "Chiến trận", functional: "Làm đề Reading" },
-  REVIEW: { themed: "Phục bàn", functional: "Chữa bài Feynman" },
-  DRILL: { themed: "Luyện binh", functional: "Ngày học thật" },
+  BATTLE: { themed: "Nhận thức", functional: "Nhìn đúng dữ kiện" },
+  REVIEW: { themed: "Hành động", functional: "Chữa lỗi bằng bằng chứng" },
+  DRILL: { themed: "Ý chí", functional: "Giữ ngày học thật" },
 } as const;

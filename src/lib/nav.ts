@@ -7,20 +7,20 @@
 
 export const MAIN_NAV = [
   { href: "/", label: "Trang chủ" },
-  { href: "/nguyet-thi", label: "Nguyệt Thí" },
-  { href: "/nghi-su-duong", label: "Nghị Sự Đường" },
-  { href: "/dien-danh-vong", label: "Điện Danh Vọng" },
-  { href: "/bang-bo-cao", label: "Bảng Bố Cáo" },
-  { href: "/bang-vang", label: "Bảng Vàng" },
+  { href: "/nguyet-thi", label: "Thử thách tháng" },
+  { href: "/nghi-su-duong", label: "Diễn đàn" },
+  { href: "/dien-danh-vong", label: "Dấu mốc cộng đồng" },
+  { href: "/bang-bo-cao", label: "Thông báo" },
+  { href: "/bang-vang", label: "Thành quả" },
 ] as const;
 
 /**
- * Hai tầng trên của đại thí. Tách khỏi `MAIN_NAV` vì chỉ hiện khi cờ
+ * Hai tầng thử thách trên. Tách khỏi `MAIN_NAV` vì chỉ hiện khi cờ
  * `ENABLE_COMPETITION_TIERS` bật.
  */
 export const TIER_NAV = [
-  { href: "/duong-thi", label: "Dương Thí" },
-  { href: "/thien-thi", label: "Thiên Thí" },
+  { href: "/duong-thi", label: "Thử thách quý" },
+  { href: "/thien-thi", label: "Thử thách năm" },
 ] as const;
 
 /**
@@ -30,7 +30,7 @@ export const TIER_NAV = [
  * `ui-labels.ts` và có khu quản trị tuyển chọn — nhưng KHÔNG có liên kết nào
  * dẫn tới. Học viên không có cách nào biết chúng tồn tại ngoài việc tự gõ URL.
  *
- * Chèn ngay sau Nguyệt Thí để menu đọc theo đúng thứ tự leo thang: tháng → quý
+ * Chèn ngay sau thử thách tháng để menu đọc theo đúng thứ tự: tháng → quý
  * → năm, rồi mới tới các trang tra cứu.
  */
 export function mainNavItems(

@@ -8,7 +8,7 @@ import {
 } from "@/lib/actions/competition";
 
 /**
- * Đăng ký dự thi, kèm lựa chọn cách xuất hiện trên Bảng Vàng.
+ * Đăng ký dự thi, kèm lựa chọn cách xuất hiện trên bảng Thành Quả.
  * Mặc định là ẨN DANH — công khai phải là lựa chọn chủ động.
  */
 export function CompetitionRegisterForm({ competitionId }: { competitionId: string }) {
@@ -26,7 +26,7 @@ export function CompetitionRegisterForm({ competitionId }: { competitionId: stri
         Bạn đã đủ điều kiện
       </p>
       <h3 className="mt-2.5 font-display text-xl font-bold text-navy-deep">
-        Chọn cách bạn xuất hiện trên Bảng Vàng
+        Chọn cách bạn xuất hiện trên bảng Thành Quả
       </h3>
 
       <div className="mt-5 space-y-2.5">
@@ -42,7 +42,7 @@ export function CompetitionRegisterForm({ competitionId }: { competitionId: stri
               value={option.value}
               checked={mode === option.value}
               onChange={(e) => setMode(e.target.value)}
-              className="h-4 w-4 cursor-pointer accent-[#1e3a5f]"
+              className="h-4 w-4 cursor-pointer accent-[#5b5fef]"
             />
             <span className="font-ui text-sm text-ink">{option.label}</span>
           </label>

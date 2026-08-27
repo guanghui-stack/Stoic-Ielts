@@ -1,10 +1,10 @@
 /**
- * Điều kiện danh tính để được dự Nguyệt Thí.
+ * Điều kiện danh tính để được dự Thử Thách Tháng.
  *
  * Tách khỏi key.ts vì file này thuần và phải kiểm thử được bằng node, còn key.ts
  * đụng tới biến môi trường bí mật.
  *
- * Quyết định phạm vi: Nguyệt Thí chỉ nhận thí sinh từ 16 tuổi. Nhờ vậy hệ thống
+ * Quyết định phạm vi: Thử Thách Tháng chỉ nhận thí sinh từ 16 tuổi. Nhờ vậy hệ thống
  * KHÔNG thu thập dữ liệu sinh trắc học của trẻ em và không cần luồng đồng ý của
  * người đại diện — phần nghĩa vụ nặng nhất theo Luật 91/2025. Nếu sau này hạ độ
  * tuổi, phải làm lại đánh giá tác động xử lý dữ liệu TRƯỚC khi mở đăng ký.
@@ -47,13 +47,13 @@ export function checkIdentityEligibility(input: {
 
   if (!input.birthDate) missing.push("Chưa khai ngày sinh");
   else if (age < MIN_COMPETITION_AGE) {
-    missing.push(`Nguyệt Thí chỉ dành cho thí sinh từ ${MIN_COMPETITION_AGE} tuổi`);
+    missing.push(`Thử Thách Tháng chỉ dành cho thí sinh từ ${MIN_COMPETITION_AGE} tuổi`);
   }
 
   if (!input.identityVerified) {
     missing.push("Chưa hoàn tất buổi xác minh danh tính qua video với trung tâm");
   }
-  if (!input.consentTerms) missing.push("Chưa đồng ý thể lệ Nguyệt Thí");
+  if (!input.consentTerms) missing.push("Chưa đồng ý thể lệ Thử Thách Tháng");
   if (!input.consentMonitoring) {
     missing.push("Chưa đồng ý việc ghi nhật ký thao tác trong lúc thi");
   }
@@ -65,7 +65,7 @@ export function checkIdentityEligibility(input: {
  * Các loại đồng ý.
  *
  * Tách lớp là bắt buộc: gộp tất cả vào một ô tích thì sự đồng ý không còn là tự
- * nguyện cho từng mục đích. Riêng PUBLICITY (hiện tên trên Bảng Vàng) KHÔNG được
+ * nguyện cho từng mục đích. Riêng PUBLICITY (hiện tên trên Thành Quả) KHÔNG được
  * gộp vào nhóm bắt buộc — không ai phải đánh đổi quyền riêng tư để được dự thi.
  *
  * PHẠM VI ĐÃ THU HẸP (chốt 2026-08-03): kỳ thi KHÔNG dùng webcam, KHÔNG ghi ảnh
@@ -77,12 +77,12 @@ export function checkIdentityEligibility(input: {
  * chuyển cửa sổ, phím tắt). Không có hình ảnh nào.
  */
 export const CONSENT_PURPOSES = {
-  TERMS: { required: true, label: "Thể lệ Nguyệt Thí và các hành vi bị cấm" },
+  TERMS: { required: true, label: "Thể lệ Thử Thách Tháng và các hành vi bị cấm" },
   MONITORING: {
     required: true,
     label: "Ghi nhật ký thao tác trong lúc thi (không có hình ảnh)",
   },
-  PUBLICITY: { required: false, label: "Hiện tên trên Bảng Vàng khi đoạt giải" },
+  PUBLICITY: { required: false, label: "Hiện tên trên Thành Quả khi đạt dấu mốc" },
 } as const;
 
 export type ConsentPurpose = keyof typeof CONSENT_PURPOSES;

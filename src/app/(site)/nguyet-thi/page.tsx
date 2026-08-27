@@ -14,9 +14,9 @@ import { SceneHero } from "@/components/world/scene-hero";
 import { ErrorBanner, NoteBox, SubmitButton } from "@/components/ui";
 
 export const metadata = {
-  title: "Nguyệt Thí",
+  title: "Thử Thách Tháng",
   description:
-    "Cuộc thi IELTS Reading hàng tháng của HỔ PHÙ · IELTS — ba đề trong bảy ngày, giải thưởng tiền mặt, và huy hiệu chỉ dành cho ba người đứng đầu.",
+    "Thử thách IELTS Reading hằng tháng của STOIC · IELTS: ba đề trong bảy ngày, kết quả được rà soát và chỉ ghi nhận người đạt chuẩn.",
 };
 export const dynamic = "force-dynamic";
 
@@ -31,7 +31,7 @@ const ERRORS: Record<string, string> = {
 const MONTHLY_NEXT_STEP: NextStepModel = {
   eyebrow: "Bước đầu tiên",
   title: "Kiểm tra điều kiện dự thi của bạn",
-  body: "Điều kiện vào Nguyệt Thí đến từ đủ ba trụ: làm đề, chữa bài Feynman và duy trì ngày học thật.",
+  body: "Điều kiện tham gia đến từ đủ ba trụ: nhìn đúng qua bài làm, hành động qua bước chữa và ý chí qua ngày học thật.",
   href: "/hoc-vien/danh-hieu",
   actionLabel: "Kiểm tra ba trụ",
   entersStudy: false,
@@ -74,14 +74,14 @@ export default async function CompetitionPage({
     <div>
       <SceneHero
         asset={ART_ASSETS.generalTruongPhi}
-        eyebrow="Cuộc thi hàng tháng"
-        title="Nguyệt Thí"
+        eyebrow="Đo tiến bộ hằng tháng"
+        title="Thử Thách Tháng"
         functionalLabel="Ba đề Reading trong bảy ngày"
       >
         <p className="text-lg leading-relaxed text-ink-soft">
-          Bảy ngày, ba đề Reading, và một danh sách rất ngắn những người đủ tư
-          cách bước vào. Không có đường tắt tới đây — chỉ có tháng ngày làm bài
-          đều đặn và chữa sai tử tế.
+          Bảy ngày, ba đề Reading và một cơ hội nhìn rõ năng lực dưới áp lực thời
+          gian. Không có đường tắt: chỉ có bài đã làm, lỗi đã chữa và những ngày
+          bạn thực sự quay lại học.
         </p>
       </SceneHero>
 
@@ -103,7 +103,7 @@ export default async function CompetitionPage({
             {
               step: "1",
               title: "Đăng ký trước khi cổng đóng",
-              body: "Mở đăng ký trước ngày thi 7 ngày. Bạn chọn luôn cách mình xuất hiện trên Bảng Vàng: tên thật, biệt danh, hoặc ẩn danh.",
+              body: "Mở đăng ký trước ngày thi 7 ngày. Bạn chọn luôn cách mình xuất hiện trên bảng Thành Quả: tên thật, biệt danh hoặc ẩn danh.",
             },
             {
               step: "2",
@@ -118,7 +118,7 @@ export default async function CompetitionPage({
             {
               step: "4",
               title: "Rà soát rồi mới công bố",
-              body: "Hết bảy ngày, trung tâm kiểm tra thời gian làm bài, tài khoản trùng và các dấu hiệu bất thường. Kết quả lên Bảng Vàng sau bước này, không sớm hơn.",
+              body: "Hết bảy ngày, trung tâm kiểm tra thời gian làm bài, tài khoản trùng và các dấu hiệu bất thường. Kết quả chỉ lên bảng Thành Quả sau bước này.",
             },
           ].map((item) => (
             <li key={item.step} className="flex gap-5 border border-line bg-paper p-6">
@@ -139,12 +139,12 @@ export default async function CompetitionPage({
 
         {/* ===== Huy hiệu ===== */}
         <h2 className="mt-14 font-display text-2xl font-bold text-navy-deep">
-          Ba huy hiệu, và chỉ ba
+          Ba dấu ghi nhận, và chỉ ba
         </h2>
         <p className="mt-3 max-w-2xl text-[0.96rem] leading-relaxed text-ink-soft">
-          Danh hiệu là chữ và bạn giữ vĩnh viễn. Huy hiệu là hình, và chỉ sống{" "}
-          <strong>30 ngày</strong> — vinh quang của tháng này không nên che mờ
-          người giỏi của tháng sau.
+          Dấu mốc dài hạn ghi nhận điều bạn đã làm. Huy hiệu kỳ thi chỉ tồn tại{" "}
+          <strong>30 ngày</strong> để thành quả tháng này không che mờ nỗ lực của
+          người học trong tháng sau.
         </p>
 
         <div className="mt-8 grid gap-6 sm:grid-cols-3">
@@ -173,9 +173,9 @@ export default async function CompetitionPage({
         <p className="mt-6 flex items-start gap-2.5 border-l-4 border-gold bg-gold-pale px-5 py-4 font-ui text-sm leading-relaxed text-ink">
           <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-gold" aria-hidden="true" />
           <span>
-            <strong>Không ai đạt chuẩn thì giải để trống.</strong> Chúng tôi
-            không hạ chuẩn để trao cho đủ mâm — làm vậy là hạ giá trị của giải
-            với tất cả những người sau này.
+            <strong>Không ai đạt chuẩn thì giải để trống.</strong> Tiêu chuẩn không
+            được hạ chỉ để có người nhận giải; sự rõ ràng quan trọng hơn một bảng
+            kết quả đủ tên.
           </span>
         </p>
 
@@ -184,9 +184,9 @@ export default async function CompetitionPage({
           Ai được tham gia
         </h2>
         <p className="mt-3 max-w-2xl text-[0.96rem] leading-relaxed text-ink-soft">
-          Vé vào cửa là danh hiệu{" "}
-          <strong>Nhận thức — Hành động — Ý chí</strong>, chỉ có được khi bạn đủ
-          cả ba trụ: giải đề, sửa đề và kỷ luật. Trụ kỷ luật cần{" "}
+          Điều kiện tham gia là dấu mốc{" "}
+          <strong>Nhận thức — Hành động — Ý chí</strong>, chỉ có khi bạn đủ cả ba
+          trụ: nhìn đúng qua bài làm, hành động qua bước chữa và ý chí qua ngày học. Trụ kỷ luật cần{" "}
           <strong>25 ngày học thật trong 35 ngày</strong> — nghĩa là không ai
           vào được đây trong vòng một tuần, dù giỏi tới đâu.
         </p>
@@ -232,7 +232,7 @@ export default async function CompetitionPage({
         {/* ===== Trạng thái theo người xem ===== */}
         {!user ? (
           <NoteBox className="mt-10" title="Bắt đầu từ đâu">
-            Hành trình tới Nguyệt Thí bắt đầu bằng một bài đọc.{" "}
+            Hành trình tới thử thách tháng bắt đầu bằng một bài đọc.{" "}
             <Link href="/dang-ky" className="font-semibold text-navy underline underline-offset-4">
               Tạo tài khoản miễn phí
             </Link>{" "}
@@ -240,7 +240,7 @@ export default async function CompetitionPage({
           </NoteBox>
         ) : !competition ? (
           <NoteBox className="mt-10" title="Chưa có kỳ thi nào đang mở">
-            Nguyệt Thí diễn ra mỗi tháng. Hãy dùng thời gian này để tích lũy ba
+            Thử thách này diễn ra mỗi tháng. Hãy dùng thời gian này để tích lũy ba
             trụ —{" "}
             <Link
               href="/hoc-vien/danh-hieu"
@@ -363,7 +363,7 @@ function CompetitionStatus({
           <NoteBox className="mt-8" title="Sau khi thi xong">
             Kết quả không hiện ngay.{" "}
             <Link href="/bang-vang" className="font-semibold text-navy underline underline-offset-4">
-              Bảng Vàng
+              Thành Quả
             </Link>{" "}
             công bố sau khi rà soát, và tiền thưởng được chuyển thủ công sau khi
             xác nhận.
@@ -375,7 +375,7 @@ function CompetitionStatus({
         <Trophy className="mt-0.5 h-4 w-4 shrink-0 text-gold" aria-hidden="true" />
         Kết quả các kỳ đã khép lại nằm ở{" "}
         <Link href="/bang-vang" className="font-semibold text-navy underline underline-offset-4">
-          Bảng Vàng
+          Thành Quả
         </Link>
         .
       </p>

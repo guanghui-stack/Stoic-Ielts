@@ -27,11 +27,24 @@ export async function createPostAction(
   const viewer = await viewerOf(user);
 
   const channelKey = String(formData.get("channelKey") ?? "").trim();
+  const tags = Array.from(
+    new Set(
+      formData
+        .getAll("tags")
+        .map((value) => String(value).trim().replace(/^#+/, "").slice(0, 36))
+        .filter(Boolean)
+        .slice(0, 5)
+    )
+  );
+  const body = String(formData.get("body") ?? "");
+  const bodyWithTags = tags.length > 0
+    ? `**Chủ đề:** ${tags.map((tag) => `#${tag.replace(/\s+/g, "-")}`).join(" ")}\n\n${body}`
+    : body;
   const result = await createPost({
     viewer,
     channelKey,
     title: String(formData.get("title") ?? ""),
-    body: String(formData.get("body") ?? ""),
+    body: bodyWithTags,
   });
 
   if (!result.ok) return { error: result.error };
@@ -110,7 +123,7 @@ export async function reportAction(
   if (!result.ok) return { error: result.error };
   return {
     success:
-      "Đã gửi báo cáo. Quản trị viên sẽ xem và xử lý — cảm ơn bạn đã giữ Nghị Sự Đường sạch.",
+      "Đã gửi báo cáo. Quản trị viên sẽ xem và xử lý — cảm ơn bạn đã giữ Diễn đàn an toàn.",
   };
 }
 

@@ -1,3 +1,5 @@
+> **Ghi chú rebrand:** Đây là tài liệu lịch sử của giai đoạn trước STOIC · IELTS. Đặc tả hiện hành nằm tại [STOIC-REBRAND-SPEC.md](./STOIC-REBRAND-SPEC.md), [BRAND-GUIDELINE.md](./BRAND-GUIDELINE.md) và [ART-ASSET-REGISTER.md](./ART-ASSET-REGISTER.md).
+
 # Hồ sơ triển khai motion có chọn lọc — 14/08/2026
 
 > Tài liệu này giữ nguyên hồ sơ của hệ motion tiết chế ban đầu và bổ sung giai

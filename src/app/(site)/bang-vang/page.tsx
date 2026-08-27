@@ -11,9 +11,9 @@ import { SceneHero } from "@/components/world/scene-hero";
 import { NoteBox } from "@/components/ui";
 
 export const metadata = {
-  title: "Bảng Vàng Nguyệt Thí",
+  title: "Thành Quả",
   description:
-    "Kết quả các kỳ Nguyệt Thí của HỔ PHÙ · IELTS — công bố sau khi đã rà soát.",
+    "Kết quả các thử thách định kỳ của STOIC · IELTS, chỉ công bố sau khi dữ liệu đã được rà soát.",
 };
 export const dynamic = "force-dynamic";
 
@@ -22,9 +22,9 @@ const RANK_ICON = [Crown, Trophy, Medal];
 const HONOR_BOARD_NEXT_STEP: NextStepModel = {
   eyebrow: "Bước đầu tiên",
   title: "Xem kỳ thi đã được rà soát gần nhất",
-  body: "Bảng Vàng chỉ công bố kết quả sau khi kỳ thi khép lại và dữ liệu đã được kiểm tra; không có bảng xếp hạng trực tiếp khi đang thi.",
+  body: "Thành Quả chỉ công bố kết quả sau khi kỳ thi khép lại và dữ liệu đã được kiểm tra; không có bảng xếp hạng trực tiếp khi đang thi.",
   href: "/nguyet-thi",
-  actionLabel: "Xem đường đến Nguyệt Thí",
+  actionLabel: "Xem thử thách tháng",
   entersStudy: false,
 };
 
@@ -34,9 +34,9 @@ const HONOR_BOARD_NEXT_STEP: NextStepModel = {
  * tới đúng tầng mình muốn khoe.
  */
 const TABS = [
-  { key: "nguyet", tier: "MONTHLY", label: "Nguyệt Thí" },
-  { key: "duong", tier: "QUARTERLY", label: "Dương Thí" },
-  { key: "thien", tier: "ANNUAL", label: "Thiên Thí" },
+  { key: "nguyet", tier: "MONTHLY", label: "Thử thách tháng" },
+  { key: "duong", tier: "QUARTERLY", label: "Thử thách quý" },
+  { key: "thien", tier: "ANNUAL", label: "Thử thách năm" },
 ] as const;
 
 export default async function HonorBoardPage({
@@ -72,8 +72,8 @@ export default async function HonorBoardPage({
     <div>
       <SceneHero
         asset={ART_ASSETS.generalTrieuVan}
-        eyebrow="Kết quả đại thí"
-        title="Bảng Vàng"
+        eyebrow="Kết quả đã kiểm chứng"
+        title="Thành Quả"
         functionalLabel="Kết quả kỳ thi đã được rà soát"
       >
         <p className="text-lg leading-relaxed text-ink-soft">
@@ -87,7 +87,7 @@ export default async function HonorBoardPage({
         <NextStepGuide step={HONOR_BOARD_NEXT_STEP} />
 
         {showTabs && (
-          <nav aria-label="Ba tầng đại thí" className="mb-10 mt-12 border-b border-line">
+          <nav aria-label="Ba cấp độ thử thách" className="mb-10 mt-12 border-b border-line">
             <ul className="m-0 flex list-none flex-wrap gap-6 p-0 pb-3">
               {TABS.map((tab) => {
                 const isActive = tab.key === active.key;
@@ -116,9 +116,9 @@ export default async function HonorBoardPage({
             className={showTabs ? "" : "mt-12"}
             title="Chưa có kỳ thi nào khép lại"
           >
-            Nguyệt Thí đầu tiên đang được chuẩn bị. Điều kiện dự thi là danh hiệu{" "}
-            <em>Nhận thức — Hành động — Ý chí</em>, đạt được qua ba trụ: giải đề,
-            sửa đề và kỷ luật.
+            Thử thách tháng đầu tiên đang được chuẩn bị. Điều kiện dự thi là dấu mốc{" "}
+            <em>Nhận thức — Hành động — Ý chí</em>, đạt được qua ba trụ: nhìn đúng,
+            chữa đúng và giữ ngày học thật.
           </NoteBox>
         ) : (
           boards.map(({ competition, rows }) => (
@@ -136,7 +136,7 @@ export default async function HonorBoardPage({
 
               {rows.length === 0 ? (
                 <p className="mt-5 border border-line bg-paper p-6 text-center text-ink-soft">
-                  Kỳ này không có thí sinh nào đạt chuẩn lên Bảng Vàng.
+                  Kỳ này không có thí sinh nào đạt chuẩn vào bảng Thành Quả.
                 </p>
               ) : (
                 <ol className="mt-5 divide-y divide-line border-y border-line">
@@ -179,8 +179,8 @@ export default async function HonorBoardPage({
         )}
 
         <NoteBox className="mt-10" title="Về cách xếp hạng">
-          Thí sinh phải đạt từ band 7.5 ở <strong>cả ba đề</strong> mới lên Bảng
-          Vàng. Khi hai người bằng điểm trung bình, người có band thấp nhất cao
+          Thí sinh phải đạt từ band 7.5 ở <strong>cả ba đề</strong> mới được ghi nhận
+          trong bảng Thành Quả. Khi hai người bằng điểm trung bình, người có band thấp nhất cao
           hơn được xếp trên — hệ thống thưởng sự đều tay, không thưởng một bài
           xuất sắc kèm hai bài lẹt đẹt. Không ai đạt chuẩn của một giải thì giải
           đó để trống, không hạ chuẩn.

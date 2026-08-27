@@ -13,7 +13,7 @@ import {
 } from "@/lib/actions/admin-forum";
 import { AdminPageShell } from "@/components/admin/admin-page-shell";
 
-export const metadata = { title: "Kiểm duyệt Nghị Sự Đường" };
+export const metadata = { title: "Kiểm duyệt Diễn đàn" };
 export const dynamic = "force-dynamic";
 
 function fmt(d: Date) {
@@ -90,7 +90,7 @@ export default async function AdminForumPage() {
   const commentById = new Map(reportedComments.map((c) => [c.id, c]));
 
   return (
-    <AdminPageShell eyebrow="Kiểm duyệt" title="Nghị Sự Đường">
+    <AdminPageShell eyebrow="Kiểm duyệt" title="Diễn đàn">
       <p className="mt-5 max-w-3xl text-[0.95rem] leading-relaxed text-ink-soft">
         Nguyên tắc ở đây là <strong>ẩn, không xóa</strong>. Nội dung bị báo cáo
         vẫn nằm trong database để tra cứu khi có tranh chấp — xóa cứng là tự tay

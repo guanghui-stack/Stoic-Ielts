@@ -8,7 +8,7 @@ import {
 } from "@/lib/actions/public-profile";
 
 /**
- * Học viên tự quyết định có hiện tên mình ở Điện Danh Vọng không.
+ * Học viên tự quyết định có hiện tên mình ở Dấu Mốc Cộng Đồng không.
  * Mặc định là KHÔNG — công khai phải là lựa chọn chủ động.
  */
 export function PublicProfileForm({
@@ -34,9 +34,9 @@ export function PublicProfileForm({
         Bạn có muốn xuất hiện ở nơi công cộng không?
       </h2>
       <p className="mt-3 max-w-2xl text-[0.94rem] leading-relaxed text-ink-soft">
-        Một nút này áp cho cả Điện Danh Vọng và Bảng Bố Cáo. Không bật thì danh
-        hiệu của bạn vẫn được tính vào tổng số, chỉ là không hiện tên, và không
-        tin nào của bạn lên bảng. Tắt sau khi đã bật thì tin cũ cũng được gỡ.
+        Một nút này áp cho cả Dấu Mốc Cộng Đồng và Thông Báo. Không bật thì dấu
+        mốc của bạn vẫn được tính vào tổng số, chỉ là không hiện tên, và không
+        tin nào của bạn xuất hiện công khai. Tắt sau khi đã bật thì tin cũ cũng được gỡ.
         Email, điểm số và lịch sử học tập không bao giờ công khai, dù bạn có bật
         hay không.
       </p>
@@ -47,10 +47,10 @@ export function PublicProfileForm({
           name="allowHall"
           checked={enabled}
           onChange={(e) => setEnabled(e.target.checked)}
-          className="h-5 w-5 cursor-pointer accent-[#1e3a5f]"
+          className="h-5 w-5 cursor-pointer accent-[#5b5fef]"
         />
         <span className="font-ui text-sm text-ink">
-          Hiện tên tôi ở Điện Danh Vọng và Bảng Bố Cáo
+          Hiện tên tôi ở Dấu Mốc Cộng Đồng và Thông Báo
         </span>
       </label>
 

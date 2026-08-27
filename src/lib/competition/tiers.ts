@@ -1,8 +1,8 @@
 /**
- * Ba tầng đại thí: Nguyệt Thí, Dương Thí, Thiên Thí.
+ * Ba cấp thử thách: Tháng, Quý, Năm.
  *
  * Ba tầng dùng CHUNG engine Competition đã có — cùng luật một lượt, cùng cách
- * chụp snapshot, cùng ranking, cùng Bảng Vàng. Khác nhau đúng năm thứ: chu kỳ,
+ * chụp snapshot, cùng ranking, cùng bảng Thành Quả. Khác nhau đúng năm thứ: chu kỳ,
  * nguồn thí sinh, ngưỡng tuyển chọn, số ghế và thời hạn huy hiệu.
  *
  * Viết thành chính sách dữ liệu thay vì rải if/else khắp nơi, vì đây là chỗ
@@ -14,7 +14,7 @@ export type CompetitionTier = "MONTHLY" | "QUARTERLY" | "ANNUAL";
 export type TierPolicy = {
   tier: CompetitionTier;
   name: string;
-  /** Tầng nguồn cấp thí sinh. Nguyệt Thí không có nguồn — đăng ký mở. */
+  /** Tầng nguồn cấp thí sinh. Thử thách tháng không có nguồn — đăng ký mở. */
   sourceTier: CompetitionTier | null;
   /** Số kỳ nguồn bắt buộc phải có, và phải FINALIZED hết. */
   sourceCount: number;
@@ -37,7 +37,7 @@ export type TierPolicy = {
 export const TIER_POLICIES: Record<CompetitionTier, TierPolicy> = {
   MONTHLY: {
     tier: "MONTHLY",
-    name: "Nguyệt Thí",
+    name: "Thử Thách Tháng",
     sourceTier: null,
     sourceCount: 0,
     topPerSource: 0,
@@ -48,7 +48,7 @@ export const TIER_POLICIES: Record<CompetitionTier, TierPolicy> = {
   },
   QUARTERLY: {
     tier: "QUARTERLY",
-    name: "Dương Thí",
+    name: "Thử Thách Quý",
     sourceTier: "MONTHLY",
     sourceCount: 3,
     topPerSource: 5,
@@ -59,7 +59,7 @@ export const TIER_POLICIES: Record<CompetitionTier, TierPolicy> = {
   },
   ANNUAL: {
     tier: "ANNUAL",
-    name: "Thiên Thí",
+    name: "Thử Thách Năm",
     sourceTier: "QUARTERLY",
     sourceCount: 4,
     topPerSource: 3,

@@ -48,24 +48,24 @@ export const WORLD_LANDMARKS = [
   {
     code: "LANDMARK_COUNCIL",
     kind: "LANDMARK",
-    title: "Nghị Sự Đường",
-    functionalLabel: "Cộng đồng thảo luận",
+    title: "Diễn Đàn",
+    functionalLabel: "Cộng đồng học tập",
     href: "/nghi-su-duong",
     lockedMessage: null,
   },
   {
     code: "LANDMARK_HONORS",
     kind: "LANDMARK",
-    title: "Điện Danh Vọng",
-    functionalLabel: "Danh hiệu và thành tích",
+    title: "Dấu Mốc Cộng Đồng",
+    functionalLabel: "Tiến bộ đã kiểm chứng",
     href: "/dien-danh-vong",
     lockedMessage: null,
   },
   {
     code: "LANDMARK_RESULTS",
     kind: "LANDMARK",
-    title: "Bảng Vàng",
-    functionalLabel: "Kết quả kỳ thi",
+    title: "Thành Quả",
+    functionalLabel: "Kết quả và dấu mốc",
     href: "/bang-vang",
     lockedMessage: null,
   },
@@ -75,24 +75,24 @@ export const WORLD_COMPETITIONS = [
   {
     code: "COMP_MONTHLY",
     kind: "COMPETITION",
-    title: "Nguyệt Thí",
-    functionalLabel: "Cuộc thi hàng tháng",
+    title: "Thử Thách Tháng",
+    functionalLabel: "Đối chiếu hàng tháng",
     href: "/nguyet-thi",
     lockedMessage: null,
   },
   {
     code: "COMP_QUARTERLY",
     kind: "COMPETITION",
-    title: "Dương Thí",
-    functionalLabel: "Cuộc thi hàng quý",
+    title: "Thử Thách Quý",
+    functionalLabel: "Đối chiếu hàng quý",
     href: "/duong-thi",
     lockedMessage: null,
   },
   {
     code: "COMP_ANNUAL",
     kind: "COMPETITION",
-    title: "Thiên Thí",
-    functionalLabel: "Cuộc thi hàng năm",
+    title: "Thử Thách Năm",
+    functionalLabel: "Đối chiếu hàng năm",
     href: "/thien-thi",
     lockedMessage: null,
   },
@@ -103,40 +103,72 @@ export const LOCKED_TERRITORIES = [
     code: "TERRITORY_WEI",
     kind: "TERRITORY",
     artKey: "wei",
-    title: "Ngụy",
-    functionalLabel: "Lãnh địa phía bắc",
+    title: "Nhận thức",
+    functionalLabel: "Vùng nhìn rõ bằng chứng",
     href: null,
-    lockedMessage: "Mở khi đạt cấp bậc yêu cầu",
+    lockedMessage: "Mở khi đạt điều kiện chặng",
   },
   {
     code: "TERRITORY_SHU",
     kind: "TERRITORY",
     artKey: "shu",
-    title: "Thục",
-    functionalLabel: "Lãnh địa phía tây",
+    title: "Hành động",
+    functionalLabel: "Vùng làm đúng bước tiếp theo",
     href: null,
-    lockedMessage: "Mở khi đạt cấp bậc yêu cầu",
+    lockedMessage: "Mở khi đạt điều kiện chặng",
   },
   {
     code: "TERRITORY_WU",
     kind: "TERRITORY",
     artKey: "wu",
-    title: "Ngô",
-    functionalLabel: "Lãnh địa phía đông nam",
+    title: "Ý chí",
+    functionalLabel: "Vùng giữ nhịp bền vững",
     href: null,
-    lockedMessage: "Mở khi đạt cấp bậc yêu cầu",
+    lockedMessage: "Mở khi đạt điều kiện chặng",
   },
 ] as const satisfies readonly TerritoryPlace[];
 
+export const STOIC_TRIAL_TITLES: Record<string, string> = {
+  TRIAL_01_DAO_VIEN: "Bắt đầu bằng một lời hẹn",
+  TRIAL_02_HOANG_CAN: "Giữ nhịp đều đặn",
+  TRIAL_03_HOA_HUNG: "Tốc độ có chủ đích",
+  TRIAL_04_NGU_QUAN: "Ổn định qua nhiều lượt",
+  TRIAL_05_TRUONG_BAN: "Không bỏ rơi phần khó",
+  TRIAL_06_LAO_TUONG: "Phản tư có chiều sâu",
+  TRIAL_07_TAY_LUONG: "Tích hợp ba trụ",
+  TRIAL_08_HO_LAO: "Tự chủ trước điểm yếu",
+};
+
+export const STOIC_TRIAL_LABELS: Record<string, string> = {
+  TRIAL_01_DAO_VIEN: "Bắt đầu có chủ đích",
+  TRIAL_02_HOANG_CAN: "Rèn nhịp đều đặn",
+  TRIAL_03_HOA_HUNG: "Quản trị sự chú ý",
+  TRIAL_04_NGU_QUAN: "Giữ phong độ ổn định",
+  TRIAL_05_TRUONG_BAN: "Củng cố phần yếu",
+  TRIAL_06_LAO_TUONG: "Phản tư có chiều sâu",
+  TRIAL_07_TAY_LUONG: "Linh hoạt trong khuôn khổ",
+  TRIAL_08_HO_LAO: "Tích hợp ba trụ",
+};
+
+export function stoicTrialTitle(node: Pick<CampaignNodeView, "trialCode" | "shortTitle">): string {
+
+  return STOIC_TRIAL_TITLES[node.trialCode] ?? node.shortTitle;
+}
+
+export function stoicTrialLabel(node: Pick<CampaignNodeView, "trialCode" | "functionalLabel">): string {
+  return STOIC_TRIAL_LABELS[node.trialCode] ?? node.functionalLabel;
+}
+
 function trialStep(node: CampaignNodeView, active: boolean): NextStepModel {
+  const stoicTitle = stoicTrialTitle(node);
   return {
     eyebrow: "Bước tiếp theo của bạn",
-    title: active ? `Tiếp tục ${node.shortTitle}` : `Bước vào ${node.shortTitle}`,
+    title: active ? `Tiếp tục ${stoicTitle}` : `Bước vào ${stoicTitle}`,
     body: active
-      ? "Thí luyện đang dở được giữ nguyên. Tiếp tục từ đúng tiến độ hiện tại."
-      : (node.hint ?? "Cửa ải đã mở. Xem điều kiện và chủ động bắt đầu khi sẵn sàng."),
+      ? "Chặng đang dở được giữ nguyên. Tiếp tục từ đúng tiến độ hiện tại."
+      : (node.hint ?? "Chặng đã mở. Xem điều kiện và chủ động bắt đầu khi sẵn sàng."),
     href: `/hoc-vien/thi-luyen/${node.trialCode}`,
-    actionLabel: active ? "Tiếp tục thí luyện" : "Xem cửa ải",
+    actionLabel: active ? "Tiếp tục chặng" : "Xem điều kiện",
     entersStudy: false,
   };
 }
@@ -152,7 +184,7 @@ export function buildCampaignWorld({
   if (audience === "GUEST") {
     nextStep = {
       eyebrow: "Bước tiếp theo",
-      title: "Bắt đầu từ Bạch thân",
+      title: "Bắt đầu từ điều bạn kiểm soát",
       body: "Tạo tài khoản miễn phí, hiểu ba trụ và chọn đúng kho Reading trước khi làm bài đầu tiên.",
       href: "/dang-ky",
       actionLabel: "Tạo tài khoản",
@@ -177,10 +209,10 @@ export function buildCampaignWorld({
             }
           : {
               eyebrow: "Hành trình hiện tại",
-              title: "Tám cửa ải đã hoàn tất",
-              body: "Cấp bậc đã được giữ vĩnh viễn. Tiếp tục xây danh hiệu và chuẩn bị cho các kỳ đại thí.",
+              title: "Tám chặng đã hoàn tất",
+              body: "Cấp bậc đã được giữ vĩnh viễn. Tiếp tục xây dấu mốc và chuẩn bị cho các thử thách đối chiếu.",
               href: "/hoc-vien/danh-hieu",
-              actionLabel: "Xem danh hiệu",
+              actionLabel: "Xem dấu mốc",
               entersStudy: false,
             };
   }

@@ -1,0 +1,24 @@
+<svg width="1200" height="900" viewBox="0 0 1200 900" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Quỹ đạo yên tĩnh quanh một điểm tập trung">
+  <defs>
+    <linearGradient id="canvas" x1="0" y1="0" x2="1200" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#11182C"/>
+      <stop offset="1" stop-color="#202A44"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(595 445) rotate(90) scale(290)">
+      <stop stop-color="#B8A8F8" stop-opacity="0.4"/>
+      <stop offset="1" stop-color="#B8A8F8" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="900" rx="36" fill="url(#canvas)"/>
+  <circle cx="600" cy="450" r="290" fill="url(#glow)"/>
+  <ellipse cx="600" cy="450" rx="330" ry="174" transform="rotate(-24 600 450)" stroke="#B8A8F8" stroke-opacity="0.34" stroke-width="3"/>
+  <ellipse cx="600" cy="450" rx="250" ry="128" transform="rotate(58 600 450)" stroke="#5B5FEF" stroke-opacity="0.72" stroke-width="3"/>
+  <ellipse cx="600" cy="450" rx="170" ry="92" transform="rotate(-24 600 450)" stroke="#D85B78" stroke-opacity="0.65" stroke-width="3"/>
+  <circle cx="600" cy="450" r="52" fill="#F7F8FC" fill-opacity="0.95"/>
+  <circle cx="600" cy="450" r="19" fill="#5B5FEF"/>
+  <circle cx="910" cy="307" r="12" fill="#D85B78"/>
+  <circle cx="441" cy="682" r="12" fill="#33745A"/>
+  <circle cx="427" cy="306" r="12" fill="#D78A58"/>
+  <path d="M161 716C278 638 390 624 497 667C615 714 740 735 873 679" stroke="white" stroke-opacity="0.08" stroke-width="2"/>
+  <path d="M177 758C303 673 405 664 518 707C632 750 757 767 893 714" stroke="#B8A8F8" stroke-opacity="0.08" stroke-width="2"/>
+</svg>

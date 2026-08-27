@@ -10,16 +10,16 @@ import { SceneHero } from "@/components/world/scene-hero";
 import { NoteBox } from "@/components/ui";
 
 export const metadata = {
-  title: "Nghị Sự Đường",
+  title: "Diễn Đàn",
   description:
-    "Nơi học viên cùng bậc bàn bài với nhau. Bậc trên quay về phòng dưới góp lời.",
+    "Nơi học viên cùng chặng trao đổi cách học, bằng chứng và điều rút ra sau mỗi bài.",
 };
 export const dynamic = "force-dynamic";
 
 const FORUM_NEXT_STEP: NextStepModel = {
   eyebrow: "Bước đầu tiên",
   title: "Chọn một phòng phù hợp với cấp bậc",
-  body: "Nghị Sự Đường dùng để bàn cách học và giảng lại điều đã hiểu; nơi này không thay thế việc chữa bài Reading và Feynman.",
+  body: "Diễn đàn dùng để hỏi rõ, chia sẻ bằng chứng và giảng lại điều đã hiểu; nơi này không thay thế việc tự chữa bài Reading và Feynman.",
   href: "/hoc-vien",
   actionLabel: "Xem vị trí của tôi",
   entersStudy: false,
@@ -37,14 +37,14 @@ export default async function ForumHome() {
     <div>
       <SceneHero
         asset={ART_ASSETS.generalQuanVu}
-        eyebrow="Nghị Sự Đường"
-        title="Bàn bài cùng người cùng bậc"
+        eyebrow="Diễn đàn học tập"
+        title="Nói điều đã hiểu, hỏi điều chưa rõ"
         functionalLabel="Cộng đồng thảo luận phương pháp học"
       >
         <p className="text-lg leading-relaxed text-ink-soft">
-          Mỗi bậc có một phòng riêng. Bạn vào được phòng của bậc mình và{" "}
-          <strong>tất cả các phòng bậc dưới</strong> — lên cao rồi thì quay về
-          giảng lại cho người đi sau, đó mới là chỗ kiến thức đọng lại.
+          Mỗi chặng có một phòng riêng. Bạn vào được phòng của chặng mình và{" "}
+          <strong>tất cả các phòng trước đó</strong>. Khi đã đi xa hơn, hãy quay lại
+          giảng điều mình hiểu bằng ngôn ngữ đơn giản; đó là một cách học sâu.
         </p>
       </SceneHero>
 
@@ -59,7 +59,7 @@ export default async function ForumHome() {
         )}
 
         {live && (
-          <NoteBox className="mt-8" title="Nguyệt Thí đang diễn ra">
+          <NoteBox className="mt-8" title="Thử thách tháng đang diễn ra">
             Phần viết tạm khóa cho tới khi kỳ thi kết thúc. Bạn vẫn đọc được mọi
             phòng. Lý do: một câu bàn về đề đang thi là đủ làm hỏng kỳ thi của
             người chưa vào phòng.
@@ -96,7 +96,7 @@ export default async function ForumHome() {
                 )}
                 {channel.level < viewer.level && (
                   <span className="inline-flex items-center gap-1 border border-gold bg-gold-pale px-2 py-0.5 font-ui text-[0.68rem] font-semibold uppercase text-gold">
-                    Phòng bậc dưới
+                    Phòng chặng trước
                   </span>
                 )}
               </div>
@@ -114,7 +114,7 @@ export default async function ForumHome() {
         </div>
 
         <NoteBox className="mt-10" title="Nội quy ngắn">
-          Chỉ chữ — ảnh, tệp và video sẽ có ở bản sau.{" "}
+          Hãy gắn chủ đề ngắn để người khác tìm đúng cuộc trao đổi. Phiên bản hiện tại chỉ hỗ trợ chữ; ảnh, tệp và video sẽ có ở bản sau.{" "}
           <strong>Không bàn về đề đang thi.</strong> Thấy nội dung sai trái thì
           bấm <strong>Báo cáo</strong> thay vì cãi nhau — quản trị viên đọc hàng
           đợi đó mỗi ngày.

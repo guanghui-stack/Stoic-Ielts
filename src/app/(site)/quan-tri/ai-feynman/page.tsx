@@ -5,6 +5,7 @@ import { features } from "@/lib/features";
 import { readFeynmanAiConfig } from "@/lib/feynman-ai/config";
 import { loadFeynmanAiStats } from "@/lib/feynman-ai/admin-stats";
 import { hasPricing, microUsdToVnd, COST_TABLE_VERSION } from "@/lib/feynman-ai/cost";
+import { DataTable, StatusBadge, type TableColumn } from "@/components/ui/data-table";
 
 /**
  * Trang theo dõi Feynman AI.
@@ -48,6 +49,37 @@ export default async function AdminFeynmanAiPage() {
   const config = readFeynmanAiConfig();
   const stats = await loadFeynmanAiStats();
   const { alerts, recent, wallet } = stats;
+  type RecentRow = (typeof recent)[number];
+  const recentColumns: TableColumn<RecentRow>[] = [
+    { id: "createdAt", header: "Thời điểm", cell: (row) => fmt(row.createdAt) },
+    {
+      id: "status",
+      header: "Trạng thái",
+      cell: (row) => (
+        <StatusBadge
+          label={row.status === "FAILED" ? `Hỏng${row.errorCode ? ` · ${row.errorCode}` : ""}` : row.status}
+          tone={row.status === "FAILED" ? "danger" : "success"}
+        />
+      ),
+    },
+    {
+      id: "verdict",
+      header: "Kết quả",
+      cell: (row) => row.verdict === "DAT" ? "Đạt" : row.verdict === "KHONG_DAT" ? "Chưa đạt" : "—",
+    },
+    { id: "similarity", header: "Tương đồng", numeric: true, align: "right", cell: (row) => `${row.similarityPercent ?? "—"}%` },
+    { id: "confidence", header: "Tin cậy", numeric: true, align: "right", cell: (row) => `${row.confidence ?? "—"}%` },
+    { id: "latency", header: "Độ trễ", numeric: true, align: "right", cell: (row) => row.latencyMs ? `${row.latencyMs}ms` : "—" },
+    {
+      id: "cost",
+      header: "Chi phí",
+      numeric: true,
+      align: "right",
+      cell: (row) => row.estimatedCostMicroUsd
+        ? `${microUsdToVnd(row.estimatedCostMicroUsd).toLocaleString("vi-VN")}đ`
+        : "—",
+    },
+  ];
 
   return (
     <section className="mx-auto max-w-6xl px-6 py-10">
@@ -163,55 +195,17 @@ export default async function AdminFeynmanAiPage() {
       <h2 className="mt-12 font-display text-xl font-bold text-navy-deep">
         Lượt chấm gần nhất
       </h2>
-      <div className="mt-4 overflow-x-auto">
-        <table className="w-full border-collapse font-ui text-sm">
-          <thead>
-            <tr className="border-b border-line-strong text-left text-muted">
-              <Th>Thời điểm</Th>
-              <Th>Trạng thái</Th>
-              <Th>Kết quả</Th>
-              <Th>Tương đồng</Th>
-              <Th>Tin cậy</Th>
-              <Th>Độ trễ</Th>
-              <Th>Chi phí</Th>
-            </tr>
-          </thead>
-          <tbody>
-            {recent.map((row) => (
-              <tr key={row.id} className="border-b border-line">
-                <Td>{fmt(row.createdAt)}</Td>
-                <Td>
-                  {row.status === "FAILED" ? (
-                    <span className="text-danger">
-                      Hỏng{row.errorCode ? ` · ${row.errorCode}` : ""}
-                    </span>
-                  ) : (
-                    row.status
-                  )}
-                </Td>
-                <Td>
-                  {row.verdict === "DAT"
-                    ? "Đạt"
-                    : row.verdict === "KHONG_DAT"
-                      ? "Chưa đạt"
-                      : "—"}
-                </Td>
-                <Td>{row.similarityPercent ?? "—"}%</Td>
-                <Td>{row.confidence ?? "—"}%</Td>
-                <Td>{row.latencyMs ? `${row.latencyMs}ms` : "—"}</Td>
-                <Td>
-                  {row.estimatedCostMicroUsd
-                    ? `${microUsdToVnd(row.estimatedCostMicroUsd).toLocaleString("vi-VN")}đ`
-                    : "—"}
-                </Td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {recent.length === 0 && (
-          <p className="mt-3 font-ui text-sm text-muted">Chưa có lượt chấm nào.</p>
-        )}
-      </div>
+      <DataTable
+        rows={recent}
+        columns={recentColumns}
+        getRowKey={(row) => row.id}
+        caption="Các lượt chấm Feynman AI gần nhất"
+        emptyTitle="Chưa có lượt chấm nào"
+        emptyDescription="Khi có dữ liệu, các lượt chấm sẽ xuất hiện ở đây để tiện theo dõi."
+        stickyHeader
+        maxHeight="30rem"
+        className="mt-4"
+      />
     </section>
   );
 }
@@ -245,16 +239,4 @@ function Stat({
       <p className="mt-1 font-ui text-[0.78rem] text-muted">{note}</p>
     </div>
   );
-}
-
-function Th({ children }: { children: React.ReactNode }) {
-  return (
-    <th className="px-3 py-2.5 font-semibold uppercase tracking-[0.08em] text-[0.72rem]">
-      {children}
-    </th>
-  );
-}
-
-function Td({ children }: { children: React.ReactNode }) {
-  return <td className="px-3 py-2.5 text-ink-soft">{children}</td>;
 }

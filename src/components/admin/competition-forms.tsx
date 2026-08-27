@@ -56,7 +56,7 @@ export function CompetitionCreateForm({
           <input
             name="name"
             required
-            placeholder="Nguyệt Thí tháng 9/2026"
+            placeholder="Thử Thách Tháng 9/2026"
             className="mt-1.5 w-full border border-line-strong bg-paper px-3 py-2.5 font-ui text-sm text-ink"
           />
         </label>
@@ -123,7 +123,7 @@ export function FinalizeForm({ competitionId }: { competitionId: string }) {
       <p className="flex items-start gap-2 font-ui text-sm leading-relaxed text-ink">
         <Trophy className="mt-0.5 h-4 w-4 shrink-0 text-gold" aria-hidden="true" />
         <span>
-          <strong>Chốt kết quả và công bố Bảng Vàng.</strong> Hãy rà soát xong
+          <strong>Chốt kết quả và công bố Thành Quả.</strong> Hãy rà soát xong
           trước: kiểm tra thời gian làm bài bất thường, tài khoản trùng, và các
           cờ liêm chính. Sau bước này thứ hạng được công khai và huy hiệu 30
           ngày được trao. Tiền thưởng bạn vẫn phải <strong>tự chuyển</strong>.

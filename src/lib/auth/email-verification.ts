@@ -60,22 +60,22 @@ export async function sendVerificationEmail(input: {
 
   return sendMail({
     to: input.email,
-    subject: "Xác minh email — HỔ PHÙ · IELTS",
+    subject: "Xác minh email — STOIC · IELTS",
     text:
       `Chào ${input.name},\n\n` +
       `Bấm vào liên kết dưới đây để xác minh email và nhận ${formatCoins(WELCOME_COINS)} ` +
       `vào ví của bạn:\n\n${link}\n\n` +
-      `Liên kết sống trong 24 giờ. Nếu bạn không tạo tài khoản nào ở HỔ PHÙ · ` +
+      `Liên kết sống trong 24 giờ. Nếu bạn không tạo tài khoản nào ở STOIC · ` +
       `IELTS thì bỏ qua thư này.\n`,
     html:
       `<p>Chào ${escapeHtml(input.name)},</p>` +
       `<p>Bấm vào nút dưới đây để xác minh email và nhận ` +
       `<strong>${formatCoins(WELCOME_COINS)}</strong> vào ví của bạn:</p>` +
       `<p><a href="${link}" style="display:inline-block;padding:12px 24px;` +
-      `background:#1e3a5f;color:#fff;text-decoration:none;font-weight:600">` +
+      `background:#5b5fef;color:#fff;text-decoration:none;font-weight:600;border-radius:999px">` +
       `Xác minh email</a></p>` +
       `<p style="color:#666;font-size:13px">Liên kết sống trong 24 giờ. Nếu bạn ` +
-      `không tạo tài khoản nào ở HỔ PHÙ · IELTS thì bỏ qua thư này.</p>`,
+      `không tạo tài khoản nào ở STOIC · IELTS thì bỏ qua thư này.</p>`,
   });
 }
 

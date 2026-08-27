@@ -272,7 +272,7 @@ export function explainTitleRule(input: {
         steps.push(`Trụ còn lại đã hoàn thành tối thiểu ${percent}% tiến độ.`);
       }
       notes.push(
-        "Danh hiệu này là cột mốc báo hiệu bạn sắp đủ điều kiện dự Nguyệt Thí — mọi việc còn lại chỉ là hoàn tất trụ cuối."
+        "Danh hiệu này là cột mốc báo hiệu bạn sắp đủ điều kiện dự Thử Thách Tháng — mọi việc còn lại chỉ là hoàn tất trụ cuối."
       );
       break;
     }
@@ -282,7 +282,7 @@ export function explainTitleRule(input: {
       const pillars = codes(c, "pillars");
       const names = pillars.map((p) => input.titleNameOf?.(p) ?? p);
 
-      summary = "Nắm đủ cả ba trụ — đây là tấm vé duy nhất vào Nguyệt Thí.";
+      summary = "Nắm đủ cả ba trụ — đây là điều kiện để bước vào Thử Thách Tháng.";
       steps.push("Đạt trọn vẹn cả ba danh hiệu trụ cột:");
       for (const name of names) steps.push(`— ${name}`);
       notes.push(
@@ -308,7 +308,7 @@ export function explainTitleRule(input: {
           );
         }
         notes.push(
-          "Danh hiệu này KHÔNG BAO GIỜ hiển thị công khai và không xuất hiện trong Điện Danh Vọng. Nó chỉ nhắc riêng bạn nên đổi cách học, không phải để so sánh với ai."
+          "Danh hiệu này KHÔNG BAO GIỜ hiển thị công khai và không xuất hiện trong Dấu Mốc Cộng Đồng. Nó chỉ nhắc riêng bạn nên đổi cách học, không phải để so sánh với ai."
         );
       } else {
         summary = "Đi lên từ giai đoạn sa sút — ngã rồi đứng dậy cũng là một năng lực.";
@@ -393,7 +393,7 @@ export const CATEGORY_ORDER = [
 ] as const;
 
 /**
- * Mã neo của từng nhóm trên trang Điện Danh Vọng.
+ * Mã neo của từng nhóm trên trang Dấu Mốc Cộng Đồng.
  *
  * Đặt cố định bằng tiếng Việt không dấu thay vì sinh tự động từ tên nhóm: đây là
  * đường dẫn người ta gửi cho nhau (`/dien-danh-vong#nhom-ky-luat`), đổi tên
@@ -420,7 +420,7 @@ export const CATEGORY_BLURBS: Record<string, string> = {
   DISCIPLINE:
     "Tính theo số ngày học thật và tổng thời gian ngồi học. Không có đường tắt: dù giỏi đến đâu cũng không rút ngắn được số ngày.",
   COMPOSITE:
-    "Cần đủ cả ba mặt cùng lúc — làm đề, chữa bài và kỷ luật. Đây là cửa vào Nguyệt Thí.",
+    "Cần đủ cả ba mặt cùng lúc — làm đề, phản tư và giữ nhịp. Đây là điều kiện vào Thử Thách Tháng.",
   TRANSFORMATION:
     "Dành cho người đi lên từ giai đoạn sa sút. Ngã rồi đứng dậy cũng là một loại năng lực.",
 };

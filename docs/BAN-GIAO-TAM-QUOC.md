@@ -1,3 +1,5 @@
+> **Tài liệu lịch sử — đã được thay thế cho lớp thương hiệu.** Nội dung dưới đây ghi lại trạng thái Tam Quốc trước rebrand; đặc tả hiện hành nằm tại [STOIC-REBRAND-SPEC.md](./STOIC-REBRAND-SPEC.md) và [BRAND-GUIDELINE.md](./BRAND-GUIDELINE.md). Các route, logic và dữ liệu protected vẫn giữ nguyên theo checksum.
+
 # Bản ghi bàn giao — hệ HỔ PHÙ · IELTS
 
 Nhánh: `feature/campaign-map-home` (đã push). PR-01→09a đã ở `main`.

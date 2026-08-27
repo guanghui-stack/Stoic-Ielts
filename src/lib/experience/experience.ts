@@ -115,7 +115,7 @@ export function experienceOf(facts: ExperienceFacts): ExperienceBreakdown {
       points: facts.validAttempts * EXPERIENCE_POINTS.VALID_ATTEMPT,
     },
     {
-      label: "Phục bàn",
+      label: "Phản tư",
       points:
         facts.qualifiedReviews * EXPERIENCE_POINTS.QUALIFIED_REVIEW +
         deep * EXPERIENCE_POINTS.DEEP_REVIEW_BONUS,

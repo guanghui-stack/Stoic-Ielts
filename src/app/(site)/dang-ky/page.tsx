@@ -7,7 +7,7 @@ import { QuietWorldPanel } from "@/components/world/quiet-world-panel";
 export const metadata: Metadata = {
   title: "Đăng ký tài khoản",
   description:
-    "Tạo tài khoản học viên HỔ PHÙ · IELTS miễn phí — luyện tập 4 kỹ năng IELTS với đồng hồ thi thật và được giáo viên chấm chữa Writing.",
+    "Tạo tài khoản STOIC · IELTS miễn phí để luyện Reading trong điều kiện thật, theo dõi tiến bộ và xây một nhịp học bền vững.",
 };
 
 export default async function RegisterPage() {
@@ -16,9 +16,9 @@ export default async function RegisterPage() {
 
   return (
     <QuietWorldPanel
-      eyebrow="Miễn phí trọn đời"
+      eyebrow="Bắt đầu từ điều bạn kiểm soát"
       title="Tạo tài khoản học viên"
-      lede="Một tài khoản — toàn bộ phòng luyện tập: đề Reading chấm tự động, đề Writing có giáo viên nhận xét và hồ sơ tiến độ của riêng bạn."
+      lede="Một tài khoản để làm Reading trong điều kiện thật, nhìn lại dữ liệu của chính mình và chọn đúng việc cần làm tiếp theo."
     >
       <RegisterForm />
     </QuietWorldPanel>

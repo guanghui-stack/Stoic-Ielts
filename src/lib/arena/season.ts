@@ -17,7 +17,7 @@ import { opponentDecayFactor } from "../experience/experience.ts";
 
 export const SEASON_RULE_VERSION = "2026-08-22-v1";
 
-/* ===================== Ba phe ===================== */
+/* ===================== Ba trụ hiển thị ===================== */
 
 export const FACTIONS = ["WEI", "SHU", "WU"] as const;
 export type Faction = (typeof FACTIONS)[number];
@@ -27,9 +27,9 @@ export function isFaction(value: string): value is Faction {
 }
 
 export const FACTION_LABEL: Readonly<Record<Faction, string>> = {
-  WEI: "Ngụy",
-  SHU: "Thục",
-  WU: "Ngô",
+  WEI: "Nhận thức",
+  SHU: "Hành động",
+  WU: "Ý chí",
 };
 
 /** Mã lãnh địa trên bản đồ, khớp `LOCKED_TERRITORIES` trong `campaign/world.ts`. */
@@ -40,12 +40,12 @@ export const FACTION_TERRITORY: Readonly<Record<Faction, string>> = {
 };
 
 /**
- * Cấp bậc tối thiểu để chọn phe.
+ * Cấp bậc tối thiểu để chọn trụ.
  *
- * Bốn, tức đầu thời Quần hùng. Không phải một con số tự nghĩ ra: đó là ranh giới
- * giữa thời đại đầu và thời đại hai trong `ranks/catalog.ts`, nên nó trùng với
- * lúc người học đã qua giai đoạn làm quen. Chọn phe ngay ngày đầu thì đó là một
- * cú bấm ngẫu nhiên, mà phe lại khoá suốt mùa.
+ * Bốn, tức đầu chặng Rèn luyện. Không phải một con số tự nghĩ ra: đó là ranh giới
+ * giữa giai đoạn bắt đầu và giai đoạn thực hành trong `ranks/catalog.ts`, nên nó
+ * trùng với lúc người học đã qua giai đoạn làm quen. Chọn trụ ngay ngày đầu thì
+ * đó là một cú bấm ngẫu nhiên, mà lựa chọn lại khóa suốt mùa.
  */
 export const FACTION_UNLOCK_LEVEL = 4;
 
@@ -287,14 +287,14 @@ export function territoryOwnerNow(
   return previousSeasonWinner;
 }
 
-/* ===================== Bảng Bố Cáo ===================== */
+/* ===================== Thông Báo ===================== */
 
 /**
- * Cấp bậc tối thiểu để một tin lên bảng: bảy, tức đầu thời Tam phân.
+ * Cấp bậc tối thiểu để một tin lên bảng: bảy, tức đầu chặng Tích hợp.
  *
- * Cũng là ranh giới thời đại có sẵn trong `ranks/catalog.ts`, không phải số tự
- * nghĩ ra. Đặc tả ghi: "Ai lên cấp cũng bố cáo thì bảng thành rác trong một
- * tuần và tin Hoá Long mất hết trọng lượng."
+ * Cũng là ranh giới giai đoạn có sẵn trong `ranks/catalog.ts`, không phải số tự
+ * nghĩ ra. Thông báo chỉ nên xuất hiện khi một dấu mốc đủ ý nghĩa; nếu ai cũng
+ * được ghi nhận, bảng sẽ trở thành nhiễu và tiến bộ mất trọng lượng.
  */
 export const BULLETIN_MIN_RANK_LEVEL = 7;
 
@@ -306,16 +306,15 @@ export const BULLETIN_KINDS = [
 export type BulletinKind = (typeof BULLETIN_KINDS)[number];
 
 /**
- * Nhóm danh hiệu KHÔNG BAO GIỜ lên bảng.
+ * Nhóm danh hiệu KHÔNG BAO GIỜ lên Thông Báo.
  *
- * `ARENA_QUESTION` và `ARENA_MANUAL` thì hiển nhiên: đẩy lời chê lên bảng công
- * cộng là bêu riếu.
+ * `ARENA_QUESTION` và `ARENA_MANUAL` thì hiển nhiên: đưa lời nhắc riêng tư lên
+ * bảng công cộng là bêu riếu.
  *
- * `ARENA_REDEMPTION` mới là cái bẫy. Cải Quá Tự Tân là danh hiệu CÔNG KHAI, nên
- * luật "chỉ bố cáo tin vinh danh" thoạt nhìn cho phép nó lên bảng. Nhưng chỉ
- * người TỪNG bị gắn danh hiệu chất vấn mới có được nó, nên bố cáo nó là công bố
- * ngược lại rằng người này từng bị chất vấn. Nó ở lại trên hồ sơ, nơi nó là
- * niềm tự hào riêng, và không lên bảng.
+ * `ARENA_REDEMPTION` mới là cái bẫy. “Sửa mình bằng hành động” là danh hiệu
+ * CÔNG KHAI, nhưng chỉ người TỪNG nhận một lời nhắc riêng tư mới có được nó.
+ * Đưa lên Thông Báo sẽ vô tình tiết lộ lịch sử đó, nên nó chỉ ở lại trên hồ sơ,
+ * nơi nó là niềm tự hào riêng.
  */
 export const BULLETIN_FORBIDDEN_CATEGORIES = [
   "ARENA_QUESTION",
@@ -336,7 +335,7 @@ export type AnnounceRequest = {
 export type AnnounceDecision = { allowed: boolean; reason: string };
 
 /**
- * Tin này có được lên Bảng Bố Cáo không.
+ * Tin này có được lên Thông Báo không.
  *
  * Ba chốt của đặc tả nằm gọn trong hàm này, theo đúng thứ tự ưu tiên: quyền
  * riêng tư trước, rồi tới nhóm danh hiệu cấm, rồi mới tới ngưỡng cấp bậc.

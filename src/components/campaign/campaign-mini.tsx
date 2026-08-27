@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, Check, Lock, Play } from "lucide-react";
 import { STATE_LABELS, type CampaignNodeView } from "@/lib/campaign/view";
+import { stoicTrialLabel, stoicTrialTitle } from "@/lib/campaign/world";
 
 /**
  * Dải bản đồ thu nhỏ cho Trung Quân Trướng.
@@ -45,14 +46,14 @@ export function CampaignMini({ nodes }: { nodes: CampaignNodeView[] }) {
             <li key={node.code} className="flex-1">
               <div
                 className={`h-full border p-3 ${TONE[node.state]}`}
-                aria-label={`${node.shortTitle} — ${node.functionalLabel}. ${STATE_LABELS[node.state]}`}
+                aria-label={`${stoicTrialTitle(node)} — ${stoicTrialLabel(node)}. ${STATE_LABELS[node.state]}`}
               >
                 <Icon className="size-4" aria-hidden />
                 <p className="mt-2 font-display text-sm font-semibold text-navy-deep">
-                  {node.shortTitle}
+                  {stoicTrialTitle(node)}
                 </p>
                 <p className="mt-0.5 font-ui text-[11px] leading-tight text-muted">
-                  {node.functionalLabel}
+                  {stoicTrialLabel(node)}
                 </p>
               </div>
             </li>
@@ -64,7 +65,7 @@ export function CampaignMini({ nodes }: { nodes: CampaignNodeView[] }) {
         href="/hoc-vien/chien-dich"
         className="mt-3 inline-flex items-center gap-1.5 font-ui text-sm text-navy hover:underline"
       >
-        Xem toàn bộ Chiến Dịch
+        Xem toàn bộ Hành Trình
         <ArrowRight className="size-3.5" aria-hidden />
       </Link>
     </div>

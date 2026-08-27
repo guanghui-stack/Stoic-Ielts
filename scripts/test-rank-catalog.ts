@@ -52,7 +52,7 @@ check(
   9,
 );
 check("cấp cao nhất là 9", MAX_RANK_LEVEL, 9);
-check("tra cứu theo cấp trả về đúng tên", rankByLevel(1)?.name, "Bạch thân");
+check("tra cứu theo cấp trả về đúng tên", rankByLevel(1)?.name, "Người bắt đầu");
 check("cấp không tồn tại trả về undefined", rankByLevel(10), undefined);
 
 // Thời đại phải đi theo đúng khối cấp bậc, không nhảy cóc qua lại.

@@ -33,12 +33,12 @@ export const metadata = { title: "Xem thử hệ cấp bậc" };
 
 const GATE_PROGRESS = [
   { label: "Đề khác nhau đã làm", current: 2, target: 3 },
-  { label: "Lượt phục bàn đạt chuẩn", current: 3, target: 3 },
+  { label: "Lượt phản tư đạt chuẩn", current: 3, target: 3 },
 ];
 
 const SUCCESS_PROGRESS = [
   { label: "Đề khác nhau đạt band 4.5", current: 3, target: 5 },
-  { label: "Lượt phục bàn", current: 1, target: 3 },
+  { label: "Lượt phản tư", current: 1, target: 3 },
 ];
 
 function Block({ title, children }: { title: string; children: React.ReactNode }) {
@@ -80,7 +80,7 @@ export default function RankPreviewPage() {
         báo lỗi thiếu đăng nhập — đó là hành vi đúng.
       </p>
 
-      <Block title="Chín ấn triện — huy hiệu cấp bậc">
+      <Block title="Chín dấu mốc — huy hiệu cấp bậc">
         <p className="mb-5 max-w-2xl font-ui text-sm leading-relaxed text-ink-soft">
           Núm ấn đổi theo thời đại (thanh ngang · vòng · vòng kép), số vạch
           trong lòng ấn là bậc trong thời đại đó. Dải nhỏ bên dưới là cỡ thật
@@ -119,50 +119,50 @@ export default function RankPreviewPage() {
         </div>
       </Block>
 
-      <Block title="Thẻ cấp bậc — đang trấn thủ">
+      <Block title="Thẻ cấp bậc — đang thực hành">
         <CurrentRankCard
           level={3}
-          rankName="Thập trưởng"
+          rankName="Giữ Nhịp"
           era="LOAN_THE"
           bandAnchor="Band 4.5 ổn định"
           active
         />
       </Block>
 
-      <Block title="Khoảnh khắc khải hoàn — chỉ hiện một lần">
+      <Block title="Khoảnh khắc tiến bộ — chỉ hiện một lần">
         <RankPromotionMoment
           userId="xem-thu-cap-bac"
           promotionId="preview-rank-5"
           level={5}
-          rankName="Nha tướng"
+          rankName="Ổn Định"
           eligible
         />
       </Block>
 
-      <Block title="Thẻ cấp bậc — nhàn cư, và bậc 8 có hiệu">
+      <Block title="Thẻ cấp bậc — nghỉ nhịp, và bậc 8 có phẩm chất">
         <div className="space-y-6">
           <CurrentRankCard
             level={5}
-            rankName="Nha tướng"
+            rankName="Ổn Định"
             era="QUAN_HUNG"
             bandAnchor="Band 5.5 - 6.0"
             active={false}
           />
           <CurrentRankCard
             level={8}
-            rankName="Tứ phương tướng quân"
+            rankName="Tích Hợp"
             era="TAM_PHAN"
             bandAnchor="Band 7.0 - 7.5"
             active
-            cardinalTitleName="Trấn Bắc tướng quân"
+            cardinalTitleName="Công bằng"
           />
         </div>
       </Block>
 
-      <Block title="Cửa ải — chưa mở">
+      <Block title="Chặng — chưa mở">
         <TrialGateCard
           trialCode="TRIAL_02_HOANG_CAN"
-          trialName="Trương Phi phá Hoàng Cân"
+          trialName="Giữ nhịp đều đặn"
           estimate="Khoảng 2 tuần"
           status="LOCKED"
           gateComplete={false}
@@ -171,23 +171,23 @@ export default function RankPreviewPage() {
         />
       </Block>
 
-      <Block title="Cửa ải — đã mở, có nút Khởi thí luyện">
+      <Block title="Chặng — đã mở, có nút bắt đầu">
         <TrialGateCard
           trialCode="TRIAL_02_HOANG_CAN"
-          trialName="Trương Phi phá Hoàng Cân"
+          trialName="Giữ nhịp đều đặn"
           estimate="Khoảng 2 tuần"
           status="ELIGIBLE"
           gateComplete
-          gateExplanation="Đã đủ số đề để mở cửa ải."
+          gateExplanation="Đã đủ số đề để mở chặng."
           gateProgress={GATE_PROGRESS}
         />
       </Block>
 
-      <Block title="Cửa ải — đang thí luyện">
+      <Block title="Chặng — đang thực hành">
         <div className="space-y-6">
           <TrialGateCard
             trialCode="TRIAL_02_HOANG_CAN"
-            trialName="Trương Phi phá Hoàng Cân"
+            trialName="Giữ nhịp đều đặn"
             estimate="Khoảng 2 tuần"
             status="ACTIVE"
             gateComplete
@@ -203,18 +203,18 @@ export default function RankPreviewPage() {
         </div>
       </Block>
 
-      <Block title="Phục bàn miễn phí">
+      <Block title="Phản tư miễn phí">
         <TrialReflectionForm
           trialCode="TRIAL_02_HOANG_CAN"
           questionTypes={["TRUE_FALSE_NOT_GIVEN", "MATCHING_HEADINGS", "SUMMARY_COMPLETION"]}
         />
       </Block>
 
-      <Block title="Chọn hiệu bậc 8">
+      <Block title="Chọn phẩm chất bậc 8">
         <CardinalTitlePicker current="TRAN_BAC" />
       </Block>
 
-      <Block title="Bản đồ — đang ở bậc 3, đã vượt 2 cửa">
+      <Block title="Bản đồ — đang ở bậc 3, đã hoàn tất 2 chặng">
         <CampaignMap world={mapWorld} variant="student" />
         <CampaignTimelineMobile world={mapWorld} />
         <NextStepGuide step={mapWorld.nextStep} />

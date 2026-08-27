@@ -21,7 +21,7 @@ import { getMeritWallet } from "@/lib/merit/merit-service";
 import { ButtonLink, NoteBox, SubmitButton } from "@/components/ui";
 import { StudentNav } from "@/components/student/student-nav";
 import { GoalsCard } from "@/components/student/goals-card";
-import { StudyCalendar } from "@/components/student/study-calendar";
+import { StudyCalendar } from "@/components/ui/study-calendar";
 import { WeeklyStats, type WeeklyRow } from "@/components/student/weekly-stats";
 import { HistoryTabs, type HistoryItem } from "@/components/student/history-tabs";
 import { AchievementSummaryCard } from "@/components/achievements/achievement-summary-card";
@@ -104,21 +104,14 @@ export default async function StudentDashboard({
   /* ===== Lịch chuyên cần (tháng hiện tại, giờ VN) ===== */
   const now = new Date();
   const todayKey = dateKey(now);
-  const [ty, tm, td] = todayKey.split("-").map(Number);
   const monthPrefix = todayKey.slice(0, 8); // "yyyy-mm-"
-  const daysInMonth = new Date(ty, tm, 0).getDate();
-  // Thứ của ngày 1 (lấy mốc 12:00 giờ VN để tránh lệch múi giờ)
-  const firstWeekday = new Date(`${monthPrefix}01T12:00:00+07:00`).getUTCDay();
-  const offset = (firstWeekday + 6) % 7; // tuần bắt đầu Thứ 2
-  const monthLabel = `Tháng ${String(tm).padStart(2, "0")} / ${ty}`;
 
-  const activeDays = [
+  const activityDates = [
     ...new Set(
       finished
         .filter((a) => a.submittedAt)
         .map((a) => dateKey(a.submittedAt!))
-        .filter((k) => k.startsWith(monthPrefix))
-        .map((k) => Number(k.slice(8)))
+        .filter((key) => key.startsWith(monthPrefix))
     ),
   ];
 
@@ -166,7 +159,7 @@ export default async function StudentDashboard({
       <section className="border-b border-line bg-paper">
         <div className="mx-auto flex max-w-6xl flex-wrap items-end justify-between gap-6 px-6 py-12">
           <div>
-            <p className="label-caps">Hồ sơ học tập</p>
+            <p className="label-caps">Nội Tâm · Hồ sơ học tập</p>
             <h1 className="mt-3 font-display text-3xl font-bold text-navy-deep md:text-4xl">
               Xin chào, {user.name}
             </h1>
@@ -191,7 +184,7 @@ export default async function StudentDashboard({
             {arena ? (
               <dl className="mt-4 flex flex-wrap gap-px border border-line bg-line">
                 <div className="flex-1 bg-paper px-5 py-3">
-                  <dt className="label-caps">Quân Công</dt>
+                  <dt className="label-caps">Điểm Thực Hành</dt>
                   <dd className="mt-1 flex items-center gap-2">
                     <span className="seal h-4 w-4" aria-hidden="true" />
                     <span className="font-display text-xl font-bold tabular-nums text-navy-deep">
@@ -200,7 +193,7 @@ export default async function StudentDashboard({
                   </dd>
                 </div>
                 <div className="flex-1 bg-paper px-5 py-3">
-                  <dt className="label-caps">Chiến Lực</dt>
+                  <dt className="label-caps">Năng lực đối chiếu</dt>
                   <dd className="mt-1 flex items-center gap-2">
                     <TrendingUp className="h-4 w-4 text-azure-ink" aria-hidden="true" />
                     <span className="font-display text-xl font-bold tabular-nums text-navy-deep">
@@ -209,13 +202,13 @@ export default async function StudentDashboard({
                   </dd>
                 </div>
                 <div className="flex-1 bg-paper px-5 py-3">
-                  <dt className="label-caps">Chiến tích</dt>
+                  <dt className="label-caps">Kết quả đối chiếu</dt>
                   <dd className="mt-1 font-display text-xl font-bold tabular-nums text-navy-deep">
                     {arena.wins}/{arena.losses}
                   </dd>
                 </div>
                 <div className="flex-1 bg-paper px-5 py-3">
-                  <dt className="label-caps">Hoà khí</dt>
+                  <dt className="label-caps">Hoà giải</dt>
                   <dd className="mt-1 flex items-center gap-2">
                     <Handshake className="h-4 w-4 text-silver-blue-ink" aria-hidden="true" />
                     <span className="font-display text-xl font-bold tabular-nums text-navy-deep">
@@ -223,7 +216,7 @@ export default async function StudentDashboard({
                     </span>
                   </dd>
                   <p className="mt-0.5 font-ui text-[0.68rem] leading-snug text-muted">
-                    số lần giảng hoà
+                    số lần chủ động hoà giải
                   </p>
                 </div>
               </dl>
@@ -315,11 +308,10 @@ export default async function StudentDashboard({
         {/* Lịch chuyên cần + thống kê tuần */}
         <div className="grid gap-6 lg:grid-cols-2">
           <StudyCalendar
-            monthLabel={monthLabel}
-            offset={offset}
-            daysInMonth={daysInMonth}
-            activeDays={activeDays}
-            today={td}
+            activityDates={activityDates}
+            streakDates={activityDates}
+            initialMonth={todayKey.slice(0, 7)}
+            title="Kỷ luật ngày"
           />
           <WeeklyStats rows={weeklyRows} />
         </div>
@@ -399,7 +391,7 @@ export default async function StudentDashboard({
             Reading General
           </ButtonLink>
           <ButtonLink href="/hoc-vien/dau-truong" variant="outline">
-            Đấu trường
+            Thử thách đối chiếu
           </ButtonLink>
         </div>
       </section>

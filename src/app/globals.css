@@ -1,17 +1,16 @@
 @import "tailwindcss";
 
 /*
-  HỔ PHÙ · IELTS — Chiến trận · Phục bàn · Luyện binh
-  Hệ thiết kế thủy mặc Đông Á: nền giấy gạo, mực navy-đen, con dấu chu sa,
-  tiêu đề serif, nhãn in hoa giãn cách.
+  STOIC · IELTS — Nhận thức · Hành động · Ý chí
+  Hệ thiết kế vòng tròn kiểm soát: nền sáng có khoảng thở, mực xanh đậm,
+  violet làm điểm tập trung, accent ruby/sage tiết chế và nhãn rõ ràng.
 
-  Một quyết định thị giác duy nhất, lặp lại nhất quán: TRANH MỰC TRÊN GIẤY.
-  80–90% bề mặt là đen, xám và kem; mỗi module chỉ được dùng ĐÚNG MỘT màu
-  accent. Trộn nhiều accent trên cùng một màn hình là lỗi thiết kế, không
-  phải lựa chọn phong cách.
+  Một quyết định thị giác duy nhất, lặp lại nhất quán: FOCUS THROUGH CLARITY.
+  Bề mặt ưu tiên khoảng trống, dữ liệu dễ đọc và một điểm nhấn có chủ đích;
+  tránh dùng quá nhiều accent hoặc chuyển động cùng lúc.
 
   Ngoại lệ tuyệt đối: phòng thi Reading CBT giữ giao diện trung tính mô phỏng
-  đề thi thật — không giấy gạo, không mực, không nhân vật. Xem .font-exam.
+  đề thi thật — không nhận diện Stoic, không animation trang trí. Xem .font-exam.
 */
 
 /*
@@ -48,71 +47,69 @@
      màu cứng `hover:bg-[#9d7223]` nằm rải trong ui.tsx. */
   --color-gold-deep: #9d7223;
 
-  /* ===== Màu chức năng Tam Quốc (Master Spec §8.2) =====
-     Mỗi màu gắn với MỘT module và MỘT danh tướng. Không dùng lẫn.
+  /* ===== Token compatibility cho các route protected =====
+     Các alias dưới đây giữ nguyên để vùng thi và dữ liệu lịch sử không thay đổi;
+     route ngoài protected dùng token Stoic scoped ở cuối file.
 
      Hậu tố -ink là biến thể đã tối đủ để làm CHỮ trên nền kem (tương phản
      WCAG AA ≥ 4.5:1). Bản gốc chỉ dùng cho viền, nền, biểu tượng và mảng
      đồ họa — dùng nó làm chữ nhỏ là không đạt chuẩn tiếp cận. */
 
-  /* Chu sa — Phục bàn, con dấu, cấp bậc cao. Trương Phi. */
+  /* Compatibility ruby — chỉ giữ cho route protected và dữ liệu lịch sử. */
   --color-vermilion: #a33a2b;
   --color-vermilion-ink: #8e3125;
   --color-vermilion-pale: #f4e6e2;
 
-  /* Lam điện — Chiến trận. Triệu Vân. */
+  /* Compatibility azure — chỉ giữ cho route protected và dữ liệu lịch sử. */
   --color-azure: #3a7fc4;
   --color-azure-ink: #2c6099;
   --color-azure-pale: #e6eef7;
 
-  /* Lục ngọc — chính đạo, liêm chính. Quan Vũ. */
+  /* Compatibility jade — chỉ giữ cho route protected và dữ liệu lịch sử. */
   --color-jade: #2e6b4f;
   --color-jade-ink: #275c44;
   --color-jade-pale: #e7f0ea;
 
-  /* Kim đồng — Luyện binh, kỷ luật, lương thảo. Hoàng Trung.
-     (Trùng --color-gold; -ink là bản đạt chuẩn chữ.) */
+  /* Compatibility gold — giữ alias cũ; --color-gold-ink là bản đạt chuẩn chữ. */
   --color-gold-ink: #8a6318;
 
-  /* Bạc lam — biến hóa, thích nghi. Mã Siêu. */
+  /* Compatibility silver-blue — chỉ giữ cho route protected và dữ liệu lịch sử. */
   --color-silver-blue: #7d97ac;
   --color-silver-blue-ink: #4e6e8c;
 
-  /* Hỏa cam — đối thủ phản chiếu, thử thách cuối. Lữ Bố. */
+  /* Compatibility fire — chỉ giữ cho route protected và dữ liệu lịch sử. */
   --color-fire: #c2591f;
   --color-fire-ink: #a94d1b;
   --color-fire-pale: #f8ebe2;
 
-  /* Bạc trăng & indigo — Nguyệt Thí và các tầng đại thí. */
+  /* Compatibility moon/indigo — chỉ giữ cho route protected và dữ liệu lịch sử. */
   --color-moon-silver: #c3cbd5;
   --color-indigo: #273a63;
 
-  /* Tro — huy hiệu tướng quân: sức bền, không bóng bẩy. */
+  /* Compatibility ash — chỉ giữ cho route protected và dữ liệu lịch sử. */
   --color-ash: #77736c;
   --color-ash-ink: #5f5b54;
 
-  /* ===== Ba phe, NGOẠI LỆ CÓ TÊN của luật một accent =====
-     Chỉ được dùng ở ĐÚNG HAI NƠI: bảng xếp hạng phe, và chú giải bản đồ lãnh
-     địa. Bản đồ KHÔNG tô lãnh địa bằng màu phẳng — nó đã giải xong bằng lớp
-     tranh chồng cộng thang opacity trong territory-map.ts. Xem
-     docs/BRAND-GUIDELINE.md muc 1.5.
+  /* ===== Alias màu legacy giữ cho các bề mặt dữ liệu protected =====
+     Không dùng cho bề mặt Stoic mới. Chỉ giữ để render dữ liệu legacy mà không
+     đổi checksum hoặc màu của vùng protected. Bề mặt mới dùng các token scoped
+     Stoic ở cuối file.
 
-     Ngụy cố ý KHÔNG dùng màu lam, dù quy ước quen thuộc là vậy: bảng màu đã có
-     năm token họ lam (navy, azure, silver-blue, indigo, ink), nên mọi ứng viên
-     lam đều rơi vào deltaE 14 tới 19 so với ink-soft hoặc azure-ink, tức là
-     đặt cạnh nhau trên bảng xếp hạng thì người đọc phải dừng lại mà đoán. */
+     Các alias này không được dùng để đặt tên module Stoic mới; chỉ tồn tại nhằm
+     tương thích với dữ liệu và route protected. Mọi bề mặt mới dùng palette
+     vòng tròn kiểm soát ở block theme scoped phía cuối file. */
 
-  /* Tía đá — Ngụy, lãnh địa phía bắc. Chữ đạt 5.58 trên kem, 4.62 trên pale. */
+  /* Legacy faction alias — không dùng cho nội dung Stoic mới. */
   --color-faction-wei: #705a86;
   --color-faction-wei-ink: #705a86;
   --color-faction-wei-pale: #e7e0e0;
 
-  /* Trúc lục — Thục, lãnh địa phía tây. Bản gốc chỉ 4.14 nên chữ PHẢI dùng -ink. */
+  /* Legacy faction alias — không dùng cho nội dung Stoic mới. */
   --color-faction-shu: #6a7f3a;
   --color-faction-shu-ink: #586b2e;
   --color-faction-shu-pale: #e6e5d6;
 
-  /* Thổ hồng — Ngô, lãnh địa phía đông nam. Chữ đạt 5.66 trên kem, 4.73 trên pale. */
+  /* Legacy faction alias — không dùng cho nội dung Stoic mới. */
   --color-faction-wu: #9c5b52;
   --color-faction-wu-ink: #8f5149;
   --color-faction-wu-pale: #ede0d9;
@@ -152,6 +149,37 @@
 
      Trùng tên với --shadow-lift là có chủ ý: hai token này đi thành cặp. */
   --radius-lift: 10px;
+
+  /* ===== STOIC · IELTS — chỉ dùng dưới .world-shell ===== */
+  --color-stoic-canvas: #ffffff;
+  --color-stoic-canvas-soft: #f7f8fc;
+  --color-stoic-canvas-cream: #f6eedf;
+  --color-stoic-slate-950: #11182c;
+  --color-stoic-slate-900: #202a44;
+  --color-stoic-ink: #172033;
+  --color-stoic-ink-secondary: #35425a;
+  --color-stoic-ink-muted: #66738a;
+  --color-stoic-line: #e2e7f0;
+  --color-stoic-line-strong: #aab9cc;
+  --color-stoic-primary: #5b5fef;
+  --color-stoic-primary-deep: #494cc4;
+  --color-stoic-primary-press: #35377f;
+  --color-stoic-primary-soft: #d9dbff;
+  --color-stoic-lavender: #b8a8f8;
+  --color-stoic-ruby: #d85b78;
+  --color-stoic-sherbet: #d78a58;
+  --color-stoic-sage: #33745a;
+  --color-stoic-danger: #b4233b;
+  --color-stoic-warning: #8a6318;
+
+  --font-stoic: var(--font-inter), var(--font-be-vietnam), system-ui, sans-serif;
+  --radius-stoic-sm: 6px;
+  --radius-stoic-md: 10px;
+  --radius-stoic-lg: 16px;
+  --radius-stoic-pill: 9999px;
+  --shadow-stoic-1: 0 1px 3px rgb(23 32 51 / 0.08);
+  --shadow-stoic-2: 0 8px 28px rgb(23 32 51 / 0.10);
+  --shadow-stoic-3: 0 20px 60px rgb(17 24 44 / 0.18);
 }
 
 :root {
@@ -290,9 +318,8 @@ body {
 }
 
 /*
-  Nhãn kép: tên cổ phong ở trên, chức năng thật ở dưới (Master Spec §3).
-  Tên Tam Quốc để ghi nhớ, dòng chức năng để người mới không lạc đường —
-  người chưa biết "Phục Bàn" là gì vẫn phải đọc được "Feynman Review".
+  Nhãn kép: tên chủ đề ở trên, chức năng thật ở dưới.
+  Tên Stoic tạo định hướng; dòng chức năng giữ cho người mới hiểu ngay bước tiếp theo.
 */
 .dual-label__function {
   font-family: var(--font-ui);
@@ -1099,6 +1126,234 @@ body {
   .world-shell .world-ceremony__seal {
     animation: none !important;
     opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* ========================================================================== */
+/* STOIC · IELTS — scoped brand layer                                         */
+/*
+  Các biến legacy được ánh xạ lại CHỈ bên trong WorldShell. Route học/làm bài
+  protected không render WorldShell, vì vậy tiếp tục nhận nguyên CSS baseline.
+*/
+.world-shell {
+  --color-cream: var(--color-stoic-canvas-soft);
+  --color-cream-deep: #eef0f8;
+  --color-paper: var(--color-stoic-canvas);
+  --color-ink: var(--color-stoic-ink);
+  --color-ink-soft: var(--color-stoic-ink-secondary);
+  --color-muted: var(--color-stoic-ink-muted);
+  --color-navy: var(--color-stoic-primary);
+  --color-navy-deep: var(--color-stoic-slate-900);
+  --color-teal: var(--color-stoic-sage);
+  --color-gold: var(--color-stoic-primary);
+  --color-gold-soft: var(--color-stoic-lavender);
+  --color-gold-pale: var(--color-stoic-primary-soft);
+  --color-gold-deep: var(--color-stoic-primary-deep);
+  --color-gold-ink: var(--color-stoic-primary-deep);
+  --color-vermilion: var(--color-stoic-ruby);
+  --color-vermilion-ink: #a73f5b;
+  --color-vermilion-pale: #fae8ee;
+  --color-azure: var(--color-stoic-primary);
+  --color-azure-ink: var(--color-stoic-primary-deep);
+  --color-azure-pale: var(--color-stoic-primary-soft);
+  --color-jade: var(--color-stoic-sage);
+  --color-jade-ink: #285e49;
+  --color-jade-pale: #e5f2ec;
+  --color-fire: var(--color-stoic-sherbet);
+  --color-fire-ink: #985936;
+  --color-fire-pale: #faede5;
+  --color-silver-blue: #91a2bc;
+  --color-silver-blue-ink: #586a84;
+  --color-moon-silver: #dfe3ef;
+  --color-indigo: var(--color-stoic-slate-900);
+  --color-ash: #7b8190;
+  --color-ash-ink: #5d6370;
+  --color-line: var(--color-stoic-line);
+  --color-line-strong: var(--color-stoic-line-strong);
+  --color-success: var(--color-stoic-sage);
+  --color-success-pale: #e5f2ec;
+  --color-danger: var(--color-stoic-danger);
+  --color-danger-deep: #8f1c31;
+  --color-danger-pale: #fae9ee;
+  --color-info-pale: #eceeff;
+  --color-faction-wei: var(--color-stoic-primary);
+  --color-faction-wei-ink: var(--color-stoic-primary-deep);
+  --color-faction-wei-pale: var(--color-stoic-primary-soft);
+  --color-faction-shu: var(--color-stoic-sage);
+  --color-faction-shu-ink: #285e49;
+  --color-faction-shu-pale: #e5f2ec;
+  --color-faction-wu: var(--color-stoic-ruby);
+  --color-faction-wu-ink: #a73f5b;
+  --color-faction-wu-pale: #fae8ee;
+  --font-display: var(--font-stoic);
+  --font-body: var(--font-stoic);
+  --font-ui: var(--font-stoic);
+  --tracking-label: 0.09em;
+  --shadow-card: var(--shadow-stoic-1);
+  --shadow-lift: var(--shadow-stoic-2);
+  --shadow-modal: var(--shadow-stoic-3);
+  --radius-lift: var(--radius-stoic-lg);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  position: relative;
+  isolation: isolate;
+  background: var(--color-stoic-canvas-soft);
+  color: var(--color-stoic-ink);
+  font-family: var(--font-stoic);
+  font-feature-settings: "ss01" 1;
+}
+
+.world-shell .paper-grain {
+  background-color: var(--color-stoic-canvas-soft);
+  background-image:
+    radial-gradient(circle at 14% 4%, rgb(216 91 120 / 0.08), transparent 26rem),
+    radial-gradient(circle at 50% -8%, rgb(91 95 239 / 0.13), transparent 34rem),
+    radial-gradient(circle at 88% 2%, rgb(215 138 88 / 0.10), transparent 28rem);
+  background-attachment: scroll;
+}
+
+.world-shell .label-caps {
+  color: var(--color-stoic-primary-deep);
+  font-family: var(--font-stoic);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+}
+
+.world-shell .seal {
+  border-color: var(--color-stoic-primary);
+  border-radius: 9999px;
+  color: var(--color-stoic-primary-deep);
+}
+
+.world-shell .rule-gold,
+.world-shell .rule-ink {
+  border-radius: 9999px;
+  background: linear-gradient(90deg, var(--color-stoic-primary), var(--color-stoic-lavender));
+}
+
+.world-shell :where(button, a, input, select, textarea):focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--color-stoic-primary) 28%, transparent);
+  outline-offset: 3px;
+}
+
+.world-shell :where(button, [role="button"], a[class*="bg-navy"], a[class*="bg-gold"]) {
+  transition:
+    transform 120ms var(--ease-out),
+    border-color 180ms var(--ease-out),
+    background-color 180ms var(--ease-out),
+    color 180ms var(--ease-out),
+    box-shadow 180ms var(--ease-out);
+}
+
+.world-shell :where(a[class*="bg-navy"], a[class*="bg-gold"], button[class*="bg-navy"], button[class*="bg-gold"]) {
+  border-radius: var(--radius-stoic-pill);
+}
+
+.world-shell :where(.shadow-card, [class*="shadow-card"]) {
+  border-radius: var(--radius-stoic-md);
+}
+
+.world-shell .tabular-nums,
+.world-shell [data-numeric="true"],
+.world-shell table {
+  font-variant-numeric: tabular-nums;
+}
+
+.world-shell[data-route-area="world"]::before {
+  content: "";
+  position: fixed;
+  z-index: -1;
+  inset: 0 0 auto;
+  height: min(38rem, 62vh);
+  pointer-events: none;
+  background:
+    radial-gradient(42% 80% at 18% 8%, rgb(246 238 223 / 0.95), transparent 70%),
+    radial-gradient(36% 72% at 42% 0%, rgb(215 138 88 / 0.20), transparent 72%),
+    radial-gradient(42% 78% at 65% -4%, rgb(184 168 248 / 0.28), transparent 72%),
+    radial-gradient(36% 70% at 82% 6%, rgb(91 95 239 / 0.22), transparent 72%),
+    radial-gradient(24% 60% at 96% 0%, rgb(216 91 120 / 0.16), transparent 74%);
+  filter: saturate(0.92);
+}
+
+@media (max-width: 767px) {
+  .world-shell[data-route-area="world"]::before {
+    height: 30rem;
+    background:
+      radial-gradient(68% 58% at 12% 2%, rgb(246 238 223 / 0.95), transparent 72%),
+      radial-gradient(70% 62% at 58% -8%, rgb(184 168 248 / 0.25), transparent 72%),
+      radial-gradient(58% 54% at 96% 4%, rgb(91 95 239 / 0.18), transparent 76%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .world-shell *,
+  .world-shell *::before,
+  .world-shell *::after {
+    scroll-behavior: auto !important;
+  }
+}
+
+/* AI waiting — chỉ được dùng trong WorldShell, không gắn vào route tier 0. */
+.world-shell .stoic-ai-orbit__ring {
+  animation: stoic-orbit 2.8s linear infinite;
+  will-change: transform;
+}
+
+.world-shell .stoic-ai-orbit__ring--reverse {
+  animation-direction: reverse;
+  animation-duration: 3.6s;
+}
+
+@keyframes stoic-orbit {
+  to { transform: rotate(1turn); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .world-shell .stoic-ai-orbit__ring,
+  .world-shell .stoic-ai-orbit__ring--reverse {
+    animation: none !important;
+  }
+}
+
+/* Stoic motion pass — chỉ áp dụng ngoài các route study-static tier 0. */
+.world-shell[data-motion-tier="2"] .world-route-scene > * {
+  animation: stoic-section-reveal var(--world-duration-scene) var(--ease-out) both;
+}
+
+.world-shell[data-motion-tier="2"] .world-route-scene > *:nth-child(2) {
+  animation-delay: 70ms;
+}
+
+.world-shell[data-motion-tier="2"] .world-route-scene > *:nth-child(3) {
+  animation-delay: 140ms;
+}
+
+.world-shell[data-motion-tier="2"] .world-route-scene > *:nth-child(4) {
+  animation-delay: 210ms;
+}
+
+.world-shell[data-motion-tier="1"] .world-action:hover {
+  transform: translateY(-1px);
+}
+
+@keyframes stoic-section-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .world-shell[data-motion-tier="2"] .world-route-scene > *,
+  .world-shell[data-motion-tier="1"] .world-action:hover {
+    animation: none !important;
     transform: none !important;
   }
 }

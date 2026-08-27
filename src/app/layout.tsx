@@ -1,6 +1,12 @@
 import type { Metadata } from "next";
-import { Playfair_Display, Source_Serif_4, Be_Vietnam_Pro } from "next/font/google";
+import { Inter, Playfair_Display, Source_Serif_4, Be_Vietnam_Pro } from "next/font/google";
 import "./globals.css";
+
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin", "vietnamese"],
+  weight: ["300", "400", "500", "600", "700"],
+});
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
@@ -23,11 +29,11 @@ const beVietnam = Be_Vietnam_Pro({
 
 export const metadata: Metadata = {
   title: {
-    default: "HỔ PHÙ · IELTS — Chiến trận · Phục bàn · Luyện binh",
-    template: "%s | HỔ PHÙ · IELTS",
+    default: "STOIC · IELTS — Nhận thức · Hành động · Ý chí",
+    template: "%s | STOIC · IELTS",
   },
   description:
-    "HỔ PHÙ · IELTS — kho đề IELTS Reading Academic và General tách biệt, quy đổi band ngay khi nộp, hệ cấp bậc và danh hiệu dành cho người kiên trì, cùng ba tầng đại thí Nguyệt Thí, Dương Thí và Thiên Thí.",
+    "STOIC · IELTS là nền tảng luyện IELTS Reading Academic và General bằng tiếng Việt, giúp bạn làm bài trong điều kiện thật, nhìn đúng lỗi và giữ một nhịp học có thể lặp lại.",
 };
 
 export default function RootLayout({
@@ -38,7 +44,7 @@ export default function RootLayout({
   return (
     <html
       lang="vi"
-      className={`${playfair.variable} ${sourceSerif.variable} ${beVietnam.variable} h-full antialiased`}
+      className={`${inter.variable} ${playfair.variable} ${sourceSerif.variable} ${beVietnam.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

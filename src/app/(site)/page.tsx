@@ -18,22 +18,22 @@ import { ButtonLink, NoteBox } from "@/components/ui";
 
 const PILLARS = [
   {
-    icon: BookOpen,
-    title: "Chiến trận",
-    functional: "Làm đề Reading",
-    body: "Làm bài trong đúng điều kiện phòng thi máy tính, chấm và quy đổi band ngay khi nộp. Không có band ảo: điểm được tính theo bảng quy đổi IELTS thật, không phải phần trăm số câu đúng.",
+    icon: Brain,
+    title: "Nhận thức",
+    functional: "Nhìn đúng dữ kiện",
+    body: "Đọc đúng yêu cầu, tách dữ kiện khỏi suy đoán và biết rõ mình sai ở đâu. Một lỗi được gọi đúng tên sẽ dễ sửa hơn một band điểm mơ hồ.",
   },
   {
-    icon: Brain,
-    title: "Phục bàn",
-    functional: "Chữa bài Feynman",
-    body: "Làm thêm đề không tự khiến bạn giỏi hơn. Sau mỗi bài, bạn tự giảng lại vì sao mình sai, tìm bằng chứng trong đoạn văn, rồi rút một quy tắc dùng được cho bài sau.",
+    icon: BookOpen,
+    title: "Hành động",
+    functional: "Làm và chữa bằng bằng chứng",
+    body: "Làm bài trong điều kiện thật, rồi quay lại passage để tìm bằng chứng. Phản hồi chỉ có giá trị khi nó dẫn tới một việc cụ thể cho lần tiếp theo.",
   },
   {
     icon: Repeat,
-    title: "Luyện binh",
-    functional: "Ngày học thật",
-    body: "Hệ thống đếm thời gian học THẬT — chỉ tính khi bạn đang thực sự làm bài, không tính tab mở quên tắt. Danh hiệu kỷ luật cần hàng chục ngày, và không có cách nào rút ngắn.",
+    title: "Ý chí",
+    functional: "Giữ ngày học thật",
+    body: "Năng lực ổn định đến từ một nhịp học có thể lặp lại. Hệ thống chỉ ghi nhận thời gian bạn thực sự học, không tính tab mở quên tắt.",
   },
 ];
 
@@ -42,26 +42,25 @@ export default async function HomePage() {
     <div>
       <SceneHero
         asset={ART_ASSETS.homeTrieuVan}
-        eyebrow="HỔ PHÙ · IELTS · Luyện Reading Academic và General"
+        eyebrow="STOIC · IELTS · Luyện Reading Academic và General"
         title={
           <>
-            Binh phù chỉ hiệu lực
+            Tập trung vào điều
             <br />
-            khi hai nửa khớp nhau.
+            bạn có thể làm hôm nay.
           </>
         }
-        functionalLabel="Cổng Doanh — Trang chủ HỔ PHÙ · IELTS"
+        functionalLabel="Điểm Khởi Tâm — Trang chủ STOIC · IELTS"
       >
         <p className="text-lg leading-relaxed text-ink-soft">
-          Hổ phù là binh phù xẻ đôi: lệnh chỉ có giá trị khi hai mảnh ăn khớp. Ở
-          đây, một nửa là kết quả đo được — band, độ chính xác, thời gian làm
-          bài. Nửa còn lại là quá trình kiểm chứng được — bài đã chữa, ngày đã
-          học thật. Bạn không mua được cấp bậc, không cày tắt được Nguyệt Thí:
-          cấp bậc chỉ trao khi cả hai nửa cùng hợp lệ.
+          Bạn không kiểm soát độ khó của đề hay kết quả của một lần thi. Bạn kiểm
+          soát cách đọc, thời gian, bằng chứng mình chọn và việc quay lại chữa lỗi.
+          STOIC · IELTS biến những lựa chọn đó thành một tiến trình rõ ràng: làm
+          trong điều kiện thật, nhìn đúng điều cần sửa và giữ nhịp đủ lâu.
         </p>
         <div className="mt-9 flex flex-wrap gap-3">
-          <ButtonLink href="#ban-do-chien-dich" variant="primary">
-            Mở bản đồ Chiến Dịch
+          <ButtonLink href="#hanh-trinh" variant="primary">
+            Xem hành trình rèn luyện
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </ButtonLink>
           <ButtonLink href="#lo-trinh-hoc" variant="outline">
@@ -70,12 +69,14 @@ export default async function HomePage() {
         </div>
       </SceneHero>
 
-      <CampaignHomeBlock />
+      <div id="hanh-trinh">
+        <CampaignHomeBlock />
+      </div>
 
       <NarrativeSection
         id="lo-trinh-hoc"
-        eyebrow="Lộ trình học"
-        title="Hiểu đúng trước khi bước vào trận"
+        eyebrow="Bắt đầu rõ ràng"
+        title="Chọn đúng dạng đề trước khi bắt đầu"
         tone="paper"
       >
         <LearningPath />
@@ -83,17 +84,17 @@ export default async function HomePage() {
 
       <NarrativeSection
         id="ba-tru"
-        eyebrow="Ba trụ"
-        title="Làm đề, chữa sai, giữ kỷ luật"
+        eyebrow="Ba trụ thực hành"
+        title="Nhìn đúng, làm đúng, giữ được nhịp"
         tone="mist"
       >
         <Pillars />
       </NarrativeSection>
 
       <NarrativeSection
-        id="dai-thi"
-        eyebrow="Đại thí"
-        title="Từ Nguyệt Thí tới Thiên Thí"
+        id="thu-thach"
+        eyebrow="Thử thách định kỳ"
+        title="Đo tiến bộ mà không chạy theo một lần bùng nổ"
         tone="ink"
       >
         <CompetitionPath />
@@ -107,9 +108,9 @@ function LearningPath() {
     <div className="space-y-14">
       <div>
         <p className="max-w-2xl text-[1.02rem] leading-relaxed text-ink-soft">
-          IELTS có hai dạng Reading khác hẳn nhau. Luyện nhầm dạng nghĩa là bạn
-          đang giỏi lên ở một kỳ thi mà mình không dự — nên hệ thống tách riêng
-          từ danh sách đề cho tới cách ghép đề Full Test.
+          IELTS có hai dạng Reading khác nhau. Luyện nhầm dạng khiến thời gian và
+          nỗ lực đi sai hướng, vì vậy hệ thống tách Academic và General từ danh
+          sách đề cho tới cách ghép Full Test.
         </p>
         <div className="mt-8 grid gap-8 md:grid-cols-2">
           {READING_NAV.map((module) => (
@@ -120,43 +121,43 @@ function LearningPath() {
             >
               <p className="label-caps flex items-center gap-2">
                 <BookOpen className="h-3.5 w-3.5" aria-hidden="true" />
-                Kho luyện tập
+                Kho thực hành
               </p>
-              <h3 className="mt-3 font-display text-2xl font-bold text-navy-deep group-hover:text-navy">
+              <h3 className="mt-3 font-display text-2xl font-medium text-navy-deep group-hover:text-navy">
                 Reading {module.label}
               </h3>
               <p className="mt-3 flex-1 text-[0.95rem] leading-relaxed text-ink-soft">
                 {module.blurb}
               </p>
-              <span className="mt-5 inline-flex items-center gap-1.5 font-ui text-[0.75rem] font-semibold uppercase tracking-[0.12em] text-navy group-hover:text-gold">
-                Vào luyện tập
+              <span className="mt-5 inline-flex items-center gap-1.5 font-ui text-[0.75rem] font-semibold uppercase tracking-[0.09em] text-navy group-hover:text-navy-deep">
+                Vào kho đề
                 <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
               </span>
             </Link>
           ))}
         </div>
-        <NoteBox title="Giao diện khi học" className="mt-6 max-w-2xl">
-          Khi vào Reading, trang sẽ chuyển sang giao diện học tập tĩnh để bạn
-          tập trung vào passage, câu hỏi và thời gian làm bài.
+        <NoteBox title="Phòng thi được giữ nguyên" className="mt-6 max-w-2xl">
+          Khi bắt đầu làm bài, giao diện chuyển sang chế độ mô phỏng thi thật và
+          loại bỏ mọi chuyển động trang trí để bạn tập trung vào passage, câu hỏi
+          và thời gian.
         </NoteBox>
       </div>
 
       <div className="grid gap-10 border-t border-line pt-12 md:grid-cols-2 md:items-center">
         <div>
-          <p className="label-caps">Hành trình danh hiệu</p>
-          <h3 className="mt-3 font-display text-2xl font-bold leading-tight text-navy-deep md:text-3xl">
-            Mười tám danh hiệu, không mua được cái nào
+          <p className="label-caps">Dấu mốc tiến bộ</p>
+          <h3 className="mt-3 font-display text-2xl font-medium leading-tight text-navy-deep md:text-3xl">
+            Mỗi dấu mốc phải nói được bạn đã làm gì
           </h3>
           <p className="mt-5 text-[1.02rem] leading-relaxed text-ink-soft">
-            Không có điểm kinh nghiệm, không có cửa hàng đổi điểm. Mỗi danh
-            hiệu nói đúng một điều bạn đã thật sự làm được — và có cả danh hiệu
-            dành cho người đi lên từ giai đoạn sa sút, bởi vì ngã rồi đứng dậy
-            cũng là một loại năng lực.
+            Không có đường tắt để mua một năng lực. Mỗi dấu mốc gắn với một việc
+            đã được kiểm chứng: số bài hoàn thành, lỗi đã chữa, ngày học thật hoặc
+            khả năng quay lại sau giai đoạn sa sút.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <ButtonLink href="/dien-danh-vong" variant="outline">
               <Award className="h-4 w-4" aria-hidden="true" />
-              Điện Danh Vọng
+              Dấu mốc cộng đồng
             </ButtonLink>
             <ButtonLink href="/luyen-tap/reading" variant="outline">
               <Layers className="h-4 w-4" aria-hidden="true" />
@@ -164,25 +165,24 @@ function LearningPath() {
             </ButtonLink>
           </div>
         </div>
-        <NoteBox title="Danh hiệu đầu tiên rất gần">
-          Chỉ cần ba bài đọc khác nhau, mỗi bài đạt từ band 4.0 ngay lần làm
-          đầu. Nhưng danh hiệu cuối cùng cần sáu mươi ngày học thật trong ba
-          tháng — và đó là điểm mấu chốt: hệ thống này thưởng cho người ở lại
-          lâu, không thưởng cho người bùng nổ một tuần rồi biến mất.
+        <NoteBox title="Bắt đầu từ điều nhỏ nhất">
+          Một bài đọc hoàn thành trong điều kiện thật cho bạn nhiều dữ liệu hơn
+          một kế hoạch hoàn hảo chưa bắt đầu. Hãy làm bài đầu tiên, rồi chọn đúng
+          một điều cần sửa cho lần sau.
         </NoteBox>
       </div>
 
       <div className="border-t border-line pt-12">
-        <h3 className="font-display text-2xl font-bold leading-tight text-navy-deep md:text-3xl">
-          Hành trình bắt đầu bằng một bài đọc
+        <h3 className="font-display text-2xl font-medium leading-tight text-navy-deep md:text-3xl">
+          Hành trình bắt đầu bằng một lựa chọn có thể thực hiện
         </h3>
         <p className="mt-5 max-w-xl text-[1.02rem] leading-relaxed text-ink-soft">
-          Tài khoản miễn phí, đề công khai miễn phí, đáp án miễn phí. Bạn chỉ
-          trả tiền khi muốn mở thêm đề hoặc dùng lớp chữa bài sâu.
+          Tài khoản miễn phí, đề công khai miễn phí và đáp án miễn phí. Bạn chỉ
+          trả tiền khi muốn mở thêm học liệu hoặc dùng lớp chữa bài sâu.
         </p>
         <div className="mt-8">
           <ButtonLink href="/thanh-toan" variant="outline">
-            Xem bảng giá
+            Xem học liệu
           </ButtonLink>
         </div>
       </div>
@@ -193,11 +193,11 @@ function LearningPath() {
 function Pillars() {
   return (
     <>
-      <div className="grid gap-px border border-line bg-line md:grid-cols-3">
+      <div className="grid gap-px overflow-hidden rounded-stoic-lg border border-line bg-line md:grid-cols-3">
         {PILLARS.map((pillar) => (
           <article key={pillar.title} className="bg-paper p-8">
-            <pillar.icon className="h-6 w-6 text-gold-ink" aria-hidden="true" />
-            <h3 className="mt-5 font-display text-xl font-semibold text-navy-deep">
+            <pillar.icon className="h-6 w-6 text-navy" aria-hidden="true" />
+            <h3 className="mt-5 font-display text-xl font-medium text-navy-deep">
               {pillar.title}
             </h3>
             <p className="dual-label__function mt-1">{pillar.functional}</p>
@@ -208,34 +208,35 @@ function Pillars() {
         ))}
       </div>
       <p className="mx-auto mt-10 max-w-2xl text-center text-[0.98rem] leading-relaxed text-ink-soft">
-        Đủ cả ba trụ, bạn nhận danh hiệu{" "}
-        <strong className="text-ink">Nhận thức — Hành động — Ý chí</strong> —
-        tấm vé duy nhất bước vào Nguyệt Thí.
+        Ba trụ không phải ba giai đoạn tách rời. Mỗi lần học tốt đều cần đủ
+        <strong className="text-ink"> nhận thức để thấy đúng, hành động để sửa và ý chí để quay lại.</strong>
       </p>
     </>
   );
 }
 
 function CompetitionPath() {
+  const stageNames = ["Thử thách tháng", "Thử thách quý", "Thử thách năm"];
+
   return (
     <>
       <p className="max-w-2xl text-[1.02rem] leading-relaxed text-paper/80">
-        Bảy ngày, ba đề Reading, và một danh sách rất ngắn những người đủ tư
-        cách bước vào. Không ai đạt chuẩn thì giải để trống — chúng tôi không
-        hạ chuẩn để trao cho đủ mâm.
+        Thử thách định kỳ không thay thế việc học hằng ngày. Nó chỉ tạo một mốc
+        để bạn kiểm tra năng lực dưới áp lực thời gian, rồi quay lại với dữ liệu
+        rõ hơn về điều cần rèn.
       </p>
 
       <div className="mt-12 grid gap-6 sm:grid-cols-3">
-        {BADGE_INFO.map(({ code, Badge, title, prizeLabel, requirement }) => (
+        {BADGE_INFO.map(({ code, Badge, prizeLabel, requirement }, index) => (
           <article
             key={code}
-            className="flex flex-col items-center border border-line bg-cream p-7 text-center"
+            className="flex flex-col items-center rounded-stoic-md border border-line bg-cream p-7 text-center"
           >
             <Badge className="h-20 w-20" />
-            <h3 className="mt-4 font-display text-lg font-bold leading-snug text-navy-deep">
-              {title}
+            <h3 className="mt-4 font-display text-lg font-medium leading-snug text-navy-deep">
+              {stageNames[index] ?? "Thử thách"}
             </h3>
-            <p className="mt-2 font-display text-2xl font-bold text-gold">
+            <p className="mt-2 font-display text-2xl font-medium text-navy">
               {prizeLabel}
             </p>
             <p className="mt-2 font-ui text-xs leading-relaxed text-ink-soft">
@@ -248,7 +249,7 @@ function CompetitionPath() {
       <div className="mt-10">
         <ButtonLink href="/nguyet-thi" variant="gold">
           <Trophy className="h-4 w-4" aria-hidden="true" />
-          Cách tham gia Nguyệt Thí
+          Xem thử thách tháng
         </ButtonLink>
       </div>
     </>

@@ -1,7 +1,7 @@
 import "server-only";
 
 /**
- * Cờ tính năng cho các module Tam Quốc chưa phát hành.
+ * Cờ tính năng cho các module đang được kiểm soát phát hành.
  *
  * Mặc định TẮT. Bảng dữ liệu có thể đã tồn tại trong database mà giao diện
  * vẫn chưa mở — đó chính là mục đích: đưa schema lên production trước, chạy
@@ -13,15 +13,15 @@ import "server-only";
  * sẵn sàng ra production.
  */
 export const features = {
-  /** Thương hiệu và art HỔ PHÙ. Bật mặc định vì đây là lớp hiển thị thuần. */
+  /** Brand và art STOIC · IELTS. Bật mặc định vì đây là lớp hiển thị thuần. */
   hoPhuBrand: process.env.ENABLE_HO_PHU_BRAND !== "false",
   /** Engine cấp bậc và thí luyện. */
   ranks: process.env.ENABLE_RANK_ENGINE === "true",
-  /** Bản đồ Chiến Dịch. */
+  /** Bản đồ Hành Trình. */
   campaignMap: process.env.ENABLE_CAMPAIGN_MAP === "true",
-  /** Đổi nhãn giao diện sang tên Tam Quốc trên toàn site. */
+  /** Legacy flag giữ tên biến môi trường để tương thích cấu hình cũ; nhãn runtime là Stoic. */
   themedLabels: process.env.ENABLE_TAM_QUOC_UI_LABELS === "true",
-  /** Ba tầng đại thí Nguyệt - Dương - Thiên. */
+  /** Ba tầng Thử Thách Tháng - Quý - Năm. */
   competitionTiers: process.env.ENABLE_COMPETITION_TIERS === "true",
   /**
    * Trang quản trị Feynman AI.

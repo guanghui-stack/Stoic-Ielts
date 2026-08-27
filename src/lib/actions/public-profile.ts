@@ -34,7 +34,7 @@ export async function savePublicProfileAction(
     create: { userId: user.id, displayName: displayName || user.name, allowHall },
   });
 
-  // Tắt cờ mà tin cũ vẫn nằm trên Bảng Bố Cáo thì cái nút này chỉ là lời hứa
+  // Tắt cờ mà tin cũ vẫn nằm trên Thông Báo thì cái nút này chỉ là lời hứa
   // suông. Gỡ bằng `visible`, không xoá hàng, để còn tra được khi có khiếu nại.
   let hidden = 0;
   if (!allowHall) {
@@ -51,10 +51,10 @@ export async function savePublicProfileAction(
   revalidatePath("/bang-bo-cao");
   return {
     success: allowHall
-      ? "Đã bật hiển thị tên bạn ở Điện Danh Vọng và Bảng Bố Cáo."
+      ? "Đã bật hiển thị tên bạn ở Dấu Mốc Cộng Đồng và Thông Báo."
       : hidden > 0
-        ? `Đã tắt, và gỡ ${hidden} tin cũ khỏi Bảng Bố Cáo. Danh hiệu của bạn vẫn được tính vào tổng số nhưng ẩn danh.`
-        : "Đã tắt. Danh hiệu của bạn vẫn được tính vào tổng số nhưng ẩn danh.",
+        ? `Đã tắt và gỡ ${hidden} tin cũ khỏi Thông Báo. Dấu mốc của bạn vẫn được tính vào tổng số nhưng ẩn danh.`
+        : "Đã tắt. Dấu mốc của bạn vẫn được tính vào tổng số nhưng ẩn danh.",
   };
 }
 

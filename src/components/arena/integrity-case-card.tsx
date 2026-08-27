@@ -38,13 +38,13 @@ const SIGNAL_LABEL: Record<string, string> = {
 const MANUAL_TITLES = [
   {
     code: "ARENA_M01_NGUY_TAO_QUAN_CONG",
-    name: "Ngụy Tạo Quân Công",
-    hint: "Công trạng ghi trong sổ mà chiến trường chưa từng thấy mặt.",
+    name: "Tín hiệu chưa nhất quán",
+    hint: "Dữ liệu trong sổ chưa khớp với các bằng chứng đang có.",
   },
   {
     code: "ARENA_M02_NOI_UNG_NGOAI_HOP",
-    name: "Nội Ứng Ngoại Hợp",
-    hint: "Hai bên giao tranh mà cùng một lòng, thắng bại định trước.",
+    name: "Phối hợp không minh bạch",
+    hint: "Nhiều tín hiệu cho thấy kết quả cần được rà soát thêm.",
   },
 ] as const;
 

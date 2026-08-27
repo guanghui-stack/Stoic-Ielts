@@ -208,13 +208,13 @@ export default async function PostPage({
       {!channel.access.canWrite && !post.lockedAt && (
         <NoteBox className="mt-6" title="Đang chỉ đọc">
           {live
-            ? "Nguyệt Thí đang diễn ra nên phần viết tạm khóa."
+            ? "Thử thách tháng đang diễn ra nên phần viết tạm khóa."
             : "Bạn chưa viết được ở phòng này."}
         </NoteBox>
       )}
 
       <h2 className="mt-10 font-display text-lg font-bold text-navy-deep">
-        {comments.length} lời bàn
+        {comments.length} phản hồi
       </h2>
 
       <div className="mt-4 space-y-4">
