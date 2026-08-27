@@ -19,7 +19,7 @@ export function ReadingModulePage({
   const other = READING_NAV.find((m) => m.module !== module)!;
 
   return (
-    <>
+    <div className="stoic-reading-surface" data-reading-module={module.toLowerCase()}>
       <PageHero
         label={`Luyện tập · Reading ${info.label}`}
         title={`Kho Reading ${info.label}`}
@@ -71,6 +71,6 @@ export function ReadingModulePage({
           là chỗ điểm số thật sự tăng lên.
         </NoteBox>
       </section>
-    </>
+    </div>
   );
 }

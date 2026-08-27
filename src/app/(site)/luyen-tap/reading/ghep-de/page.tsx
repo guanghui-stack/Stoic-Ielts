@@ -59,7 +59,7 @@ export default async function AssemblyPage({
   const autoPlan = planAutoAssembly(candidates);
 
   return (
-    <section className="mx-auto max-w-4xl px-6 py-12 md:py-16">
+    <section className="stoic-reading-surface mx-auto max-w-4xl px-6 py-12 md:py-16">
       <SectionHeading
         label={`Reading ${moduleLabel}`}
         title="Ghép ba bài đọc thành một đề Full Test"

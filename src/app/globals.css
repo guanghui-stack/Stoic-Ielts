@@ -1714,3 +1714,214 @@ body {
     display: none;
   }
 }
+
+
+/* ===== STOIC STUDY + FEYNMAN SURFACES — ngoài runtime thi tính giờ ===== */
+.stoic-reading-surface,
+.feynman-surface,
+.feynman-admin-surface {
+  --surface-shadow: 0 1.5rem 3.5rem -2.5rem rgb(23 32 51 / 0.42);
+  color: var(--color-stoic-ink);
+  font-family: var(--font-stoic);
+}
+
+.stoic-reading-surface {
+  background: var(--color-stoic-canvas-soft);
+}
+
+.stoic-reading-surface > section:first-child {
+  border-color: var(--color-stoic-line);
+  background:
+    radial-gradient(circle at 84% 22%, rgb(184 168 248 / 0.2), transparent 22rem),
+    radial-gradient(circle at 12% 90%, rgb(215 138 88 / 0.1), transparent 20rem),
+    var(--color-stoic-canvas);
+}
+
+.stoic-reading-surface > section:first-child > div {
+  max-width: 72rem;
+  padding-top: 4.75rem;
+  padding-bottom: 4.75rem;
+}
+
+.stoic-reading-surface .font-display,
+.feynman-surface .font-display,
+.feynman-admin-surface .font-display {
+  font-family: var(--font-inter);
+  letter-spacing: -0.035em;
+}
+
+.stoic-reading-surface h1,
+.feynman-surface h1,
+.feynman-admin-surface h1 {
+  color: var(--color-stoic-ink);
+}
+
+.stoic-reading-surface .rule-gold,
+.feynman-surface .rule-gold,
+.feynman-admin-surface .rule-gold {
+  width: 4rem;
+  height: 0.2rem;
+  background: linear-gradient(90deg, var(--color-stoic-primary), var(--color-stoic-ruby));
+}
+
+.stoic-reading-surface > section:not(:first-child),
+.stoic-reading-surface > section:first-child + section {
+  background:
+    radial-gradient(circle at 88% 14%, rgb(184 168 248 / 0.09), transparent 26rem),
+    var(--color-stoic-canvas-soft);
+}
+
+.stoic-reading-surface .stoic-exercise-list article,
+.stoic-reading-surface article {
+  border-color: color-mix(in srgb, var(--color-stoic-primary) 18%, var(--color-stoic-line));
+  border-radius: var(--radius-stoic-lg);
+  box-shadow: var(--surface-shadow);
+}
+
+.stoic-reading-surface .stoic-exercise-list article {
+  background:
+    radial-gradient(circle at 100% 0%, rgb(184 168 248 / 0.1), transparent 13rem),
+    var(--color-stoic-canvas);
+}
+
+.stoic-reading-surface article[class*="bg-stoic-primary-soft"] {
+  border-color: color-mix(in srgb, var(--color-stoic-primary) 36%, var(--color-stoic-line));
+  background:
+    linear-gradient(135deg, rgb(184 168 248 / 0.28), rgb(255 255 255 / 0.62)),
+    var(--color-stoic-canvas);
+}
+
+.stoic-reading-surface :where(a[class*="rounded-xl"], button[class*="rounded-xl"], a[class*="rounded-2xl"], button[class*="rounded-2xl"]) {
+  border-radius: var(--radius-stoic-pill);
+}
+
+.stoic-reading-surface :where(a, button):focus-visible,
+.feynman-surface :where(a, button, input, textarea, select):focus-visible,
+.feynman-admin-surface :where(a, button, input, textarea, select):focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--color-stoic-primary) 32%, transparent);
+  outline-offset: 3px;
+}
+
+.feynman-surface,
+.feynman-admin-surface {
+  position: relative;
+  isolation: isolate;
+}
+
+.feynman-surface::before,
+.feynman-admin-surface::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background:
+    radial-gradient(circle at 94% 4%, rgb(184 168 248 / 0.18), transparent 22rem),
+    radial-gradient(circle at 4% 48%, rgb(216 91 120 / 0.06), transparent 18rem);
+  content: "";
+  pointer-events: none;
+}
+
+.feynman-surface section:not(.feynman-surface),
+.feynman-admin-surface > dl > div,
+.feynman-admin-surface > ul > li {
+  border-color: color-mix(in srgb, var(--color-stoic-primary) 18%, var(--color-stoic-line));
+  border-radius: var(--radius-stoic-lg);
+  box-shadow: var(--surface-shadow);
+}
+
+.feynman-surface section:not(.feynman-surface) {
+  background: rgb(255 255 255 / 0.78);
+}
+
+.feynman-surface .stoic-ai-panel,
+.feynman-surface [class*="bg-stoic-primary-soft"] {
+  border-color: color-mix(in srgb, var(--color-stoic-primary) 38%, var(--color-stoic-line));
+  background:
+    linear-gradient(135deg, rgb(184 168 248 / 0.28), rgb(255 255 255 / 0.72)),
+    var(--color-stoic-canvas);
+}
+
+.feynman-surface form :where(input, textarea, select) {
+  border-color: var(--color-stoic-line-strong);
+  border-radius: var(--radius-stoic-md);
+  background: rgb(255 255 255 / 0.84);
+}
+
+.feynman-surface form :where(input, textarea, select):focus {
+  border-color: var(--color-stoic-primary);
+  box-shadow: 0 0 0 3px rgb(91 95 239 / 0.12);
+  outline: none;
+}
+
+.feynman-admin-surface > dl > div {
+  background: rgb(255 255 255 / 0.78);
+}
+
+.feynman-admin-surface > dl > div:has(svg) {
+  transition: transform 180ms var(--ease-out), box-shadow 180ms var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .feynman-admin-surface > dl > div:has(svg):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 1.5rem 3.5rem -2.3rem rgb(91 95 239 / 0.42);
+  }
+}
+
+@media (max-width: 767px) {
+  .stoic-reading-surface > section:first-child > div {
+    padding-top: 3.25rem;
+    padding-bottom: 3.25rem;
+  }
+
+  .stoic-reading-surface > section:not(:first-child) {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+
+  .stoic-reading-surface article,
+  .feynman-surface section:not(.feynman-surface) {
+    border-radius: var(--radius-stoic-md);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .feynman-admin-surface > dl > div:has(svg) {
+    transition: none;
+  }
+
+  .feynman-admin-surface > dl > div:has(svg):hover {
+    transform: none;
+  }
+}
+
+
+.stoic-reading-surface > section > :where(div.rounded-2xl, p.rounded-xl) {
+  border-color: color-mix(in srgb, var(--color-stoic-primary) 30%, var(--color-stoic-line));
+  box-shadow: var(--surface-shadow);
+}
+
+.stoic-reading-surface > section > div.rounded-2xl {
+  background:
+    linear-gradient(135deg, rgb(184 168 248 / 0.2), rgb(255 255 255 / 0.72)),
+    var(--color-stoic-canvas);
+}
+
+.stoic-reading-surface > section > p.rounded-xl {
+  background: rgb(255 255 255 / 0.68);
+}
+
+.stoic-reading-surface .stoic-exercise-list h3 {
+  font-family: var(--font-inter);
+  letter-spacing: -0.025em;
+}
+
+.stoic-reading-surface .stoic-exercise-list article:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 1.5rem 3.5rem -2.3rem rgb(91 95 239 / 0.38);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stoic-reading-surface .stoic-exercise-list article:hover {
+    transform: none;
+  }
+}
