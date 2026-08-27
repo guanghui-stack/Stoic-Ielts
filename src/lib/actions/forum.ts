@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { formatTaggedBody, normalizeTags } from "@/lib/forum/tags";
 import { requireUser } from "@/lib/session";
 import {
   castVote,
@@ -27,19 +28,9 @@ export async function createPostAction(
   const viewer = await viewerOf(user);
 
   const channelKey = String(formData.get("channelKey") ?? "").trim();
-  const tags = Array.from(
-    new Set(
-      formData
-        .getAll("tags")
-        .map((value) => String(value).trim().replace(/^#+/, "").slice(0, 36))
-        .filter(Boolean)
-        .slice(0, 5)
-    )
-  );
+  const tags = normalizeTags(formData.getAll("tags").map(String));
   const body = String(formData.get("body") ?? "");
-  const bodyWithTags = tags.length > 0
-    ? `**Chủ đề:** ${tags.map((tag) => `#${tag.replace(/\s+/g, "-")}`).join(" ")}\n\n${body}`
-    : body;
+  const bodyWithTags = formatTaggedBody(tags, body);
   const result = await createPost({
     viewer,
     channelKey,

@@ -11,7 +11,9 @@ import {
 } from "@/lib/forum/service";
 import { SCORE_LABEL } from "@/lib/forum/rules";
 import { NewPostForm } from "@/components/forum/forum-forms";
+import { ForumTags } from "@/components/forum/forum-tags";
 import { VoteButtons } from "@/components/forum/vote-buttons";
+import { extractTagsFromBody } from "@/lib/forum/tags";
 import { NoteBox, SectionHeading } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
@@ -53,14 +55,20 @@ export default async function ChannelPage({
       lockedAt: true,
       createdAt: true,
       lastActivityAt: true,
+      body: true,
       author: { select: { name: true } },
     },
   });
 
+  const postsWithTags = posts.map((post) => ({
+    ...post,
+    tags: extractTagsFromBody(post.body).tags,
+  }));
+
   const votes = await myVotes(
     viewer.id,
     "POST",
-    posts.map((p) => p.id)
+    postsWithTags.map((p) => p.id)
   );
   const basePath = `/nghi-su-duong/${channel.key}`;
 
@@ -100,7 +108,7 @@ export default async function ChannelPage({
         </div>
       )}
 
-      {posts.length === 0 ? (
+      {postsWithTags.length === 0 ? (
         <NoteBox className="mt-10" title="Phòng này chưa có chủ đề nào">
           {channel.access.canWrite
             ? "Hãy mở chủ đề đầu tiên: một câu hỏi thật hoặc một lỗi bạn chưa hiểu đều là điểm bắt đầu tốt."
@@ -108,7 +116,7 @@ export default async function ChannelPage({
         </NoteBox>
       ) : (
         <ul className="mt-10 divide-y divide-line border-y border-line">
-          {posts.map((post) => (
+          {postsWithTags.map((post) => (
             <li key={post.id} className="flex items-start gap-4 py-5">
               <div className="shrink-0 pt-0.5">
                 <VoteButtons
@@ -129,6 +137,7 @@ export default async function ChannelPage({
                 >
                   {post.title}
                 </Link>
+                <ForumTags tags={post.tags} />
                 <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 font-ui text-xs text-muted">
                   <span>{post.author.name}</span>
                   <span>{fmt(post.createdAt)}</span>
@@ -158,7 +167,7 @@ export default async function ChannelPage({
         </ul>
       )}
 
-      {posts.length === PAGE_SIZE && (
+      {postsWithTags.length === PAGE_SIZE && (
         <p className="mt-6 font-ui text-xs text-muted">
           Đang hiện {PAGE_SIZE} chủ đề mới nhất.
         </p>
