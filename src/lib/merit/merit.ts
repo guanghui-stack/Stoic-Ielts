@@ -213,5 +213,5 @@ export function decideThiButPurchase(input: {
 }
 
 export function formatMerit(amount: number): string {
-  return `${amount.toLocaleString("vi-VN")} quân công`;
+  return `${amount.toLocaleString("vi-VN")} Đức Hạnh`;
 }

@@ -26,7 +26,7 @@ export type IncomingInvite = {
  * cùng một lá thư, và người có đồng hồ chạy nhanh sẽ tưởng thư đã hết hạn
  * trong khi máy chủ vẫn nhận.
  *
- * Nhận lời thì đi thẳng vào phòng thi. Quân Công đã bị trừ ngay lúc đó, nên để
+  * Nhận lời thì đi thẳng vào phòng thi. Đức Hạnh đã bị trừ ngay lúc đó, nên để
  * người ta phải tự tìm đường vào là cách nhanh nhất khiến họ mất cược mà không
  * hiểu vì sao.
  */
@@ -59,7 +59,7 @@ function InviteCard({ invite }: { invite: IncomingInvite }) {
           Chiến Lực {invite.fromChienLuc}
         </span>
         <span className="font-ui text-xs text-ink-soft">
-          {invite.stake > 0 ? `Cược ${invite.stake} quân công` : "Không cược"}
+          {invite.stake > 0 ? `Cược ${invite.stake} Đức Hạnh` : "Không cược"}
         </span>
         <span
           className="ml-auto font-ui text-xs tabular-nums text-gold-ink"
@@ -70,7 +70,7 @@ function InviteCard({ invite }: { invite: IncomingInvite }) {
       </div>
 
       <p className="mt-2 text-[0.9rem] leading-relaxed text-ink-soft">
-        Nhận lời thì vào phòng thi ngay, và quân công bị trừ lúc đó.
+        Nhận lời thì vào phòng thi ngay, và Đức Hạnh bị trừ lúc đó.
       </p>
 
       <div className="mt-3.5 flex flex-wrap gap-2.5">

@@ -148,11 +148,11 @@ check("thăng cấp là tiền thưởng, không phải thu nhập chính", MERI
 check("mọi mức thưởng đều dương", Object.values(MERIT_EARN).every((v) => v > 0), true);
 
 check("có bản luật để tra ngược", typeof MERIT_RULE_VERSION === "string" && MERIT_RULE_VERSION.length > 0, true);
-check("định dạng Quân Công", formatMerit(1_250), "1.250 quân công");
+check("định dạng Đức Hạnh", formatMerit(1_250), "1.250 Đức Hạnh");
 
 console.log(
   failures === 0
-    ? "\n✅ TẤT CẢ KIỂM THỬ QUÂN CÔNG ĐỀU ĐẠT\n"
+    ? "\n✅ TẤT CẢ KIỂM THỬ ĐỨC HẠNH ĐỀU ĐẠT\n"
     : `\n❌ CÓ ${failures} KIỂM THỬ THẤT BẠI\n`
 );
 process.exit(failures === 0 ? 0 : 1);
