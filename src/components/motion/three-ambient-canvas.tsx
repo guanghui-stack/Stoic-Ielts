@@ -59,19 +59,19 @@ function createScene(variant: AmbientVariant, activeKey: string | null) {
   if (variant === "hero") {
     addRing(scene, animated, {
       radius: 1.42,
-      tube: 0.018,
+      tube: 0.026,
       position: new THREE.Vector3(1.72, 0.2, 0),
       color: PALETTE.primary,
-      opacity: 0.42,
+      opacity: 0.66,
       speed: 0.055,
       rotation: new THREE.Euler(0.22, -0.32, 0.2),
     });
     addRing(scene, animated, {
       radius: 1.88,
-      tube: 0.012,
+      tube: 0.018,
       position: new THREE.Vector3(1.72, 0.2, -0.1),
       color: PALETTE.lavender,
-      opacity: 0.34,
+      opacity: 0.5,
       speed: -0.035,
       rotation: new THREE.Euler(-0.32, 0.24, -0.1),
     });
@@ -81,15 +81,15 @@ function createScene(variant: AmbientVariant, activeKey: string | null) {
       const angle = (index / 42) * Math.PI * 2;
       const radius = 1.4 + (index % 5) * 0.18;
       positions[index * 3] = Math.cos(angle) * radius;
-      positions[index * 3 + 1] = Math.sin(angle) * radius * 0.66;
+      positions[index * 3 + 1] = Math.sin(angle) * radius;
       positions[index * 3 + 2] = (index % 3) * 0.04;
     }
     points.setAttribute("position", new THREE.BufferAttribute(positions, 3));
     const pointMaterial = new THREE.PointsMaterial({
       color: PALETTE.gold,
-      size: 0.035,
+      size: 0.05,
       transparent: true,
-      opacity: 0.7,
+      opacity: 0.9,
       depthWrite: false,
     });
     const pointCloud = new THREE.Points(points, pointMaterial);

@@ -1643,7 +1643,7 @@ body {
 
 .world-shell .world-ambient-canvas--hero {
   mix-blend-mode: multiply;
-  opacity: 0.72;
+  opacity: 0.9;
 }
 
 .world-shell .world-map-stage > .world-ambient-canvas {
