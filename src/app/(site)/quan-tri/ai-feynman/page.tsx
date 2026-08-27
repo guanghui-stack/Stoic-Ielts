@@ -82,7 +82,7 @@ export default async function AdminFeynmanAiPage() {
   ];
 
   return (
-    <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+    <section className="feynman-admin-surface mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <p className="label-caps">Quản trị</p>
       <h1 className="mt-3 font-display text-3xl font-bold text-navy-deep">
         Feynman AI

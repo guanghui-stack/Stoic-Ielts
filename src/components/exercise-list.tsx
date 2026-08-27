@@ -71,7 +71,7 @@ export async function ExerciseList({
   }
 
   return (
-    <div className="space-y-5">
+    <div className="stoic-exercise-list space-y-5">
       {exercises.map((ex, idx) => {
         const mine = attempts.filter((a) => a.exerciseId === ex.id);
         const inProgress = mine.find((a) => a.status === "IN_PROGRESS");

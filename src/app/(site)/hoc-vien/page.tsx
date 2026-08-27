@@ -20,6 +20,7 @@ import { WELCOME_COINS, formatCoins } from "@/lib/payments/coins";
 import { getMeritWallet } from "@/lib/merit/merit-service";
 import { ButtonLink, NoteBox, SubmitButton } from "@/components/ui";
 import { StudentNav } from "@/components/student/student-nav";
+import { StudentAvatar } from "@/components/student/student-avatar";
 import { GoalsCard } from "@/components/student/goals-card";
 import { StudyCalendar } from "@/components/ui/study-calendar";
 import { WeeklyStats, type WeeklyRow } from "@/components/student/weekly-stats";
@@ -158,8 +159,10 @@ export default async function StudentDashboard({
     <div>
       <section className="border-b border-line bg-paper">
         <div className="mx-auto flex max-w-6xl flex-wrap items-end justify-between gap-6 px-6 py-12">
-          <div>
-            <p className="label-caps">Nội Tâm · Hồ sơ học tập</p>
+          <div className="flex min-w-0 flex-1 items-start gap-4">
+            <StudentAvatar src={user.avatarUrl} name={user.name} email={user.email} />
+            <div className="min-w-0 flex-1">
+              <p className="label-caps">Nội Tâm · Hồ sơ học tập</p>
             <h1 className="mt-3 font-display text-3xl font-bold text-navy-deep md:text-4xl">
               Xin chào, {user.name}
             </h1>
@@ -221,6 +224,7 @@ export default async function StudentDashboard({
                 </div>
               </dl>
             ) : null}
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <Link

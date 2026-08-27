@@ -52,9 +52,23 @@ export type GoogleProfile = {
   email: string;
   emailVerified: boolean;
   name: string;
+  picture: string | null;
 };
 
 /** Đổi `code` lấy hồ sơ. Ném lỗi nếu Google từ chối hoặc trả thiếu trường. */
+function normalizeGooglePicture(value: string | undefined): string | null {
+  if (!value) return null;
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "https:" || url.hostname !== "googleusercontent.com" && !url.hostname.endsWith(".googleusercontent.com")) {
+      return null;
+    }
+    return url.toString();
+  } catch {
+    return null;
+  }
+}
+
 export async function fetchGoogleProfile(code: string): Promise<GoogleProfile> {
   const tokenRes = await fetch(GOOGLE_TOKEN_URL, {
     method: "POST",
@@ -84,6 +98,7 @@ export async function fetchGoogleProfile(code: string): Promise<GoogleProfile> {
     email?: string;
     email_verified?: boolean;
     name?: string;
+    picture?: string;
   };
   if (!info.sub || !info.email) throw new Error("USERINFO_MISSING");
 
@@ -92,5 +107,6 @@ export async function fetchGoogleProfile(code: string): Promise<GoogleProfile> {
     email: info.email.toLowerCase(),
     emailVerified: info.email_verified === true,
     name: info.name?.trim() || info.email.split("@")[0],
+    picture: normalizeGooglePicture(info.picture),
   };
 }
