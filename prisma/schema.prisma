@@ -25,6 +25,8 @@ model User {
 
   /// "sub" cua Google. Chi dat khi tai khoan da lien ket Google.
   googleId String? @unique @db.VarChar(191)
+  /// URL anh dai dien do Google tra ve, chi la du lieu hien thi tuy chon.
+  avatarUrl String? @db.VarChar(2048)
 
   /// Moc xac minh email. NULL = chua xac minh -> KHONG duoc tang xu chao mung.
   /// Dang nhap Google dat luon vi Google da xac minh ho (email_verified).

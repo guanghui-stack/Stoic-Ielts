@@ -40,10 +40,16 @@ export async function GET(request: NextRequest) {
   // cũ chỉ bằng cách khai email của nạn nhân.
   if (!profile.emailVerified) return back("google-email-chua-xac-minh");
 
-  // Đã liên kết trước đó thì vào thẳng.
+  // Đã liên kết trước đó thì vào thẳng, đồng thời làm mới ảnh đại diện
+  // nếu Google đã thay đổi ảnh. URL đã được whitelist ở fetchGoogleProfile.
   let user = await db.user.findUnique({ where: { googleId: profile.sub } });
 
-  if (!user) {
+  if (user) {
+    user = await db.user.update({
+      where: { id: user.id },
+      data: { avatarUrl: profile.picture },
+    });
+  } else {
     const sameEmail = await db.user.findUnique({
       where: { email: profile.email },
     });
@@ -53,7 +59,7 @@ export async function GET(request: NextRequest) {
       // vì Google đã xác minh email ở trên.
       user = await db.user.update({
         where: { id: sameEmail.id },
-        data: { googleId: profile.sub },
+        data: { googleId: profile.sub, avatarUrl: profile.picture },
       });
     } else {
       user = await db.user.create({
@@ -61,6 +67,7 @@ export async function GET(request: NextRequest) {
           email: profile.email,
           name: profile.name,
           googleId: profile.sub,
+          avatarUrl: profile.picture,
           // Không có mật khẩu: tài khoản này chỉ vào bằng Google cho tới khi
           // tự đặt mật khẩu ở trang đổi mật khẩu.
           passwordHash: null,

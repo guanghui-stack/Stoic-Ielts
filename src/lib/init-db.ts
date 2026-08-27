@@ -1552,6 +1552,7 @@ const MIGRATIONS = [
   // Dang nhap Google + gioi han mot thiet bi
   `ALTER TABLE \`User\` MODIFY COLUMN \`passwordHash\` VARCHAR(191) NULL`,
   `ALTER TABLE \`User\` ADD COLUMN \`googleId\` VARCHAR(191) NULL`,
+  `ALTER TABLE \`User\` ADD COLUMN \`avatarUrl\` VARCHAR(2048) NULL`,
   `ALTER TABLE \`User\` ADD COLUMN \`activeSessionId\` VARCHAR(64) NULL`,
   `CREATE UNIQUE INDEX \`User_googleId_key\` ON \`User\`(\`googleId\`)`,
 
