@@ -178,7 +178,7 @@ export default async function StudentDashboard({
               Xem đặc tả mục 05.
 
               Mỗi chỉ số có hình dạng riêng chứ không chỉ khác màu, theo
-              BRAND-GUIDELINE mục 8.3: quân công đi với con dấu, Chiến Lực đi với
+              BRAND-GUIDELINE mục 8.3: Đức Hạnh đi với con dấu, Chiến Lực đi với
               mũi tên, Hoà khí đi với cái bắt tay.
 
               Hoà khí CHỈ đến từ giảng hoà, không đến từ hoà điểm. Nó không đo sự
@@ -187,13 +187,16 @@ export default async function StudentDashboard({
             {arena ? (
               <dl className="mt-4 flex flex-wrap gap-px border border-line bg-line">
                 <div className="flex-1 bg-paper px-5 py-3">
-                  <dt className="label-caps">Điểm Thực Hành</dt>
+                  <dt className="label-caps">Đức Hạnh</dt>
                   <dd className="mt-1 flex items-center gap-2">
                     <span className="seal h-4 w-4" aria-hidden="true" />
                     <span className="font-display text-xl font-bold tabular-nums text-navy-deep">
                       {merit.balance}
                     </span>
                   </dd>
+                  <p className="mt-0.5 font-ui text-[0.68rem] leading-snug text-muted">
+                    số dư hiện tại
+                  </p>
                 </div>
                 <div className="flex-1 bg-paper px-5 py-3">
                   <dt className="label-caps">Năng lực đối chiếu</dt>

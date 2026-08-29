@@ -90,7 +90,7 @@ export default async function ArenaPage() {
               </p>
             </div>
             <div className="flex-1 bg-navy-deep px-7 py-4">
-              <p className="label-caps text-gold-soft">Quân Công</p>
+              <p className="label-caps text-gold-soft">Đức Hạnh</p>
               <p className="mt-1.5 font-display text-2xl font-bold tabular-nums text-paper">
                 {wallet.balance}
               </p>
@@ -157,7 +157,7 @@ export default async function ArenaPage() {
                     {dateTimeVN.format(a.scheduledAt)}
                   </span>
                   <span className="font-ui text-xs text-ink-soft">
-                    {a.stake > 0 ? `Cược ${a.stake}` : "Không cược"}
+                    {a.stake > 0 ? `Cược ${a.stake} Đức Hạnh` : "Không cược"}
                   </span>
                   {/* Màu không phải tín hiệu duy nhất: trạng thái hiện bằng chữ. */}
                   <span className="ml-auto font-ui text-xs text-muted">
@@ -200,7 +200,7 @@ export default async function ArenaPage() {
               : "Mùa đang khép lại."}{" "}
             Phe thắng giữ lãnh địa trên bản đồ cho tới hết mùa sau. Cuối mùa,
             Chiến Lực của mọi người được kéo về gần mốc gốc, còn cấp bậc, kinh
-            nghiệm và Quân Công thì không đụng tới.
+            nghiệm và Đức Hạnh thì không đụng tới.
           </p>
 
           <FactionChoice

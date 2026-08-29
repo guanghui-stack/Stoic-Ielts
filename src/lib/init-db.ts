@@ -874,6 +874,7 @@ const DDL = [
     \`userId\` VARCHAR(191) NOT NULL,
     \`userTrialId\` VARCHAR(191) NOT NULL,
     \`sourceAttemptId\` VARCHAR(191) NULL,
+    \`sourceQuestionId\` VARCHAR(191) NULL,
     \`questionType\` VARCHAR(64) NULL,
     \`evidenceText\` TEXT NOT NULL,
     \`explanation\` TEXT NOT NULL,
@@ -1645,6 +1646,9 @@ const MIGRATIONS = [
   `ALTER TABLE \`ArenaProfile\` ADD COLUMN \`factionChosenAt\` DATETIME(3) NULL`,
   `ALTER TABLE \`ArenaProfile\` ADD COLUMN \`factionSeasonId\` VARCHAR(191) NULL`,
   `CREATE INDEX \`ArenaProfile_faction_idx\` ON \`ArenaProfile\` (\`faction\`)`,
+
+  // Lien ket den dung cau sai khi hoc vien phuc ban.
+  `ALTER TABLE \`TrialReflection\` ADD COLUMN \`sourceQuestionId\` VARCHAR(191) NULL`,
 ];
 
 const PAYMENT_EVENT_LEASE_MIGRATION =

@@ -1982,3 +1982,436 @@ body {
     height: 3.75rem;
   }
 }
+
+
+/* ===== REFLECTION SOURCE — dẫn chiếu câu sai ngoài runtime thi ===== */
+.reflection-source {
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--color-stoic-primary) 28%, var(--color-stoic-line));
+  border-radius: var(--radius-stoic-lg);
+  background:
+    radial-gradient(circle at 100% 0%, rgb(184 168 248 / 0.2), transparent 18rem),
+    var(--color-stoic-canvas);
+  box-shadow: var(--surface-shadow, 0 1.5rem 3.5rem -2.5rem rgb(23 32 51 / 0.42));
+}
+
+.reflection-source--empty {
+  padding: 1.1rem 1.25rem;
+}
+
+.reflection-source__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.15rem 1.25rem;
+  border-bottom: 1px solid var(--color-stoic-line);
+  background: rgb(255 255 255 / 0.52);
+}
+
+.reflection-source__eyebrow {
+  color: var(--color-stoic-primary-deep);
+  font-family: var(--font-inter);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.reflection-source__title {
+  margin-top: 0.35rem;
+  color: var(--color-stoic-ink);
+  font-family: var(--font-inter);
+  font-size: 0.98rem;
+  font-weight: 750;
+  letter-spacing: -0.02em;
+}
+
+.reflection-source__copy {
+  max-width: 42rem;
+  margin-top: 0.35rem;
+  color: var(--color-stoic-muted);
+  font-family: var(--font-inter);
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.reflection-source__count {
+  flex: 0 0 auto;
+  border: 1px solid color-mix(in srgb, var(--color-stoic-primary) 35%, var(--color-stoic-line));
+  border-radius: var(--radius-stoic-pill);
+  padding: 0.35rem 0.62rem;
+  color: var(--color-stoic-primary-deep);
+  font-family: var(--font-inter);
+  font-size: 0.68rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.reflection-source__grid {
+  display: grid;
+  grid-template-columns: minmax(12rem, 0.72fr) minmax(0, 1.28fr);
+}
+
+.reflection-source__list {
+  display: flex;
+  max-height: 22rem;
+  flex-direction: column;
+  gap: 0.4rem;
+  overflow-y: auto;
+  padding: 0.75rem;
+  border-right: 1px solid var(--color-stoic-line);
+}
+
+.reflection-source__option {
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  gap: 0.6rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-stoic-md);
+  padding: 0.7rem;
+  color: var(--color-stoic-muted);
+  font-family: var(--font-inter);
+  text-align: left;
+  transition: border-color 160ms var(--ease-out), background-color 160ms var(--ease-out), transform 160ms var(--ease-out);
+}
+
+.reflection-source__option:hover,
+.reflection-source__option:focus-visible {
+  border-color: color-mix(in srgb, var(--color-stoic-primary) 35%, var(--color-stoic-line));
+  background: rgb(255 255 255 / 0.65);
+}
+
+.reflection-source__option:focus-visible {
+  outline: 3px solid rgb(91 95 239 / 0.2);
+  outline-offset: 2px;
+}
+
+.reflection-source__option.is-selected {
+  border-color: color-mix(in srgb, var(--color-stoic-primary) 48%, var(--color-stoic-line));
+  background: rgb(184 168 248 / 0.2);
+  color: var(--color-stoic-primary-deep);
+}
+
+.reflection-source__option strong,
+.reflection-source__option span,
+.reflection-source__option small {
+  display: block;
+}
+
+.reflection-source__option strong {
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.reflection-source__option span {
+  margin-top: 0.16rem;
+  overflow: hidden;
+  color: var(--color-stoic-ink);
+  font-size: 0.74rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reflection-source__option small {
+  margin-top: 0.16rem;
+  font-size: 0.65rem;
+  color: var(--color-stoic-muted);
+}
+
+.reflection-source__detail {
+  min-width: 0;
+  padding: 1.1rem 1.25rem 1.25rem;
+  background: rgb(255 255 255 / 0.7);
+}
+
+.reflection-source__detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  color: var(--color-stoic-primary-deep);
+  font-family: var(--font-inter);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.reflection-source__detail-meta span {
+  border-radius: var(--radius-stoic-pill);
+  padding: 0.28rem 0.5rem;
+  background: rgb(184 168 248 / 0.22);
+}
+
+.reflection-source__prompt {
+  margin-top: 0.9rem;
+  color: var(--color-stoic-ink);
+  font-family: var(--font-inter);
+  font-size: 0.9rem;
+  font-weight: 650;
+  line-height: 1.55;
+}
+
+.reflection-source__answers {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 1rem;
+}
+
+.reflection-source__answers > div {
+  border-left: 3px solid var(--color-stoic-line-strong);
+  padding: 0.55rem 0.7rem;
+  background: rgb(248 249 252 / 0.82);
+}
+
+.reflection-source__answers > div:last-child {
+  border-left-color: var(--color-stoic-sage);
+}
+
+.reflection-source__answers dt {
+  color: var(--color-stoic-muted);
+  font-family: var(--font-inter);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.reflection-source__answers dd {
+  margin-top: 0.26rem;
+  overflow-wrap: anywhere;
+  color: var(--color-stoic-ink);
+  font-family: var(--font-inter);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.reflection-source__locked,
+.reflection-source__note {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+  color: var(--color-stoic-muted);
+  font-size: 0.72rem;
+}
+
+.reflection-source__note {
+  margin-top: 0.8rem;
+  line-height: 1.45;
+}
+
+@media (max-width: 640px) {
+  .reflection-source__header {
+    flex-direction: column;
+  }
+
+  .reflection-source__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .reflection-source__list {
+    max-height: 13rem;
+    border-right: 0;
+    border-bottom: 1px solid var(--color-stoic-line);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reflection-source__option {
+    transition: none;
+  }
+}
+
+
+/* ===== LINEAR STOIC JOURNEY — thay orbit map cũ ===== */
+.world-shell .world-linear-stage {
+  aspect-ratio: auto;
+  min-height: 24rem;
+  border-color: var(--color-stoic-line, var(--color-line));
+  border-radius: var(--radius-stoic-lg, 1rem);
+  background:
+    radial-gradient(circle at 86% 22%, rgb(184 168 248 / 0.16), transparent 18rem),
+    radial-gradient(circle at 8% 88%, rgb(215 138 88 / 0.1), transparent 17rem),
+    var(--color-stoic-canvas, var(--color-paper));
+  box-shadow: 0 1.5rem 3.5rem -2.5rem rgb(23 32 51 / 0.4);
+}
+
+.world-shell .world-linear-header {
+  position: relative;
+  z-index: 2;
+  padding: 1.25rem 1.5rem 0;
+}
+
+.world-shell .world-linear-caption {
+  margin-top: 0.35rem;
+  color: var(--color-stoic-muted, var(--color-muted));
+  font-family: var(--font-inter, var(--font-ui));
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.world-shell .world-linear-track-wrap {
+  position: relative;
+  z-index: 1;
+  overflow-x: auto;
+  padding: 5rem 1.5rem 1.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--color-stoic-primary, var(--color-azure)) 45%, transparent) transparent;
+}
+
+.world-shell .world-linear-track {
+  position: absolute;
+  top: 6.15rem;
+  right: 4.5rem;
+  left: 4.5rem;
+  height: 0.2rem;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    var(--color-stoic-primary, var(--color-azure)),
+    var(--color-stoic-sage, var(--color-jade)),
+    var(--color-stoic-ruby, var(--color-vermilion))
+  );
+  opacity: 0.62;
+}
+
+.world-shell .world-linear-gates {
+  display: grid;
+  min-width: 64rem;
+  grid-template-columns: repeat(8, minmax(7.5rem, 1fr));
+  gap: 0.55rem;
+}
+
+.world-shell .world-linear-gate {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 16.25rem;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.world-shell .world-linear-step {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  width: 1.15rem;
+  height: 1.15rem;
+  place-items: center;
+  border: 0.2rem solid var(--color-stoic-canvas, var(--color-paper));
+  border-radius: 999px;
+  background: var(--color-stoic-muted, var(--color-muted));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-stoic-muted, var(--color-muted)) 45%, transparent);
+}
+
+.world-shell .world-linear-step__dot {
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.world-shell .world-linear-gate[data-state="AVAILABLE"] .world-linear-step,
+.world-shell .world-linear-gate[data-state="ACTIVE"] .world-linear-step {
+  background: var(--color-stoic-primary, var(--color-azure));
+  color: white;
+}
+
+.world-shell .world-linear-gate[data-state="PASSED"] .world-linear-step {
+  background: var(--color-stoic-sage, var(--color-jade));
+  color: white;
+}
+
+.world-shell .world-linear-gate .world-map-marker {
+  width: min(100%, 8.5rem);
+  min-height: 6.6rem;
+  border-color: color-mix(in srgb, var(--color-stoic-primary, var(--color-azure)) 20%, var(--color-line));
+  border-radius: var(--radius-stoic-md, 0.75rem);
+  background: rgb(255 255 255 / 0.78);
+  box-shadow: 0 0.9rem 2rem -1.3rem rgb(23 32 51 / 0.44);
+}
+
+.world-shell .world-linear-gate .world-map-marker-seal {
+  width: 2rem;
+  height: 2rem;
+  border-width: 1px;
+  box-shadow: none;
+}
+
+.world-shell .world-linear-gate .world-map-marker-current {
+  order: -1;
+}
+
+.world-shell .world-linear-gate .world-map-marker:not(.is-locked):hover {
+  transform: translateY(-3px);
+  border-color: var(--color-stoic-primary, var(--color-azure));
+  box-shadow: 0 1.2rem 2.5rem -1.5rem rgb(91 95 239 / 0.42);
+}
+
+@media (max-width: 1023px) {
+  .world-shell .world-linear-stage {
+    min-height: 0;
+  }
+
+  .world-shell .world-linear-track-wrap {
+    overflow: visible;
+    padding: 1.25rem 1rem 1.25rem 3.25rem;
+  }
+
+  .world-shell .world-linear-track {
+    top: 1.75rem;
+    bottom: 1.75rem;
+    left: 1.9rem;
+    width: 0.18rem;
+    height: auto;
+    background: linear-gradient(
+      180deg,
+      var(--color-stoic-primary, var(--color-azure)),
+      var(--color-stoic-sage, var(--color-jade)),
+      var(--color-stoic-ruby, var(--color-vermilion))
+    );
+  }
+
+  .world-shell .world-linear-gates {
+    min-width: 0;
+    grid-template-columns: 1fr;
+    gap: 0.7rem;
+  }
+
+  .world-shell .world-linear-gate {
+    min-height: 0;
+    min-width: 0;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 0.85rem;
+  }
+
+  .world-shell .world-linear-step {
+    flex: 0 0 auto;
+    margin-top: 0.95rem;
+  }
+
+  .world-shell .world-linear-gate .world-map-marker {
+    width: min(100%, 22rem);
+    min-height: 5.5rem;
+    align-items: flex-start;
+    padding: 0.7rem 0.8rem;
+    text-align: left;
+  }
+
+  .world-shell .world-linear-gate .world-map-marker-current {
+    align-self: flex-start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .world-shell .world-linear-gate .world-map-marker,
+  .world-shell .world-linear-gate .world-map-marker:not(.is-locked):hover {
+    animation: none;
+    transform: none;
+    transition: none;
+  }
+}

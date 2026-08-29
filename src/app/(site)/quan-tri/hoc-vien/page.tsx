@@ -102,7 +102,7 @@ export default async function AdminStudentsPage() {
                 // "Đã tặng" = quyền do trung tâm cấp, tách hẳn với quyền đã mua
                 const gifted = grants.readingGift.has(s.id);
                 const bought = grants.readingPurchases.get(s.id) ?? 0;
-                // Quyền đoạt được bằng Quân Công qua Thí Bút. KHÔNG gộp vào
+                // Quyền đoạt được bằng Đức Hạnh qua Thí Bút. KHÔNG gộp vào
                 // cột đã mua: nó không đối ứng đồng nào trong ngân hàng.
                 const byMerit = grants.readingMerit.get(s.id) ?? 0;
                 const boughtPackage = grants.readingPackage.has(s.id);
@@ -139,7 +139,7 @@ export default async function AdminStudentsPage() {
                       )}
                       {byMerit > 0 && (
                         <span className="block font-semibold text-gold-ink">
-                          Đoạt {byMerit} bài bằng Quân Công
+                          Đoạt {byMerit} bài bằng Đức Hạnh
                         </span>
                       )}
                       {!gifted && bought === 0 && byMerit === 0 && (

@@ -30,7 +30,7 @@ export default async function AdminThiButPage() {
     <AdminPageShell
       eyebrow="Thí Bút"
       title="Duyệt kho câu khảo hạch"
-      lede="AI sinh câu ở trạng thái nháp. Chỉ người duyệt mới đẩy sang phát hành. Một câu sai đáp án sẽ lấy mất quân công của người ngay thẳng, và không tái lập được để xử tranh chấp."
+      lede="AI sinh câu ở trạng thái nháp. Chỉ người duyệt mới đẩy sang phát hành. Một câu sai đáp án sẽ lấy mất Đức Hạnh của người ngay thẳng, và không tái lập được để xử tranh chấp."
     >
       <section className="grid gap-px border border-line bg-line sm:grid-cols-3">
         <div className="bg-paper p-6">

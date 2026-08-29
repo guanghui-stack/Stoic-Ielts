@@ -1708,6 +1708,7 @@ model TrialReflection {
   userId          String
   userTrialId     String
   sourceAttemptId String? @db.VarChar(191)
+  sourceQuestionId String? @db.VarChar(191)
   questionType    String? @db.VarChar(64)
 
   // Đường phục bàn MIỄN PHÍ. Đây là thứ giữ cho hệ cấp bậc không trở thành

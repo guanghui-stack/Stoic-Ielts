@@ -166,7 +166,7 @@ export async function ExerciseList({
                     tồn tại nếu người học BIẾT nó tồn tại; để họ tự đoán thì họ
                     chỉ thấy một hàng rào phí.
 
-                    Không hiện số dư quân công ở đây: màn Thí Bút mới là nơi
+                    Không hiện số dư Đức Hạnh ở đây: màn Thí Bút mới là nơi
                     gác, và một chỗ chỉ để hiển thị không bao giờ được thành
                     chốt chặn thứ hai nói khác đi.
                   */}

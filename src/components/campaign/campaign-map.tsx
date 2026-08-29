@@ -2,7 +2,6 @@ import Link from "next/link";
 import { Check, Flag, Lock, Play } from "lucide-react";
 import type { CSSProperties } from "react";
 import { WorldLandmarkRail } from "@/components/campaign/world-landmark-rail";
-import { ThreeAmbientCanvas } from "@/components/motion/three-ambient-canvas";
 import { STATE_LABELS, type CampaignNodeView } from "@/lib/campaign/view";
 import { stoicTrialLabel, stoicTrialTitle, type CampaignWorld } from "@/lib/campaign/world";
 
@@ -89,22 +88,6 @@ function GateMarker({ node, index }: { node: CampaignNodeView; index: number }) 
   );
 }
 
-function campaignPath(nodes: CampaignNodeView[]): string {
-  return nodes.map((node, index) => `${index === 0 ? "M" : "L"} ${node.x} ${node.y}`).join(" ");
-}
-
-function OrbitField() {
-  return (
-    <div className="world-map-orbit-field">
-      <div className="world-map-orbit-grid" />
-      <span className="world-map-orbit world-map-orbit--attention" />
-      <span className="world-map-orbit world-map-orbit--practice" />
-      <span className="world-map-orbit world-map-orbit--integration" />
-      <span className="world-map-orbit-core" />
-    </div>
-  );
-}
-
 export function CampaignMap({
   world,
   variant,
@@ -113,39 +96,26 @@ export function CampaignMap({
   variant: "portal" | "student";
 }) {
   return (
-    <div className="world-map-desktop hidden lg:block" data-map-variant={variant}>
-        <section
-        aria-label="Bản đồ tám chặng thực hành"
-        className="world-map-stage relative overflow-hidden border border-line bg-paper"
+    <div className="world-map-desktop" data-map-variant={variant}>
+      <section
+        aria-label="Hành trình tám chặng thực hành"
+        className="world-linear-stage relative overflow-hidden border border-line bg-paper"
       >
-        <div className="world-map-art-layer" aria-hidden="true">
-          <OrbitField />
+        <div className="world-linear-header">
+          <p className="label-caps">Hành trình thực hành</p>
+          <p className="world-linear-caption">
+            Mỗi chặng là một bước nhỏ, đi đều trên cùng một đường tiến bộ.
+          </p>
         </div>
 
-        <ThreeAmbientCanvas variant="campaign" />
-
-        <div className="world-map-route-layer">
-          <svg
-            className="world-map-path-layer"
-            viewBox="0 0 100 100"
-            preserveAspectRatio="none"
-            aria-hidden="true"
-          >
-            <path
-              className="world-map-path-shadow"
-              d={campaignPath(world.gates)}
-              pathLength="1"
-            />
-            <path className="world-map-path" d={campaignPath(world.gates)} pathLength="1" />
-          </svg>
-
-          <ol className="world-map-gates m-0 list-none p-0">
+        <div className="world-linear-track-wrap">
+          <div className="world-linear-track" aria-hidden="true" />
+          <ol className="world-linear-gates m-0 list-none p-0">
             {world.gates.map((node, index) => (
-              <li
-                key={node.code}
-                className="world-map-gate"
-                style={{ left: `${node.x}%`, top: `${node.y}%` }}
-              >
+              <li key={node.code} className="world-linear-gate" data-state={node.state}>
+                <span className="world-linear-step" aria-hidden="true">
+                  <span className="world-linear-step__dot" />
+                </span>
                 <GateMarker node={node} index={index} />
               </li>
             ))}

@@ -122,7 +122,7 @@ export function ArenaFloor({
         Đường quay lại trận đang dở.
 
         Người đóng tab giữa chừng phải tìm được đường về. Không có khối này thì
-        quân công đã cược biến mất khỏi tầm mắt họ, và cách duy nhất để quay lại
+              Đức Hạnh đã cược biến mất khỏi tầm mắt họ, và cách duy nhất để quay lại
         là nhớ đường dẫn phòng thi.
       */}
       {activeDuel ? (
@@ -131,7 +131,7 @@ export function ArenaFloor({
           <p className="mt-2 text-[0.98rem] leading-relaxed text-ink">
             Đối thủ: <strong className="text-navy-deep">{activeDuel.opponentName}</strong>
             {activeDuel.stake > 0
-              ? `, cược ${activeDuel.stake} quân công`
+              ? `, cược ${activeDuel.stake} Đức Hạnh`
               : ", hạng không cược"}
             .
           </p>

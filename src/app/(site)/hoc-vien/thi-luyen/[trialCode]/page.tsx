@@ -15,6 +15,7 @@ import { ensureUserRank, syncTrialEligibility } from "@/lib/ranks/engine";
 import { loadRankFacts } from "@/lib/ranks/facts";
 import { evaluateTrialGate, evaluateTrialSuccess } from "@/lib/ranks/rules";
 import { trialByCode, rankByLevel } from "@/lib/ranks/catalog";
+import { listReflectionSourceQuestions } from "@/lib/ranks/reflection-reference";
 
 export const dynamic = "force-dynamic";
 
@@ -68,6 +69,9 @@ export default async function TrialPage({
       facts.attempts.flatMap((attempt) => Object.keys(attempt.questionTypeStats)),
     ),
   ].sort();
+  const sourceQuestions = isActive
+    ? await listReflectionSourceQuestions(user.id)
+    : [];
 
   return (
     <main>
@@ -161,7 +165,11 @@ export default async function TrialPage({
         )}
 
         {isActive && (
-          <TrialReflectionForm trialCode={trial.code} questionTypes={questionTypes} />
+          <TrialReflectionForm
+            trialCode={trial.code}
+            questionTypes={questionTypes}
+            sourceQuestions={sourceQuestions}
+          />
         )}
       </div>
       </section>
