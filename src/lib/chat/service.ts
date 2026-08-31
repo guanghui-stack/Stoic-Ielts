@@ -4,6 +4,7 @@ import {
   orderedParticipants,
   validateMessageBody,
 } from "@/lib/chat/rules";
+import { publishChatMessageCreated } from "@/lib/chat/ably-server";
 const INBOX_LIMIT = 50;
 const MESSAGE_PAGE_SIZE = 100;
 
@@ -175,7 +176,7 @@ export async function getConversation(
       participantA: { select: { id: true, name: true, role: true, active: true, isBot: true } },
       participantB: { select: { id: true, name: true, role: true, active: true, isBot: true } },
       messages: {
-        orderBy: { createdAt: "asc" },
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
         take: MESSAGE_PAGE_SIZE,
         include: { sender: { select: { id: true, name: true } } },
       },
@@ -195,7 +196,7 @@ export async function getConversation(
     value: {
       id: conversation.id,
       other: { id: other.id, name: other.name },
-      messages: conversation.messages.map((message) => ({
+      messages: [...conversation.messages].reverse().map((message) => ({
         id: message.id,
         body: message.body,
         createdAt: message.createdAt,
@@ -285,8 +286,20 @@ export async function sendMessage(
         ? { lastMessageAt: now, participantAReadAt: now }
         : { lastMessageAt: now, participantBReadAt: now },
     });
-    return { ok: true as const, value: { messageId: message.id } };
+    return {
+      ok: true as const,
+      value: { messageId: message.id, recipientUserId: otherUserId },
+    };
   });
 
-  return result;
+  if (!result.ok) return result;
+
+  // Tin đã commit vào MySQL trước khi báo realtime. Ably lỗi vẫn không được
+  // biến một tin đã lưu thành trạng thái gửi thất bại ở phía người dùng.
+  await publishChatMessageCreated({
+    recipientUserId: result.value.recipientUserId,
+    conversationId,
+    messageId: result.value.messageId,
+  });
+  return { ok: true, value: { messageId: result.value.messageId } };
 }

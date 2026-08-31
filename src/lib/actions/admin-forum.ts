@@ -2,9 +2,16 @@
 
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
+import { nextModeratedCommentStatus } from "@/lib/forum/rules";
 import { requireAdmin } from "@/lib/session";
 
 const ADMIN_PATH = "/quan-tri/nghi-su-duong";
+const FORUM_PATH = "/nghi-su-duong";
+
+function revalidatePost(channelKey: string, postId: string) {
+  revalidatePath(FORUM_PATH);
+  revalidatePath(`${FORUM_PATH}/${channelKey}/${postId}`);
+}
 
 /**
  * Công cụ kiểm duyệt Nghị Sự Đường.
@@ -22,7 +29,11 @@ export async function togglePostVisibilityAction(postId: string) {
   await requireAdmin();
   const post = await db.forumPost.findUnique({
     where: { id: postId },
-    select: { id: true, status: true },
+    select: {
+      id: true,
+      status: true,
+      channel: { select: { key: true } },
+    },
   });
   if (!post) return;
 
@@ -31,22 +42,58 @@ export async function togglePostVisibilityAction(postId: string) {
     data: { status: post.status === "VISIBLE" ? "HIDDEN" : "VISIBLE" },
   });
   revalidatePath(ADMIN_PATH);
+  revalidatePost(post.channel.key, post.id);
 }
 
 /** Ẩn hoặc hiện lại một bình luận. */
 export async function toggleCommentVisibilityAction(commentId: string) {
   await requireAdmin();
-  const comment = await db.forumComment.findUnique({
-    where: { id: commentId },
-    select: { id: true, status: true, postId: true },
-  });
-  if (!comment) return;
+  const changed = await db.$transaction(async (tx) => {
+    const comment = await tx.forumComment.findUnique({
+      where: { id: commentId },
+      select: {
+        id: true,
+        status: true,
+        postId: true,
+        post: { select: { channel: { select: { key: true } } } },
+      },
+    });
+    if (!comment) return null;
 
-  await db.forumComment.update({
-    where: { id: comment.id },
-    data: { status: comment.status === "VISIBLE" ? "HIDDEN" : "VISIBLE" },
+    const currentStatus =
+      comment.status === "VISIBLE" ||
+      comment.status === "HIDDEN" ||
+      comment.status === "DELETED"
+        ? comment.status
+        : null;
+    if (!currentStatus) return null;
+    const nextStatus = nextModeratedCommentStatus(currentStatus);
+    if (!nextStatus) return null;
+
+    // Lọc cả trạng thái cũ để hai lần bấm đồng thời không cùng trừ/cộng bộ
+    // đếm. Sau đó đếm lại từ dữ liệu thật để tự sửa cả sai lệch lịch sử.
+    const updated = await tx.forumComment.updateMany({
+      where: { id: comment.id, status: currentStatus },
+      data: { status: nextStatus },
+    });
+    if (updated.count === 0) return null;
+
+    const visibleCount = await tx.forumComment.count({
+      where: { postId: comment.postId, status: "VISIBLE" },
+    });
+    await tx.forumPost.update({
+      where: { id: comment.postId },
+      data: { commentCount: visibleCount },
+    });
+
+    return {
+      postId: comment.postId,
+      channelKey: comment.post.channel.key,
+    };
   });
+
   revalidatePath(ADMIN_PATH);
+  if (changed) revalidatePost(changed.channelKey, changed.postId);
 }
 
 /** Đóng hoặc mở lại một chủ đề. Đóng thì giữ nội dung, chỉ chặn bình luận mới. */
@@ -54,7 +101,11 @@ export async function togglePostLockAction(postId: string) {
   await requireAdmin();
   const post = await db.forumPost.findUnique({
     where: { id: postId },
-    select: { id: true, lockedAt: true },
+    select: {
+      id: true,
+      lockedAt: true,
+      channel: { select: { key: true } },
+    },
   });
   if (!post) return;
 
@@ -63,14 +114,19 @@ export async function togglePostLockAction(postId: string) {
     data: { lockedAt: post.lockedAt ? null : new Date() },
   });
   revalidatePath(ADMIN_PATH);
+  revalidatePost(post.channel.key, post.id);
 }
 
-/** Ghim hoặc bỏ ghim một chủ đề lên đầu phòng. */
+/** Ghim hoặc bỏ ghim một chủ đề lên đầu feed mà người xem được phép đọc. */
 export async function togglePostPinAction(postId: string) {
   await requireAdmin();
   const post = await db.forumPost.findUnique({
     where: { id: postId },
-    select: { id: true, pinnedAt: true },
+    select: {
+      id: true,
+      pinnedAt: true,
+      channel: { select: { key: true } },
+    },
   });
   if (!post) return;
 
@@ -79,9 +135,10 @@ export async function togglePostPinAction(postId: string) {
     data: { pinnedAt: post.pinnedAt ? null : new Date() },
   });
   revalidatePath(ADMIN_PATH);
+  revalidatePost(post.channel.key, post.id);
 }
 
-/** Khóa hoặc mở một phòng. */
+/** Khóa hoặc mở phần viết của một bậc nội dung. */
 export async function toggleChannelLockAction(channelId: string) {
   await requireAdmin();
   const channel = await db.forumChannel.findUnique({
@@ -95,6 +152,7 @@ export async function toggleChannelLockAction(channelId: string) {
     data: { locked: !channel.locked },
   });
   revalidatePath(ADMIN_PATH);
+  revalidatePath(FORUM_PATH);
 }
 
 /**

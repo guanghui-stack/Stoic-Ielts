@@ -2,6 +2,10 @@ import "server-only";
 import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import {
+  publishForumCommentCreated,
+  publishForumPostCreated,
+} from "@/lib/forum/ably-server";
+import {
   BODY_MAX,
   BODY_MIN,
   COMMENT_MAX,
@@ -97,7 +101,7 @@ export type ChannelView = {
   access: ForumAccess;
 };
 
-/** Danh sách phòng học viên nhìn thấy, kèm quyền của từng phòng. */
+/** Các bậc nội dung học viên nhìn thấy, kèm quyền viết của từng bậc. */
 export async function channelsFor(
   viewer: Viewer,
   live: boolean
@@ -127,12 +131,12 @@ export async function channelsFor(
         isAdmin: viewer.isAdmin,
       }),
     }))
-    // Phòng không đọc được thì KHÔNG trả về. Trả về rồi để giao diện tự giấu
-    // là sớm muộn có chỗ quên giấu — và lộ tiêu đề bài của phòng bậc trên.
+    // Bậc không đọc được thì KHÔNG trả về. Trả về rồi để giao diện tự giấu là
+    // sớm muộn có chỗ quên giấu — và lộ tiêu đề bài của bậc trên.
     .filter((channel) => channel.access.canRead);
 }
 
-/** Một phòng theo mã đường dẫn, kèm quyền. `null` = không được vào. */
+/** Một bậc theo mã đường dẫn cũ, kèm quyền. `null` = không được vào. */
 export async function channelFor(
   key: string,
   viewer: Viewer,
@@ -147,10 +151,10 @@ export type ActionResult<T = undefined> =
   | { ok: false; error: string };
 
 const BLOCK_MESSAGES: Record<string, string> = {
-  RANK: "Phòng này dành cho bậc cao hơn bậc hiện tại của bạn.",
+  RANK: "Nội dung này dành cho bậc cao hơn bậc hiện tại của bạn.",
   COMPETITION:
     "Thử thách tháng đang diễn ra nên Diễn đàn tạm khóa phần viết. Bạn vẫn đọc được, và viết lại được ngay sau khi kỳ thi kết thúc.",
-  CHANNEL_LOCKED: "Phòng này đang được quản trị viên khóa.",
+  CHANNEL_LOCKED: "Phần viết ở bậc này đang được quản trị viên khóa.",
   BANNED: "Tài khoản của bạn đang bị hạn chế đăng bài trên Diễn đàn.",
 };
 
@@ -169,7 +173,7 @@ export async function createPost(input: {
 }): Promise<ActionResult<{ postId: string }>> {
   const live = await competitionLive();
   const channel = await channelFor(input.channelKey, input.viewer, live);
-  if (!channel) return { ok: false, error: "Không tìm thấy phòng này." };
+  if (!channel) return { ok: false, error: "Không tìm thấy bậc nội dung này." };
   if (!channel.access.canWrite) {
     return { ok: false, error: blockMessage(channel.access) };
   }
@@ -202,6 +206,10 @@ export async function createPost(input: {
     select: { id: true },
   });
 
+  // Bài đã nằm trong MySQL trước khi phát tín hiệu. Ably lỗi không được biến
+  // một bài đã lưu thành thông báo "đăng thất bại" cho học viên.
+  await publishForumPostCreated({ level: channel.level, postId: post.id });
+
   return { ok: true, value: { postId: post.id } };
 }
 
@@ -211,7 +219,7 @@ export async function createComment(input: {
   postId: string;
   parentId: string | null;
   body: string;
-}): Promise<ActionResult<{ commentId: string }>> {
+}): Promise<ActionResult<{ commentId: string; channelKey: string }>> {
   const post = await db.forumPost.findUnique({
     where: { id: input.postId },
     select: {
@@ -292,7 +300,16 @@ export async function createComment(input: {
     return created;
   });
 
-  return { ok: true, value: { commentId: comment.id } };
+  await publishForumCommentCreated({
+    level: post.channel.level,
+    postId: post.id,
+    commentId: comment.id,
+  });
+
+  return {
+    ok: true,
+    value: { commentId: comment.id, channelKey: post.channel.key },
+  };
 }
 
 /**
@@ -488,6 +505,36 @@ export async function reportContent(input: {
   targetId: string;
   reason: string;
 }): Promise<ActionResult> {
+  // Không tin `targetId` từ biểu mẫu. Mục tiêu phải còn hiển thị và nằm trong
+  // bậc người báo cáo được phép đọc; nếu không, một ID đoán được có thể dùng
+  // để tạo báo cáo cho nội dung ẩn hoặc làm lộ sự tồn tại của bài bậc cao.
+  let channelLevel: number | undefined;
+  if (input.targetType === "POST") {
+    const target = await db.forumPost.findFirst({
+      where: { id: input.targetId, status: "VISIBLE" },
+      select: { channel: { select: { level: true } } },
+    });
+    channelLevel = target?.channel.level;
+  } else {
+    const target = await db.forumComment.findFirst({
+      where: {
+        id: input.targetId,
+        status: "VISIBLE",
+        post: { status: "VISIBLE" },
+      },
+      select: {
+        post: { select: { channel: { select: { level: true } } } },
+      },
+    });
+    channelLevel = target?.post.channel.level;
+  }
+  if (
+    channelLevel === undefined ||
+    (!input.viewer.isAdmin && input.viewer.level < channelLevel)
+  ) {
+    return { ok: false, error: "Không tìm thấy nội dung này." };
+  }
+
   const reason = checkText(input.reason, 10, 1_000, "Lý do báo cáo");
   if (!reason.ok) return { ok: false, error: reason.error };
 

@@ -5,10 +5,11 @@
  * được, ai đăng được, phiếu này cộng mấy điểm" phải trả lời ở đây, để nơi
  * hiển thị và nơi chặn ở máy chủ dùng chung một luật.
  *
- * BỐN ĐIỀU ĐÃ CHỐT VỚI CHỦ DỰ ÁN (12/08/2026), đừng tự đổi:
- * 1. **Chín phòng, mỗi bậc một phòng.** Phòng bậc N mở đầy đủ cho mọi người
- *    từ bậc N trở lên — bậc cao quay về phòng dưới ĐĂNG BÀI được, không chỉ
- *    bình luận. Đây chính là thứ khiến phòng bậc cao không thành phòng chết.
+ * BỐN ĐIỀU ĐÃ CHỐT VỚI CHỦ DỰ ÁN, đừng tự đổi:
+ * 1. **Một feed, nhãn bậc là quyền xem tối thiểu.** Nội dung bậc N mở đầy đủ
+ *    cho mọi người từ bậc N trở lên — bậc cao được đăng cho bậc dưới, không
+ *    chỉ bình luận. Các `ForumChannel` vẫn tồn tại làm lớp phân quyền phía máy
+ *    chủ, nhưng không còn được trình bày như những phòng tách biệt.
  * 2. **Khóa đăng và bình luận trong khung giờ Nguyệt Thí**, vẫn đọc được.
  *    Một câu "câu 12 chọn NOT GIVEN" là đủ hỏng cả kỳ thi.
  * 3. Hai chiều phiếu: **Cắm cờ** (+1) và **Hạ cờ** (−1).
@@ -61,7 +62,7 @@ export type ForumAccess = {
 };
 
 /**
- * Ai vào được phòng nào.
+ * Ai đọc và viết được nội dung mang nhãn bậc nào.
  *
  * Thứ tự xét là cố ý: **quyền đọc xét trước mọi lý do khóa**. Người chưa đủ
  * bậc thì không đọc được, chấm hết; còn người đủ bậc mà đang kỳ thi thì vẫn
@@ -74,7 +75,7 @@ export function decideForumAccess(input: {
   channelLevel: number;
   /** Nguyệt Thí đang trong khung giờ thi. */
   competitionLive: boolean;
-  /** Quản trị viên đã khóa phòng này. */
+  /** Quản trị viên đã khóa phần viết ở bậc này. */
   channelLocked: boolean;
   /** Tài khoản bị cấm đăng trên diễn đàn. */
   banned: boolean;
@@ -105,11 +106,28 @@ export function decideForumAccess(input: {
   return { canRead: true, canWrite: true, blockedBy: null };
 }
 
-/** Các phòng một người nhìn thấy: mọi phòng từ bậc 1 tới bậc của họ. */
+/** Các nhãn một người nhìn thấy: mọi bậc từ 1 tới bậc của họ. */
 export function visibleChannelLevels(userLevel: number): number[] {
   const levels: number[] = [];
   for (let level = 1; level <= userLevel; level++) levels.push(level);
   return levels;
+}
+
+export type ModeratedCommentStatus = "VISIBLE" | "HIDDEN" | "DELETED";
+
+/**
+ * Trạng thái kế tiếp khi quản trị viên bấm ẩn/hiện một lời bàn.
+ *
+ * `DELETED` là lời tác giả đã tự gỡ. Trả về `null` cho trạng thái đó là bất
+ * biến quan trọng: nút kiểm duyệt không được vô tình hồi sinh lời người viết
+ * đã chủ động rút lại.
+ */
+export function nextModeratedCommentStatus(
+  status: ModeratedCommentStatus
+): "VISIBLE" | "HIDDEN" | null {
+  if (status === "VISIBLE") return "HIDDEN";
+  if (status === "HIDDEN") return "VISIBLE";
+  return null;
 }
 
 export type VoteValue = 1 | -1 | 0;

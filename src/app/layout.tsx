@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Playfair_Display, Source_Serif_4, Be_Vietnam_Pro } from "next/font/google";
+import { StudentRealtimeProvider } from "@/components/realtime/student-realtime-provider";
 import "./globals.css";
 
 const inter = Inter({
@@ -46,7 +47,9 @@ export default function RootLayout({
       lang="vi"
       className={`${inter.variable} ${playfair.variable} ${sourceSerif.variable} ${beVietnam.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <StudentRealtimeProvider>{children}</StudentRealtimeProvider>
+      </body>
     </html>
   );
 }

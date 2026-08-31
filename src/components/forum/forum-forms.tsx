@@ -35,13 +35,29 @@ function Feedback({ state }: { state: ForumFormState }) {
   return null;
 }
 
-/** Đăng bài mới trong một phòng. */
-export function NewPostForm({ channelKey }: { channelKey: string }) {
+export type PostLevelOption = {
+  channelKey: string;
+  level: number;
+  name: string;
+};
+
+/** Đăng bài mới và chọn bậc tối thiểu được phép xem. */
+export function NewPostForm({
+  levels,
+  defaultLevel,
+}: {
+  levels: PostLevelOption[];
+  defaultLevel: number;
+}) {
   const [state, action, pending] = useActionState<ForumFormState, FormData>(
     createPostAction,
     undefined
   );
   const [open, setOpen] = useState(false);
+  const defaultChannel =
+    levels.find((item) => item.level === defaultLevel) ?? levels.at(-1);
+
+  if (!defaultChannel) return null;
 
   if (!open) {
     return (
@@ -58,14 +74,39 @@ export function NewPostForm({ channelKey }: { channelKey: string }) {
 
   return (
     <form action={action} className="space-y-3 border border-line bg-paper p-6">
-      <input type="hidden" name="channelKey" value={channelKey} />
-      <input
-        name="title"
-        required
-        maxLength={TITLE_MAX}
-        placeholder="Tiêu đề — nói thẳng vấn đề bạn muốn bàn"
-        className={FIELD}
-      />
+      <div>
+        <label htmlFor="forum-post-level" className="mb-1.5 block font-ui text-xs font-semibold text-ink-soft">
+          Bậc tối thiểu được xem
+        </label>
+        <select
+          id="forum-post-level"
+          name="channelKey"
+          defaultValue={defaultChannel.channelKey}
+          className={FIELD}
+        >
+          {levels.map((item) => (
+            <option key={item.channelKey} value={item.channelKey}>
+              Bậc {item.level} — {item.name}
+            </option>
+          ))}
+        </select>
+        <p className="mt-1.5 font-ui text-xs leading-relaxed text-muted">
+          Chỉ học viên ở bậc này hoặc cao hơn mới đọc được. Bạn có thể chọn từ Bậc 1 đến bậc hiện tại của mình.
+        </p>
+      </div>
+      <div>
+        <label htmlFor="forum-post-title" className="mb-1.5 block font-ui text-xs font-semibold text-ink-soft">
+          Tiêu đề
+        </label>
+        <input
+          id="forum-post-title"
+          name="title"
+          required
+          maxLength={TITLE_MAX}
+          placeholder="Nói thẳng vấn đề bạn muốn bàn"
+          className={FIELD}
+        />
+      </div>
       <TagsInput
         name="tags"
         maxTags={5}
@@ -75,6 +116,7 @@ export function NewPostForm({ channelKey }: { channelKey: string }) {
       />
       <MarkupEditor
         name="body"
+        label="Nội dung bài viết"
         rows={9}
         maxLength={BODY_MAX}
         required
@@ -154,6 +196,7 @@ export function CommentForm({
         <input type="hidden" name="parentId" value={parentId} />
         <MarkupEditor
           name="body"
+          label={replyingTo ? `Nội dung trả lời ${replyingTo}` : "Nội dung bình luận"}
           rows={parentId ? 4 : 6}
           maxLength={COMMENT_MAX}
           required
@@ -274,14 +317,20 @@ export function ReportForm({
       <form action={action} className="mt-3 w-full space-y-2">
         <input type="hidden" name="targetType" value={targetType} />
         <input type="hidden" name="targetId" value={targetId} />
-        <input
-          name="reason"
-          required
-          minLength={10}
-          autoFocus
-          placeholder="Vì sao nội dung này cần xem lại?"
-          className={FIELD}
-        />
+        <div>
+          <label htmlFor={`forum-report-${targetType}-${targetId}`} className="mb-1.5 block font-ui text-xs font-semibold text-ink-soft">
+            Lý do báo cáo
+          </label>
+          <input
+            id={`forum-report-${targetType}-${targetId}`}
+            name="reason"
+            required
+            minLength={10}
+            autoFocus
+            placeholder="Vì sao nội dung này cần xem lại?"
+            className={FIELD}
+          />
+        </div>
         <Feedback state={state} />
         <div className="flex items-center gap-2">
           <button

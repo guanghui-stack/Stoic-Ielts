@@ -209,16 +209,16 @@ export default async function AdminForumPage() {
         </div>
       )}
 
-      {/* ===== Chín phòng ===== */}
+      {/* ===== Chín bậc nội dung ===== */}
       <h2 className="mt-12 font-display text-xl font-bold text-navy-deep">
-        Chín phòng
+        Chín bậc nội dung
       </h2>
       <div className="mt-4 overflow-x-auto border border-line">
         <table className="w-full min-w-[40rem] border-collapse font-ui text-sm">
           <thead>
             <tr className="bg-cream-deep text-ink">
               <th className="px-4 py-3 text-left font-semibold">Bậc</th>
-              <th className="px-4 py-3 text-left font-semibold">Phòng</th>
+              <th className="px-4 py-3 text-left font-semibold">Nhãn bậc</th>
               <th className="px-4 py-3 text-center font-semibold">Chủ đề</th>
               <th className="px-4 py-3 text-right font-semibold">Thao tác</th>
             </tr>
@@ -242,7 +242,7 @@ export default async function AdminForumPage() {
                   <form action={toggleChannelLockAction.bind(null, channel.id)}>
                     <button type="submit" className={ICON_BTN}>
                       {channel.locked ? <LockOpen className="h-3.5 w-3.5" /> : <Lock className="h-3.5 w-3.5" />}
-                      {channel.locked ? "Mở phòng" : "Khóa phòng"}
+                      {channel.locked ? "Mở phần viết" : "Khóa phần viết"}
                     </button>
                   </form>
                 </td>

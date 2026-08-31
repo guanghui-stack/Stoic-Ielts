@@ -14,6 +14,7 @@ import {
   deleteMinutesLeft,
   depthForReply,
   nextVoteValue,
+  nextModeratedCommentStatus,
   pruneDeletedLeaves,
   visibleChannelLevels,
   voteCountDelta,
@@ -127,6 +128,16 @@ check("bậc 1 chỉ thấy một phòng", visibleChannelLevels(1), [1]);
 check("bậc 4 thấy bốn phòng", visibleChannelLevels(4), [1, 2, 3, 4]);
 check("bậc 9 thấy cả chín phòng", visibleChannelLevels(9), [1, 2, 3, 4, 5, 6, 7, 8, 9]);
 check("bậc 0 (dữ liệu hỏng) không thấy phòng nào", visibleChannelLevels(0), []);
+
+console.log("\n— Kiểm duyệt lời bàn —");
+
+check("lời đang hiện được chuyển thành ẩn", nextModeratedCommentStatus("VISIBLE"), "HIDDEN");
+check("lời đang ẩn được hiện lại", nextModeratedCommentStatus("HIDDEN"), "VISIBLE");
+check(
+  "lời tác giả đã gỡ KHÔNG bị quản trị viên hồi sinh",
+  nextModeratedCommentStatus("DELETED"),
+  null
+);
 
 console.log("\n— Phép cộng phiếu —");
 

@@ -1900,14 +1900,14 @@ export async function initDatabase() {
    * o buoc dang ky roi lai duoc buoc nay tang them la mat tien that.
    */
   /**
-   * Chín phòng Nghị Sự Đường, mỗi bậc một phòng.
+   * Chín nhãn bậc của feed Nghị Sự Đường.
    *
    * Tên và mã lấy THẲNG từ `RANK_SEEDS` chứ không chép tay: chép tay thì đổi
-   * tên một bậc là lệch ngay, và lệch ở đây nghĩa là học viên bậc 4 nhìn thấy
-   * một phòng mang tên bậc 5.
+   * tên một bậc là lệch ngay, và lệch ở đây nghĩa là một bài Bậc 4 mang nhãn
+   * của Bậc 5.
    *
    * KHÔNG bọc applyOnce: đây là seed idempotent theo `key`, cần chạy lại mỗi
-   * lần triển khai để phòng mới (nếu sau này thêm bậc) tự xuất hiện. Phòng đã
+   * lần triển khai để nhãn mới (nếu sau này thêm bậc) tự xuất hiện. Nhãn đã
    * có thì chỉ cập nhật tên và mô tả, KHÔNG đụng tới `locked` — đó là thiết
    * lập của quản trị viên.
    */
@@ -1931,7 +1931,7 @@ export async function initDatabase() {
         },
       });
     }
-    console.log(`[wobridges] Nghi Su Duong: ${RANK_SEEDS.length} phong.`);
+    console.log(`[wobridges] Nghi Su Duong: ${RANK_SEEDS.length} nhan bac.`);
   } catch (err) {
     console.error("[wobridges] Khong seed duoc phong dien dan:", err);
   }

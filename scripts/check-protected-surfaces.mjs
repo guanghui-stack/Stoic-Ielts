@@ -25,9 +25,11 @@ for (const entry of entries) {
     continue;
   }
 
-  const actual = createHash("sha256")
-    .update(readFileSync(entry.file))
-    .digest("hex");
+  // Git có thể checkout LF thành CRLF trên Windows dù blob và nội dung nguồn
+  // không đổi. Chuẩn hóa đúng phần khác biệt vận chuyển này để hàng rào vẫn
+  // bắt mọi sửa đổi thật nhưng không báo giả theo hệ điều hành.
+  const normalizedSource = readFileSync(entry.file, "utf8").replace(/\r\n/g, "\n");
+  const actual = createHash("sha256").update(normalizedSource).digest("hex");
   if (actual !== entry.expected) changed.push(entry.file);
 }
 

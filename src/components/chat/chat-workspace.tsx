@@ -5,8 +5,9 @@ import { useEffect, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
-import { useRouter } from "next/navigation";
 import { MessageCircle, Plus, RefreshCw, Search, Send, UserRound } from "lucide-react";
+import { useRealtimeChat } from "@/components/chat/use-realtime-chat";
+import { useOnlineStudents } from "@/components/realtime/student-realtime-provider";
 import {
   searchStudentsAction,
   sendMessageAction,
@@ -40,6 +41,7 @@ type Props = {
   inbox: ChatInboxItem[];
   activeConversation: ChatConversation | null;
   activeConversationId?: string;
+  realtimeEnabled: boolean;
 };
 
 function formatTime(value: string | null): string {
@@ -50,6 +52,19 @@ function formatTime(value: string | null): string {
     hour: "2-digit",
     minute: "2-digit",
   }).format(new Date(value));
+}
+
+function OnlineMark({ online, ready }: { online: boolean; ready: boolean }) {
+  if (!ready) return null;
+  return (
+    <span
+      className={`inline-block size-2 shrink-0 rounded-full ${
+        online ? "bg-success" : "bg-line-strong"
+      }`}
+      aria-label={online ? "Đang trực tuyến" : "Đang ngoại tuyến"}
+      title={online ? "Đang trực tuyến" : "Đang ngoại tuyến"}
+    />
+  );
 }
 
 function SearchSubmit() {
@@ -94,7 +109,13 @@ function SendButton() {
   );
 }
 
-function SearchStudents() {
+function SearchStudents({
+  onlineUserIds,
+  presenceReady,
+}: {
+  onlineUserIds: ReadonlySet<string>;
+  presenceReady: boolean;
+}) {
   const [state, action] = useActionState<ChatActionState, FormData>(
     searchStudentsAction,
     undefined,
@@ -141,7 +162,13 @@ function SearchStudents() {
                 className="flex items-center justify-between gap-3 border border-line/80 px-3 py-2.5"
               >
                 <input type="hidden" name="otherUserId" value={student.id} />
-                <span className="min-w-0 truncate font-ui text-sm font-medium text-ink">{student.name}</span>
+                <span className="flex min-w-0 items-center gap-2 truncate font-ui text-sm font-medium text-ink">
+                  <OnlineMark
+                    online={onlineUserIds.has(student.id)}
+                    ready={presenceReady}
+                  />
+                  {student.name}
+                </span>
                 <StartConversationButton />
               </form>
             ))
@@ -200,9 +227,13 @@ function MessageComposer({ conversationId }: { conversationId: string }) {
 function ConversationPanel({
   currentUserId,
   conversation,
+  presenceReady,
+  otherOnline,
 }: {
   currentUserId: string;
   conversation: ChatConversation;
+  presenceReady: boolean;
+  otherOnline: boolean;
 }) {
   const messagesRef = useRef<HTMLDivElement>(null);
   const previousConversationRef = useRef<string | null>(null);
@@ -236,7 +267,14 @@ function ConversationPanel({
         </div>
         <div className="min-w-0">
           <h2 className="truncate font-display text-lg font-bold text-navy-deep">{conversation.other.name}</h2>
-          <p className="font-ui text-xs text-muted">Đối thoại riêng giữa hai học viên</p>
+          <p className="flex items-center gap-1.5 font-ui text-xs text-muted">
+            <OnlineMark online={otherOnline} ready={presenceReady} />
+            {presenceReady
+              ? otherOnline
+                ? "Đang trực tuyến"
+                : "Đang ngoại tuyến"
+              : "Đối thoại riêng giữa hai học viên"}
+          </p>
         </div>
       </header>
       <div ref={messagesRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-5 sm:px-6" aria-live="polite">
@@ -268,7 +306,17 @@ function ConversationPanel({
   );
 }
 
-function Inbox({ items, activeId }: { items: ChatInboxItem[]; activeId?: string }) {
+function Inbox({
+  items,
+  activeId,
+  onlineUserIds,
+  presenceReady,
+}: {
+  items: ChatInboxItem[];
+  activeId?: string;
+  onlineUserIds: ReadonlySet<string>;
+  presenceReady: boolean;
+}) {
   const [search, setSearch] = useState("");
   const normalizedSearch = search.trim().toLocaleLowerCase("vi-VN");
   const filteredItems = normalizedSearch
@@ -341,8 +389,15 @@ function Inbox({ items, activeId }: { items: ChatInboxItem[]; activeId?: string 
                     aria-current={activeId === item.id ? "page" : undefined}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-cream-deep font-display text-sm font-bold text-navy-deep">
+                      <div className="relative flex size-9 shrink-0 items-center justify-center rounded-full bg-cream-deep font-display text-sm font-bold text-navy-deep">
                         {item.other.name.slice(0, 1).toUpperCase()}
+                        {presenceReady && onlineUserIds.has(item.other.id) && (
+                          <span
+                            className="absolute bottom-0 right-0 size-2.5 rounded-full border-2 border-paper bg-success"
+                            aria-label="Đang trực tuyến"
+                            title="Đang trực tuyến"
+                          />
+                        )}
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between gap-2">
@@ -380,27 +435,31 @@ export function ChatWorkspace({
   inbox,
   activeConversation,
   activeConversationId,
+  realtimeEnabled,
 }: Props) {
-  const router = useRouter();
-  const refreshRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  useEffect(() => {
-    const refresh = () => {
-      if (document.visibilityState === "visible") router.refresh();
-    };
-    refreshRef.current = setInterval(refresh, 8_000);
-    return () => {
-      if (refreshRef.current) clearInterval(refreshRef.current);
-    };
-  }, [router]);
+  useRealtimeChat({ currentUserId, enabled: realtimeEnabled });
+  const presence = useOnlineStudents(realtimeEnabled);
 
   return (
     <div className="space-y-6">
-      <SearchStudents />
+      <SearchStudents
+        onlineUserIds={presence.onlineUserIds}
+        presenceReady={presence.ready}
+      />
       <div className="flex flex-col gap-4 lg:flex-row lg:items-stretch">
-        <Inbox items={inbox} activeId={activeConversationId} />
+        <Inbox
+          items={inbox}
+          activeId={activeConversationId}
+          onlineUserIds={presence.onlineUserIds}
+          presenceReady={presence.ready}
+        />
         {activeConversation ? (
-          <ConversationPanel currentUserId={currentUserId} conversation={activeConversation} />
+          <ConversationPanel
+            currentUserId={currentUserId}
+            conversation={activeConversation}
+            presenceReady={presence.ready}
+            otherOnline={presence.onlineUserIds.has(activeConversation.other.id)}
+          />
         ) : (
           <section className="flex min-h-[34rem] flex-1 items-center justify-center border border-dashed border-line bg-canvas px-6 py-12 text-center">
             <div className="max-w-sm">
@@ -417,7 +476,9 @@ export function ChatWorkspace({
       </div>
       <p className="flex items-center justify-end gap-1.5 font-ui text-[11px] text-muted">
         <RefreshCw className="size-3" aria-hidden />
-        Hộp thư tự cập nhật định kỳ khi bạn đang mở trang.
+        {realtimeEnabled
+          ? "Tin mới được cập nhật tức thời, kèm đồng bộ dự phòng."
+          : "Hộp thư tự cập nhật định kỳ khi bạn đang mở trang."}
       </p>
     </div>
   );

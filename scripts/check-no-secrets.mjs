@@ -7,8 +7,9 @@
  * trong mã nguồn.
  *
  * `.gitignore` đã chặn `.env*`, nhưng nó chỉ bảo vệ đúng những file có tên đó.
- * Script này quét NỘI DUNG của mọi file được Git theo dõi, nên bắt được cả
- * trường hợp khóa bị dán nhầm vào mã nguồn, tài liệu hay script.
+ * Script này quét NỘI DUNG của mọi file được Git theo dõi hoặc sắp được thêm
+ * vào Git, nên bắt được cả trường hợp khóa bị dán nhầm vào mã nguồn, tài liệu
+ * hay script trước khi commit.
  *
  * Chạy: npm run test:no-secrets  (đã nối vào npm test)
  */
@@ -48,6 +49,13 @@ const PATTERNS = [
   },
   { name: "Khóa riêng tư (private key)", re: /-----BEGIN [A-Z ]*PRIVATE KEY-----/ },
   { name: "Token GitHub", re: /\bgh[pousr]_[0-9A-Za-z]{30,}\b/ },
+  {
+    name: "Khóa API Ably",
+    // Định dạng Ably API key: appId.keyId:secret. Chỉ secret dài mới được coi
+    // là khóa thật để các giá trị minh họa ngắn trong tài liệu không báo giả.
+    re: /\b[0-9A-Za-z_-]{4,}\.[0-9A-Za-z_-]{4,}:([0-9A-Za-z_-]{20,})\b/,
+    ignore: (match) => isPlaceholder(match[1]),
+  },
 ];
 
 /**
@@ -60,14 +68,18 @@ const SKIP_EXT = new Set([
   ".ttf", ".otf", ".pdf", ".zip", ".db", ".docx",
 ]);
 
-const tracked = execFileSync("git", ["ls-files"], { encoding: "utf8" })
+const files = execFileSync(
+  "git",
+  ["ls-files", "--cached", "--others", "--exclude-standard"],
+  { encoding: "utf8" },
+)
   .split("\n")
   .map((line) => line.trim())
   .filter(Boolean);
 
 const findings = [];
 
-for (const file of tracked) {
+for (const file of files) {
   if (SKIP_FILES.has(file)) continue;
   if (SKIP_EXT.has(path.extname(file).toLowerCase())) continue;
   if (!fs.existsSync(file)) continue;
@@ -90,7 +102,7 @@ for (const file of tracked) {
 }
 
 // Hàng rào thứ hai: chính file .env không được nằm trong danh sách Git theo dõi.
-const trackedEnv = tracked.filter((f) => /(^|\/)\.env($|\.)/.test(f));
+const trackedEnv = files.filter((f) => /(^|\/)\.env($|\.)/.test(f));
 for (const file of trackedEnv) {
   findings.push(`${file} — file môi trường bị Git theo dõi, phải gỡ khỏi index`);
 }
@@ -106,5 +118,5 @@ if (findings.length > 0) {
 }
 
 console.log(
-  `test:no-secrets — sach, da quet ${tracked.length} file duoc Git theo doi.`,
+  `test:no-secrets — sach, da quet ${files.length} file trong pham vi Git.`,
 );

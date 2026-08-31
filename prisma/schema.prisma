@@ -1761,21 +1761,20 @@ model EmailVerification {
 
 /// ===== Nghi Su Duong (dien dan theo cap bac) =====
 ///
-/// Phong la DU LIEU, khong phai hang so trong ma. Chin phong theo chin bac la
-/// lua chon hom nay; gop lai ba phong theo thoi dai, hay tach ra khac di, chi
-/// la sua seed chu khong phai viet lai.
+/// Channel la lop phan quyen an cho feed chung, khong phai phong hien tren UI.
+/// Moi bai gan mot channel de co nhan bac va muc bac toi thieu duoc xem.
 model ForumChannel {
   id    String @id @default(cuid())
   /// Ma on dinh dung trong duong dan: `bach-than`, `nghia-binh`...
   key   String @unique @db.VarChar(64)
-  /// Bac toi thieu de vao. Phong bac N mo DAY DU cho moi nguoi tu bac N tro
-  /// len — bac cao quay ve phong duoi dang bai duoc, khong chi binh luan.
+  /// Bac toi thieu de xem. Noi dung bac N mo DAY DU cho moi nguoi tu bac N tro
+  /// len — bac cao duoc dang bai cho bac duoi, khong chi binh luan.
   level Int    @unique
   name  String
   blurb String @db.Text
 
   sortOrder Int      @default(0)
-  /// Quan tri vien khoa phong: van doc duoc, khong viet duoc.
+  /// Quan tri vien khoa phan viet cua bac: van doc duoc, khong viet duoc.
   locked    Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

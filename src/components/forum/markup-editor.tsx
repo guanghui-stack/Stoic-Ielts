@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useId, useRef } from "react";
 import { Bold, Italic, List, Underline } from "lucide-react";
 import { toggleBullet, toggleWrap } from "@/lib/forum/markup";
 
@@ -17,6 +17,7 @@ import { toggleBullet, toggleWrap } from "@/lib/forum/markup";
  */
 export function MarkupEditor({
   name,
+  label,
   rows = 6,
   placeholder,
   maxLength,
@@ -24,6 +25,7 @@ export function MarkupEditor({
   autoFocus,
 }: {
   name: string;
+  label?: string;
   rows?: number;
   placeholder?: string;
   maxLength?: number;
@@ -31,6 +33,7 @@ export function MarkupEditor({
   autoFocus?: boolean;
 }) {
   const ref = useRef<HTMLTextAreaElement>(null);
+  const id = useId();
 
   function apply(
     fn: (
@@ -52,6 +55,11 @@ export function MarkupEditor({
 
   return (
     <div className="w-full">
+      {label && (
+        <label htmlFor={id} className="mb-1.5 block font-ui text-xs font-semibold text-ink-soft">
+          {label}
+        </label>
+      )}
       <div className="flex flex-wrap items-center gap-1.5 border border-b-0 border-line-strong bg-cream-deep px-2 py-1.5">
         <button
           type="button"
@@ -96,6 +104,7 @@ export function MarkupEditor({
       </div>
 
       <textarea
+        id={id}
         ref={ref}
         name={name}
         rows={rows}

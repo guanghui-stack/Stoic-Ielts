@@ -36,6 +36,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Check repository for secrets
+        run: npm run test:no-secrets
+
       - name: Run lint
         run: npm run lint
 

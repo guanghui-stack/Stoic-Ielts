@@ -26,6 +26,8 @@ import {
 import { VoteButtons } from "@/components/forum/vote-buttons";
 import { RichText } from "@/components/forum/rich-text";
 import { ForumTags } from "@/components/forum/forum-tags";
+import { ForumAuthorStatus } from "@/components/forum/forum-author-status";
+import { ForumRealtimeBridge } from "@/components/forum/use-realtime-forum";
 import { extractTagsFromBody } from "@/lib/forum/tags";
 import { NoteBox } from "@/components/ui";
 
@@ -78,7 +80,7 @@ export default async function PostPage({
       status: true,
       lockedAt: true,
       createdAt: true,
-      author: { select: { name: true } },
+      author: { select: { id: true, name: true } },
     },
   });
   // Bài phải thuộc ĐÚNG phòng trên đường dẫn: thiếu phép kiểm này thì đổi tên
@@ -147,23 +149,36 @@ export default async function PostPage({
 
   const basePath = `/nghi-su-duong/${channel.key}/${post.id}`;
   const canWrite = channel.access.canWrite && !post.lockedAt;
+  const renderedCommentCount = (() => {
+    const count = (nodes: CommentNode<CommentData>[]): number =>
+      nodes.reduce((total, node) => total + 1 + count(node.children), 0);
+    return count(tree);
+  })();
 
   return (
     <section className="mx-auto max-w-3xl px-6 py-12 md:py-16">
+      <ForumRealtimeBridge levels={[channel.level]} />
       <Link
-        href={`/nghi-su-duong/${channel.key}`}
+        href={`/nghi-su-duong?bac=${channel.level}`}
         className="inline-flex items-center gap-2 font-ui text-sm font-semibold text-navy hover:text-gold"
       >
         <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-        Phòng {channel.name}
+        Trở lại diễn đàn · Bậc {channel.level}
       </Link>
 
       <article className="mt-6 border border-line bg-paper p-7 shadow-card">
+        <div className="mb-3 flex flex-wrap items-center gap-2">
+          <span className="border border-gold bg-gold-pale px-2 py-0.5 font-ui text-[0.68rem] font-bold uppercase tracking-wide text-gold">
+            Bậc {channel.level}
+          </span>
+          <span className="font-ui text-xs text-muted">{channel.name}</span>
+        </div>
         <h1 className="font-display text-2xl font-bold leading-tight text-navy-deep md:text-3xl">
           {post.title}
         </h1>
         <p className="mt-2 font-ui text-xs text-muted">
-          {post.author.name} · {fmt(post.createdAt)}
+          <ForumAuthorStatus userId={post.author.id} name={post.author.name} /> ·{" "}
+          {fmt(post.createdAt)}
         </p>
         <ForumTags tags={postContent.tags} />
         <div className="rule-gold mt-4" />
@@ -213,12 +228,12 @@ export default async function PostPage({
         <NoteBox className="mt-6" title="Đang chỉ đọc">
           {live
             ? "Thử thách tháng đang diễn ra nên phần viết tạm khóa."
-            : "Bạn chưa viết được ở phòng này."}
+            : "Bạn chưa viết được ở bậc nội dung này."}
         </NoteBox>
       )}
 
       <h2 className="mt-10 font-display text-lg font-bold text-navy-deep">
-        {comments.length} phản hồi
+        {renderedCommentCount} phản hồi
       </h2>
 
       <div className="mt-4 space-y-4">
@@ -274,9 +289,15 @@ function CommentBranch({
       }
     >
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-ui text-xs text-muted">
-        <span className="font-semibold text-ink">
-          {node.deleted ? "—" : node.authorName}
-        </span>
+        {node.deleted ? (
+          <span className="font-semibold text-ink">—</span>
+        ) : (
+          <ForumAuthorStatus
+            userId={node.authorId}
+            name={node.authorName}
+            className="font-semibold text-ink"
+          />
+        )}
         <span>{fmt(node.createdAt)}</span>
         {node.status === "HIDDEN" && (
           <span className="inline-flex items-center gap-1 font-semibold text-danger">

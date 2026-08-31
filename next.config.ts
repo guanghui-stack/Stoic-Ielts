@@ -6,6 +6,9 @@ import {
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // Ably có các gói transport/storage Node tùy chọn. Để package ở ngoài bundle
+  // máy chủ giúp Turbopack không cố đóng gói các tích hợp `keyv` không dùng tới.
+  serverExternalPackages: ["ably"],
   experimental: {
     serverActions: {
       // Website chạy sau CDN/proxy của Hostinger — khai báo tên miền hợp lệ

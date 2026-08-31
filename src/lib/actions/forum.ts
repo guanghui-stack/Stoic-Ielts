@@ -40,7 +40,8 @@ export async function createPostAction(
 
   if (!result.ok) return { error: result.error };
 
-  revalidatePath(`/nghi-su-duong/${channelKey}`);
+  revalidatePath("/nghi-su-duong");
+  revalidatePath(`/nghi-su-duong/${channelKey}/${result.value.postId}`);
   redirect(`/nghi-su-duong/${channelKey}/${result.value.postId}`);
 }
 
@@ -52,7 +53,6 @@ export async function createCommentAction(
   const viewer = await viewerOf(user);
 
   const postId = String(formData.get("postId") ?? "").trim();
-  const channelKey = String(formData.get("channelKey") ?? "").trim();
   const parentRaw = String(formData.get("parentId") ?? "").trim();
 
   const result = await createComment({
@@ -64,7 +64,8 @@ export async function createCommentAction(
 
   if (!result.ok) return { error: result.error };
 
-  revalidatePath(`/nghi-su-duong/${channelKey}/${postId}`);
+  revalidatePath("/nghi-su-duong");
+  revalidatePath(`/nghi-su-duong/${result.value.channelKey}/${postId}`);
   return { success: "Đã gửi." };
 }
 
@@ -90,6 +91,7 @@ export async function voteAction(formData: FormData): Promise<void> {
 
   // Chỉ nhận đường dẫn NỘI BỘ của chính diễn đàn. Không thì một biểu mẫu gửi
   // tay có thể ép máy chủ dựng lại đường dẫn tùy ý.
+  revalidatePath("/nghi-su-duong");
   if (path.startsWith("/nghi-su-duong/")) revalidatePath(path);
 }
 
@@ -135,6 +137,7 @@ export async function deleteCommentAction(formData: FormData): Promise<void> {
   const result = await deleteOwnComment({ viewer, commentId });
   if (result.ok) {
     const { channelKey, postId } = result.value;
+    revalidatePath("/nghi-su-duong");
     revalidatePath(`/nghi-su-duong/${channelKey}/${postId}`);
   }
 }
