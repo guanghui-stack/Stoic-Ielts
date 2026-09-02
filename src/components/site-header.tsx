@@ -11,19 +11,18 @@ export async function SiteHeader() {
   const isAdmin = user?.role === "ADMIN";
 
   return (
-    <header className="relative z-40 bg-paper">
-      {/* Sợi chỉ vàng đầu trang — chi tiết editorial */}
-      <div className="h-[3px] bg-gold" />
+    <header className="relative z-40 border-b border-stoic-line bg-stoic-canvas/95 font-stoic text-stoic-ink backdrop-blur">
+      <div className="h-0.5 bg-gradient-to-r from-stoic-sherbet via-stoic-primary to-stoic-ruby" />
 
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3.5 sm:px-6">
         <BrandLockup />
 
         <div className="flex items-center gap-3">
-          <div className="hidden lg:block">
+          <div className={features.competitionTiers ? "hidden xl:block" : "hidden lg:block"}>
             {isLoggedIn ? (
               <Link
                 href={isAdmin ? "/quan-tri" : "/hoc-vien"}
-                className="flex items-center gap-2 border border-navy px-5 py-2 font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-navy transition-colors hover:bg-navy hover:text-paper"
+                className="inline-flex min-h-11 items-center gap-2 rounded-stoic-pill border border-stoic-primary bg-stoic-canvas px-5 py-2 text-sm font-semibold text-stoic-primary-deep shadow-stoic-1 transition-colors hover:bg-stoic-primary-soft/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/35"
               >
                 <UserRound className="h-3.5 w-3.5" aria-hidden="true" />
                 {isAdmin ? "Quản trị" : user?.name?.split(" ").slice(-1)[0] ?? "Học viên"}
@@ -32,13 +31,13 @@ export async function SiteHeader() {
               <div className="flex items-center gap-2">
                 <Link
                   href="/dang-nhap"
-                  className="px-4 py-2 font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-navy transition-colors hover:text-gold"
+                  className="inline-flex min-h-11 items-center rounded-stoic-pill px-4 py-2 text-sm font-semibold text-stoic-ink-secondary transition-colors hover:bg-stoic-canvas-soft hover:text-stoic-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/35"
                 >
                   Đăng nhập
                 </Link>
                 <Link
                   href="/dang-ky"
-                  className="border border-navy bg-navy px-5 py-2 font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-paper transition-colors hover:bg-navy-deep"
+                  className="inline-flex min-h-11 items-center rounded-stoic-pill border border-stoic-primary bg-stoic-primary px-5 py-2 text-sm font-semibold text-white shadow-stoic-1 transition-colors hover:border-stoic-primary-deep hover:bg-stoic-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/35"
                 >
                   Đăng ký
                 </Link>
@@ -54,7 +53,6 @@ export async function SiteHeader() {
       </div>
 
       <DesktopNav showTiers={features.competitionTiers} />
-      <div className="border-t border-line" />
     </header>
   );
 }

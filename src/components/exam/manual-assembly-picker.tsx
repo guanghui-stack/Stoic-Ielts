@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
-import { Lock, SquareCheck } from "lucide-react";
+import { ArrowRight, Check, Lock } from "lucide-react";
 
 /**
  * Chọn đúng ba bài đọc để ghép thành đề.
@@ -46,55 +47,70 @@ export function ManualAssemblyPicker({
 
   const chosen = candidates.filter((c) => picked.includes(c.exerciseId));
   const totalQuestions = chosen.reduce((sum, c) => sum + c.questionCount, 0);
-  const missing = chosen.filter((c) => c.restricted && !c.owned);
-  const ready = picked.length === REQUIRED && missing.length === 0;
+  const ready = picked.length === REQUIRED;
+  const hasLocked = candidates.some((c) => c.restricted && !c.owned);
 
   return (
-    <form action={action} className="mt-6">
+    <form action={action}>
       <input type="hidden" name="mode" value="MANUAL" />
       <input type="hidden" name="readingType" value={readingType} />
       {picked.map((id) => (
         <input key={id} type="hidden" name="exerciseId" value={id} />
       ))}
 
-      <ul className="divide-y divide-line border-y border-line">
+      <ul className="overflow-hidden rounded-stoic-md border border-stoic-line">
         {candidates.map((item) => {
           const checked = picked.includes(item.exerciseId);
           const full = !checked && picked.length >= REQUIRED;
+          const locked = item.restricted && !item.owned;
+          const disabled = full || locked;
           return (
-            <li key={item.exerciseId}>
+            <li
+              key={item.exerciseId}
+              className="border-b border-stoic-line last:border-b-0"
+            >
               <button
                 type="button"
                 onClick={() => toggle(item.exerciseId)}
-                disabled={full}
+                disabled={disabled}
                 aria-pressed={checked}
-                className={`flex w-full flex-wrap items-center gap-x-3 gap-y-1 px-1 py-3 text-left transition-colors ${
-                  full ? "cursor-not-allowed opacity-40" : "cursor-pointer hover:bg-cream"
+                className={`flex min-h-16 w-full flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3 text-left transition-colors sm:px-5 ${
+                  disabled
+                    ? "cursor-not-allowed bg-stoic-canvas-soft/55"
+                    : checked
+                      ? "cursor-pointer bg-stoic-primary-soft/30"
+                      : "cursor-pointer bg-stoic-canvas hover:bg-stoic-primary-soft/15"
                 }`}
               >
                 <span
                   aria-hidden="true"
-                  className={`flex h-5 w-5 shrink-0 items-center justify-center border ${
-                    checked ? "border-navy bg-navy text-paper" : "border-line-strong"
+                  className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-stoic-sm border ${
+                    checked
+                      ? "border-stoic-primary bg-stoic-primary text-white"
+                      : "border-stoic-line-strong bg-stoic-canvas text-stoic-ink-muted"
                   }`}
                 >
-                  {checked && <SquareCheck className="h-3.5 w-3.5" />}
+                  {checked && <Check className="h-4 w-4" />}
                 </span>
-                <span className="min-w-0 flex-1 text-ink">{item.title}</span>
-                <span className="font-ui text-xs text-muted">
-                  {item.questionCount} câu · {item.tierLabel}
-                  {item.attemptCount > 0 && ` · đã làm ${item.attemptCount} lần`}
+                <span className={`min-w-0 flex-1 font-medium ${locked ? "text-stoic-ink-muted" : "text-stoic-ink"}`}>
+                  {item.title}
+                </span>
+                <span className="text-xs text-stoic-ink-muted">
+                  <span className="tabular-nums">{item.questionCount}</span> câu · {item.tierLabel}
+                  {item.attemptCount > 0 && (
+                    <> · đã làm <span className="tabular-nums">{item.attemptCount}</span> lần</>
+                  )}
                 </span>
                 {item.restricted && (
                   <span
-                    className={`inline-flex items-center gap-1 border px-2 py-0.5 font-ui text-[0.68rem] font-semibold uppercase ${
+                    className={`inline-flex items-center gap-1.5 rounded-stoic-pill border px-2.5 py-1 text-xs font-semibold ${
                       item.owned
-                        ? "border-success bg-success-pale text-success"
-                        : "border-line-strong bg-cream-deep text-ink-soft"
+                        ? "border-success/20 bg-success-pale text-success"
+                        : "border-stoic-warning/20 bg-stoic-canvas-cream text-stoic-warning"
                     }`}
                   >
                     <Lock className="h-3 w-3" aria-hidden="true" />
-                    {item.owned ? "Đã mở" : "Cần mở khóa"}
+                    {item.owned ? "Đã mở" : "Chưa mở"}
                   </span>
                 )}
               </button>
@@ -103,24 +119,49 @@ export function ManualAssemblyPicker({
         })}
       </ul>
 
-      <p className="mt-4 font-ui text-sm text-ink-soft" aria-live="polite">
-        Đã chọn {picked.length}/{REQUIRED}
-        {picked.length > 0 && ` · ${totalQuestions} câu`}
-        {missing.length > 0 && (
-          <span className="text-danger">
-            {" "}
-            · còn {missing.length} bài chưa mở khóa
-          </span>
-        )}
-      </p>
+      <div className="mt-5 flex flex-col justify-between gap-4 rounded-stoic-md border border-stoic-line bg-stoic-canvas-soft px-4 py-4 sm:flex-row sm:items-center sm:px-5">
+        <div aria-live="polite">
+          <p className="text-sm font-semibold text-stoic-ink">
+            Đã chọn <span className="tabular-nums text-stoic-primary-deep">{picked.length}/{REQUIRED}</span>
+            {picked.length > 0 && (
+              <span className="font-normal text-stoic-ink-secondary">
+                {" "}· <span className="tabular-nums">{totalQuestions}</span> câu
+              </span>
+            )}
+          </p>
+          <div className="mt-2 flex gap-1.5" aria-hidden="true">
+            {Array.from({ length: REQUIRED }, (_, index) => (
+              <span
+                key={index}
+                className={`h-1.5 w-10 rounded-full ${
+                  index < picked.length ? "bg-stoic-primary" : "bg-stoic-line"
+                }`}
+              />
+            ))}
+          </div>
+        </div>
 
-      <button
-        type="submit"
-        disabled={!ready}
-        className="mt-4 inline-flex cursor-pointer items-center justify-center gap-2 border border-navy bg-navy px-7 py-3 font-ui text-[0.8rem] font-semibold uppercase tracking-[0.12em] text-paper transition-colors hover:bg-navy-deep disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        Bắt đầu đề tự chọn
-      </button>
+        <button
+          type="submit"
+          disabled={!ready}
+          className="inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-stoic-pill border border-stoic-primary bg-stoic-primary px-6 py-2.5 text-sm font-semibold text-white shadow-stoic-1 transition-colors hover:border-stoic-primary-deep hover:bg-stoic-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/35 disabled:cursor-not-allowed disabled:opacity-45 sm:w-auto"
+        >
+          Bắt đầu đề tự chọn
+        </button>
+      </div>
+
+      {hasLocked ? (
+        <p className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm leading-relaxed text-stoic-ink-muted">
+          Bài chưa mở không thể chọn tại đây.
+          <Link
+            href={readingType === "GENERAL" ? "/luyen-tap/reading/general" : "/luyen-tap/reading"}
+            className="inline-flex min-h-10 items-center gap-1 font-semibold text-stoic-primary-deep hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/35"
+          >
+            Mở bài trong Kho Reading
+            <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+          </Link>
+        </p>
+      ) : null}
     </form>
   );
 }

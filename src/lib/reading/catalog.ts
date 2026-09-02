@@ -47,7 +47,7 @@ function isRecord(value: unknown): value is JsonRecord {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function displayTitleOf(title: string): string {
+export function readingDisplayTitle(title: string): string {
   const original = title.trim();
   const withoutPrefix = original.replace(INTERNAL_TITLE_PREFIX, "").trim();
   return withoutPrefix || original || "Bài Reading";
@@ -126,7 +126,7 @@ export function buildReadingCatalogMetadata(
   const difficulty = difficultyMetadataOf(source.difficultyTier);
 
   return {
-    displayTitle: displayTitleOf(source.title),
+    displayTitle: readingDisplayTitle(source.title),
     questionCount: facts.questionCount,
     questionTypeLabels: facts.questionTypeLabels,
     difficultyLabel: difficulty.difficultyLabel,

@@ -24,6 +24,19 @@ const ORDER_TTL_MS = 24 * 60 * 60 * 1000;
 /** Chặn bấm mua dồn dập (bot hoặc bấm liên tục) — đếm ngay trên database. */
 const MAX_PENDING_PER_HOUR = 12;
 
+const READING_PURCHASE_RETURN_PATHS = new Set([
+  "/luyen-tap/reading/ghep-de?dang=ACADEMIC",
+  "/luyen-tap/reading/ghep-de?dang=GENERAL",
+]);
+
+function readingPurchaseReturnPath(
+  value: FormDataEntryValue | null,
+  fallback: string
+) {
+  const requested = String(value ?? "").trim();
+  return READING_PURCHASE_RETURN_PATHS.has(requested) ? requested : fallback;
+}
+
 /** Mã đơn dạng WB-260801-A1B2C3: đọc được bằng mắt khi đối soát với SePay. */
 function newInvoiceNumber(): string {
   const stamp = new Date().toISOString().replace(/\D/g, "").slice(2, 14);
@@ -141,6 +154,10 @@ export async function buyWithCoinsAction(formData: FormData) {
     exerciseId,
     attemptId,
   });
+  const returnPath =
+    OFFERS[offerCode].feature === "READING"
+      ? readingPurchaseReturnPath(formData.get("returnTo"), resolved.path)
+      : resolved.path;
 
   const result = await spendCoinsForOffer({
     userId: user.id,
@@ -150,14 +167,14 @@ export async function buyWithCoinsAction(formData: FormData) {
     spendToken,
   });
 
-  if (result.ok) redirect(resolved.path);
+  if (result.ok) redirect(returnPath);
 
   // Thiếu xu là trường hợp PHỔ BIẾN nhất, nên nó phải dẫn thẳng tới chỗ nạp
   // kèm số còn thiếu — chứ không phải một câu "không đủ" rồi bỏ mặc.
   if (result.reason === "NOT_ENOUGH_COINS") {
     redirect(`/thanh-toan?loi=thieu-xu&thieu=${result.missing}`);
   }
-  if (result.reason === "ALREADY_OWNED") redirect(resolved.path);
+  if (result.reason === "ALREADY_OWNED") redirect(returnPath);
   redirect("/thanh-toan?loi=san-pham");
 }
 

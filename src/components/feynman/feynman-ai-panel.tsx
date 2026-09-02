@@ -1,8 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Sparkles, Wallet } from "lucide-react";
+import { CheckCircle2, Sparkles, Wallet } from "lucide-react";
+import { AiWaiting } from "@/components/ui/ai-waiting";
 import {
   FeynmanAiEvaluation,
   type AiEvaluationView,
@@ -58,9 +60,10 @@ export function FeynmanAiPanel({
 
   if (!reviewCompleted) {
     return (
-      <section className="mt-8 rounded-2xl border border-line bg-stoic-canvas-soft/70 px-6 py-5 shadow-card">
-        <p className="font-ui text-sm text-muted">
-          Hoàn thành phần tự giảng lại ở trên, rồi bạn nhờ AI chấm được.
+      <section className="mt-8 rounded-stoic-lg border border-stoic-line bg-stoic-canvas px-6 py-5 shadow-stoic-1">
+        <p className="flex items-start gap-2.5 text-sm leading-relaxed text-stoic-ink-muted">
+          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-stoic-primary-deep" aria-hidden="true" />
+          Hoàn thành phần tự giảng ở trên để mở bước AI đối chiếu.
         </p>
       </section>
     );
@@ -69,6 +72,7 @@ export function FeynmanAiPanel({
   const grade = async () => {
     setBusy(true);
     setError(null);
+    let refreshing = false;
     try {
       const response = await fetch("/api/feynman/ai/evaluate", {
         method: "POST",
@@ -80,6 +84,7 @@ export function FeynmanAiPanel({
       if (data.ok) {
         // Đọc lại từ máy chủ thay vì tự dựng kết quả ở đây: bản chấm còn kèm
         // nhãn câu và lịch sử hỏi đáp mà trang server đã biết cách lấy.
+        refreshing = true;
         router.refresh();
         return;
       }
@@ -87,50 +92,67 @@ export function FeynmanAiPanel({
     } catch {
       setError("Không gọi được máy chủ. Bạn kiểm tra kết nối rồi thử lại nhé.");
     } finally {
-      setBusy(false);
+      if (!refreshing) setBusy(false);
     }
   };
 
   const empty = walletRemaining <= 0;
 
+  if (busy) {
+    return (
+      <section className="mt-8" aria-label="AI đang chấm phần tự giảng">
+        <AiWaiting
+          title="Đang chấm phần tự giảng"
+          description="Bạn có thể giữ nguyên trang này; kết quả sẽ xuất hiện ngay khi việc đối chiếu hoàn tất."
+          steps={[
+            "Đọc phần tự giảng",
+            "Đối chiếu lời giải và bằng chứng",
+            "Chuẩn bị phản hồi",
+          ]}
+          activeStep={1}
+        />
+      </section>
+    );
+  }
+
   return (
-    <section className="mt-8 rounded-2xl border border-stoic-primary/35 bg-stoic-primary-soft p-7 shadow-card">
-      <p className="flex items-center gap-2 font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-ink">
+    <section className="stoic-ai-panel mt-8 rounded-stoic-lg border border-stoic-primary/30 bg-stoic-primary-soft/50 p-6 shadow-stoic-1 sm:p-7">
+      <p className="flex items-center gap-2 text-[0.7rem] font-semibold uppercase tracking-[0.09em] text-stoic-primary-deep">
         <Sparkles className="h-3.5 w-3.5 text-stoic-primary-deep" aria-hidden="true" />
         Nhờ AI chấm phần tự giảng
       </p>
-      <h2 className="mt-2.5 font-display text-xl font-bold text-navy-deep md:text-2xl">
+      <h2 className="mt-2.5 text-xl font-medium tracking-[-0.02em] text-stoic-ink md:text-2xl">
         Bạn giảng lại đã đúng bản chất chưa?
       </h2>
-      <p className="mt-3 max-w-2xl text-[0.95rem] leading-relaxed text-ink-soft">
+      <p className="mt-3 max-w-2xl text-[0.95rem] leading-relaxed text-stoic-ink-secondary">
         AI so phần bạn tự giảng với lời giải chuẩn theo ý nghĩa, chỉ ra chỗ còn
         thiếu và trích dẫn bằng chứng trong bài. Điểm Reading của bạn không thay
         đổi.
       </p>
 
-      <p className="mt-4 flex items-center gap-2 font-ui text-sm text-ink-soft">
+      <p className="mt-4 flex items-center gap-2 text-sm text-stoic-ink-secondary">
         <Wallet className="h-4 w-4" aria-hidden="true" />
-        Ví lượt AI: <strong className="text-ink">{walletRemaining}</strong> lượt
+        Ví lượt AI: <strong className="tabular-nums text-stoic-ink">{walletRemaining}</strong> lượt
       </p>
 
       {error && <p className="mt-3 font-ui text-sm text-danger" role="alert">{error}</p>}
 
       <div className="mt-5 flex flex-wrap gap-3">
         {empty ? (
-          <a
+          <Link
             href={topUpHref}
-            className="rounded-xl border border-stoic-primary bg-stoic-primary px-6 py-3 font-ui text-[0.75rem] font-semibold uppercase tracking-[0.1em] text-white transition-colors hover:border-stoic-primary-deep hover:bg-stoic-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/40"
+            className="inline-flex min-h-11 items-center justify-center rounded-stoic-pill border border-stoic-primary bg-stoic-primary px-6 py-2.5 text-sm font-semibold text-white shadow-stoic-1 transition-colors hover:border-stoic-primary-deep hover:bg-stoic-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/35"
           >
             Nạp thêm lượt AI
-          </a>
+          </Link>
         ) : (
           <button
             type="button"
             onClick={grade}
             disabled={busy}
-            className="rounded-xl border border-stoic-primary bg-stoic-primary px-6 py-3 font-ui text-[0.75rem] font-semibold uppercase tracking-[0.1em] text-white transition-colors hover:border-stoic-primary-deep hover:bg-stoic-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/40 disabled:cursor-wait disabled:opacity-50"
+            className="inline-flex min-h-11 items-center justify-center rounded-stoic-pill border border-stoic-primary bg-stoic-primary px-6 py-2.5 text-sm font-semibold text-white shadow-stoic-1 transition-colors hover:border-stoic-primary-deep hover:bg-stoic-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/35 disabled:cursor-wait disabled:opacity-50"
           >
-            {busy ? "AI đang chấm..." : "Nhờ AI chấm (1 lượt)"}
+            Nhờ AI chấm · 1 lượt
           </button>
         )}
       </div>

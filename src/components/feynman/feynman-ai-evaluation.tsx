@@ -1,7 +1,7 @@
 "use client";
 
 import { CheckCircle2, XCircle, Quote, Flag } from "lucide-react";
-import { useState } from "react";
+import { useId, useState } from "react";
 
 /**
  * Hiển thị kết quả một lần AI chấm.
@@ -40,17 +40,26 @@ const FEEDBACK_KINDS = [
 
 export function FeynmanAiEvaluation({ data }: { data: AiEvaluationView }) {
   const passed = data.verdict === "DAT";
+  const hasAdvice = Boolean(
+    data.advice &&
+      [data.advice.diemManh, data.advice.canSua, data.advice.buocTiepTheo].some(
+        (value) => value.trim().length > 0
+      )
+  );
+  const hasDetails = hasAdvice || data.perQuestion.length > 0;
 
   return (
-    <section className="mt-8 overflow-hidden rounded-2xl border border-line-strong bg-paper shadow-card">
+    <section className="mt-8 overflow-hidden rounded-stoic-lg border border-stoic-line bg-stoic-canvas shadow-stoic-1">
       <header
-        className={`flex flex-wrap items-center justify-between gap-4 px-6 py-5 ${
-          passed ? "bg-success-pale" : "bg-stoic-primary-soft"
+        className={`flex flex-wrap items-center justify-between gap-4 border-b px-6 py-5 ${
+          passed
+            ? "border-success/15 bg-success-pale"
+            : "border-stoic-primary/15 bg-stoic-primary-soft/55"
         }`}
       >
         <p
-          className={`flex items-center gap-2.5 font-ui text-sm font-semibold ${
-            passed ? "text-success" : "text-navy-deep"
+          className={`flex items-center gap-2.5 text-sm font-semibold ${
+            passed ? "text-success" : "text-stoic-primary-deep"
           }`}
         >
           {passed ? (
@@ -62,15 +71,15 @@ export function FeynmanAiEvaluation({ data }: { data: AiEvaluationView }) {
             ? "Bạn đã giảng lại đúng bản chất"
             : "Phần giảng lại còn thiếu ý"}
         </p>
-        <p className="font-ui text-sm text-ink-soft">
+        <p className="text-sm text-stoic-ink-secondary">
           Mức tương đồng với lời giải chuẩn:{" "}
-          <strong className="text-ink">{data.similarityPercent}%</strong>
+          <strong className="tabular-nums text-ink">{data.similarityPercent}%</strong>
         </p>
       </header>
 
       <div className="px-6 py-6">
-        {data.advice && (
-          <dl className="grid gap-4 md:grid-cols-3">
+        {hasAdvice && data.advice && (
+          <dl className="grid gap-3 md:grid-cols-3">
             <AdviceCell label="Bạn đã nắm được" value={data.advice.diemManh} />
             <AdviceCell label="Cần sửa" value={data.advice.canSua} />
             <AdviceCell
@@ -83,10 +92,13 @@ export function FeynmanAiEvaluation({ data }: { data: AiEvaluationView }) {
         {data.perQuestion.length > 0 && (
           <ul className="mt-7 space-y-5">
             {data.perQuestion.map((row) => (
-              <li key={row.maCau} className="rounded-r-xl border-l-2 border-stoic-primary/45 bg-stoic-canvas-soft/45 py-3 pl-5 pr-4">
-                <p className="font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-ink">
+              <li
+                key={row.maCau}
+                className="rounded-stoic-md border border-stoic-line bg-stoic-canvas-soft/55 px-5 py-4"
+              >
+                <p className="text-[0.7rem] font-semibold uppercase tracking-[0.09em] text-stoic-ink">
                   {data.labels[row.maCau] ?? row.maCau}
-                  <span className="ml-3 font-normal normal-case tracking-normal text-muted">
+                  <span className="ml-3 font-normal tabular-nums normal-case tracking-normal text-muted">
                     {row.diem}%
                   </span>
                 </p>
@@ -114,6 +126,13 @@ export function FeynmanAiEvaluation({ data }: { data: AiEvaluationView }) {
           </ul>
         )}
 
+        {!hasDetails ? (
+          <p className="rounded-stoic-md border border-stoic-line bg-stoic-canvas-soft px-4 py-4 text-sm leading-relaxed text-stoic-ink-muted" role="status">
+            Kết luận đã được lưu, nhưng phần phân tích chi tiết chưa tải đủ. Bạn
+            vẫn có thể hỏi AI về bài này ở khung bên dưới.
+          </p>
+        ) : null}
+
         <FeedbackForm evaluationId={data.id} />
       </div>
     </section>
@@ -123,11 +142,11 @@ export function FeynmanAiEvaluation({ data }: { data: AiEvaluationView }) {
 function AdviceCell({ label, value }: { label: string; value: string }) {
   if (!value) return null;
   return (
-    <div>
-      <dt className="font-ui text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-muted">
+    <div className="rounded-stoic-md border border-stoic-line bg-stoic-canvas-soft px-4 py-4">
+      <dt className="text-[0.68rem] font-semibold uppercase tracking-[0.09em] text-stoic-ink-muted">
         {label}
       </dt>
-      <dd className="mt-1.5 text-[0.95rem] leading-relaxed text-ink-soft">
+      <dd className="mt-1.5 text-[0.92rem] leading-relaxed text-stoic-ink-secondary">
         {value}
       </dd>
     </div>
@@ -136,15 +155,23 @@ function AdviceCell({ label, value }: { label: string; value: string }) {
 
 /** Báo sai: gửi một lần rồi khóa nút, vì bấm thêm cũng không tạo thêm dòng nào. */
 function FeedbackForm({ evaluationId }: { evaluationId: string }) {
+  const formId = useId();
+  const kindId = `${formId}-kind`;
+  const noteId = `${formId}-note`;
   const [open, setOpen] = useState(false);
   const [sent, setSent] = useState(false);
   const [busy, setBusy] = useState(false);
   const [kind, setKind] = useState<string>(FEEDBACK_KINDS[0].value);
   const [note, setNote] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   if (sent) {
     return (
-      <p className="mt-7 rounded-xl border-t border-line bg-stoic-canvas-soft/55 px-4 py-4 font-ui text-sm text-muted">
+      <p
+        className="mt-7 rounded-stoic-md border border-stoic-line bg-stoic-canvas-soft px-4 py-4 text-sm text-stoic-ink-muted"
+        role="status"
+        aria-live="polite"
+      >
         Đã ghi nhận. Giáo viên sẽ xem lại bản chấm này.
       </p>
     );
@@ -155,7 +182,9 @@ function FeedbackForm({ evaluationId }: { evaluationId: string }) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="mt-7 flex items-center gap-2 rounded-lg border-t border-line pt-5 font-ui text-sm text-muted transition-colors hover:text-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/40"
+        aria-expanded="false"
+        aria-controls={formId}
+        className="mt-7 inline-flex min-h-11 items-center gap-2 rounded-stoic-pill px-3 py-2 text-sm font-semibold text-stoic-ink-muted transition-colors hover:bg-stoic-canvas-soft hover:text-stoic-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/35"
       >
         <Flag className="h-3.5 w-3.5" aria-hidden="true" />
         Bản chấm này có chỗ chưa đúng
@@ -165,32 +194,42 @@ function FeedbackForm({ evaluationId }: { evaluationId: string }) {
 
   const submit = async () => {
     setBusy(true);
+    setError(null);
     try {
       const response = await fetch("/api/feynman/ai/feedback", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ evaluationId, kind, note }),
       });
-      // Báo sai hỏng thì không có gì để học viên xử lý, và cũng không mất mát
-      // gì của họ. Đóng form lại, không dựng thêm một thông báo lỗi.
       if (response.ok) setSent(true);
-      else setOpen(false);
+      else setError("Chưa gửi được báo lỗi. Bạn thử lại sau ít phút nhé.");
     } catch {
-      setOpen(false);
+      setError("Mất kết nối khi gửi. Bạn kiểm tra mạng rồi thử lại nhé.");
     } finally {
       setBusy(false);
     }
   };
 
   return (
-    <div className="mt-7 rounded-xl border-t border-line bg-stoic-canvas-soft/55 px-4 pt-5">
-      <p className="font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-ink">
+    <div
+      id={formId}
+      className="mt-7 rounded-stoic-md border border-stoic-line bg-stoic-canvas-soft px-4 py-5"
+    >
+      <p className="text-[0.7rem] font-semibold uppercase tracking-[0.09em] text-stoic-ink">
         Báo lỗi bản chấm
       </p>
+      <label
+        htmlFor={kindId}
+        className="mt-3 block text-xs font-semibold text-stoic-ink-secondary"
+      >
+        Loại lỗi
+      </label>
       <select
+        id={kindId}
+        autoFocus
         value={kind}
         onChange={(e) => setKind(e.target.value)}
-        className="mt-3 w-full rounded-xl border border-line-strong bg-paper px-4 py-2.5 font-ui text-sm text-ink outline-none transition-colors focus:border-stoic-primary focus:ring-2 focus:ring-stoic-primary/20"
+        className="mt-1.5 min-h-11 w-full rounded-stoic-md border border-stoic-line-strong bg-stoic-canvas px-4 py-2.5 text-sm text-stoic-ink outline-none transition-colors focus:border-stoic-primary focus:ring-2 focus:ring-stoic-primary/20"
       >
         {FEEDBACK_KINDS.map((item) => (
           <option key={item.value} value={item.value}>
@@ -198,26 +237,41 @@ function FeedbackForm({ evaluationId }: { evaluationId: string }) {
           </option>
         ))}
       </select>
+      <label
+        htmlFor={noteId}
+        className="mt-3 block text-xs font-semibold text-stoic-ink-secondary"
+      >
+        Mô tả thêm <span className="font-normal text-stoic-ink-muted">(không bắt buộc)</span>
+      </label>
       <textarea
+        id={noteId}
         value={note}
         onChange={(e) => setNote(e.target.value.slice(0, 1000))}
         rows={3}
-        placeholder="Mô tả ngắn chỗ chưa đúng (không bắt buộc)"
-        className="mt-3 w-full rounded-xl border border-line-strong bg-paper px-4 py-3 font-body text-[0.95rem] text-ink placeholder:text-muted outline-none transition-colors focus:border-stoic-primary focus:ring-2 focus:ring-stoic-primary/20"
+        placeholder="Mô tả ngắn chỗ chưa đúng"
+        className="mt-1.5 w-full rounded-stoic-md border border-stoic-line-strong bg-stoic-canvas px-4 py-3 text-[0.95rem] text-stoic-ink placeholder:text-stoic-ink-muted outline-none transition-colors focus:border-stoic-primary focus:ring-2 focus:ring-stoic-primary/20"
       />
-      <div className="mt-3 flex gap-3">
+      {error ? (
+        <p className="mt-3 text-sm text-stoic-danger" role="alert">
+          {error}
+        </p>
+      ) : null}
+      <div className="mt-3 flex flex-wrap gap-3">
         <button
           type="button"
           onClick={submit}
           disabled={busy}
-          className="rounded-xl border border-stoic-primary px-5 py-2 font-ui text-[0.75rem] font-semibold uppercase tracking-[0.1em] text-stoic-primary-deep transition-colors hover:bg-stoic-primary hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/40 disabled:opacity-50"
+          className="inline-flex min-h-11 items-center justify-center rounded-stoic-pill border border-stoic-primary bg-stoic-canvas px-5 py-2.5 text-sm font-semibold text-stoic-primary-deep transition-colors hover:bg-stoic-primary-soft/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/35 disabled:opacity-50"
         >
           {busy ? "Đang gửi..." : "Gửi báo lỗi"}
         </button>
         <button
           type="button"
-          onClick={() => setOpen(false)}
-          className="px-3 py-2 font-ui text-sm text-muted hover:text-ink"
+          onClick={() => {
+            setError(null);
+            setOpen(false);
+          }}
+          className="inline-flex min-h-11 items-center justify-center rounded-stoic-pill px-4 py-2 text-sm font-semibold text-stoic-ink-muted transition-colors hover:bg-stoic-canvas hover:text-stoic-ink"
         >
           Bỏ qua
         </button>

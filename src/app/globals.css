@@ -1719,8 +1719,34 @@ body {
 /* ===== STOIC STUDY + FEYNMAN SURFACES — ngoài runtime thi tính giờ ===== */
 .stoic-reading-surface,
 .feynman-surface,
-.feynman-admin-surface {
-  --surface-shadow: 0 1.5rem 3.5rem -2.5rem rgb(23 32 51 / 0.42);
+.feynman-admin-surface,
+.attempt-learning-surface {
+  --color-cream: var(--color-stoic-canvas-soft);
+  --color-cream-deep: #eef0f8;
+  --color-paper: var(--color-stoic-canvas);
+  --color-ink: var(--color-stoic-ink);
+  --color-ink-soft: var(--color-stoic-ink-secondary);
+  --color-muted: var(--color-stoic-ink-muted);
+  --color-navy: var(--color-stoic-primary);
+  --color-navy-deep: var(--color-stoic-slate-900);
+  --color-gold: var(--color-stoic-primary);
+  --color-gold-soft: var(--color-stoic-lavender);
+  --color-gold-pale: var(--color-stoic-primary-soft);
+  --color-gold-deep: var(--color-stoic-primary-deep);
+  --color-gold-ink: var(--color-stoic-primary-deep);
+  --color-line: var(--color-stoic-line);
+  --color-line-strong: var(--color-stoic-line-strong);
+  --color-success: var(--color-stoic-sage);
+  --color-success-pale: #e5f2ec;
+  --color-danger: var(--color-stoic-danger);
+  --color-danger-pale: #fae9ee;
+  --font-display: var(--font-inter);
+  --font-body: var(--font-inter);
+  --font-ui: var(--font-inter);
+  --tracking-label: 0.09em;
+  --shadow-card: var(--shadow-stoic-1);
+  --shadow-lift: var(--shadow-stoic-2);
+  --surface-shadow: var(--shadow-stoic-1);
   color: var(--color-stoic-ink);
   font-family: var(--font-stoic);
 }
@@ -1832,8 +1858,7 @@ body {
   background: rgb(255 255 255 / 0.78);
 }
 
-.feynman-surface .stoic-ai-panel,
-.feynman-surface [class*="bg-stoic-primary-soft"] {
+.feynman-surface .stoic-ai-panel {
   border-color: color-mix(in srgb, var(--color-stoic-primary) 38%, var(--color-stoic-line));
   background:
     linear-gradient(135deg, rgb(184 168 248 / 0.28), rgb(255 255 255 / 0.72)),
@@ -1923,6 +1948,203 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .stoic-reading-surface .stoic-exercise-list article:hover {
     transform: none;
+  }
+}
+
+
+/* ===== READING RESULT — skin qua layout, không sửa file protected ===== */
+.attempt-learning-surface {
+  min-height: 100%;
+  background:
+    radial-gradient(circle at 86% 2%, rgb(184 168 248 / 0.12), transparent 28rem),
+    var(--color-stoic-canvas-soft);
+}
+
+.attempt-learning-surface > section:not(.feynman-surface) {
+  width: 100%;
+  max-width: 72rem;
+  padding-top: 3.5rem;
+  padding-bottom: 5rem;
+  color: var(--color-stoic-ink);
+  font-family: var(--font-stoic);
+}
+
+.attempt-learning-surface > section:not(.feynman-surface) .font-display {
+  font-family: var(--font-inter);
+  letter-spacing: -0.03em;
+}
+
+.attempt-learning-surface > section:not(.feynman-surface) > a:first-child {
+  min-height: 2.75rem;
+  padding: 0.5rem 0.875rem;
+  border-radius: var(--radius-stoic-pill);
+  color: var(--color-stoic-primary-deep);
+  transition: background-color 180ms var(--ease-out), color 180ms var(--ease-out);
+}
+
+.attempt-learning-surface > section:not(.feynman-surface) > a:first-child:hover {
+  background: rgb(217 219 255 / 0.42);
+  color: var(--color-stoic-primary-deep);
+}
+
+.attempt-learning-surface > section:not(.feynman-surface) > a:first-child + div {
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  border: 1px solid var(--color-stoic-line);
+  border-radius: var(--radius-stoic-lg);
+  background:
+    radial-gradient(circle at 94% 6%, rgb(184 168 248 / 0.24), transparent 16rem),
+    radial-gradient(circle at 8% 100%, rgb(215 138 88 / 0.09), transparent 15rem),
+    var(--color-stoic-canvas);
+  box-shadow: var(--shadow-stoic-1);
+}
+
+.attempt-learning-surface > section:not(.feynman-surface) > a:first-child + div h1 {
+  max-width: 58rem;
+  color: var(--color-stoic-ink);
+  font-size: clamp(2rem, 4.2vw, 3rem);
+  font-weight: 300;
+  line-height: 1.1;
+}
+
+.attempt-learning-surface > section:not(.feynman-surface) .label-caps {
+  color: var(--color-stoic-primary-deep);
+  font-size: 0.6875rem;
+  letter-spacing: 0.09em;
+}
+
+.attempt-learning-surface > section:not(.feynman-surface) .rule-gold {
+  width: 4rem;
+  height: 0.2rem;
+  border-radius: var(--radius-stoic-pill);
+  background: linear-gradient(90deg, var(--color-stoic-primary), var(--color-stoic-ruby));
+}
+
+.attempt-learning-surface > section:not(.feynman-surface) > div[class~="mt-8"] {
+  overflow: hidden;
+  border-width: 1px;
+  border-color: color-mix(in srgb, var(--color-stoic-primary) 30%, var(--color-stoic-line));
+  border-radius: var(--radius-stoic-lg);
+  background:
+    linear-gradient(135deg, rgb(217 219 255 / 0.72), rgb(255 255 255 / 0.9)),
+    var(--color-stoic-canvas);
+  box-shadow: var(--shadow-stoic-1);
+}
+
+.attempt-learning-surface > section:not(.feynman-surface) > div[class~="mt-8"][class*="border-success"] {
+  border-color: color-mix(in srgb, var(--color-stoic-sage) 28%, var(--color-stoic-line));
+  background: linear-gradient(135deg, rgb(229 242 236 / 0.94), rgb(255 255 255 / 0.88));
+}
+
+.attempt-learning-surface > section:not(.feynman-surface) > div[class~="mt-8"] h2 {
+  color: var(--color-stoic-ink);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.attempt-learning-surface > section:not(.feynman-surface)
+  :where(a[class*="bg-gold"], button[class*="bg-gold"]) {
+  min-height: 2.75rem;
+  border-color: var(--color-stoic-primary);
+  border-radius: var(--radius-stoic-pill);
+  background: var(--color-stoic-primary);
+  color: white;
+  font-family: var(--font-stoic);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  box-shadow: var(--shadow-stoic-1);
+}
+
+.attempt-learning-surface > section:not(.feynman-surface)
+  :where(a[class*="bg-gold"], button[class*="bg-gold"]):hover {
+  border-color: var(--color-stoic-primary-deep);
+  background: var(--color-stoic-primary-deep);
+  color: white;
+}
+
+.attempt-learning-surface > section:not(.feynman-surface)
+  :where(button[class*="border-navy"][class*="text-navy"], a[class*="border-success"]) {
+  min-height: 2.75rem;
+  border-radius: var(--radius-stoic-pill);
+  background: var(--color-stoic-canvas);
+  font-family: var(--font-stoic);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.attempt-learning-surface > section:not(.feynman-surface) > div[class~="mt-10"][class~="grid"] {
+  gap: 1rem;
+  border: 0;
+  background: transparent;
+}
+
+.attempt-learning-surface > section:not(.feynman-surface) > div[class~="mt-10"][class~="grid"] > div {
+  border: 1px solid var(--color-stoic-line);
+  border-radius: var(--radius-stoic-md);
+  background: var(--color-stoic-canvas);
+  box-shadow: var(--shadow-stoic-1);
+}
+
+.attempt-learning-surface > section:not(.feynman-surface) > div[class~="mt-10"][class~="grid"] p[class*="text-5xl"] {
+  color: var(--color-stoic-ink);
+  font-family: var(--font-inter);
+  font-weight: 400;
+  letter-spacing: -0.04em;
+}
+
+.attempt-learning-surface > section:not(.feynman-surface) #chi-tiet {
+  color: var(--color-stoic-ink);
+  font-family: var(--font-inter);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.attempt-learning-surface > section:not(.feynman-surface) #chi-tiet + div {
+  border: 1px solid color-mix(in srgb, var(--color-stoic-primary) 24%, var(--color-stoic-line));
+  border-radius: var(--radius-stoic-md);
+  background: rgb(217 219 255 / 0.35);
+}
+
+.attempt-learning-surface > section:not(.feynman-surface) > ol {
+  overflow: hidden;
+  border: 1px solid var(--color-stoic-line);
+  border-radius: var(--radius-stoic-lg);
+  background: var(--color-stoic-canvas);
+  box-shadow: var(--shadow-stoic-1);
+}
+
+.attempt-learning-surface > section:not(.feynman-surface) > ol > li {
+  padding-right: 1.25rem;
+  padding-left: 1.25rem;
+}
+
+.attempt-learning-surface > section:not(.feynman-surface) > div[class~="mt-10"]:not([class~="grid"]) {
+  border: 1px solid var(--color-stoic-line);
+  border-radius: var(--radius-stoic-md);
+  background: var(--color-stoic-canvas-cream);
+}
+
+.attempt-learning-surface > section:not(.feynman-surface)
+  :where(button, a):focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--color-stoic-primary) 30%, transparent);
+  outline-offset: 3px;
+}
+
+@media (max-width: 639px) {
+  .attempt-learning-surface > section:not(.feynman-surface) {
+    padding: 2.5rem 1rem 4rem;
+  }
+
+  .attempt-learning-surface > section:not(.feynman-surface) > div[class~="mt-8"] {
+    padding: 1.25rem;
+  }
+
+  .attempt-learning-surface > section:not(.feynman-surface)
+    :where(a[class*="bg-gold"], button[class*="bg-gold"], button[class*="border-navy"][class*="text-navy"]) {
+    width: 100%;
   }
 }
 

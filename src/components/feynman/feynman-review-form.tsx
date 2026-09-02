@@ -51,9 +51,9 @@ export type FeynmanMistakeView = {
 /* ===================== Khối dùng chung ===================== */
 
 const labelCls =
-  "block font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-ink";
+  "block text-[0.72rem] font-semibold uppercase tracking-[0.09em] text-stoic-ink";
 const inputCls =
-  "mt-2 w-full border border-line-strong bg-paper px-4 py-3 font-body text-[1rem] leading-relaxed text-ink placeholder:text-muted focus:border-navy focus:outline-none focus:ring-2 focus:ring-navy/20";
+  "mt-2 min-h-11 w-full rounded-stoic-md border border-stoic-line-strong bg-stoic-canvas px-4 py-3 text-base leading-relaxed text-stoic-ink placeholder:text-stoic-ink-muted focus:border-stoic-primary focus:outline-none focus:ring-2 focus:ring-stoic-primary/20";
 
 /** Ô nhập dài kèm bộ đếm ký tự trực tiếp — học viên biết ngay còn thiếu bao nhiêu. */
 function CountedTextarea({
@@ -94,16 +94,22 @@ function CountedTextarea({
         id={name}
         name={name}
         rows={rows}
+        required={!optional}
+        minLength={limits.min}
+        maxLength={limits.max}
         defaultValue={defaultValue}
         onChange={(e) => setLen(e.target.value.trim().length)}
+        aria-required={!optional}
+        aria-invalid={showWarn || undefined}
         aria-describedby={`${name}-count${hint ? ` ${name}-hint` : ""}`}
         className={`${inputCls} resize-y`}
       />
       <p
         id={`${name}-count`}
-        className={`mt-1 text-right font-ui text-xs tabular-nums ${
-          showWarn ? "font-semibold text-danger" : "text-muted"
+        className={`mt-1 text-right text-xs tabular-nums ${
+          showWarn ? "font-semibold text-stoic-danger" : "text-stoic-ink-muted"
         }`}
+        aria-live="polite"
       >
         {len}/{limits.max} ký tự
         {tooShort && !(optional && empty) && ` — cần thêm ${limits.min - len}`}
@@ -133,18 +139,19 @@ function ConfidenceScale({
         {[1, 2, 3, 4, 5].map((v) => (
           <label
             key={v}
-            className="flex min-h-11 cursor-pointer items-center gap-2 border border-line bg-paper px-3 py-2 font-ui text-sm text-ink transition-colors hover:border-stoic-primary has-[:checked]:border-stoic-primary has-[:checked]:bg-stoic-primary-soft has-[:checked]:font-semibold"
+            className="flex min-h-12 cursor-pointer items-center gap-2 rounded-stoic-md border border-stoic-line bg-stoic-canvas px-3 py-2 text-sm text-stoic-ink transition-colors hover:border-stoic-primary has-[:checked]:border-stoic-primary has-[:checked]:bg-stoic-primary-soft/55 has-[:checked]:font-semibold"
           >
             <input
               type="radio"
               name={name}
               value={v}
+              required
               defaultChecked={defaultValue === v}
               className="h-4 w-4 shrink-0 accent-[var(--color-stoic-primary)]"
             />
             <span>
               <span className="font-bold tabular-nums">{v}</span>
-              <span className="ml-1.5 text-xs text-ink-soft">{CONFIDENCE_LABELS[v]}</span>
+              <span className="ml-1.5 text-xs text-stoic-ink-secondary">{CONFIDENCE_LABELS[v]}</span>
             </span>
           </label>
         ))}
@@ -156,17 +163,17 @@ function ConfidenceScale({
 /** Thẻ tiêu đề của một câu chữa sâu. */
 function MistakeHeader({ m }: { m: FeynmanMistakeView }) {
   return (
-    <div className="border-b border-line bg-cream-deep px-5 py-4">
+    <div className="border-b border-stoic-line bg-stoic-canvas-soft px-5 py-4">
       <div className="flex flex-wrap items-center gap-2">
         <span className="rounded-full border border-stoic-primary bg-stoic-primary-soft px-2.5 py-0.5 font-ui text-xs font-bold text-stoic-primary-deep">
           Câu {m.numberLabel}
         </span>
-        <span className="font-ui text-xs text-muted">
+        <span className="text-xs text-stoic-ink-muted">
           Part {m.partNumber} · {QUESTION_TYPE_LABELS[m.questionType] ?? m.questionType}
         </span>
       </div>
-      <p className="mt-2.5 leading-relaxed text-ink">{m.prompt}</p>
-      <p className="mt-2 font-ui text-sm text-danger">
+      <p className="mt-2.5 leading-relaxed text-stoic-ink">{m.prompt}</p>
+      <p className="mt-2 text-sm text-stoic-danger">
         Bạn đã trả lời: <strong>{m.userAnswer || "(bỏ trống)"}</strong>
       </p>
     </div>
@@ -182,41 +189,58 @@ export function FeynmanStepper({ current }: { current: 1 | 2 | 3 | 4 }) {
     "Giảng lại",
   ];
   return (
-    <ol className="grid gap-px border border-line bg-line sm:grid-cols-4">
-      {steps.map((s, i) => {
-        const n = i + 1;
-        const done = n < current;
-        const active = n === current;
-        return (
-          <li
-            key={s}
-            aria-current={active ? "step" : undefined}
-            className={`flex items-center gap-2.5 px-4 py-3 ${
-              active ? "bg-navy text-paper" : done ? "bg-cream-deep" : "bg-paper"
-            }`}
-          >
-            <span
-              className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full font-ui text-xs font-bold ${
+    <div
+      className="rounded-stoic-lg border border-stoic-line bg-stoic-canvas p-1.5 shadow-stoic-1"
+      role="region"
+      aria-label="Tiến trình chữa bài Feynman"
+    >
+      <ol className="grid grid-cols-2 gap-1.5 sm:grid-cols-4">
+        {steps.map((s, i) => {
+          const n = i + 1;
+          const done = n < current;
+          const active = n === current;
+          return (
+            <li
+              key={s}
+              aria-current={active ? "step" : undefined}
+              aria-label={
+                done
+                  ? `${s} — đã hoàn thành`
+                  : active
+                    ? `${s} — đang thực hiện`
+                    : s
+              }
+              className={`flex min-h-12 items-center gap-2.5 rounded-stoic-md px-3.5 py-2.5 ${
                 active
-                  ? "bg-stoic-primary text-white"
+                  ? "bg-stoic-primary-soft/65 text-stoic-primary-deep"
                   : done
-                    ? "bg-success text-paper"
-                    : "border border-line-strong text-muted"
+                    ? "bg-success-pale text-success"
+                    : "bg-stoic-canvas-soft text-stoic-ink-muted"
               }`}
             >
-              {done ? "✓" : n}
-            </span>
-            <span
-              className={`font-ui text-xs leading-tight ${
-                active ? "font-semibold" : done ? "text-ink-soft" : "text-muted"
-              }`}
-            >
-              {s}
-            </span>
-          </li>
-        );
-      })}
-    </ol>
+              <span
+                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                  active
+                    ? "bg-stoic-primary text-white"
+                    : done
+                      ? "bg-success text-white"
+                      : "border border-stoic-line-strong bg-stoic-canvas text-stoic-ink-muted"
+                }`}
+              >
+                {done ? (
+                  <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+                ) : (
+                  n
+                )}
+              </span>
+              <span className={`text-xs leading-tight ${active || done ? "font-semibold" : ""}`}>
+                {s}
+              </span>
+            </li>
+          );
+        })}
+      </ol>
+    </div>
   );
 }
 
@@ -244,13 +268,13 @@ export function FeynmanDraftForm({
       )}
 
       {/* ---- Bước 1 ---- */}
-      <section className="border border-line bg-paper p-7 shadow-card md:p-8">
+      <section className="rounded-stoic-lg border border-stoic-line bg-stoic-canvas p-6 shadow-stoic-1 sm:p-7 md:p-8">
         <p className="label-caps">Bước 1</p>
-        <h2 className="mt-2 font-display text-2xl font-bold text-navy-deep">
+        <h2 className="mt-2 text-2xl font-medium tracking-[-0.025em] text-stoic-ink">
           Giải thích bài đọc từ trí nhớ
         </h2>
         <div className="rule-gold mt-4" />
-        <p className="mt-4 text-[0.95rem] leading-relaxed text-ink-soft">
+        <p className="mt-4 text-[0.95rem] leading-relaxed text-stoic-ink-secondary">
           Chưa xem đáp án vội. Hãy viết như thể bạn đang giảng cho một người chưa
           đọc bài này — dùng từ ngữ đơn giản của chính bạn.
         </p>
@@ -286,9 +310,9 @@ export function FeynmanDraftForm({
       </section>
 
       {/* ---- Bước 2 ---- */}
-      <section className="border border-line bg-paper p-7 shadow-card md:p-8">
+      <section className="rounded-stoic-lg border border-stoic-line bg-stoic-canvas p-6 shadow-stoic-1 sm:p-7 md:p-8">
         <p className="label-caps">Bước 2</p>
-        <h2 className="mt-2 font-display text-2xl font-bold text-navy-deep">
+        <h2 className="mt-2 text-2xl font-medium tracking-[-0.025em] text-stoic-ink">
           Tự chẩn đoán {mistakes.length} câu quan trọng nhất
         </h2>
         <div className="rule-gold mt-4" />
@@ -307,7 +331,10 @@ export function FeynmanDraftForm({
             </p>
             <div className="mt-7 space-y-8">
               {mistakes.map((m) => (
-                <article key={m.id} className="border border-line-strong">
+                <article
+                  key={m.id}
+                  className="overflow-hidden rounded-stoic-lg border border-stoic-line"
+                >
                   <MistakeHeader m={m} />
                   <div className="space-y-5 p-5">
                     <fieldset>
@@ -319,12 +346,13 @@ export function FeynmanDraftForm({
                         {FEYNMAN_ERROR_TYPES.map((t) => (
                           <label
                             key={t}
-                            className="flex min-h-11 cursor-pointer items-start gap-2.5 border border-line bg-cream px-3 py-2.5 font-ui text-[0.85rem] leading-snug text-ink transition-colors hover:border-stoic-primary has-[:checked]:border-stoic-primary has-[:checked]:bg-stoic-primary-soft"
+                            className="flex min-h-12 cursor-pointer items-start gap-2.5 rounded-stoic-md border border-stoic-line bg-stoic-canvas-soft px-3 py-2.5 text-[0.85rem] leading-snug text-stoic-ink transition-colors hover:border-stoic-primary has-[:checked]:border-stoic-primary has-[:checked]:bg-stoic-primary-soft/60"
                           >
                             <input
                               type="radio"
                               name={`errorType_${m.id}`}
                               value={t}
+                              required
                               defaultChecked={m.errorType === t}
                               className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--color-stoic-primary)]"
                             />
@@ -342,6 +370,8 @@ export function FeynmanDraftForm({
                       <input
                         id={`evidenceParagraph_${m.id}`}
                         name={`evidenceParagraph_${m.id}`}
+                        required
+                        aria-required="true"
                         defaultValue={m.evidenceParagraph ?? ""}
                         placeholder="Ví dụ: C  ·  Part 2 — đoạn B"
                         maxLength={FEYNMAN_LIMITS.evidenceParagraph.max}
@@ -373,14 +403,14 @@ export function FeynmanDraftForm({
         )}
       </section>
 
-      <div className="rounded-r-xl border-l-4 border-stoic-primary bg-stoic-canvas-soft px-6 py-5">
+      <div className="rounded-stoic-lg border border-stoic-primary/20 bg-stoic-primary-soft/35 px-5 py-5 sm:px-6">
         <p className="font-ui text-sm leading-relaxed text-ink-soft">
           Nộp xong bước này, hệ thống mới mở lời giải mẫu và đáp án đúng. Bạn sẽ
           không sửa được phần đã viết ở trên — đó là điểm mấu chốt để so sánh
           cách nghĩ trước và sau.
         </p>
         <div className="mt-5">
-          <SubmitButton disabled={pending} variant="gold">
+          <SubmitButton disabled={pending} variant="stoicPrimary">
             <Eye className="h-4 w-4" aria-hidden="true" />
             {pending ? "Đang lưu…" : "Nộp và xem lời giải"}
           </SubmitButton>
@@ -414,9 +444,9 @@ export function FeynmanRevealedForm({
       )}
 
       {/* ---- Bước 3 ---- */}
-      <section className="border border-line bg-paper p-7 shadow-card md:p-8">
+      <section className="rounded-stoic-lg border border-stoic-line bg-stoic-canvas p-6 shadow-stoic-1 sm:p-7 md:p-8">
         <p className="label-caps">Bước 3</p>
-        <h2 className="mt-2 font-display text-2xl font-bold text-navy-deep">
+        <h2 className="mt-2 text-2xl font-medium tracking-[-0.025em] text-stoic-ink">
           Đối chiếu lời giải và sửa lại cách nghĩ
         </h2>
         <div className="rule-gold mt-4" />
@@ -428,7 +458,10 @@ export function FeynmanRevealedForm({
         ) : (
           <div className="mt-7 space-y-8">
             {mistakes.map((m) => (
-              <article key={m.id} className="border border-line-strong">
+              <article
+                key={m.id}
+                className="overflow-hidden rounded-stoic-lg border border-stoic-line"
+              >
                 <MistakeHeader m={m} />
 
                 {/* Đáp án đúng + lời giải mẫu — chỉ xuất hiện ở giai đoạn này */}
@@ -485,7 +518,9 @@ export function FeynmanRevealedForm({
                           <dl className="mt-2 divide-y divide-line border-y border-line">
                             {m.modelParaphrases.map((p, i) => (
                               <div key={i} className="grid gap-1 py-2 sm:grid-cols-2 sm:gap-4">
-                                <dt className="font-ui text-sm text-navy">{p.question}</dt>
+                                <dt className="text-sm font-medium text-stoic-primary-deep">
+                                  {p.question}
+                                </dt>
                                 <dd className="font-ui text-sm text-ink-soft">→ {p.passage}</dd>
                               </div>
                             ))}
@@ -504,7 +539,7 @@ export function FeynmanRevealedForm({
 
                 {/* So sánh: suy luận ban đầu của học viên */}
                 {m.firstExplanation && (
-                  <div className="border-b border-line bg-cream px-5 py-4">
+                  <div className="border-b border-stoic-line bg-stoic-canvas-soft px-5 py-4">
                     <p className="label-caps">Suy luận ban đầu của bạn</p>
                     <p className="mt-1.5 text-[0.92rem] leading-relaxed text-muted">
                       {m.firstExplanation}
@@ -537,9 +572,9 @@ export function FeynmanRevealedForm({
       </section>
 
       {/* ---- Bước 4 ---- */}
-      <section className="border border-line bg-paper p-7 shadow-card md:p-8">
+      <section className="rounded-stoic-lg border border-stoic-line bg-stoic-canvas p-6 shadow-stoic-1 sm:p-7 md:p-8">
         <p className="label-caps">Bước 4</p>
-        <h2 className="mt-2 font-display text-2xl font-bold text-navy-deep">
+        <h2 className="mt-2 text-2xl font-medium tracking-[-0.025em] text-stoic-ink">
           Giảng lại toàn bài bằng ngôn ngữ đơn giản
         </h2>
         <div className="rule-gold mt-4" />
@@ -569,13 +604,13 @@ export function FeynmanRevealedForm({
         </div>
       </section>
 
-      <div className="rounded-r-xl border-l-4 border-stoic-primary bg-stoic-canvas-soft px-6 py-5">
+      <div className="rounded-stoic-lg border border-stoic-primary/20 bg-stoic-primary-soft/35 px-5 py-5 sm:px-6">
         <p className="font-ui text-sm leading-relaxed text-ink-soft">
           Hoàn thành xong, toàn bộ đáp án đúng của bài sẽ được mở ở trang kết
           quả, và bản chữa bài này được lưu lại để bạn xem lại bất cứ lúc nào.
         </p>
         <div className="mt-5">
-          <SubmitButton disabled={pending} variant="gold">
+          <SubmitButton disabled={pending} variant="stoicPrimary">
             <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
             {pending ? "Đang lưu…" : "Hoàn thành chữa bài"}
           </SubmitButton>

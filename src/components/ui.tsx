@@ -47,6 +47,15 @@ export function NoteBox({
 
 const BTN_BASE =
   "inline-flex cursor-pointer items-center justify-center gap-2 px-7 py-3 font-ui text-[0.8rem] font-semibold uppercase tracking-[0.12em] transition-colors duration-200";
+const STOIC_BTN_BASE =
+  "inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-stoic-pill px-6 py-2.5 font-stoic text-sm font-semibold tracking-normal transition-[background-color,border-color,color,transform,box-shadow] duration-200 active:translate-y-px";
+
+export type ButtonVariant =
+  | "primary"
+  | "outline"
+  | "gold"
+  | "stoicPrimary"
+  | "stoicOutline";
 
 export function ButtonLink({
   href,
@@ -56,7 +65,7 @@ export function ButtonLink({
 }: {
   href: string;
   children: ReactNode;
-  variant?: "primary" | "outline" | "gold";
+  variant?: ButtonVariant;
   className?: string;
 }) {
   const styles = {
@@ -67,9 +76,14 @@ export function ButtonLink({
     // Trạng thái nhấn làm SÁNG lên (gold-soft, 7.25:1) chứ không làm trầm đi:
     // gold-deep sẽ kéo tương phản xuống 3.42:1 và lại trượt chuẩn.
     gold: "border border-gold bg-gold text-navy-deep hover:border-gold-soft hover:bg-gold-soft",
+    stoicPrimary:
+      "border border-stoic-primary bg-stoic-primary text-white shadow-stoic-1 hover:border-stoic-primary-deep hover:bg-stoic-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/35",
+    stoicOutline:
+      "border border-stoic-primary bg-stoic-canvas text-stoic-primary-deep hover:bg-stoic-primary-soft/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/35",
   }[variant];
+  const base = variant.startsWith("stoic") ? STOIC_BTN_BASE : BTN_BASE;
   return (
-    <Link href={href} className={`${BTN_BASE} ${styles} ${className}`}>
+    <Link href={href} className={`${base} ${styles} ${className}`}>
       {children}
     </Link>
   );
@@ -82,7 +96,7 @@ export function SubmitButton({
   className = "",
 }: {
   children: ReactNode;
-  variant?: "primary" | "outline" | "gold" | "danger";
+  variant?: ButtonVariant | "danger";
   disabled?: boolean;
   className?: string;
 }) {
@@ -94,13 +108,18 @@ export function SubmitButton({
     // Trạng thái nhấn làm SÁNG lên (gold-soft, 7.25:1) chứ không làm trầm đi:
     // gold-deep sẽ kéo tương phản xuống 3.42:1 và lại trượt chuẩn.
     gold: "border border-gold bg-gold text-navy-deep hover:border-gold-soft hover:bg-gold-soft",
+    stoicPrimary:
+      "border border-stoic-primary bg-stoic-primary text-white shadow-stoic-1 hover:border-stoic-primary-deep hover:bg-stoic-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/35",
+    stoicOutline:
+      "border border-stoic-primary bg-stoic-canvas text-stoic-primary-deep hover:bg-stoic-primary-soft/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/35",
     danger: "border border-danger bg-danger text-paper hover:bg-danger-deep",
   }[variant];
+  const base = variant.startsWith("stoic") ? STOIC_BTN_BASE : BTN_BASE;
   return (
     <button
       type="submit"
       disabled={disabled}
-      className={`${BTN_BASE} ${styles} disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
+      className={`${base} ${styles} disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
     >
       {children}
     </button>

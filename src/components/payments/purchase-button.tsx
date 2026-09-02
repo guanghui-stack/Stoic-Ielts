@@ -28,7 +28,7 @@ export function TopUpButton({
   tierCode: TopUpTierCode;
   /** Chỉ dùng để quay về đúng chỗ sau khi nạp; không ghim vào ví. */
   attemptId?: string;
-  variant?: "primary" | "outline" | "gold";
+  variant?: "primary" | "outline" | "gold" | "stoicPrimary" | "stoicOutline";
   className?: string;
   children: ReactNode;
 }) {
@@ -65,7 +65,7 @@ export function CoinPurchaseButton({
   exerciseId?: string;
   attemptId?: string;
   spendToken?: string;
-  variant?: "primary" | "outline" | "gold";
+  variant?: "primary" | "outline" | "gold" | "stoicPrimary" | "stoicOutline";
   className?: string;
   children: ReactNode;
 }) {

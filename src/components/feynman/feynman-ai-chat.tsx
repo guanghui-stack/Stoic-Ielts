@@ -94,29 +94,39 @@ export function FeynmanAiChat({
   };
 
   return (
-    <section className="mt-8 overflow-hidden rounded-2xl border border-line-strong bg-paper shadow-card">
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-line bg-stoic-canvas-soft/55 px-6 py-4">
-        <p className="flex items-center gap-2 font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-ink">
+    <section className="mt-8 overflow-hidden rounded-stoic-lg border border-stoic-line bg-stoic-canvas shadow-stoic-1">
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-stoic-line bg-stoic-canvas-soft/65 px-6 py-4">
+        <p className="flex items-center gap-2 text-[0.7rem] font-semibold uppercase tracking-[0.09em] text-stoic-ink">
           <MessageCircle className="h-3.5 w-3.5 text-stoic-primary-deep" aria-hidden="true" />
           Hỏi thêm về bài này
         </p>
-        <p className="font-ui text-sm text-muted">
-          Còn <strong className="text-ink">{remaining}</strong> / {questionLimit} câu
+        <p className="text-sm text-stoic-ink-muted">
+          Còn <strong className="tabular-nums text-stoic-ink">{remaining}</strong> /{" "}
+          <span className="tabular-nums">{questionLimit}</span> câu
         </p>
       </header>
 
       <div className="px-6 py-5">
         {turns.length === 0 && (
-          <p className="rounded-xl border border-dashed border-line-strong bg-stoic-canvas-soft/45 px-4 py-4 text-[0.95rem] leading-relaxed text-muted">
+          <p className="rounded-stoic-md border border-dashed border-stoic-line-strong bg-stoic-canvas-soft/55 px-4 py-4 text-[0.95rem] leading-relaxed text-stoic-ink-muted">
             Bạn hỏi được về đoạn văn, đáp án, hoặc chỗ mình còn chưa thông trong
             phần chữa bài vừa rồi.
           </p>
         )}
 
-        <ul className="space-y-5">
+        <ul
+          className="space-y-5"
+          role="log"
+          aria-live="polite"
+          aria-relevant="additions"
+          aria-label="Lịch sử hỏi đáp với AI về bài này"
+        >
           {turns.map((turn) => (
-            <li key={turn.id} className="rounded-xl border border-line bg-stoic-canvas-soft/35 p-4">
-              <p className="font-ui text-[0.9rem] font-semibold leading-relaxed text-navy-deep">
+            <li
+              key={turn.id}
+              className="rounded-stoic-md border border-stoic-line bg-stoic-canvas-soft/45 p-4"
+            >
+              <p className="text-[0.9rem] font-semibold leading-relaxed text-stoic-ink">
                 {turn.question}
               </p>
               <p
@@ -130,15 +140,26 @@ export function FeynmanAiChat({
           ))}
         </ul>
 
+        {busy ? (
+          <div
+            role="status"
+            aria-live="polite"
+            className="mt-5 rounded-stoic-md border border-stoic-primary/20 bg-stoic-primary-soft/35 px-4 py-3 text-sm leading-relaxed text-stoic-primary-deep"
+          >
+            Đang đọc câu hỏi và tìm bằng chứng trong bài…
+          </div>
+        ) : null}
+
         {remaining > 0 ? (
           <div className="mt-6">
             <textarea
+              aria-label="Câu hỏi gửi AI về bài này"
               value={question}
               onChange={(e) => setQuestion(e.target.value.slice(0, 1000))}
               rows={3}
               disabled={busy}
               placeholder="Ví dụ: vì sao đáp án câu 14 không phải NOT GIVEN?"
-              className="w-full rounded-xl border border-line-strong bg-paper px-4 py-3 font-body text-[0.95rem] leading-relaxed text-ink placeholder:text-muted outline-none transition-colors focus:border-stoic-primary focus:ring-2 focus:ring-stoic-primary/20 disabled:opacity-60"
+              className="w-full rounded-stoic-md border border-stoic-line-strong bg-stoic-canvas px-4 py-3 text-[0.95rem] leading-relaxed text-stoic-ink placeholder:text-stoic-ink-muted outline-none transition-colors focus:border-stoic-primary focus:ring-2 focus:ring-stoic-primary/20 disabled:opacity-60"
             />
             {error && (
               <p className="mt-2 font-ui text-sm text-danger" role="alert">{error}</p>
@@ -147,14 +168,14 @@ export function FeynmanAiChat({
               type="button"
               onClick={send}
               disabled={!canAsk}
-              className="mt-3 inline-flex items-center gap-2 rounded-xl border border-stoic-primary bg-stoic-primary px-5 py-2.5 font-ui text-[0.75rem] font-semibold uppercase tracking-[0.1em] text-white transition-colors hover:border-stoic-primary-deep hover:bg-stoic-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/40 disabled:cursor-not-allowed disabled:opacity-40"
+              className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-stoic-pill border border-stoic-primary bg-stoic-primary px-5 py-2.5 text-sm font-semibold text-white shadow-stoic-1 transition-colors hover:border-stoic-primary-deep hover:bg-stoic-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/35 disabled:cursor-not-allowed disabled:opacity-40"
             >
               <Send className="h-3.5 w-3.5" aria-hidden="true" />
-              {busy ? "Đang hỏi..." : "Gửi câu hỏi"}
+              {busy ? "Đang tìm câu trả lời…" : "Gửi câu hỏi"}
             </button>
           </div>
         ) : (
-              <p className="mt-6 rounded-xl border-t border-line bg-stoic-canvas-soft/55 px-4 py-4 font-ui text-sm text-muted">
+              <p className="mt-6 rounded-stoic-md border border-stoic-line bg-stoic-canvas-soft px-4 py-4 text-sm text-stoic-ink-muted">
             Bạn đã dùng hết số câu hỏi của lượt chấm này.
           </p>
         )}

@@ -20,6 +20,7 @@ import type { AiEvaluationView } from "@/components/feynman/feynman-ai-evaluatio
 import type { ChatTurn } from "@/components/feynman/feynman-ai-chat";
 import { readFeynmanAiConfig } from "@/lib/feynman-ai/config";
 import { walletRemaining } from "@/lib/feynman-ai/rules";
+import { readingDisplayTitle } from "@/lib/reading/catalog";
 
 export const metadata = { title: "Chữa bài theo phương pháp Feynman" };
 
@@ -99,27 +100,27 @@ export default async function FeynmanPage({
   });
 
   return (
-    <section className="feynman-surface mx-auto max-w-4xl px-4 py-10 sm:px-6 md:py-14">
+    <section className="feynman-surface mx-auto max-w-5xl px-4 py-10 sm:px-6 md:py-14">
       {/* Chữa bài là học thật — thời gian ở đây được tính vào danh hiệu kỷ luật */}
       <StudyHeartbeat kind="FEYNMAN" />
       <Link
         href={`/hoc-vien/bai-lam/${attemptId}`}
-        className="inline-flex items-center gap-2 rounded-lg font-ui text-sm font-semibold text-navy transition-colors hover:text-stoic-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/40"
+        className="inline-flex min-h-11 items-center gap-2 rounded-stoic-pill px-3 py-2 text-sm font-semibold text-stoic-primary-deep transition-colors hover:bg-stoic-primary-soft/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/35"
       >
         <ArrowLeft className="h-4 w-4" aria-hidden="true" />
         Kết quả bài làm
       </Link>
 
-      <div className="mt-6">
-        <p className="label-caps">
+      <div className="mt-5 rounded-stoic-lg border border-stoic-line bg-stoic-canvas p-6 shadow-stoic-1 sm:p-8">
+        <p className="text-[0.68rem] font-semibold uppercase tracking-[0.1em] text-stoic-primary-deep">
           Tự giảng · Feynman AI ·{" "}
           {review.mode === "DEEP" ? "Chữa sâu" : "Chữa nhanh"}
         </p>
-        <h1 className="mt-3 font-display text-3xl font-bold leading-tight text-navy-deep md:text-4xl">
-          {review.attempt.exercise.title}
+        <h1 className="mt-3 max-w-3xl text-3xl font-light leading-[1.12] tracking-[-0.035em] text-stoic-ink md:text-[2.75rem]">
+          {readingDisplayTitle(review.attempt.exercise.title)}
         </h1>
-        <div className="rule-gold mt-5" />
-        <p className="mt-5 max-w-2xl text-[1rem] leading-relaxed text-ink-soft">
+        <div className="mt-5 h-0.5 w-16 rounded-full bg-gradient-to-r from-stoic-primary to-stoic-ruby" />
+        <p className="mt-5 max-w-2xl text-base leading-relaxed text-stoic-ink-secondary">
           {isCompleted
             ? "Bạn đã hoàn thành phiên chữa bài này. Toàn bộ đáp án đã được mở ở trang kết quả."
             : review.mode === "DEEP"
@@ -128,11 +129,11 @@ export default async function FeynmanPage({
         </p>
       </div>
 
-      <div className="mt-8">
+      <div className="mt-6">
         <FeynmanStepper current={isCompleted ? 4 : revealed ? 3 : 1} />
       </div>
 
-      <div className="mt-10">
+      <div className="mt-8">
         {isCompleted ? (
           <CompletedSummary review={review} mistakes={mistakes} attemptId={attemptId} />
         ) : revealed ? (
@@ -278,14 +279,14 @@ function CompletedSummary({
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-wrap items-center gap-4 border-l-4 border-success bg-success-pale px-6 py-5">
+      <div className="flex flex-wrap items-center gap-4 rounded-stoic-lg border border-success/20 bg-success-pale px-6 py-5 shadow-stoic-1">
         <Trophy className="h-6 w-6 shrink-0 text-success" aria-hidden="true" />
         <div>
-          <p className="font-display text-lg font-bold text-success">
+          <p className="text-lg font-semibold text-success">
             Đã hoàn thành chữa bài
           </p>
           {gain != null && (
-            <p className="mt-1 font-ui text-sm text-ink-soft">
+            <p className="mt-1 font-ui text-sm tabular-nums text-ink-soft">
               Mức tự tin: {review.confidenceBefore} → {review.confidenceAfter}
               {gain > 0 && ` (tăng ${gain} bậc)`} ·{" "}
               {CONFIDENCE_LABELS[review.confidenceAfter!]}
@@ -295,9 +296,11 @@ function CompletedSummary({
       </div>
 
       {review.finalRule && (
-        <div className="border border-gold bg-gold-pale p-7">
-          <p className="label-caps">Quy tắc bạn mang sang bài sau</p>
-          <p className="mt-3 font-display text-xl font-bold leading-snug text-navy-deep">
+        <div className="rounded-stoic-lg border border-stoic-primary/25 bg-stoic-primary-soft/45 p-7">
+          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.1em] text-stoic-primary-deep">
+            Quy tắc bạn mang sang bài sau
+          </p>
+          <p className="mt-3 text-xl font-medium leading-snug tracking-[-0.015em] text-stoic-ink">
             “{review.finalRule}”
           </p>
         </div>
@@ -311,14 +314,17 @@ function CompletedSummary({
 
       {mistakes.length > 0 && (
         <div>
-          <h2 className="font-display text-2xl font-bold text-navy-deep">
+          <h2 className="text-2xl font-medium tracking-[-0.025em] text-stoic-ink">
             Các lỗi đã chữa
           </h2>
           <div className="mt-5 space-y-5">
             {mistakes.map((m) => (
-              <article key={m.id} className="border border-line bg-paper p-6 shadow-card">
+              <article
+                key={m.id}
+                className="rounded-stoic-lg border border-stoic-line bg-stoic-canvas p-6 shadow-stoic-1"
+              >
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="border border-gold bg-gold-pale px-2.5 py-0.5 font-ui text-xs font-bold text-navy-deep">
+                  <span className="rounded-stoic-pill border border-stoic-primary/25 bg-stoic-primary-soft/45 px-2.5 py-1 text-xs font-semibold text-stoic-primary-deep">
                     Câu {m.numberLabel}
                   </span>
                   {m.errorType && (
@@ -337,7 +343,7 @@ function CompletedSummary({
                   </p>
                 )}
                 {m.lessonRule && (
-                  <p className="mt-3 border-l-4 border-gold bg-cream-deep px-4 py-2.5 text-[0.92rem] italic leading-relaxed text-ink-soft">
+                  <p className="mt-3 rounded-stoic-md border border-stoic-line bg-stoic-canvas-cream px-4 py-3 text-[0.92rem] italic leading-relaxed text-stoic-ink-secondary">
                     {m.lessonRule}
                   </p>
                 )}
@@ -351,7 +357,7 @@ function CompletedSummary({
 
       <Link
         href={`/hoc-vien/bai-lam/${attemptId}`}
-        className="inline-flex items-center gap-2 border border-navy bg-navy px-7 py-3 font-ui text-[0.8rem] font-semibold uppercase tracking-[0.12em] text-paper transition-colors hover:bg-navy-deep"
+        className="inline-flex min-h-11 items-center gap-2 rounded-stoic-pill border border-stoic-primary bg-stoic-primary px-6 py-2.5 text-sm font-semibold text-white shadow-stoic-1 transition-colors hover:border-stoic-primary-deep hover:bg-stoic-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/35"
       >
         <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
         Xem toàn bộ đáp án ở trang kết quả
@@ -363,9 +369,11 @@ function CompletedSummary({
 function ReadOnlyBlock({ title, body }: { title: string; body: string | null }) {
   if (!body) return null;
   return (
-    <div className="border border-line bg-paper p-7 shadow-card">
-      <p className="label-caps">{title}</p>
-      <div className="mt-3 space-y-3 leading-relaxed text-ink">
+    <div className="rounded-stoic-lg border border-stoic-line bg-stoic-canvas p-7 shadow-stoic-1">
+      <p className="text-[0.68rem] font-semibold uppercase tracking-[0.1em] text-stoic-primary-deep">
+        {title}
+      </p>
+      <div className="mt-3 space-y-3 leading-relaxed text-stoic-ink">
         {body.split(/\n+/).map((p, i) => p.trim() && <p key={i}>{p}</p>)}
       </div>
     </div>
