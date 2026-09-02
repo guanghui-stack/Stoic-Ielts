@@ -10,6 +10,7 @@ import { isDuplicateColumnMigrationError } from "@/lib/payments/payment-rules";
 import seedData from "../../prisma/seed-data.json";
 import readingGameTheory from "../../prisma/reading-game-theory.json";
 import readingPaidPack1 from "../../prisma/reading-paid-pack-1.json";
+import readingPackActualTest from "../../prisma/reading-pack-actual-test.json";
 
 /**
  * Tạo bảng trực tiếp bằng SQL MySQL (tương đương `prisma db push` cho schema
@@ -1747,6 +1748,10 @@ export async function initDatabase() {
     ...seedData.exercises,
     readingGameTheory,
     ...readingPaidPack1,
+    // Bộ đề chuyển từ kho .md của trung tâm (xem scripts/convert-reading-md.mjs).
+    // Đối chiếu theo tiêu đề như mọi bộ khác, nên các đợt bổ sung sau chỉ thêm
+    // đề mới chứ không ghi đè đề quản trị viên đã sửa tay trên máy chủ.
+    ...readingPackActualTest,
   ].filter((exercise) => exercise.skill === "READING");
   for (const ex of exercises) {
     const existing = await db.exercise.findFirst({ where: { title: ex.title } });
