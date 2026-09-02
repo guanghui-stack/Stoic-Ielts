@@ -29,6 +29,16 @@ function check(ex) {
     if (!Array.isArray(part.questionGroups) || !part.questionGroups.length) errs.push("thiếu questionGroups");
 
     for (const g of part.questionGroups ?? []) {
+      /* --- chất lượng đề bài ---
+       * Đáp án đúng mà đề bài hỏng thì học viên vẫn không làm được. Hai lỗi
+       * dưới đây đã xảy ra thật khi bóc từ .md: mảnh bảng markdown lọt vào
+       * prompt, và năm câu liền dùng chung một prompt. */
+      const prompts = (g.questions ?? []).map((q) => (q.prompt ?? "").trim()).filter(Boolean);
+      const dup = prompts.find((p, i) => prompts.indexOf(p) !== i);
+      if (dup) errs.push(`${g.type}: nhiều câu dùng chung một đề bài — "${dup.slice(0, 40)}…"`);
+      const junk = prompts.find((p) => /<br\s*\/?>|\|\s*[-–—]|^\|/i.test(p));
+      if (junk) errs.push(`${g.type}: đề bài lẫn mảnh bảng/HTML — "${junk.slice(0, 40)}…"`);
+
       if (!TYPES.includes(g.type)) errs.push(`dạng lạ: ${g.type}`);
       if (!Array.isArray(g.questions) || !g.questions.length) errs.push(`${g.type}: nhóm rỗng`);
       if (g.type === "GAP" && g.wordLimit && !WORD_LIMITS.includes(g.wordLimit)) errs.push("wordLimit lạ");

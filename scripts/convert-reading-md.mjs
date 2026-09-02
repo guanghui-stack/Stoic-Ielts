@@ -168,14 +168,54 @@ function gapItems(lines, from, to) {
       }
 
       // (b) số dẫn đầu dòng, ô trống nằm đâu đó trong câu
-      if (leadNum === null || leadUsed || !inRange(leadNum) || !ANY_BLANK.test(sentence)) continue;
-      leadUsed = true;
-      items.push({
-        n: leadNum,
-        text: sentence.replace(new RegExp(ANY_BLANK.source, "g"), " ______ ").replace(/\s+/g, " ").trim(),
-      });
+      if (leadNum !== null && !leadUsed && inRange(leadNum) && ANY_BLANK.test(sentence)) {
+        leadUsed = true;
+        items.push({
+          n: leadNum,
+          text: sentence.replace(new RegExp(ANY_BLANK.source, "g"), " ______ ").replace(/\s+/g, " ").trim(),
+        });
+        continue;
+      }
+
+      // (e) chính con số LÀ ô trống, không có gạch dưới nào:
+      //     "nests are created in 8 where eggs are laid."
+      // Chỉ nhận số nằm trong dải câu của nhóm; nếu bắt nhầm số liệu trong bài
+      // thì tổng số câu sẽ lệch và cả file bị loại — đó là lưới an toàn.
+      const bare = [...sentence.matchAll(/(?:^|\s)(\d{1,2})(?=[\s.,;:]|$)/g)]
+        .filter((m) => Number(m[1]) >= from && Number(m[1]) <= to);
+      for (const m of bare) {
+        const n = Number(m[1]);
+        if (!inRange(n)) continue;
+        const text = sentence
+          .replace(new RegExp(`(^|\\s)${n}(?=[\\s.,;:]|$)`), "$1 ______ ")
+          .replace(/\s+/g, " ")
+          .trim();
+        items.push({ n, text });
+      }
+    }
+
+    // (g) Số dẫn đầu dòng mà cả dòng không có ô trống nào: chính con số đó là
+    //     ô trống. "10 were an animal which they introduced…" → "______ were…"
+    //     Số này đã bị cắt khỏi `rest` ở trên nên không nhánh nào bắt được nữa.
+    if (leadNum !== null && !leadUsed && inRange(leadNum) && !ANY_BLANK.test(rest)) {
+      items.push({ n: leadNum, text: `______ ${rest}`.replace(/\s+/g, " ").trim() });
     }
   });
+
+  // (f) Ô trống KHÔNG đánh số: mỗi dòng có ô trống là một câu, số suy theo
+  //     đúng thứ tự xuất hiện. Chỉ dùng khi chưa bóc được câu nào, để không
+  //     trộn lẫn hai cách đánh số trong cùng một nhóm.
+  if (items.length === 0) {
+    const blanks = lines.filter((l) => !INSTRUCTION_LINE.test(l) && ANY_BLANK.test(l));
+    if (blanks.length === to - from + 1) {
+      blanks.forEach((line, i) => {
+        items.push({
+          n: from + i,
+          text: line.replace(new RegExp(ANY_BLANK.source, "g"), " ______ ").replace(/\s+/g, " ").trim(),
+        });
+      });
+    }
+  }
 
   return items.sort((a, b) => a.n - b.n);
 }
@@ -205,7 +245,10 @@ function parseGroup(chunk, from, to, paragraphs, answerMap) {
   // nhãn lựa chọn. Chỉ làm với MATCH_*: ở MC, các dòng A./B./C. thuộc về từng
   // câu chứ không phải kho dùng chung.
   const isMatchType = ["MATCH_HEADINGS", "MATCH_INFO", "MATCH_FEATURES", "MATCH_ENDINGS"].includes(type);
-  if (isMatchType && options.length < 2) {
+  // GAP cũng cần nhặt: đề "Complete the summary using the list of words A–I"
+  // trông như điền từ nhưng thực chất chọn từ kho cho sẵn. Kho đó chỉ được
+  // dùng nếu đáp án hóa ra là chữ cái, nên nhặt thừa cũng vô hại.
+  if ((isMatchType || type === "GAP") && options.length < 2) {
     for (const l of lines) {
       if (/^\d{1,2}\s*[.)]?\s/.test(l)) continue;
       const m = l.match(OPTION_LINE);
@@ -220,12 +263,21 @@ function parseGroup(chunk, from, to, paragraphs, answerMap) {
   if (type === "GAP") {
     const items = gapItems(lines, from, to);
     if (items.length !== want) return { error: `Q${from}-${to} GAP: bóc được ${items.length}/${want} ô trống` };
-    return { type, instruction, options: [], items, from, to };
+    // Giữ lại kho từ nếu có: đề "Complete the summary using the list of words
+    // A–I" có đáp án là CHỮ CÁI chứ không phải từ tự điền, và sẽ được đổi dạng
+    // ở bước ghép đáp án bên dưới.
+    return { type, instruction, options, items, from, to };
   }
 
   /* --- các dạng còn lại: câu hỏi là dòng đánh số trong dải --- */
   const items = [];
-  for (const line of lines) {
+  for (let li = 0; li < lines.length; li++) {
+    let line = lines[li];
+    // Có đề để số câu trên một dòng riêng, đề bài xuống dòng dưới. Ghép lại
+    // trước khi bóc, nếu không thì dòng số trống rỗng và câu hỏi mất số.
+    if (/^\d{1,2}\s*[.)]?$/.test(line) && lines[li + 1]) {
+      line = `${line.replace(/[.)]$/, "")} ${lines[++li]}`;
+    }
     const m = line.match(/^(\d{1,2})\s*[.)]?\s+(.*)$/);
     if (m) {
       const n = Number(m[1]);
@@ -418,6 +470,18 @@ function convert(file, raw) {
   const questionGroups = [];
   let qid = 0;
   for (const g of groups) {
+    /* Đề "Complete the summary using the list of words A–I" trông như điền từ
+     * nhưng đáp án là CHỮ CÁI chọn từ kho cho sẵn. Để nguyên dạng GAP thì học
+     * viên phải gõ chữ "C" vào ô điền từ — sai hẳn về sư phạm. Đổi sang
+     * MATCH_FEATURES để các em chọn từ danh sách, đúng như đề gốc yêu cầu. */
+    if (g.type === "GAP" && g.options.length >= 2) {
+      const letters = g.items.filter((it) => /^[A-J]\b/i.test(String(answerMap[it.n]?.answer ?? "")));
+      if (letters.length >= Math.max(2, Math.ceil(g.items.length * 0.6))) {
+        g.type = "MATCH_FEATURES";
+        g.reuseOptions = false;
+      }
+    }
+
     const questions = [];
     for (const item of g.items) {
       qid++;
