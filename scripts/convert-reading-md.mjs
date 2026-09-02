@@ -89,8 +89,96 @@ const OPTION_LINE = /^\**\s*([A-Ja-j]|[ivx]{1,4})\s*[.)]?\s*\**\s+(.+)$/;
 
 /** Dòng lựa chọn của một câu MC: "A. …" / "**B)** …" */
 const MC_CHOICE = /^([A-J])\s*[.)]\s*(.+)$/;
-/** Ô trống GAP: "**7.** ____", "8. ________", "**9**……" */
-const GAP_MARK = /(?:^|\s|\()(\d{1,2})\s*[.)]?\s*(_{2,}|…{1,}|\.{4,})/;
+
+/** Bất kỳ kiểu ô trống nào: gạch dưới, chấm lửng, hoặc dãy dấu chấm. */
+const ANY_BLANK = /(?:_{2,}|…+|\.{4,})/;
+/** Ô trống có số đứng ngay trước: "8. ____", "(8) ……", "8 ____" */
+const NUM_BLANK = /(?:^|\s|\()(\d{1,2})\s*[.)]?\s*(?:_{2,}|…+|\.{4,})/g;
+
+/**
+ * Bóc câu điền từ.
+ *
+ * Ba cách viết đều gặp trong kho .md, nên phải xử lý ở mức CÂU chứ không phải
+ * mức dòng — một đoạn tóm tắt có thể nằm gọn trên một dòng mà chứa tới sáu ô:
+ *   (a) số dính liền ô trống          — "8. ________"
+ *   (b) số dẫn đầu câu, ô nằm giữa     — "14 Plants are similar to ……"
+ *   (c) nhiều ô trống trong cùng dòng  — đoạn summary liền mạch
+ */
+function gapItems(lines, from, to) {
+  const items = [];
+  const inRange = (n) => n >= from && n <= to && !items.some((it) => it.n === n);
+
+  lines.forEach((line, k) => {
+    if (INSTRUCTION_LINE.test(line)) return;
+
+    // Tách số thứ tự dẫn đầu TRƯỚC khi cắt câu. Nếu không, "6. In France…" bị
+    // bộ cắt câu xẻ đôi ngay sau "6." (dấu chấm + chữ hoa), và câu hỏi mất số.
+    const lead = line.match(/^(\d{1,2})\s*[.)]?\s+(.*)$/);
+    const leadNum = lead && Number(lead[1]) >= from && Number(lead[1]) <= to ? Number(lead[1]) : null;
+    const rest = leadNum !== null ? lead[2] : line;
+
+    // Tách câu để mỗi ô trống có ngữ cảnh riêng, không kéo cả đoạn vào prompt.
+    const sentences = rest.split(/(?<=[.!?])\s+(?=[A-Z“"'(])/);
+    let leadUsed = false;
+
+    for (const sentence of sentences) {
+      const marks = [...sentence.matchAll(new RegExp(NUM_BLANK.source, "g"))]
+        .filter((m) => Number(m[1]) >= from && Number(m[1]) <= to);
+
+      if (marks.length) {
+        for (const m of marks) {
+          const n = Number(m[1]);
+          if (!inRange(n)) continue;
+          // Ô đang hỏi thành ______; các ô khác trong cùng câu rút về "…" cho
+          // học viên khỏi tưởng phải điền nhiều chỗ trong một câu hỏi.
+          let text = sentence.replace(m[0], " ______ ")
+            .replace(new RegExp(NUM_BLANK.source, "g"), " … ")
+            .replace(/\s+/g, " ")
+            .trim();
+          if (text.replace(/[_…\s]/g, "").length < 12) {
+            const ctx = lines.slice(0, k).reverse()
+              .find((p) => p.length > 12 && !ANY_BLANK.test(p) && !INSTRUCTION_LINE.test(p));
+            if (ctx) text = `${ctx}: ${text}`;
+          }
+          items.push({ n, text });
+        }
+        continue;
+      }
+
+      // (d) ô trống chỉ được đánh dấu bằng số trong ngoặc, không có gạch dưới:
+      //     "The ships were remarkable for the number of (7) they had."
+      const parens = [...sentence.matchAll(/\(\s*(\d{1,2})\s*\)/g)]
+        .filter((m) => Number(m[1]) >= from && Number(m[1]) <= to);
+      if (parens.length) {
+        for (const m of parens) {
+          const n = Number(m[1]);
+          if (!inRange(n)) continue;
+          let text = sentence.replace(m[0], " ______ ")
+            .replace(/\(\s*\d{1,2}\s*\)/g, " … ")
+            .replace(/\s+/g, " ")
+            .trim();
+          if (text.replace(/[_…\s]/g, "").length < 12) {
+            const ctx = lines.slice(0, k).reverse()
+              .find((p) => p.length > 12 && !/\(\s*\d{1,2}\s*\)/.test(p) && !INSTRUCTION_LINE.test(p));
+            if (ctx) text = `${ctx}: ${text}`;
+          }
+          items.push({ n, text });
+        }
+        continue;
+      }
+
+      // (b) số dẫn đầu dòng, ô trống nằm đâu đó trong câu
+      if (leadNum === null || leadUsed || !inRange(leadNum) || !ANY_BLANK.test(sentence)) continue;
+      leadUsed = true;
+      items.push({
+        n: leadNum,
+        text: sentence.replace(new RegExp(ANY_BLANK.source, "g"), " ______ ").replace(/\s+/g, " ").trim(),
+      });
+    }
+  });
+
+  return items.sort((a, b) => a.n - b.n);
+}
 
 function parseGroup(chunk, from, to, paragraphs, answerMap) {
   const type = detectType(chunk);
@@ -112,35 +200,25 @@ function parseGroup(chunk, from, to, paragraphs, answerMap) {
     }
   }
 
+  // Không phải đề nào cũng có dòng "List of …". Nhiều đề thả thẳng A./B./C.
+  // ngay sau các vế câu, nên với các dạng MATCH_* ta nhặt luôn mọi dòng có
+  // nhãn lựa chọn. Chỉ làm với MATCH_*: ở MC, các dòng A./B./C. thuộc về từng
+  // câu chứ không phải kho dùng chung.
+  const isMatchType = ["MATCH_HEADINGS", "MATCH_INFO", "MATCH_FEATURES", "MATCH_ENDINGS"].includes(type);
+  if (isMatchType && options.length < 2) {
+    for (const l of lines) {
+      if (/^\d{1,2}\s*[.)]?\s/.test(l)) continue;
+      const m = l.match(OPTION_LINE);
+      if (m) options.push(m[2].trim());
+    }
+  }
+
   const instrLines = lines.filter((l) => INSTRUCTION_LINE.test(l) && !/^\d/.test(l));
   const instruction = instrLines.slice(0, 4).join(" ") || `Questions ${from}–${to}`;
 
-  /* --- GAP: mỗi ô trống là một câu, prompt là chính dòng chứa ô đó --- */
+  /* --- GAP --- */
   if (type === "GAP") {
-    const items = [];
-    lines.forEach((line, k) => {
-      // Hai cách viết đều gặp:
-      //  (a) số dính liền ô trống  — "**8.** ________"
-      //  (b) số đầu dòng, ô trống nằm giữa câu — "**8.** The King adopted ___ psychology."
-      let m = line.match(GAP_MARK);
-      let n = m ? Number(m[1]) : null;
-      if (!m) {
-        const lead = line.match(/^(\d{1,2})\s*[.)]\s+(.*)$/);
-        if (!lead || !/(_{2,}|…{2,}|\.{4,})/.test(lead[2])) return;
-        n = Number(lead[1]);
-      }
-      if (n < from || n > to || items.some((it) => it.n === n)) return;
-      let text = m
-        ? line.replace(new RegExp(`(^|\\s)${n}\\s*[.)]?\\s*(_{2,}|…+|\\.{4,})`), "$1 ______")
-        : line.replace(/^\d{1,2}\s*[.)]\s+/, "").replace(/(_{2,}|…{2,}|\.{4,})/g, "______");
-      text = text.replace(/^[-•]\s*/, "").trim();
-      // Dòng chỉ có mỗi ô trống thì mượn dòng phía trên làm ngữ cảnh.
-      if (text.replace(/_+/g, "").trim().length < 12) {
-        const ctx = lines.slice(0, k).reverse().find((p) => p.length > 12 && !GAP_MARK.test(p) && !INSTRUCTION_LINE.test(p));
-        if (ctx) text = `${ctx}: ${text}`;
-      }
-      items.push({ n, text });
-    });
+    const items = gapItems(lines, from, to);
     if (items.length !== want) return { error: `Q${from}-${to} GAP: bóc được ${items.length}/${want} ô trống` };
     return { type, instruction, options: [], items, from, to };
   }
@@ -188,10 +266,17 @@ function parseGroup(chunk, from, to, paragraphs, answerMap) {
         return { type, instruction, options, items: recovered, from, to, recovered: true };
       }
     }
-    // TFNG hay viết mệnh đề KHÔNG đánh số — lấy theo thứ tự xuất hiện.
-    if (type === "TFNG") {
+    // TFNG và các dạng MATCH_* hay viết mệnh đề KHÔNG đánh số — số câu suy ra
+    // theo đúng thứ tự xuất hiện. Phải loại cả dòng nhãn lựa chọn A./B./C.,
+    // nếu không kho đáp án sẽ bị đếm nhầm thành câu hỏi.
+    if (type === "TFNG" || isMatchType) {
       const bare = lines.filter(
-        (l) => !INSTRUCTION_LINE.test(l) && !/^\d/.test(l) && !/^(list of|danh sách)/i.test(l) && l.length > 20
+        (l) =>
+          !INSTRUCTION_LINE.test(l) &&
+          !/^\d/.test(l) &&
+          !/^(list of|danh sách)/i.test(l) &&
+          !OPTION_LINE.test(l) &&
+          l.length > 20
       );
       if (bare.length === want) {
         return {
@@ -200,7 +285,7 @@ function parseGroup(chunk, from, to, paragraphs, answerMap) {
           from, to,
         };
       }
-      return { error: `Q${from}-${to} TFNG: bóc được ${items.length || bare.length}/${want} câu` };
+      return { error: `Q${from}-${to} ${type}: bóc được ${items.length || bare.length}/${want} câu` };
     }
     return { error: `Q${from}-${to} ${type}: bóc được ${items.length}/${want} câu` };
   }
@@ -357,8 +442,8 @@ function convert(file, raw) {
         q.options = /YES/i.test(String(answer)) || /^NO$/i.test(String(answer))
           ? ["YES", "NO", "NOT GIVEN"] : ["TRUE", "FALSE", "NOT GIVEN"];
       }
-      if ((g.type === "MC" || g.type === "MC_MULTI") && item.extra) {
-        q.options = item.extra.filter((e) => /^[A-J]\s*[.)]/.test(e));
+      if ((g.type === "MC" || g.type === "MC_MULTI") && item.choices?.length) {
+        q.options = item.choices;
       }
       if (g.type === "MC_MULTI") q.selectCount = Array.isArray(answer) ? answer.length : 2;
       if (found.explanation) {
