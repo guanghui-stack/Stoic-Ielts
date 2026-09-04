@@ -8966,5 +8966,1445 @@
     }
    ]
   }
+ },
+ {
+  "skill": "READING",
+  "taskType": "READING_PASSAGE",
+  "title": "Reading Practice 63 — Public Libraries",
+  "description": "1 passage · 14 câu · TFNG + GAP · 20 phút",
+  "durationMinutes": 20,
+  "accessLevel": "PUBLIC",
+  "achievementEligible": true,
+  "difficultyTier": "EASY",
+  "content": {
+   "parts": [
+    {
+     "passage": {
+      "title": "Public Libraries",
+      "paragraphs": [
+       "A. The word public comes from a Latin word, publicus, meaning people. A public library is for all the people in a community to use. It charges no fee for its services. The public library will have available, within the limits of its budget, a wide variety of books and other materials. These books or other materials may be borrowed, or taken out for a specific time, by anyone in the community. The library loans its materials.",
+       "B. Public libraries are usually tax-supported. There are a few that are instead supported from money that has been donated. And there are some that receive part of their money from taxes and part from gifts.",
+       "C. Few public libraries are exactly alike. Not only are the shapes and sizes of the building different, but also are the number of books and other materials in each. Your nearest library may be like the Los Angeles Public Library, which has over 4,538,458 books and bound periodicals (magazines and journals) in its collection. Or it may be like the Cherokee County Public Library, which has only about 3,800 books in its collection.",
+       "D. Libraries vary in other ways, too, for instance, in the number of hours (or days) they are open or in the number of people who work there. Most public libraries, however, arrange their books and other materials in similar ways. They divide their collection into two basic age groups, children and adult. Adult books are in one place; children’s books are in another. The books are further separated by the kind of books. Storybooks – works of fiction – are separated from information, or fact books – nonfiction.",
+       "E. People often want to refer to, that is, look something up in a certain basic information book. Thus reference books, which are rarely read cover to cover, are put in a special place in the library, a reference section of perhaps a reference room. Reference books are never to be taken out from the library building.",
+       "F. Each library decides for itself how it should further arrange its books and other materials. In a large city library, certain nonfiction materials may be put into a special area or separate room. For instance, there may be a separate room just for all the materials a library has on music. In another large city, the music materials might not be kept so separate. It would depend on what the people in that city had indicated they found useful.",
+       "G. A library’s holdings are everything the library has in its collection. These holdings almost always reflect the community’s special interest. Suppose, for example, there was a town where Morgan horses were widely raised and trained. That town’s library would most likely have a great deal of material about Morgan horses. Since the people who were interested in Morgan horses would probably be less interested in other breeds of horses, the library might have only a small amount of material on Mustangs or Appaloosas."
+      ],
+      "labelParagraphs": true
+     },
+     "questionGroups": [
+      {
+       "type": "TFNG",
+       "instruction": "Do the following statements agree with the information given in the reading passage? TRUE: if the statement agrees with the information. FALSE: if the statement contradicts the information. NOT GIVEN: if there is no information on this.",
+       "questions": [
+        {
+         "id": "q1",
+         "answer": "TRUE",
+         "prompt": "Public libraries are free for everyone living in the community to use.",
+         "options": [
+          "TRUE",
+          "FALSE",
+          "NOT GIVEN"
+         ],
+         "learning": {
+          "explanation": "Đáp án: TRUE Giải thích: Đoạn A khẳng định thư viện công cộng dành cho tất cả mọi người trong cộng đồng và không thu phí dịch vụ (“It charges no fee for its services”).",
+          "skillTag": "TFNG_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q2",
+         "answer": "FALSE",
+         "prompt": "Most public libraries are funded exclusively by private donations.",
+         "options": [
+          "TRUE",
+          "FALSE",
+          "NOT GIVEN"
+         ],
+         "learning": {
+          "explanation": "Đáp án: FALSE Giải thích: Đoạn B cho biết phần lớn thư viện công cộng được hỗ trợ bởi tiền thuế (“usually tax-supported”), chỉ một số ít mới dựa hoàn toàn vào tiền quyên góp.",
+          "skillTag": "TFNG_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q3",
+         "answer": "NOT GIVEN",
+         "prompt": "The Los Angeles Public Library has the largest collection of books in the United States.",
+         "options": [
+          "TRUE",
+          "FALSE",
+          "NOT GIVEN"
+         ],
+         "learning": {
+          "explanation": "Đáp án: NOT GIVEN Giải thích: Đoạn C đưa ra con số hơn 4,5 triệu cuốn sách của thư viện Los Angeles như một ví dụ về quy mô lớn, nhưng không hề so sánh hay khẳng định đây là thư viện lớn nhất nước Mỹ.",
+          "skillTag": "TFNG_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q4",
+         "answer": "TRUE",
+         "prompt": "In most public libraries, books are organized based on the age of the readers.",
+         "options": [
+          "TRUE",
+          "FALSE",
+          "NOT GIVEN"
+         ],
+         "learning": {
+          "explanation": "Đáp án: TRUE Giải thích: Đoạn D nêu rõ hầu hết các thư viện chia bộ sưu tập thành hai nhóm tuổi cơ bản: trẻ em và người lớn (“divide their collection into two basic age groups, children and adult”).",
+          "skillTag": "TFNG_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q5",
+         "answer": "FALSE",
+         "prompt": "Reference books can be borrowed for a short period of time if requested.",
+         "options": [
+          "TRUE",
+          "FALSE",
+          "NOT GIVEN"
+         ],
+         "learning": {
+          "explanation": "Đáp án: FALSE Giải thích: Đoạn E nhấn mạnh sách tham khảo không bao giờ được phép mang ra khỏi tòa nhà thư viện (“Reference books are never to be taken out from the library building”).",
+          "skillTag": "TFNG_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q6",
+         "answer": "TRUE",
+         "prompt": "The way a library organizes its special collections often depends on the preferences of the local people.",
+         "options": [
+          "TRUE",
+          "FALSE",
+          "NOT GIVEN"
+         ],
+         "learning": {
+          "explanation": "Đáp án: TRUE Giải thích: Đoạn F giải thích việc sắp xếp các khu vực riêng biệt phụ thuộc vào những gì người dân trong thành phố đó cho là hữu ích (“depend on what the people in that city had indicated they found useful”).",
+          "skillTag": "TFNG_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q7",
+         "answer": "FALSE",
+         "prompt": "A library in a town known for horse breeding will definitely have more books on Mustangs than Morgan horses.",
+         "options": [
+          "TRUE",
+          "FALSE",
+          "NOT GIVEN"
+         ],
+         "learning": {
+          "explanation": "Đáp án: FALSE Giải thích: Đoạn G lấy ví dụ nếu một thị trấn nuôi ngựa Morgan, thư viện sẽ có rất nhiều tài liệu về loài này và chỉ có một lượng nhỏ tài liệu về các loài khác như Mustang. ### Câu 8–14: Hoàn thành câu (ONE WORD ONLY)",
+          "skillTag": "TFNG_MD_IMPORT"
+         }
+        }
+       ]
+      },
+      {
+       "type": "GAP",
+       "instruction": "Complete the sentences below. Choose ONE WORD ONLY from the passage for each answer.",
+       "questions": [
+        {
+         "id": "q8",
+         "answer": "Latin",
+         "prompt": "The term “public” has its origins in a ______ .. word meaning “people”.",
+         "learning": {
+          "explanation": "Vị trí: Đoạn A. Giải thích: Từ “public” bắt nguồn từ một từ Latin là “publicus”.",
+          "skillTag": "GAP_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q9",
+         "answer": "gifts",
+         "prompt": "Some libraries are funded by ______ .. while others rely on tax money or a combination of both.",
+         "learning": {
+          "explanation": "Vị trí: Đoạn B. Giải thích: Một số thư viện nhận tiền từ thuế, số khác dựa vào gifts (quà tặng/quyên góp) hoặc kết hợp cả hai.",
+          "skillTag": "GAP_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q10",
+         "answer": "shapes",
+         "prompt": "Libraries can differ significantly in terms of their physical ______ .. and the size of their collections.",
+         "learning": {
+          "explanation": "Vị trí: Đoạn C. Giải thích: Các thư viện khác nhau về shapes (hình dáng) và kích thước tòa nhà cũng như quy mô bộ sưu tập.",
+          "skillTag": "GAP_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q11",
+         "answer": "storybooks",
+         "prompt": "Fiction books, also known as ______ .., are kept separately from nonfiction books.",
+         "learning": {
+          "explanation": "Vị trí: Đoạn D. Giải thích: Sách hư cấu (fiction) còn được gọi là storybooks.",
+          "skillTag": "GAP_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q12",
+         "answer": "reference",
+         "prompt": "Because ______ .. books are mainly used for looking up specific information, they must remain inside the library building.",
+         "learning": {
+          "explanation": "Vị trí: Đoạn E. Giải thích: Vì sách reference (tham khảo) dùng để tra cứu thông tin cụ thể nên chúng phải được để lại trong thư viện.",
+          "skillTag": "GAP_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q13",
+         "answer": "music",
+         "prompt": "In large cities, certain materials, such as those related to ______ .., may be placed in a dedicated room.",
+         "learning": {
+          "explanation": "Vị trí: Đoạn F. Giải thích: Ở các thành phố lớn, các tài liệu liên quan đến music (âm nhạc) có thể được để trong phòng riêng.",
+          "skillTag": "GAP_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q14",
+         "answer": "holdings",
+         "prompt": "A library’s ______ .. usually represent the specific interests of the local community.",
+         "learning": {
+          "explanation": "Vị trí: Đoạn G. Giải thích: Toàn bộ tài sản/bộ sưu tập (holdings) của thư viện thường phản ánh sở thích đặc biệt của cộng đồng địa phương.",
+          "skillTag": "GAP_MD_IMPORT"
+         }
+        }
+       ],
+       "wordLimit": "ONE_WORD"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "skill": "READING",
+  "taskType": "READING_PASSAGE",
+  "title": "Reading Practice 64 — Growing More for Less",
+  "description": "1 passage · 11 câu · MATCH_INFO + GAP · 20 phút",
+  "durationMinutes": 20,
+  "accessLevel": "PUBLIC",
+  "achievementEligible": true,
+  "difficultyTier": "MEDIUM",
+  "content": {
+   "parts": [
+    {
+     "passage": {
+      "title": "Growing More for Less",
+      "paragraphs": [
+       "A. For farmers, working out the optimal amount of seed, fertiliser, pesticide and water to scatter on a field can be a matter of luck, despite several harvests. Regular laboratory analyses of soil and plant samples from various sections of a field can help — but such expertise is costly, and often unavailable. However, a new and cheaper method of doing this analysis is now on offer. Precise prescriptions for growing crops can be obtained quickly, and less expensively, by calculating the amount of electromagnetic radiation reflected from agricultural land. The data is collected by orbiting satellites.",
+       "B. Examining the wavelength of radiation that is reflected can reveal, with surprising precision, the properties of the soil, the quality of crop being grown, and the levels in those crops of chlorophyll, various minerals, moisture and other indicators of their quality. If recent and forecast weather data is added, detailed maps can be produced indicating exactly how, where and when crops should be grown. The service usually costs less than US $15 per hectare for a handful of readings a year, and can increase yields by as much as 10%.",
+       "C. Such precision farming using satellite-based intelligence is a relatively new technique. Even so, it is catching on quickly. Five years ago, for example, a French cereal-growers’ co-operative called Sevepi purchased a satellite and makes it available to its members in the form of maps of their fields, divided into three or four colour-coded zones per hectare. For each zone, the exact and best fertiliser formula is recommended. On top of this, if the amount of rain in the field has already grown quite high early in the season, and heavy showers are expected, an appropriate dose of growth regulator is recommended for each zone (as fragile stems break more easily in downpours). Then, farm vehicles equipped with global-positioning system locators automatically mix and apply the prescribed dose to each area.",
+       "D. France is the pioneer in this sort of surveillance. More farmland is analysed by satellite there than in any other country, according to Infoterra (a subsidiary of EADS Astrium), the firm that is France’s largest provider of such information, supplying data to companies such as Sevepi. Moreover, Henri Douche, head of Infoterra’s agriculture sales in Toulouse, reckons the amount of monitored farmland will increase as weather patterns change and farmers can no longer rely on the past as a guide to the future. When confounded by the yield variations that these new weather patterns will bring, even farmers who are afraid of new technology will sign up, he says.",
+       "E. Inexpensive data on the productivity of land is advantageous to governments too. Areas where fertilisers and pesticides are being applied excessively can be pinpointed, enabling a reduction in environmental and land-use damage. Says Guy Lafond, an agronomist with Agriculture and Agri-Food Canada, a government agency, says the satellite data it purchases is proving useful for the study of fields with declining productivity in the province of Saskatchewan. Over-application of nitrate fertilisers (which are also a source of greenhouse gases) appears partly responsible. And according to RapidEye, a German satellite operator, some companies are also studying satellite data with a view to selling insurance policies to governments of famine-prone countries that might be threatened by crop failure.",
+       "F. In March, RapidEye began selling data that helps forecast harvests. “Too often, farmers limit productivity by managing fields wrongly,” says Fredrick Jung-Rothenhäuser, head of product development at the firm’s headquarters in Brandenburg an der Havel. “Our satellites are the first commercial satellites to include the Red-Edge band of the light spectrum, which is sensitive to changes in chlorophyll content. More research will be necessary to realise the full benefits of the Red-Edge band. However, this band can assist in monitoring vegetation health, improving species separation and also help in measuring protein and nitrogen content in biomass.” The company’s data, which comes from both Europe and the Americas, breaks field productivity down into patches just five metres square.",
+       "G. The advantages that satellite technology provides in terms of precision farming do not have to be restricted to rich countries. In Africa, where many areas have become badly depleted of nutrients, better fertiliser management would help reverse this situation. As a consequence, the charitable trust World Agroforestry Centre, in the city of Nairobi, in Kenya, has begun to build up a collection of radiation patterns derived from around 100,000 samples of African soils. The aim of this work is to help by understanding the potential of these soils to be more agriculturally productive. Once passed on to the International Centre for Tropical Agriculture, based in Colombia, South America, it is intended that the information be used to build a database called the ‘Digital Soil Map’. When complete, this will provide farmers with free forecasts, developed with regularly updated satellite imagery, across farmland in the poorest countries in Africa. This is information which will almost certainly assist in improving crop yields. For a hunger-ravaged continent, that is good news indeed."
+      ],
+      "labelParagraphs": true
+     },
+     "questionGroups": [
+      {
+       "type": "MATCH_INFO",
+       "instruction": "Reading Passage 2 has seven paragraphs, A–G. Which paragraph contains the following information? Write the correct letter, A–G, in boxes 14–20 on your answer sheet. Choose TWO letters, A–E.",
+       "questions": [
+        {
+         "id": "q1",
+         "answer": "C",
+         "prompt": "an example of how farmers in one country are now using satellite data to determine fertiliser use",
+         "learning": {
+          "explanation": "Đáp án: C Giải thích: Đoạn C đưa ra ví dụ về các nông dân ở Pháp (“a French cereal-growers’ co-operative called Sevepi”). Họ sử dụng bản đồ vệ tinh để xác định “công thức phân bón chính xác và tốt nhất” (exact and best fertiliser formula) cho từng vùng. Vị trí và trích dẫn: Đoạn C.”…a French cereal-growers’ co-operative called Sevepi… For each zone, the exact and best fertiliser formula is recommended.”",
+          "skillTag": "MATCH_INFO_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q2",
+         "answer": "D",
+         "prompt": "a reference to climate change and its effects",
+         "learning": {
+          "explanation": "Đáp án: D Giải thích: Đoạn D đề cập đến việc các kiểu thời tiết thay đổi (“weather patterns change” – tương đương climate change) và nông dân không thể dựa vào quá khứ để dự đoán tương lai nữa. Vị trí và trích dẫn: Đoạn D.”…Henri Douche… reckons the amount of monitored farmland will increase as weather patterns change and farmers can no longer rely on the past…”",
+          "skillTag": "MATCH_INFO_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q3",
+         "answer": "E",
+         "prompt": "a reference to the effect on the soil of using too much fertiliser",
+         "learning": {
+          "explanation": "Đáp án: E Giải thích: Đoạn E nói về việc bón quá nhiều phân đạm (“Over-application of nitrate fertilisers”) chịu một phần trách nhiệm cho việc giảm năng suất đất ở Saskatchewan. Vị trí và trích dẫn: Đoạn E.”Over-application of nitrate fertilisers… appears partly responsible.”",
+          "skillTag": "MATCH_INFO_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q4",
+         "answer": "G",
+         "prompt": "an example of information that will be shared between different countries",
+         "learning": {
+          "explanation": "Đáp án: G Giải thích: Đoạn G nói về thông tin được thu thập ở Kenya (châu Phi) sau đó được chuyển đến Colombia (Nam Mỹ) để xây dựng cơ sở dữ liệu. Vị trí và trích dẫn: Đoạn G.”Once passed on to the International Centre for Tropical Agriculture, based in Colombia, South America…” (từ World Agroforestry Centre ở Kenya).",
+          "skillTag": "MATCH_INFO_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q5",
+         "answer": "D",
+         "prompt": "mention of the country which is the leader in agricultural technology",
+         "learning": {
+          "explanation": "Đáp án: D Giải thích: Đoạn D khẳng định Pháp là người tiên phong (“pioneer”) trong loại hình giám sát này và có nhiều đất nông nghiệp được phân tích hơn bất kỳ nước nào khác. Vị trí và trích dẫn: Đoạn D.”France is the pioneer in this sort of surveillance. More farmland is analysed by satellite there than in any other country…”",
+          "skillTag": "MATCH_INFO_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q6",
+         "answer": "F",
+         "prompt": "a description of an innovation in satellite imaging which requires further study",
+         "learning": {
+          "explanation": "Đáp án: F Giải thích: Đoạn F mô tả dải quang phổ “Red-Edge band” (một sự đổi mới) và nói rằng cần nhiều nghiên cứu hơn để nhận ra hết lợi ích của nó. Vị trí và trích dẫn: Đoạn F.”Our satellites are the first commercial satellites to include the Red-Edge band… More research will be necessary to realise the full benefits…”",
+          "skillTag": "MATCH_INFO_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q7",
+         "answer": "B",
+         "prompt": "evidence of the cost-effectiveness of using satellite technology in agriculture",
+         "learning": {
+          "explanation": "Đáp án: B Giải thích: Đoạn B đưa ra bằng chứng về chi phí thấp (“costs less than US $15 per hectare”) và lợi nhuận cao (“increase yields by as much as 10%”), chứng minh tính hiệu quả về chi phí. Vị trí và trích dẫn: Đoạn B.”The service usually costs less than US $15 per hectare… and can increase yields by as much as 10%.” ### Câu 21–22: Chọn đáp án đúng Đáp án: B, D (Theo bất kỳ thứ tự nào) Giải thích: B (Infoterra): Đoạn D nói Infoterra là “nhà cung cấp thông tin lớn nhất của Pháp” (France’s largest provider of such information), ngụ ý họ sở hữu nguồn dữ liệu. D (RapidEye): Đoạn F nói “Our satellites…” (Vệ tinh của chúng tôi), và họ là một “satellite operator” (nhà điều hành vệ tinh), tức là họ lấy thông tin trực tiếp. (Loại A – Sevepi vì đoạn D nói Infoterra cung cấp dữ liệu cho Sevepi. Loại C và E vì họ là người mua/sử dụng dữ liệu). Vị trí và trích dẫn: Đoạn D (Infoterra) và Đoạn F (",
+          "skillTag": "MATCH_INFO_MD_IMPORT"
+         }
+        }
+       ],
+       "options": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G"
+       ],
+       "reuseOptions": true
+      },
+      {
+       "type": "GAP",
+       "instruction": "Complete the sentences below. Choose NO MORE THAN TWO WORDS from the passage for each answer. Write your answers in boxes 23–26 on your answer sheet.",
+       "questions": [
+        {
+         "id": "q8",
+         "answer": "electromagnetic radiation",
+         "prompt": "Initially, orbiting satellites are used to measure ______ coming from farmland.",
+         "learning": {
+          "explanation": "Giải thích: Bài đọc nói ban đầu các vệ tinh được dùng để tính toán lượng “bức xạ điện từ” phản xạ từ đất nông nghiệp. Vị trí và trích dẫn: Đoạn A, câu cuối.”…calculating the amount of electromagnetic radiation reflected from agricultural land.”",
+          "skillTag": "GAP_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q9",
+         "answer": "amount",
+         "prompt": "Fredrick Jung-Rothenhäuser says that additional irregular weather will raise the ______ of satellite technology.",
+         "learning": {
+          "explanation": "Giải thích: Lưu ý: Trong câu hỏi bạn cung cấp ghi tên là “Fredrick Jung-Rothenhäuser”, nhưng nội dung về “irregular weather” (thời tiết thất thường) lại nằm ở đoạn D gắn với tên ông Henri Douche. Đây có thể là một lỗi đánh máy trong đề gốc bạn gửi. Tuy nhiên, dựa vào ngữ cảnh “raise” (tăng) do thời tiết thay đổi, từ cần điền nằm ở đoạn D. Đoạn D nói Henri Douche cho rằng “lượng” (amount) đất nông nghiệp được giám sát sẽ tăng lên khi thời tiết thay đổi. Vị trí và trích dẫn: Đoạn D.”…Henri Douche… reckons the amount of monitored farmland will increase as weather patterns change…”",
+          "skillTag": "GAP_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q10",
+         "answer": "crop failure",
+         "prompt": "As a result of satellite technology, it may become possible to insure against the threat of ______ in some countries.",
+         "learning": {
+          "explanation": "Giải thích: Câu hỏi nói về việc bảo hiểm chống lại mối đe dọa của “…” ở một số quốc gia. Bài đọc nói các công ty đang nghiên cứu bán bảo hiểm cho các chính phủ của những nước có nguy cơ bị đe dọa bởi “mất mùa”. Vị trí và trích dẫn: Đoạn E, câu cuối.”…threatened by crop failure.”",
+          "skillTag": "GAP_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q11",
+         "answer": "nutrients",
+         "prompt": "In Africa, much of the soil suffers from the loss of ______ .",
+         "learning": {
+          "explanation": "Giải thích: Câu hỏi nói đất đai ở Châu Phi chịu đựng sự mất mát của “…”. Bài đọc nói nhiều khu vực ở Châu Phi đã bị cạn kiệt nghiêm trọng “chất dinh dưỡng”. Vị trí và trích dẫn: Đoạn G, câu 2.”In Africa, where many areas have become badly depleted of nutrients…”",
+          "skillTag": "GAP_MD_IMPORT"
+         }
+        }
+       ],
+       "wordLimit": "TWO_WORDS"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "skill": "READING",
+  "taskType": "READING_PASSAGE",
+  "title": "Reading Practice 65 — The Role of Accidents in Business",
+  "description": "1 passage · 14 câu · TFNG + MATCH_ENDINGS + MC · 20 phút",
+  "durationMinutes": 20,
+  "accessLevel": "PUBLIC",
+  "achievementEligible": true,
+  "difficultyTier": "HARD",
+  "content": {
+   "parts": [
+    {
+     "passage": {
+      "title": "THE ROLE OF ACCIDENTS IN BUSINESS",
+      "paragraphs": [
+       "In 1894, Dr John Kellogg and his brother, Will, were supervising a hospital and health spa in Michigan. The patients were on a restricted diet. One day, the brothers left cooked wheat unattended for more than 24 hours. When they returned, they saw what they had done. It was no good to eat, but they decided to run the stale wheat through rollers, just to see how it would turn out. Normally, the process produced long sheets, but they were surprised to discover that this time the rollers created flat flakes. They baked them and then tried the same thing with corn. From this accidental discovery came the cornflakes that generations have now been eating for breakfast.",
+       "Accidents happen; there is nothing predictable and orderly about innovation. Nobel laureate Sir Alan Hodgkin, who discovered how nerve cells transmit electrical impulses between the skin and the brain, commented: ‘I believe that the record of my published papers conveys an impression of directedness and planning which does not at all coincide with the actual sequence of events.’",
+       "The same rule applies in business. The mistake that gave us cornflakes keeps repeating itself in the history of disruptive innovation, the kind that transforms markets. Louis Daguerre, for instance, discovered the technique that gave us photography in the 1830s, when drops of mercury from a shattered thermometer produced a photographic image. The microwave was discovered when Percy Spencer, a scientist with Raytheon, was testing a new vacuum tube and discovered that the sweet in his pocket had melted. The artificial sweetener, saccharin, was the unintentional result of a medical scientist’s work on a chemical treatment for gastric ulcers. While working for the firm 3M, researcher Art Fry had no idea he was taking the first steps towards Post-it Notes when he used bits of adhesive office paper that could be easily lifted off the page to replace the scrap-paper bookmarks that kept falling out of his hymn book.",
+       "Breakthrough and disruptive innovation are rarely driven by an orderly process. Usually, they come out of a chaotic, haphazard mess, which is why big companies, full of managers schooled in business programmes designed to eliminate random variation and mistakes, struggle with them. In these sorts of environments, accidents are called failures and are discouraged.",
+       "It is no surprise, then, that research from the late British economist Paul Geroski and London Business School’s Constantinos Markides found that companies that were skilled at innovation were usually not that skilled when it came to commercialisation, and vice versa. Their book, Fast Second, divides businesses into ‘colonists’ and ‘consolidators’. Small and nimble, colonists are adept at creating market niches but are terrible institution builders. Consolidators, with their strong cultures of discipline and cost control, know how to take clever ideas from other firms and turn them into mass-market items. Microsoft is a prime instance of this.",
+       "With companies spending hundreds of billions of dollars on research and development, US academics Robert Austin and Lee Devin examined how managers can encourage productive slip-ups. In their article Accident, Intention and Expectation in the Innovation Process, they argue that business processes actually prevent helpful mis-steps from occurring. According to their catalogue of accidents, not all false steps and mishaps are equal. Accidents, they say, come from unlikely mental associations such as memories and vague connections, looking for something and finding it in an unexpected way, looking for one thing and finding something else, and not looking for anything but finding something valuable.",
+       "Accident-prone innovation, they say, requires companies to get outside the ‘cone of expectation’. It means throwing together groups from diverse backgrounds and combining ideas in unpredictable ways. Other strategies also include having systems that watch out for accidents and examine them for value, generating them when they do not happen often enough, seizing on the useful ones, capturing their valuable features, and building on them to add value and give potential for useful accidents.",
+       "All this, however, requires thinking that is often counter-intuitive to the way businesses operate. In other words, it is the kind of thinking that goes against the beliefs of most business managers. It runs counter to the notion frequently pushed by consultants that you can ‘harness’ creativity and direct it to line up with intention. ‘The cost of accidents? In business, people tend to call such efforts failure.’",
+       "There are tentative signs that more companies are starting to realise that failure can lead to commercial gain, and that this is part of the risk-taking that underpins innovation. Australia’s largest brewing company, for example, made a bad error when it launched a new beer called Empire Lager, pitched at younger consumers. Having spent a fortune creating a beer with a sweeter taste, designing a great-looking bottle, and a television campaign, Foster’s was left with a drink that no one wanted to buy. The target market was more interested in brands built up by word of mouth.",
+       "Instead of wiping the unsuccessful product launch, Foster’s used this lesson learned to go on and develop other brands instead. One of them, Pure Blonde, is now ranked as Australia’s fifth-largest beer brand. Unlike Empire Lager, there has been almost no promotion, and its sales are generated more by word of mouth.",
+       "Other companies are taking similar steps to study their own slip-ups. Intuit, the company behind financial tools such as Quicken, holds regular ‘When Learning Hurts’ sessions. But this sort of transformation is never easy. In a market that focuses on the short-term, convincing employees and shareholders to tolerate failure and not play it safe is a big thing to ask."
+      ],
+      "labelParagraphs": true
+     },
+     "questionGroups": [
+      {
+       "type": "TFNG",
+       "instruction": "Choose YES if the statement agrees with the claims of the writer, choose NO if the statement contradicts the claims of the writer, or NOT GIVEN if it is impossible to say what the writer thinks about this. YES NO NOT GIVEN",
+       "questions": [
+        {
+         "id": "q1",
+         "answer": "YES",
+         "prompt": "The delay in the process used by the Kellogg brothers affected the final product.",
+         "options": [
+          "YES",
+          "NO",
+          "NOT GIVEN"
+         ]
+        },
+        {
+         "id": "q2",
+         "answer": "NO",
+         "prompt": "Sir Alan Hodgkin is an example of someone whose work proceeded in a logical and systematic way.",
+         "options": [
+          "YES",
+          "NO",
+          "NOT GIVEN"
+         ]
+        },
+        {
+         "id": "q3",
+         "answer": "NO",
+         "prompt": "Daguerre is an exception to the general rule of innovation.",
+         "options": [
+          "YES",
+          "NO",
+          "NOT GIVEN"
+         ]
+        },
+        {
+         "id": "q4",
+         "answer": "YES",
+         "prompt": "The discovery of saccharin occurred by accident during drug research.",
+         "options": [
+          "YES",
+          "NO",
+          "NOT GIVEN"
+         ]
+        },
+        {
+         "id": "q5",
+         "answer": "NOT GIVEN",
+         "prompt": "The company 3M should have supported Art Fry by funding his idea of Post-It Notes.",
+         "options": [
+          "YES",
+          "NO",
+          "NOT GIVEN"
+         ]
+        }
+       ]
+      },
+      {
+       "type": "MATCH_ENDINGS",
+       "instruction": "Complete each sentence with the correct ending, A-H, below.",
+       "questions": [
+        {
+         "id": "q6",
+         "answer": "E",
+         "prompt": "The usual business environment (32)"
+        },
+        {
+         "id": "q7",
+         "answer": "G",
+         "prompt": "Geroki and Markides’s book (33)"
+        },
+        {
+         "id": "q8",
+         "answer": "C",
+         "prompt": "Microsoft is an example of a company which (34)"
+        },
+        {
+         "id": "q9",
+         "answer": "A",
+         "prompt": "The origin of useful accidents (35)"
+        }
+       ],
+       "options": [
+        "can be found in unusual thoughts and chance events.",
+        "can be taught in business schools.",
+        "has made a success from someone else's invention.",
+        "is designed to nurture differences.",
+        "is unlikely to lead to creative innovation.",
+        "says that all mistakes are the same.",
+        "shows that businesses are good at either inventing or selling.",
+        "suggests ways of increasing the number of mistakes."
+       ]
+      },
+      {
+       "type": "MC",
+       "instruction": "Choose the correct answer.",
+       "questions": [
+        {
+         "id": "q10",
+         "answer": "B",
+         "prompt": "How do Austin and Devin advise companies to get out of the ‘cone of expectation’?",
+         "options": [
+          "A. by decreasing the number of company systems",
+          "B. by forming teams of different types of people",
+          "C. by hiring new and creative people",
+          "D. by holding regular brainstorming meetings"
+         ]
+        },
+        {
+         "id": "q11",
+         "answer": "B",
+         "prompt": "In recommending ‘counter-intuitive’ thinking, what do Austin and Devin imply?",
+         "options": [
+          "A. that failing at business is bad for staff morale",
+          "B. that innovation cannot be planned for",
+          "C. that most businesses should be devoted to avoiding mistakes",
+          "D. that the cost of mistakes is an important consideration"
+         ]
+        },
+        {
+         "id": "q12",
+         "answer": "A",
+         "prompt": "The writer describes the Empire Lager disaster in order to show that",
+         "options": [
+          "A. success can come out of a business failure",
+          "B. the majority of companies now value risk-talking.",
+          "C. TV advertising works better on older people",
+          "D. young beer drinkers do not like a sweet taste"
+         ]
+        },
+        {
+         "id": "q13",
+         "answer": "C",
+         "prompt": "Pure Blonde has been more successful than Empire Lager because",
+         "options": [
+          "A. digital media other than TV were used.",
+          "B. it was advertised under a different brand name.",
+          "C. it was launched with very little advertising.",
+          "D. the advertising budget was larger"
+         ]
+        },
+        {
+         "id": "q14",
+         "answer": "B",
+         "prompt": "The writer concludes that creating a culture that learns from mistakes",
+         "options": [
+          "A. brings short-term financial gains.",
+          "B. can be very difficult for some companies.",
+          "C. holds no risk for workers.",
+          "D. is a popular move with shareholders."
+         ],
+         "learning": {
+          "explanation": "TEST 2 READING PASSAGE 1 You should spend about 20 minutes on Questions 1–13, which are based on Reading Passage 1 below.",
+          "skillTag": "MC_MD_IMPORT"
+         }
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "skill": "READING",
+  "taskType": "READING_PASSAGE",
+  "title": "Reading Practice 66 — Mechanisms of Linguistic Change",
+  "description": "1 passage · 14 câu · GAP + TFNG + MATCH_FEATURES · 20 phút",
+  "durationMinutes": 20,
+  "accessLevel": "PUBLIC",
+  "achievementEligible": true,
+  "difficultyTier": "HARD",
+  "content": {
+   "parts": [
+    {
+     "passage": {
+      "title": "Mechanisms of Linguistic Change",
+      "paragraphs": [
+       "A. The changes that have caused the most disagreement are those in pronunciation. We have various sources of evidence for the pronunciations of earlier times, such as the spellings, the treatment of words borrowed from other languages or borrowed by them, the descriptions of contemporary grammarians and spelling-reformers, and the modern pronunciations in all the languages and dialects concerned From the middle of the sixteenth century, there are in England writers who attempt to describe the position of the speech-organs for the production of English phonemes, and who invent what are in effect systems of phonetic symbols. These various kinds of evidence, combined with a knowledge of the mechanisms of speech-production, can often give us a very good idea of the pronunciation of an earlier age, though absolute certainty is never possible.",
+       "B. When we study the pronunciation of a language over any period of a few generations or more, we find there are always large-scale regularities in the changes: for example, over a certain period of time, just about all the long [a:] vowels in a language may change into long [e:] vowels, or all the [b] consonants in a certain position (for example at the end of a word) may change into [p] consonants. Such regular changes are often called sound laws. There are no universal sound laws (even though sound laws often reflect universal tendencies), but simply particular sound laws for one given language (or dialect) at one given period.",
+       "C. It is also possible that fashion plays a part in the process of change. It certainly plays a part in the spread of change: one person imitates another, and people with the most prestige are most likely to be imitated, so that a change that takes place in one social group may be imitated (more or less accurately) by speakers in another group. When a social group goes up or down in the world, its pronunciation of Russian, which had formerly been considered desirable, became on the contrary an undesirable kind of accent to have, so that people tried to disguise it. Some of the changes in accepted English pronunciation in the seventeenth and eighteenth centuries have been shown to consist in the replacement of one style of pronunciation by another style already existing, and it is likely that such substitutions were a result of the great social changes of the period: the increased power and wealth of the middle classes, and their steady infiltration upwards into the ranks of the landed gentry, probably carried elements of middle-class pronunciation into upper-class speech.",
+       "D. A less specific variant of the argument is that the imitation of children is imperfect: they copy their parents’ speech, but never reproduce it exactly. This is true, but it is also true that such deviations from adult speech are usually corrected in later childhood. Perhaps it is more significant that even adults show a certain amount of random variation in their pronunciation of a given phoneme, even if the phonetic context is kept unchanged. This, however, cannot explain changes in pronunciation unless it can be shown that there is some systematic trend in the failures of imitation: if they are merely random deviations they will cancel one another out and there will be no net change in the language.",
+       "E. One such force which is often invoked is the principle of ease, or minimization of effort. The change from fussy to fuzzy would be an example of assimilation, which is a very common kind of change. Assimilation is the changing of a sound under the influence of a neighbouring one. For example, the word scant was once skamt, but the /m/ has been changed to /n/ under the influence of the following /t/. Greater efficiency has hereby been achieved, because /n/ and /t/ are articulated in the same place (with the tip of the tongue against the teeth-ridge), whereas /m/ is articulated elsewhere (with the two lips). So the place of articulation of the nasal consonant has been changed to conform with that of the following plosive. A more recent example of the same kind of thing is the common pronunciation of football as football.",
+       "F. Assimilation is not the only way in which we change our pronunciation in order to increase efficiency. It is very common for consonants to be lost at the end of a word: in Middle English, word-final [-n] was often lost in unstressed syllables, so that baken ‘to bake’ changed from [‘ba:kan] to [‘ba:k3], and later to [ba:k]. Consonant-clusters are often simplified. At one time there was a [t] in words like castle and Christmas, and an initial [k] in words like knight and know. Sometimes a whole syllable is dropped out when two successive syllables begin with the same consonant (haplology): a recent example is temporary, which in Britain is often pronounced as if it were tempory."
+      ],
+      "labelParagraphs": true
+     },
+     "questionGroups": [
+      {
+       "type": "GAP",
+       "instruction": "Complete the summary below. Choose NO MORE THAN THREE WORDS from the passage for each answer.",
+       "questions": [
+        {
+         "id": "q1",
+         "answer": "sound laws",
+         "prompt": "Large-scale regular changes are usually called ______ .",
+         "learning": {
+          "explanation": "Giải thích: Những thay đổi có quy mô lớn và mang tính quy luật trong phát âm được gọi là các định luật âm thanh. Vị trí: Đoạn B: “Such regular changes are often called sound laws.”",
+          "skillTag": "GAP_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q2",
+         "answer": "fashion",
+         "prompt": "Firstly, the influence of one language on another; when one person imitates another pronunciation(the most prestige’s), the imitation always partly involving factor of ______ .",
+         "learning": {
+          "explanation": "Giải thích: Thời trang đóng vai trò quan trọng trong việc lan truyền sự thay đổi ngôn ngữ khi mọi người bắt chước những người có địa vị cao. Vị trí: Đoạn C: “It is also possible that fashion plays a part in the process of change… one person imitates another, and people with the most prestige are most likely to be imitated…”",
+          "skillTag": "GAP_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q3",
+         "answer": "imperfect",
+         "prompt": "Secondly, the imitation of children from adults language sometimes are ______ , and may also contribute to this change if there are insignificant deviations though later they may be corrected.",
+         "learning": {
+          "explanation": "Giải thích: Việc trẻ em bắt chước cách nói của cha mẹ thường không hoàn hảo, dẫn đến những sai lệch so với tiếng nói của người lớn. Vị trí: Đoạn D: “…the imitation of children is imperfect: they copy their parents’ speech, but never reproduce it exactly.”",
+          "skillTag": "GAP_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q4",
+         "answer": "principle of ease",
+         "prompt": "Finally, for those random variations in pronunciation, the deeper evidence lies in the ______ or minimization of effort.",
+         "learning": {
+          "explanation": "Giải thích: Nguyên tắc về sự dễ dàng (tối thiểu hóa nỗ lực) là động lực đằng sau những thay đổi nhằm tăng hiệu quả phát âm. Vị trí: Đoạn E: “One such force which is often invoked is the principle of ease, or minimization of effort.” ### Questions 31–37: TRUE / FALSE / NOT GIVEN",
+          "skillTag": "GAP_MD_IMPORT"
+         }
+        }
+       ],
+       "wordLimit": "THREE_WORDS"
+      },
+      {
+       "type": "TFNG",
+       "instruction": "Do the following statements agree with the information given in Reading Passage? In boxes 31-37 on your answer sheet, write: TRUE if the statement agrees with the information FALSE if the statement contradicts the information",
+       "questions": [
+        {
+         "id": "q5",
+         "answer": "FALSE",
+         "prompt": "It is impossible for modern people to find pronunciation of words in an earlier age",
+         "options": [
+          "TRUE",
+          "FALSE",
+          "NOT GIVEN"
+         ],
+         "learning": {
+          "explanation": "Giải thích: Tác giả khẳng định rằng thông qua nhiều bằng chứng khác nhau, chúng ta có thể biết khá rõ về cách phát âm của một thời đại trước đó. Vị trí: Đoạn A: “…can often give us a very good idea of the pronunciation of an earlier age, though absolute certainty is never possible.”",
+          "skillTag": "TFNG_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q6",
+         "answer": "FALSE",
+         "prompt": "The great change of language in Russian history is related to the rising status and fortune of middle classes.",
+         "options": [
+          "TRUE",
+          "FALSE",
+          "NOT GIVEN"
+         ],
+         "learning": {
+          "explanation": "Giải thích: Bài đọc đề cập đến việc tiếng Nga từng được coi là đáng ao ước nhưng sau đó thì không, còn chi tiết về sự gia tăng tài sản của tầng lớp trung lưu là để giải thích cho tiếng Anh. Vị trí: Đoạn C: “Some of the changes in accepted English pronunciation… probably carried elements of middle-class pronunciation into upper-class speech.”",
+          "skillTag": "TFNG_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q7",
+         "answer": "NOT GIVEN",
+         "prompt": "All the children learn speeches from adults while they assume that certain language is difficult to imitate exactly.",
+         "options": [
+          "TRUE",
+          "FALSE",
+          "NOT GIVEN"
+         ],
+         "learning": {
+          "explanation": "Giải thích: Văn bản chỉ nói trẻ em bắt chước không hoàn hảo, chứ không đề cập đến việc trẻ em “tự giả định” rằng ngôn ngữ đó khó bắt chước. Vị trí: Đoạn D.",
+          "skillTag": "TFNG_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q8",
+         "answer": "TRUE",
+         "prompt": "Pronunciation with causal inaccuracy will not exert big influence on language changes.",
+         "options": [
+          "TRUE",
+          "FALSE",
+          "NOT GIVEN"
+         ],
+         "learning": {
+          "explanation": "Giải thích: Những sai lệch ngẫu nhiên trong phát âm của người lớn sẽ tự triệt tiêu lẫn nhau và không tạo ra thay đổi thực sự trừ khi có một xu hướng hệ thống. Vị trí: Đoạn D: “…if they are merely random deviations they will cancel one another out and there will be no net change in the language.”",
+          "skillTag": "TFNG_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q9",
+         "answer": "TRUE",
+         "prompt": "The word scant can be pronounced more easily than skamt",
+         "options": [
+          "TRUE",
+          "FALSE",
+          "NOT GIVEN"
+         ],
+         "learning": {
+          "explanation": "Giải thích: Việc chuyển từ skamt sang scant giúp việc phát âm dễ dàng hơn vì /n/ và /t/ được phát âm cùng một chỗ. Vị trí: Đoạn E: “Greater efficiency has hereby been achieved, because /n/ and /t/ are articulated in the same place…”",
+          "skillTag": "TFNG_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q10",
+         "answer": "NOT GIVEN",
+         "prompt": "The [g] in gnat not being pronounced will not be spelt out in the future.",
+         "options": [
+          "TRUE",
+          "FALSE",
+          "NOT GIVEN"
+         ],
+         "learning": {
+          "explanation": "Giải thích: Văn bản không hề nhắc đến từ “gnat” hay dự đoán về cách viết của nó trong tương lai. Vị trí: Đoạn F.",
+          "skillTag": "TFNG_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q11",
+         "answer": "TRUE",
+         "prompt": "The sound of ‘temporary’ cannot wholly present its spelling.",
+         "options": [
+          "TRUE",
+          "FALSE",
+          "NOT GIVEN"
+         ],
+         "learning": {
+          "explanation": "Giải thích: Tại Anh, từ temporary thường được phát âm là tempory, nghĩa là âm thanh không còn đại diện đầy đủ cho cách viết. Vị trí: Đoạn F: “…temporary, which in Britain is often pronounced as if it were tempory.” ### Questions 38–40: Sentence Completion",
+          "skillTag": "TFNG_MD_IMPORT"
+         }
+        }
+       ]
+      },
+      {
+       "type": "MATCH_FEATURES",
+       "instruction": "Look at the following sentences and the list of statements below. Match each statement with the correct sentence, A-D. Write the correct letter, A-D, in boxes 38-40 on your answer sheet.",
+       "questions": [
+        {
+         "id": "q12",
+         "answer": "C",
+         "prompt": "As a consequence, ‘b’ will be pronounced as",
+         "learning": {
+          "explanation": "Giải thích: Việc phụ âm [b] chuyển thành [p] là ví dụ của các thay đổi quy mô lớn có tính quy luật (sound laws). Vị trí: Đoạn B: “…all the [b] consonants… may change into [p] consonants. Such regular changes are often called sound laws.”",
+          "skillTag": "MATCH_FEATURES_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q13",
+         "answer": "B",
+         "prompt": "The pronunciation of [mt] changed to [nt]",
+         "learning": {
+          "explanation": "Giải thích: Việc skamt đổi thành scant ([mt] thành [nt]) là ví dụ của hiện tượng đồng hóa (assimilation). Vị trí: Đoạn E: “The change from fussy to fuzzy would be an example of assimilation… the word scant was once skamt…”",
+          "skillTag": "MATCH_FEATURES_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q14",
+         "answer": "A",
+         "prompt": "The omit of ‘t” in the sound of Christmas",
+         "learning": {
+          "explanation": "Giải thích: Việc bỏ âm [t] trong Christmas là để tăng hiệu quả và giảm bớt nỗ lực khi phát âm. Vị trí: Đoạn F: “…change our pronunciation in order to increase efficiency… At one time there was a [t] in words like castle and Christmas.”",
+          "skillTag": "MATCH_FEATURES_MD_IMPORT"
+         }
+        }
+       ],
+       "options": [
+        "Since the speakers can pronounce it with less effort",
+        "Assimilation of a sound under the influence of a neighbouring one",
+        "It is a trend for changes in pronunciation in a large scale in a given period",
+        "Because the speaker can pronounce [n] and [t] both in the same time"
+       ],
+       "reuseOptions": true
+      }
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "skill": "READING",
+  "taskType": "READING_PASSAGE",
+  "title": "Reading Practice 67 — Graffiti",
+  "description": "1 passage · 13 câu · MATCH_HEADINGS + TFNG + MATCH_ENDINGS · 20 phút",
+  "durationMinutes": 20,
+  "accessLevel": "PUBLIC",
+  "achievementEligible": true,
+  "difficultyTier": "EASY",
+  "content": {
+   "parts": [
+    {
+     "passage": {
+      "title": "Graffiti",
+      "paragraphs": [
+       "A. The word ‘graffiti’ derives from the Greek word graphein, meaning to write. This evolved into the Latin word graffito. Graffiti is the plural form of graffito. Simply put, graffiti is a drawing, scribbling or writing on a flat surface. Today, we equate graffiti with the ‘New York’ or ‘Hip Hop’ style which emerged from New York City in the 1970s. Hip Hop was originally an inner-city concept. It evolved from the rap music made in Brooklyn and Harlem in the late 1960s and early 1970s. Donald Clarke, a music historian, has written that rap music was a reaction to the disco music of the period. Disco was centred in the rich, elitist clubs of Manhattan and rap emerged on street corners as an alternative. Using lyrical rhythms and ‘beat boxing’, the music was a way to express feelings about inner-city life. Hip Hop emerged as turntables began to be used to form part of the rhythm by ‘scratching’ (the sound created by running the stylus over the grooves of an LP). As Hip Hop music emerged so did a new outlet for artistic visibility. Keith Haring began using posters to place his uniquely drawn figures and characters in public places. Soon he began to draw directly on subway walls and transit posters. The uniqueness of his drawings eventually led to their being shown in galleries and published in books and his art became ‘legitimate’.",
+       "B. At about the same time as Keith Haring, a delivery messenger began writing ‘Taki 183’ whenever he delivered documents. Soon his name was all over the city. Newspapers and magazines wrote articles about him and Keith Haring, and soon both became celebrities. This claim to fame attracted many young people, especially those involved with rapping, and they began to imitate ‘Taki 183’, as a means to indicate the writer’s presence, i.e. the age-old statement of I was here. Graffiti was soon incorporated int the Hip Hop culture and became a sort of triad with rapping and breakdancing. Breakdancing has since lost much of its initial popularity, while rapping has emerged as a major style in American music. New York City was inundated with graffiti during the late seventies and early eighties, but as media coverage faded so did the graffiti. Then, in the mid-eighties, a national TV programme did a graffiti story and set off a graffiti wildfire which has since gone global.",
+       "C. In the past, graffiti artists usually worked alone, but the size and complexity of pieces, as well as safety concerns, motivated artists to work together in crews, which are groups of graffitists that vary in membership from 3 to 10 or more persons. A member of a crew can be ‘down with’ (affiliated with) more than one crew. To join a crew, one must have produced stylish pieces and show potential for developing one’s own, unique style. A crew is headed by a king or queen who is usually that person recognised as having the best artistic ability among the members of the crew. One early crew wrote TAG as their crew name, an acronym for Tuff Artists Group. Tag has since come to mean both graffiti writing, ‘tagging’ and graffiti, a ‘tag’. Crews often tag together, writing both the crew tag and their own personal tags. Graffiti has its own language with terms such as piece, toy, wild-style, and racking.",
+       "D. At first pens and markets were used, but these were limited as to what types of surfaces they worked on, so very quickly everyone started using spray paint. Spray paint could mark all types of surfaces and be quick and easy to use. However, the spray nozzles on the spray cans proved inadequate to create more colourful pieces. Caps from deodorant, insecticide, and other aerosol cans were substituted to allow for a finer or thicker stream of paint. As municipalities began passing graffiti ordinances outlawing graffiti implements, clever ways of disguising paint implements were devised. Shoe polish, deodorant roll-ons and other seemingly innocent containers were emptied and filled with paint. Markers, art pens and grease pens obtained from art supply stores were also used. In fact, nearly any object which can leave a mark on most surfaces is used by taggers, though the spray can is the medium of choice for most taggers.",
+       "E. As graffiti has grown, so too has its character. What began as an urban lower-income protest, graffiti now spans all racial and economic groups. While many inner-city kids are still heavily involved in the graffiti culture, taggers range from the ultra-rich to the ultra-poor. There is no general classification of graffitists. They range in age from 12-30 years old, and there are male and female artists. One tagger recently caught in Philadelphia was a 27-year-old stockbroker who drove to tagging sites in his BMW. Styles have dramatically evolved from the simple cursory style, which is still the most prevalent, to intricate interlocking letter graphic designs with multiple colours called ‘pieces’ (from master-pieces). Gang markings of territory also fit the definition of graffiti, and they mainly consist of tags and messages that provide ‘news’ of happenings in the neighbourhood.",
+       "F. Graffiti shops, both retail and on-line, sell a wide variety of items to taggers. Caps, markers, magazines, T-shirts, backpacks, shorts with hidden pockets, even drawing books with templates of different railroad cars can be purchased. Over 25,000 graffiti sites exist on the world wide web; the majority of these are pro-graffiti. Graffiti vandalism is a problem in nearly every urban area in the world. Pro-graffiti web sites post photos of graffiti from Europe, South America, the Philippines, Australia, South Africa, China and Japan. Billions of dollars worldwide are spent each year in an effort to curb graffiti.",
+       "G. While most taggers are simply interested in seeing their name is as many places as possible and as visibly as possible, some taggers are more content to find secluded warehouse walls where they can practise their pieces. Some of these taggers are able to sell twelve-foot canvases of their work for upwards of $10 – $12,000. As graffiti was introduced to the art world, two trends happened. One, the art world of collectors, dealers, curators, artists and the like helped graffitists evolve in style, presumably by sharing their artistic knowledge with the newcomers. Two, the exposure helped to expand graffiti into all parts of the world. Furthermore, more progressive cities have recognised the talent of graffitists by providing a means for them to do legal graffiti art, which has helped to foster the art form and lessen the amount of graffiti art that appears in the city as vandalism. Likewise, organisations who support graffiti artists seek out places to do legal graffiti such as abandoned buildings, businesses, or community walls in parks. What this shows is that some graffiti, particularly in the form of a spray can art, is recognised as art by the conventional art world."
+      ],
+      "labelParagraphs": true
+     },
+     "questionGroups": [
+      {
+       "type": "MATCH_HEADINGS",
+       "instruction": "Reading Passage 1 has seven paragraphs, A-G. Choose the correct heading for each paragraph from the list of headings below.",
+       "questions": [
+        {
+         "id": "q1",
+         "answer": "x",
+         "paragraph": "A",
+         "learning": {
+          "explanation": "Giải thích: Đoạn văn đi từ nguồn gốc từ vựng cổ đại (Hy Lạp và Latin) cho đến sự hình thành của phong cách Hip Hop hiện đại tại New York những năm 1970. Vị trí: “The word ‘graffiti’ derives from the Greek word graphein… Today, we equate graffiti with the ‘New York’ or ‘Hip Hop’ style which emerged from New York City in the 1970s.”",
+          "skillTag": "MATCH_HEADINGS_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q2",
+         "answer": "viii",
+         "paragraph": "B",
+         "learning": {
+          "explanation": "Giải thích: Mô tả sự lan tỏa của graffiti từ một cá nhân (Taki 183) thành một hiện tượng được báo chí chú ý và cuối cùng bùng nổ toàn cầu nhờ truyền hình. Vị trí: “Newspapers and magazines wrote articles about him… then, in the mid-eighties, a national TV programme… set off a graffiti wildfire which has since gone global.”",
+          "skillTag": "MATCH_HEADINGS_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q3",
+         "answer": "ii",
+         "paragraph": "C",
+         "learning": {
+          "explanation": "Giải thích: Nói về các quy tắc trong giới graffiti như làm việc theo nhóm (crews), hệ thống cấp bậc và ngôn ngữ/thuật ngữ riêng. Vị trí: “artists… work together in crews… A crew is headed by a king or queen… Graffiti has its own language with terms such as piece, toy, wild-style, and racking.”",
+          "skillTag": "MATCH_HEADINGS_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q4",
+         "answer": "iii",
+         "paragraph": "D",
+         "learning": {
+          "explanation": "Giải thích: Liệt kê chi tiết các công cụ vẽ, sự cải tiến các loại nắp bình xịt và cách ngụy trang dụng cụ. Vị trí: “everyone started using spray paint… Caps from deodorant, insecticide… were substituted… Shoe polish, deodorant roll-ons… were emptied and filled with paint.”",
+          "skillTag": "MATCH_HEADINGS_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q5",
+         "answer": "v",
+         "paragraph": "E",
+         "learning": {
+          "explanation": "Giải thích: Khẳng định graffiti không còn giới hạn ở tầng lớp nghèo mà đã xuất hiện ở mọi thành phần xã hội, từ người nghèo đến môi giới chứng khoán đi xe BMW. Vị trí: “What began as an urban lower-income protest, graffiti now spans all racial and economic groups… taggers range from the ultra-rich to the ultra-poor.”",
+          "skillTag": "MATCH_HEADINGS_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q6",
+         "answer": "vi",
+         "paragraph": "F",
+         "learning": {
+          "explanation": "Giải thích: Đề cập đến khía cạnh kinh tế: các cửa hàng bán đồ graffiti và chi phí khổng lồ mà các thành phố phải bỏ ra để xử lý nó. Vị trí: “Graffiti shops, both retail and on-line, sell a wide variety of items… Billions of dollars worldwide are spent each year in an effort to curb graffiti.”",
+          "skillTag": "MATCH_HEADINGS_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q7",
+         "answer": "i",
+         "paragraph": "G",
+         "learning": {
+          "explanation": "Giải thích: Sự công nhận của giới nghệ thuật truyền thống, giá trị cao của các tác phẩm và việc chính quyền cung cấp không gian vẽ hợp pháp. Vị trí: “Some of these taggers are able to sell twelve-foot canvases of their work for upwards of $10 – $12,000… recognised as art by the conventional art world.” ### Questions 8–10: TRUE / FALSE / NOT GIVEN",
+          "skillTag": "MATCH_HEADINGS_MD_IMPORT"
+         }
+        }
+       ],
+       "options": [
+        "Becoming mainstream art",
+        "The Culture Of Graffiti",
+        "Tools Of The Trade",
+        "Internet Art Styles",
+        "Crossing Boundaries",
+        "Cashing In On The Craze",
+        "Trends In Street Music",
+        "Gradually gaining popularity",
+        "A Solitary Existence",
+        "From Ancient To Modern"
+       ]
+      },
+      {
+       "type": "TFNG",
+       "instruction": "Do the following statements agree with the information given in Reading Passage 1? In boxes 8-10 on your answer sheet, write TRUE – if the statement agrees with the writer’s claims FALSE – if the statement contradicts the writer’s claims",
+       "questions": [
+        {
+         "id": "q8",
+         "answer": "NOT GIVEN",
+         "prompt": "The introduction of anti-graffiti laws managed to curb its spread in some cities.",
+         "options": [
+          "TRUE",
+          "FALSE",
+          "NOT GIVEN"
+         ],
+         "learning": {
+          "explanation": "Giải thích: Bài đọc có nói về việc các thành phố chi tiền và ra luật để kiềm chế graffiti, nhưng không thông tin nào khẳng định các luật này “đã thành công” (managed to curb) ở một số thành phố. Vị trí: “Billions of dollars worldwide are spent each year in an effort to curb graffiti.” (Chỉ nói về nỗ lực chi tiền, không nói về kết quả thành công)",
+          "skillTag": "TFNG_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q9",
+         "answer": "TRUE",
+         "prompt": "Along with Hip Hop music came a new way of visual expression.",
+         "options": [
+          "TRUE",
+          "FALSE",
+          "NOT GIVEN"
+         ],
+         "learning": {
+          "explanation": "Giải thích: Sự ra đời của nhạc Hip Hop đi kèm với một lối thoát mới cho sự hiển thị nghệ thuật (chính là graffiti). Vị trí: “As Hip Hop music emerged so did a new outlet for artistic visibility.”",
+          "skillTag": "TFNG_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q10",
+         "answer": "NOT GIVEN",
+         "prompt": "There was hostility towards graffiti artists among the established art community.",
+         "options": [
+          "TRUE",
+          "FALSE",
+          "NOT GIVEN"
+         ],
+         "learning": {
+          "explanation": "Giải thích: Không có thông tin về sự thù địch. Ngược lại, đoạn G còn nói giới nghệ thuật đã giúp đỡ các nghệ sĩ graffiti phát triển. Vị trí: “the art world of collectors, dealers, curators, artists and the like helped graffitists evolve in style…” ### Questions 11–13: Sentence Completion",
+          "skillTag": "TFNG_MD_IMPORT"
+         }
+        }
+       ]
+      },
+      {
+       "type": "MATCH_ENDINGS",
+       "instruction": "Complete each sentence with the correct ending A-F below.",
+       "questions": [
+        {
+         "id": "q11",
+         "answer": "F",
+         "prompt": "Graffiti is flourishing in the 21st century as people from all backgrounds have begun to ……………………….",
+         "learning": {
+          "explanation": "Giải thích: Vì graffiti đã lan rộng ra mọi tầng lớp và được giới nghệ thuật công nhận, con người bắt đầu đón nhận nó như một cách biểu đạt. Vị trí: “graffiti now spans all racial and economic groups… recognised as art by the conventional art world.”",
+          "skillTag": "MATCH_ENDINGS_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q12",
+         "answer": "C",
+         "prompt": "As graffiti has developed, it has come to ……………………….",
+         "learning": {
+          "explanation": "Giải thích: Graffiti hiện tại đã vượt qua các ranh giới về chủng tộc, địa vị kinh tế và giới tính. Vị trí: “spans all racial and economic groups… there are male and female artists.”",
+          "skillTag": "MATCH_ENDINGS_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q13",
+         "answer": "E",
+         "prompt": "Graffiti artists used many ingenious methods to ……………………..",
+         "learning": {
+          "explanation": "Giải thích: Nghệ sĩ sử dụng các vật dụng như hộp lăn khử mùi hay xi đánh giày để ngụy trang sơn xịt nhằm qua mắt chính quyền. Vị trí: “As municipalities began passing graffiti ordinances… clever ways of disguising paint implements were devised.”",
+          "skillTag": "MATCH_ENDINGS_MD_IMPORT"
+         }
+        }
+       ],
+       "options": [
+        "use it as a means of expression of rebellion against law enforcement.",
+        "become increasingly more difficult to succeed in the art world.",
+        "transcend race, status, and gender.",
+        "realize that inner-urban areas where poverty is the norm are decreasing.",
+        "conceal their intentions from law enforcement officers.",
+        "embrace it as a means of expression."
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "skill": "READING",
+  "taskType": "READING_PASSAGE",
+  "title": "Reading Practice 68 — The costs of brand loyalty",
+  "description": "1 passage · 14 câu · MC + TFNG + MATCH_FEATURES · 20 phút",
+  "durationMinutes": 20,
+  "accessLevel": "PUBLIC",
+  "achievementEligible": true,
+  "difficultyTier": "HARD",
+  "content": {
+   "parts": [
+    {
+     "passage": {
+      "title": "The costs of brand loyalty",
+      "paragraphs": [
+       "A Londoner with a sudden urge for giant African snails could do worse than head to the bustling marketplace in Brixton, a part of south London that is home to many people from Africa. Markets like Brixton market that eater to migrants are testament to the fact that people often retain very strong preferences for the kinds of food they grew up eating. Just ask the expatriate Britons who flock to ‘Tea and Sympathy’ in New York's Greenwich Village for pots of Marmite, a yeast- based spread whose delights baffle other nationalities (and many of their own compatriots).",
+       "Past research has shown that people are often willing to pay much more for a favoured brand than for seemingly identical alternatives. It is not always obvious why. However, there is ample evidence to support the theory that certain food preferences form in childhood. Children have a predisposition to fear new foods, which is only overcome when they are repeatedly presented with, and encouraged to consume, a particular food. Evidence shows that children's instinctive wariness of new foods dates back to the times when humans had to forage for food, and it was important that they learnt which foods were safe to eat. In the modern world, people routinely express a strong liking for a brand even though they are unable to tell the brand apart from rival brands in blind tests, and many studies have found that advertising alone cannot explain the strength of brand loyalty.",
+       "A new study by economists from the universities of Tilburg and Chicago tracks the consumption patterns of 38,000 US households over two years, and confirms the theory that such brand loyalty is widespread, deep and long-lasting. There were clear local patterns in consumption, although the same brands were available everywhere. But 16% of people studied were migrants: they had grown up in one state and moved to another. These migrants had the same options, in terms of what was on offer and at what price, as everyone else in their adopted home, but although they consumed local favourites they bought fewer than longtime residents. This gap between purchases of migrants and those of the locally born was quite stubborn: although it faded the longer a person lived in their new state. it still took 20 year to halve in magnitude. Even 50 years on, it was still large enough to show up in the data. This could mean that the benefits of being the first brand into a market could last longer than might he assumed.",
+       "David Atkin of Yale University has identified some important implications of local food favourites. He suggests in a recent paper that the effects of people being loyal to known brands may also lead economists to rethink the say they calculate the benefits resulting from trade. This is because opening up to trade is in some ways very similar to migrating, as it changes the composition and prices of the foods that are available to a person. In particular, trade can cause local foods to become relatively more expensive. Atkin's data show something many economists do not take into account: when a traditional food has to compete with imported foods it may no longer be the cheapest food available for people to choose to eat. Atkin decided to look at this situation in the context of developing countries.",
+       "To illustrate his point, Atkin uses detailed data about people's food choices in India. India is a good choice because it covers a large number of climatic zones where different specialised crops are grown. Despite being part of the same country, the prevalence or internal barriers to trade means that its regions are best thought of as being only partially open to trade. Atkin's data show that the foods a region specialises in producing are instead cheaper in that region.",
+       "However, there has been some opening up of internal trade in India in recent years, and this has revealed that for every rupee spent on food, people's intake of calories declined most in regions where prices in local favourite foods had risen. In theory, when there is a greater choice of types of food, people should adjust their food habits and purchase the cheapest option so that they boost their calorie intake. However, in practice, food habits mean that consumers keep buying the things they know and like even though these foods have become relatively expensive. Atkin calculates that if all barriers to internal trade in India were abolished, the average Indian household would have to generate a rise of 3.3 percent in income to maintain their calorie intake.",
+       "In developing countries where there is a high prevalence of undernutrition, such as in sub-Saharan Africa, the habit of continuing to eat favourite foods could have a serious effect on development. There is clear evidence that nutritional shortfalls in children can affect their ability to work and earn as adults, and also has detrimental effects on their long-term health.",
+       "Consequently, the nutritional declines that can occur as a result of the opening up of trade are of serious concern, because an entire generation that is malnourished as children will continue to suffer irreversible consequences for the rest of their lives, which could hinder the development of their country due to a lack of a quality workforce."
+      ],
+      "labelParagraphs": true
+     },
+     "questionGroups": [
+      {
+       "type": "MC",
+       "instruction": "Choose the correct answer.",
+       "questions": [
+        {
+         "id": "q1",
+         "answer": "D",
+         "prompt": "In the first paragraph the writer's purpose is to",
+         "options": [
+          "A. show that London has a multicultural society.",
+          "B. point out that people grow up eating food from markets.",
+          "C. give examples of the wide variety of food available in Britain.",
+          "D. illustrate the way adults enjoy eating food from their childhood."
+         ],
+         "learning": {
+          "explanation": "Câu hỏi: In the first paragraph the writer's purpose is to A. show that London has a multicultural society. B. point out that people grow up eating food from markets. C. give examples of the wide variety of food available in Britain. D. illustrate the way adults enjoy eating food from their childhood. (Trong đoạn đầu tiên, mục đích của tác giả là A. chỉ ra rằng London có một xã hội đa văn hoá. B. nhấn mạnh rằng con người lớn lên với những món ăn từ các khu chợ. C. đưa ra ví dụ về sự đa dạng của thực phẩm có ở Anh. D. minh hoạ cách người trưởng thành thích ăn lại những món ăn thời thơ ấu.) Đoạn chứa đáp án: Markets like Brixton market that eater to migrants are testament to the fact that people often retain very strong preferences for the kinds of food they grew up eating. Just ask the expatriate Britons who flock to ‘Tea and Sympathy’ in New York's Greenwich Village for pots of Marmite, ",
+          "skillTag": "MC_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q2",
+         "answer": "C",
+         "prompt": "Economists from the universities of Tilburg and Chicago found that people who have migrated from one American state to another",
+         "options": [
+          "A. were poorer than longtime residents of the new state.",
+          "B. sometimes returned to their home states to buy their favourite foods.",
+          "C. bought only some of the brands which were popular in their new state.",
+          "D. were particularly sensitive to price increases on food items."
+         ],
+         "learning": {
+          "explanation": "Câu hỏi: Economists from the universities of Tilburg and Chicago found that people who have migrated from one American state to another A. were poorer than longtime residents of the new state. B. sometimes returned to their home states to buy their favourite foods. C. bought only some of the brands which were popular in their new state. D. were particularly sensitive to price increases on food items. (Các nhà kinh tế học từ các trường đại học Tilburg và Chicago phát hiện rằng A. những người di cư từ bang này sang bang khác ở Mỹ nghèo hơn so với các cư dân sống lâu năm ở bang mới. B. thỉnh thoảng quay lại bang quê nhà để mua những món ăn yêu thích. C. chỉ mua một số thương hiệu phổ biến ở bang họ chuyển đến. D. đặc biệt nhạy cảm với việc tăng giá các mặt hàng thực phẩm.) Đoạn chứa đáp án: These migrants had the same options, in terms of what was on offer and at what price, as everyone els",
+          "skillTag": "MC_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q3",
+         "answer": "D",
+         "prompt": "Atkin's research shows that",
+         "options": [
+          "A. trade makes favourite foods hard to find.",
+          "B. trade results in increasing levels of migration.",
+          "C. imported food is of a higher quality than local food.",
+          "D. economists fail to understand all the effects of increased trade."
+         ],
+         "learning": {
+          "explanation": "Câu hỏi: Atkin's research shows that A. trade makes favourite foods hard to find. B. trade results in increasing levels of migration. C. imported food is of a higher quality than local food. D. economists fail to understand all the effects of increased trade. (Nghiên cứu của Atkin cho thấy rằng A. thương mại khiến các món ăn yêu thích trở nên khó tìm hơn. B. thương mại dẫn đến mức độ di cư ngày càng tăng. C. thực phẩm nhập khẩu có chất lượng cao hơn thực phẩm nội địa. D. các nhà kinh tế không thể hiểu hết mọi tác động của việc gia tăng thương mại.) Đoạn chứa đáp án: Atkin's data show something many economists do not take into account: when a traditional food has to compete with imported foods it may no longer be the cheapest food available for people to choose to eat. Dữ liệu của Atkin cho thấy một điều mà nhiều nhà kinh tế không tính đến: khi một loại thực phẩm truyền thống phải cạnh tr",
+          "skillTag": "MC_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q4",
+         "answer": "D",
+         "prompt": "The writer thinks Atkin was wise to choose India for his study because",
+         "options": [
+          "A. trade barriers create food shortages between regions.",
+          "B. food is cheap in India in comparison to developed countries.",
+          "C. cultural variation results in a wide range of food preferences.",
+          "D. the varying weather patterns have resulted in regional crop types."
+         ],
+         "learning": {
+          "explanation": "Câu hỏi: The writer thinks Atkin was wise to choose India for his study because A. trade barriers create food shortages between regions. B. food is cheap in India in comparison to developed countries. C. cultural variation results in a wide range of food preferences. D. the varying weather patterns have resulted in regional crop types. (Tác giả cho rằng Atkin đã khôn ngoan khi chọn Ấn Độ làm nơi nghiên cứu vì A. các rào cản thương mại tạo ra tình trạng thiếu thực phẩm giữa các vùng. B. thực phẩm ở Ấn Độ rẻ hơn so với các nước phát triển. C. sự đa dạng văn hoá dẫn đến nhiều sở thích ẩm thực khác nhau. D. sự khác biệt về thời tiết tạo nên các loại cây trồng đặc trưng theo vùng.) Đoạn chứa đáp án: India is a good choice because it covers a large number of climatic zones where different specialised crops are grown Ấn Độ là một lựa chọn tốt vì nước này bao phủ nhiều vùng khí hậu khác nhau, nơ",
+          "skillTag": "MC_MD_IMPORT"
+         }
+        }
+       ]
+      },
+      {
+       "type": "TFNG",
+       "instruction": "Choose YES if the statement agrees with the claims of the writer, choose NO if the statement contradicts the claims of the writer, or NOT GIVEN if it is impossible to say what the writer thinks about this. YES NO NOT GIVEN",
+       "questions": [
+        {
+         "id": "q5",
+         "answer": "NOT GIVEN",
+         "prompt": "The Tilburg and Chicago study shows that brand loyalty is greater in some states of the United States than in others.",
+         "options": [
+          "YES",
+          "NO",
+          "NOT GIVEN"
+         ],
+         "learning": {
+          "explanation": "Câu hỏi: The Tilburg and Chicago study shows that brand loyalty is greater in some states of the United States than in others. (Nghiên cứu của Tilburg và Chicago cho thấy sự trung thành với thương hiệu ở một số bang của Mỹ cao hơn so với các bang khác.) Đoạn chứa đáp án: A new study by economists from the universities of Tilburg and Chicago tracks the consumption patterns of 38,000 US households over two years, and confirms the theory that such brand loyalty is widespread, deep and long-lasting. Một nghiên cứu mới của các nhà kinh tế đến từ các đại học Tilburg và Chicago theo dõi thói quen tiêu dùng của 38.000 hộ gia đình Mỹ trong hai năm, và xác nhận rằng sự trung thành với thương hiệu như vậy là phổ biến, sâu sắc và kéo dài. Đáp án: NG",
+          "skillTag": "TFNG_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q6",
+         "answer": "NO",
+         "prompt": "The study shows that the differences in shopping habits between migrants and native residents increased in the first 20 years.",
+         "options": [
+          "YES",
+          "NO",
+          "NOT GIVEN"
+         ],
+         "learning": {
+          "explanation": "Câu hỏi: The study shows that the differences in shopping habits between migrants and native residents increased in the first 20 years. (Nghiên cứu cho thấy sự khác biệt trong thói quen mua sắm giữa người nhập cư và cư dân bản địa tăng lên trong 20 năm đầu tiên.) Đoạn chứa đáp án: although it faded the longer a person lived in their new state. it still took 20 year to halve in magnitude. mặc dù mức độ này giảm dần khi một người sống lâu hơn tại bang mới, nhưng cũng phải mất 20 năm thì mới giảm xuống còn một nửa. Đáp án: NO",
+          "skillTag": "TFNG_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q7",
+         "answer": "NOT GIVEN",
+         "prompt": "First brands into a new market only hold their advantage if they are supported by advertising.",
+         "options": [
+          "YES",
+          "NO",
+          "NOT GIVEN"
+         ],
+         "learning": {
+          "explanation": "Câu hỏi: First brands into a new market only hold their advantage if they are supported by advertising. (Các thương hiệu đầu tiên vào thị trường mới chỉ giữ được lợi thế nếu được hỗ trợ bởi quảng cáo.) Đoạn chứa đáp án: This could mean that the benefits of being the first brand into a market could last longer than might he assumed. Điều này có thể có nghĩa rằng lợi thế của việc là thương hiệu đầu tiên bước vào một thị trường có thể kéo dài lâu hơn so với giả định thông thường. Đáp án: NG",
+          "skillTag": "TFNG_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q8",
+         "answer": "NO",
+         "prompt": "Atkin originally chose India as a case study because trade within the country was unrestricted.",
+         "options": [
+          "YES",
+          "NO",
+          "NOT GIVEN"
+         ],
+         "learning": {
+          "explanation": "Câu hỏi: Atkin originally chose India as a case study because trade within the country was unrestricted. (Atkin ban đầu chọn Ấn Độ làm nghiên cứu điển hình vì thương mại trong nước không bị hạn chế.) Đoạn chứa đáp án: Despite being part of the same country, the prevalence or internal barriers to trade means that its regions are best thought of as being only partially open to trade. Mặc dù là những phần khác nhau của cùng 1 nước, sự phổ biến của những việc giới hạn thương mại nội bộ làm cho những vùng của Ấn độ nên được xem là chỉ mở cửa 1 phần cho giao thương. Atkin originally chose India as a case study because trade within the country was unrestricted. Atkin chọn Ấn độ như là 1 trường hợp nghiên cứu bởi vì giao thương quốc nội k bị ngăn cấm Đáp án: No",
+          "skillTag": "TFNG_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q9",
+         "answer": "YES",
+         "prompt": "In India, if a region focuses on certain foods the cost of the foods remains comparatively low.",
+         "options": [
+          "YES",
+          "NO",
+          "NOT GIVEN"
+         ],
+         "learning": {
+          "explanation": "Câu hỏi: In India, if a region focuses on certain foods the cost of the foods remains comparatively low. (Ở Ấn Độ, nếu một vùng tập trung vào một số loại thực phẩm nhất định, giá các loại thực phẩm đó vẫn tương đối thấp.) Đoạn chứa đáp án: Atkin's data show that the foods a region specialises in producing are instead cheaper in that region. Dữ liệu của Atkin cho thấy những loại thực phẩm mà một vùng chuyên sản xuất thì lại rẻ hơn ở chính vùng đó. Đáp án: YES",
+          "skillTag": "TFNG_MD_IMPORT"
+         }
+        }
+       ]
+      },
+      {
+       "type": "MATCH_FEATURES",
+       "instruction": "Complete the summary using the list of words, A–I, below.",
+       "questions": [
+        {
+         "id": "q10",
+         "answer": "B",
+         "prompt": "Data show that a wider ______ of foods does not necessarily result in a corresponding … in the amount of calories in people's diets.",
+         "learning": {
+          "explanation": "Câu hỏi: Data show that a wider………… of foods… (Dữ liệu cho thấy việc có nhiều ………… của thực phẩm..) Đoạn chứa đáp án: In theory, when there is a greater choice of types of food, people should adjust their food habits and purchase the cheapest option so that they boost their calorie intake. However, in practice, food habits mean that consumers keep buying the things they know and like even though these foods have become relatively expensive. Về lý thuyết, khi có nhiều lựa chọn thực phẩm hơn, người ta nên điều chỉnh thói quen ăn uống và mua loại rẻ nhất để tăng lượng calo hấp thụ. Tuy nhiên, trên thực tế, thói quen ăn uống khiến người tiêu dùng tiếp tục mua những món mà họ biết và thích, dù những món này đã trở nên tương đối đắt đỏ. Đáp án: B range",
+          "skillTag": "MATCH_FEATURES_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q11",
+         "answer": "F",
+         "prompt": "Data show that a wider … of foods does not necessarily result in a corresponding ______ in the amount of calories in people's diets.",
+         "learning": {
+          "explanation": "Câu hỏi: does not necessarily result in a corresponding …………in the amount of calories in people's diets. (không nhất thiết dẫn đến ………… tương ứng trong lượng calo trong chế độ ăn của mọi người.) Đoạn chứa đáp án: In theory, when there is a greater choice of types of food, people should adjust their food habits and purchase the cheapest option so that they boost their calorie intake. However, in practice, food habits mean that consumers keep buying the things they know and like even though these foods have become relatively expensive. Về lý thuyết, khi có nhiều lựa chọn thực phẩm hơn, người ta nên điều chỉnh thói quen ăn uống và mua loại rẻ nhất để tăng lượng calo hấp thụ. Tuy nhiên, trên thực tế, thói quen ăn uống khiến người tiêu dùng tiếp tục mua những món mà họ biết và thích, dù những món này đã trở nên tương đối đắt đỏ. Đáp án: F increase",
+          "skillTag": "MATCH_FEATURES_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q12",
+         "answer": "I",
+         "prompt": "This is because people's ______ on continuing to eat the foods they grew up eating could result in insufficient calories in their diet if the cost of these foods rises as a result of more open trade conditions.",
+         "learning": {
+          "explanation": "Câu hỏi: This is because people's …………on continuing to eat the foods they grew up eating… (Nguyên nhân là do thói quen ………… tiếp tục ăn những món ăn mà họ đã lớn lên cùng…) Đoạn chứa đáp án: In developing countries where there is a high prevalence of undernutrition. such as in sub- Saharan Africa, the habit of continuing to eat favourite foods could have a serious effect on development. There is clear evidence that nutritional shortfalls in children can affect their ability to work and earn as adults, and also has detrimental effects on their long-term health. Ở những quốc gia đang phát triển, nơi tình trạng suy dinh dưỡng phổ biến như vùng cận Sahara châu Phi, thói quen tiếp tục ăn những món yêu thích có thể gây ảnh hưởng nghiêm trọng đến sự phát triển. Có bằng chứng rõ ràng rằng thiếu hụt dinh dưỡng ở trẻ em có thể ảnh hưởng đến khả năng làm việc và kiếm tiền khi trưởng thành, đồng thờ",
+          "skillTag": "MATCH_FEATURES_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q13",
+         "answer": "A",
+         "prompt": "This is especially true in countries where adequate ______ is already a problem and could result in a whole section of society being unable to contribute fully to their country's … in the future.",
+         "learning": {
+          "explanation": "Câu hỏi: This is especially true in countries where adequate…………is already a problem… (Điều này đặc biệt đúng ở những quốc gia nơi ………… đầy đủ đã là một vấn đề…) Đoạn chứa đáp án: In developing countries where there is a high prevalence of undernutrition. such as in sub- Saharan Africa, the habit of continuing to eat favourite foods could have a serious effect on development. There is clear evidence that nutritional shortfalls in children can affect their ability to work and earn as adults, and also has detrimental effects on their long-term health. Ở những quốc gia đang phát triển, nơi tình trạng suy dinh dưỡng phổ biến như vùng cận Sahara châu Phi, thói quen tiếp tục ăn những món yêu thích có thể gây ảnh hưởng nghiêm trọng đến sự phát triển. Có bằng chứng rõ ràng rằng thiếu hụt dinh dưỡng ở trẻ em có thể ảnh hưởng đến khả năng làm việc và kiếm tiền khi trưởng thành, đồng thời gây tác đ",
+          "skillTag": "MATCH_FEATURES_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q14",
+         "answer": "C",
+         "prompt": "This is especially true in countries where adequate … is already a problem and could result in a whole section of society being unable to contribute fully to their country's ______ in the future.",
+         "learning": {
+          "explanation": "Câu hỏi: and could result in a whole section of society being unable to contribute fully to their country's…………in the future. (và có thể dẫn đến việc một phần lớn của xã hội không thể đóng góp toàn diện vào ………… của đất nước trong tương lai.) Đoạn chứa đáp án: Consequently, the nutritional declines that can occur as a result of the opening up of trade are of serious concern, because an entire generation that is malnourished as children will continue to suffer irreversible consequences for the rest of their lives, which could hinder the development of their country due to a lack of a quality workforce. Hệ quả là những suy giảm về dinh dưỡng do mở cửa thương mại gây ra là điều đáng lo ngại. Một thế hệ trẻ em lớn lên trong tình trạng suy dinh dưỡng sẽ phải chịu những hệ quả không thể khắc phục, và điều đó có thể kìm hãm sự phát triển của đất nước vì thiếu nguồn nhân lực chất lượng. Đáp án: ",
+          "skillTag": "MATCH_FEATURES_MD_IMPORT"
+         }
+        }
+       ],
+       "options": [
+        "nutrition",
+        "range",
+        "progress",
+        "dislike",
+        "incentive",
+        "increase",
+        "independence",
+        "production",
+        "insistence"
+       ],
+       "reuseOptions": true
+      }
+     ]
+    }
+   ]
+  }
+ },
+ {
+  "skill": "READING",
+  "taskType": "READING_PASSAGE",
+  "title": "Reading Practice 69 — Rebranding art museums",
+  "description": "1 passage · 14 câu · MC + TFNG + MATCH_ENDINGS · 20 phút",
+  "durationMinutes": 20,
+  "accessLevel": "PUBLIC",
+  "achievementEligible": true,
+  "difficultyTier": "HARD",
+  "content": {
+   "parts": [
+    {
+     "passage": {
+      "title": "Rebranding art museums",
+      "paragraphs": [
+       "As anyone with even a passing interest in cultural institutions will know, art museums are adapting to keep up with changes in society. Do any of these newly developed spaces indicate a fundamental shift in the ways we engage with art at the beginning of the twenty-first century? The answer is a qualified yes—and also, it must be said, no. A clear sense of this can be gained by considering the 2003 redevelopment of the National Gallery of Victoria (NGV) in Melbourne, Australia's second largest city, in the light of the aspirations embodied in the original building that served as its template.",
+       "The first building was considered a thoroughly modern museum when it opened to the public in 1968. We should not forget that it was also bold, entrepreneurial, and innovative in ways that have done great credit to the vision and foresight of the architect, Roy Grounds. For one thing, the 1968 building signaled a strong sense of engagement with Asian and Pacific cultures, both in its architecture and through the layout of its collections. Its entrance lobby was designed to facilitate the rapid and efficient circulation of visitors. It also contained a series of greatly expanded temporary exhibition galleries and a vast Great Hall, which represented an unprecedented emphasis on the ancillary roles of corporate functions and public performances in the contemporary museum.",
+       "This last feature might have seemed excessive to some, yet how wise it has proven over the years as museums have come to place increasing emphasis on corporate sponsorship and on the need to generate additional funds via room hire. Furthermore, the Great Hall has for forty years provided an area for children to roam at large before being escorted through the much less spatially accommodating galleries themselves. As an unintimidating introduction to the lifelong rigours of visiting art museums, its impact on attendance cannot be overestimated.",
+       "At the same time, other aspects of the 1968 NGV have not withstood the test of time so well. Foremost among these are the huge expanse of the exterior's windowless wall and the surrounding moat, which creates a rather unwelcoming expression of the museum as a temple of culture set apart from the everyday world. Over time, this idea has been questioned and has been superseded by the growing impetus towards the alternative model of the museum as a more open-ended and visitor-friendly forum that engages the public more effectively.",
+       "With these considerations in mind, Mario Bellini's redeveloped NGV opened in 2003, and his design reflects what the new, improved, twenty-first-century global museum feels it should be emphasising to its visitors. Here the institution's energies are focused, not so much on the technical subtleties of how to design the galleries themselves, as on presenting to the public a spectacular image of the museum itself as a welcoming yet efficient facilitator of social interaction, popular entertainment and public knowledge. All of this is certainly impressive, but where has the art gone? We are not allowed to see the exhibitions until we have completed the necessary inductions. We are greeted by a hugely expanded cloakroom screening off our vision to the right, followed by a large visitor information office leading to the ticket booths. Above us is the cafe, and to our left, we cannot escape the NGV shop set alongside the exit.",
+       "And what of the redesigned galleries themselves? In fact, they represent a wonderfully elegant reframing of the permanent collections in ways that should offer first-time visitors and seasoned members alike many new avenues for engagement in the years to come. But herein lies the conundrum posed by the NGV renovation and by the global sweep of new museum projects more generally. The mainstay elements of a permanent collection can become all too easily lost in the increased prominence that these rebranding exercises tend to place on the more glamorously spectacular aspects of the institution itself. At its most extreme, this results in the construction of new buildings that supplant the artworks inside them to become the major attractions themselves.",
+       "These challenges are most keenly felt in the area of the temporary exhibition. Entrance to the NGV permanent collection is now free, so the NGV needs something to keep the paying public coming back. The answer lies in the international 'blockbuster' exhibition. The Impressionists, for example, netted a total of 380,000 visitors, making it one of the most popular exhibitions in Australian history. There has also been, it needs to be said, a commendable attempt to leaven the international masterpieces with selected highlights from the permanent collection.",
+       "Overall, though, the prevalence of these 'rental blockbusters' cannot but help introduce a certain 'off-the-rack' feeling to the institution's exhibition programme. More importantly perhaps, they clearly narrow the options for other worthy but less glamorous projects, and they take energy away from the curators' potential to do further work on and around the permanent collection itself.",
+       "Yet the show must go on, and shows can't exist without the public. Even the most adroit organisation, as the NGV assuredly is, needs to be able to juggle numerous, often conflicting priorities: the need to advance scholarship, on the one hand, versus the imperative of access on the other; the need to introduce audiences to new areas versus the necessity of luring them in with instant brand recognition. Nobody said it was going to be easy, and the effect of too much innovation in museums can be disastrous."
+      ],
+      "labelParagraphs": true
+     },
+     "questionGroups": [
+      {
+       "type": "MC",
+       "instruction": "Choose the correct answer.",
+       "questions": [
+        {
+         "id": "q1",
+         "answer": "C",
+         "prompt": "What is the writer doing in paragraph 1?",
+         "options": [
+          "A. comparing the old NGV with the new NGV",
+          "B. describing the role of art museums in Australian culture",
+          "C. considering the influence of gallery design on art appreciation",
+          "D. suggesting there has been little recent change in gallery design"
+         ],
+         "learning": {
+          "explanation": "o Explanation: Paragraph 1 asks, \"Do any of these newly developed spaces indicate a fundamental shift in the ways we engage with art at the beginning of the twenty-first century?\" — questioning how gallery design affects art appreciation. o Location: Paragraph 1. (Ở đoạn 1, tác giả đang làm gì? A. So sánh NGV cũ với NGV mới. B. Mô tả vai trò của bảo tàng nghệ thuật trong văn hóa Australia. C. Xem xét ảnh hưởng của thiết kế bảo tàng đến cách con người thưởng thức nghệ thuật. D. Cho rằng gần đây hầu như không có thay đổi trong thiết kế bảo tàng.) Đoạn chứa đáp án: Do any of these newly developed spaces indicate a fundamental shift in the ways we engage with art at the beginning of the twenty-first century? (Liệu những không gian mới được phát triển này có cho thấy một sự thay đổi căn bản trong cách chúng ta tiếp cận và thưởng thức nghệ thuật vào đầu thế kỷ XXI hay không?)",
+          "skillTag": "MC_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q2",
+         "answer": "B",
+         "prompt": "The writer criticises the old NGV because",
+         "options": [
+          "A. the permanent collection was poorly displayed.",
+          "B. the building tended to make art seem remote.",
+          "C. Asian and Pacific art was neglected.",
+          "D. the foyer resembled a shop."
+         ],
+         "learning": {
+          "explanation": "o Explanation: The passage states the old NGV's windowless wall and moat \"creates a rather unwelcoming expression of the museum as a temple of culture set apart from the everyday world.\" o Location: Paragraph 4. (Tác giả chỉ trích bảo tàng NGV cũ vì: A. Bộ sưu tập thường trực được trưng bày không tốt. B. Tòa nhà khiến nghệ thuật có cảm giác xa cách, khó tiếp cận với công chúng. C. Nghệ thuật châu Á và khu vực Thái Bình Dương bị xem nhẹ. D. Tiền sảnh trông giống như một cửa hàng.) Đoạn chứa đáp án: Foremost among these are the huge expanse of the exterior's windowless wall and the surrounding moat, which creates a rather unwelcoming expression of the museum as a temple of culture set apart from the everyday world. (Nổi bật nhất là bức tường bên ngoài khổng lồ không có cửa sổ cùng với con hào bao quanh, khiến bảo tàng mang dáng vẻ không mấy thân thiện, giống như một ngôi đền văn hóa tách b",
+          "skillTag": "MC_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q3",
+         "answer": "C",
+         "prompt": "What does the writer notice about the new NGV?",
+         "options": [
+          "A. He thinks the ticket booths are well positioned",
+          "B. He is upset that he is made to move so quickly.",
+          "C. He is frustrated because the art is obscured by the entrance.",
+          "D. He thinks the redevelopment fails to keep up with international trends."
+         ],
+         "learning": {
+          "explanation": "o Explanation: The writer describes being blocked by \"a hugely expanded cloakroom screening off our vision,\" the information office, ticket booths, cafe and shop — \"where has the art gone?\" o Location: Paragraph 5. (Tác giả nhận thấy điều gì về bảo tàng NGV mới? A. Ông ấy cho rằng các quầy bán vé được bố trí hợp lý. B. Ông ấy khó chịu vì bị buộc phải di chuyển quá nhanh. C. Ông ấy bực bội vì các tác phẩm nghệ thuật bị che khuất bởi khu vực lối vào. D. Ông ấy cho rằng việc cải tạo không theo kịp các xu hướng quốc tế.) Đoạn chứa đáp án: We are not allowed to see the exhibitions until we have completed the necessary inductions. We are greeted by a hugely expanded cloakroom screening off our vision to the right, followed by a large visitor information office leading to the ticket booths. Above us is the cafe, and to our left, we cannot escape the NGV shop set alongside the exit. (Chúng ta kh",
+          "skillTag": "MC_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q4",
+         "answer": "B",
+         "prompt": "The writer argues that rental \"blockbuster' exhibitions",
+         "options": [
+          "A. should be cheaper",
+          "B. are a financial necessity.",
+          "C. should be increased in number.",
+          "D. allow the museum to present an original programme."
+         ],
+         "learning": {
+          "explanation": "o Explanation: The passage states, \"Entrance to the NGV permanent collection is now free, so the NGV needs something to keep the paying public coming back. The answer lies in the international 'blockbuster' exhibition.\" o Location: Paragraph 7. (Tác giả cho rằng các triển lãm \"bom tấn\" được thuê từ nơi khác: A. nên có giá rẻ hơn. B. là một điều cần thiết về mặt tài chính. C. nên được tổ chức với số lượng nhiều hơn. D. giúp bảo tàng xây dựng một chương trình triển lãm độc đáo.) Đoạn chứa đáp án: Entrance to the NGV permanent collection is now free, so the NGV needs something to keep the paying public coming back. The answer lies in the international 'blockbuster' exhibition. (Hiện nay, việc tham quan bộ sưu tập thường trực của NGV là miễn phí, vì vậy bảo tàng cần một điều gì đó để thu hút những khách phải mua vé quay trở lại. Giải pháp chính là các triển lãm quốc tế \"bom tấn\".)",
+          "skillTag": "MC_MD_IMPORT"
+         }
+        }
+       ]
+      },
+      {
+       "type": "TFNG",
+       "instruction": "Choose YES if the statement agrees with the claims of the writer, choose NO if the statement contradicts the claims of the writer, or NOT GIVEN if it is impossible to say what the writer thinks about this. YES NO NOT GIVEN",
+       "questions": [
+        {
+         "id": "q5",
+         "answer": "NO",
+         "prompt": "Roy Grounds's design failed to recognise the importance of functions and performances in museums.",
+         "options": [
+          "YES",
+          "NO",
+          "NOT GIVEN"
+         ],
+         "learning": {
+          "explanation": "o Explanation: The passage states the 1968 building \"represented an unprecedented emphasis on the ancillary roles of corporate functions and public performances,\" contradicting the claim that Grounds failed to recognise their importance. o Location: Paragraph 2.",
+          "skillTag": "TFNG_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q6",
+         "answer": "NO",
+         "prompt": "Mario Bellini's new NGV rejects international museum design trends.",
+         "options": [
+          "YES",
+          "NO",
+          "NOT GIVEN"
+         ],
+         "learning": {
+          "explanation": "o Explanation: The passage states Bellini's design \"reflects what the new, improved, twenty-first-century global museum feels it should be emphasising,\" showing alignment with, not rejection of, international trends. o Location: Paragraph 5.",
+          "skillTag": "TFNG_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q7",
+         "answer": "NOT GIVEN",
+         "prompt": "Mario Bellini's work on subsequent museum projects has been less successful than that on the NGV.",
+         "options": [
+          "YES",
+          "NO",
+          "NOT GIVEN"
+         ],
+         "learning": {
+          "explanation": "o Explanation: The passage discusses only the NGV redevelopment and never mentions any of Bellini's other projects, so no comparison can be drawn. o Location: Entire passage.",
+          "skillTag": "TFNG_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q8",
+         "answer": "NOT GIVEN",
+         "prompt": "The NGV monitors the number of first-time visitors to permanent collections.",
+         "options": [
+          "YES",
+          "NO",
+          "NOT GIVEN"
+         ],
+         "learning": {
+          "explanation": "o Explanation: The passage mentions the reframed collection \"should offer first-time visitors and seasoned members alike many new avenues for engagement,\" but it never states that the NGV monitors visitor numbers. o Location: Paragraph 6.",
+          "skillTag": "TFNG_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q9",
+         "answer": "YES",
+         "prompt": "Too much change may have negative impacts on museums.",
+         "options": [
+          "YES",
+          "NO",
+          "NOT GIVEN"
+         ],
+         "learning": {
+          "explanation": "o Explanation: The passage states, \"the effect of too much innovation in museums can be disastrous.\" o Location: Paragraph 9.",
+          "skillTag": "TFNG_MD_IMPORT"
+         }
+        }
+       ]
+      },
+      {
+       "type": "MATCH_ENDINGS",
+       "instruction": "Complete each sentence with the correct ending, A-G, below.",
+       "questions": [
+        {
+         "id": "q10",
+         "answer": "F",
+         "prompt": "If a large space is available in the museum,",
+         "learning": {
+          "explanation": "o Explanation: The passage states large spaces have proven wise \"as museums have come to place increasing emphasis on corporate sponsorship and on the need to generate additional funds via room hire.\" o Location: Paragraph 3.",
+          "skillTag": "MATCH_ENDINGS_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q11",
+         "answer": "E",
+         "prompt": "If children are allowed to move freely in parts of the gallery,",
+         "learning": {
+          "explanation": "o Explanation: The passage states the Great Hall's role as \"an unintimidating introduction to the lifelong rigours of visiting art museums\" means \"its impact on attendance cannot be overestimated.\" o Location: Paragraph 3.",
+          "skillTag": "MATCH_ENDINGS_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q12",
+         "answer": "C",
+         "prompt": "If too much emphasis is placed on the museum building itself,",
+         "learning": {
+          "explanation": "o Explanation: The passage states, \"this results in the construction of new buildings that supplant the artworks inside them to become the major attractions themselves.\" o Location: Paragraph 6.",
+          "skillTag": "MATCH_ENDINGS_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q13",
+         "answer": "A",
+         "prompt": "If there is an over-reliance on \"blockbuster' exhibitions,",
+         "learning": {
+          "explanation": "o Explanation: The passage states, \"the prevalence of these 'rental blockbusters' cannot but help introduce a certain 'off-the-rack' feeling to the institution's exhibition programme.\" o Location: Paragraph 8.",
+          "skillTag": "MATCH_ENDINGS_MD_IMPORT"
+         }
+        },
+        {
+         "id": "q14",
+         "answer": "D",
+         "prompt": "If the NGV wants to continue to be successful,",
+         "learning": {
+          "explanation": "o Explanation: The passage states the NGV \"needs to be able to juggle numerous, often conflicting priorities: the need to advance scholarship... versus the imperative of access.\" o Location: Paragraph 9. TEST 11 · READING PASSAGE 1",
+          "skillTag": "MATCH_ENDINGS_MD_IMPORT"
+         }
+        }
+       ],
+       "options": [
+        "the museum programme will lose its individuality.",
+        "the museum will lose credibility.",
+        "the art loses its importance.",
+        "it will have to balance opposing demands.",
+        "this will encourage museum visitors in the future.",
+        "it will have the capability of increasing revenue.",
+        "the architect's reputation might suffer."
+       ]
+      }
+     ]
+    }
+   ]
+  }
  }
 ]

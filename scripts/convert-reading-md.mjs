@@ -85,10 +85,10 @@ const WORD_LIMITS = [
 const detectWordLimit = (t) => (WORD_LIMITS.find(([re]) => re.test(t)) ?? [, null])[1];
 
 /** Nhãn lựa chọn trong kho đáp án: "**A** 1888", "A. 1888", "i. …" */
-const OPTION_LINE = /^\**\s*([A-Ja-j]|[ivx]{1,4})\s*[.)]?\s*\**\s+(.+)$/;
+const OPTION_LINE = /^\**\s*([A-La-l]|[ivx]{1,4})\s*[.)]?\s*\**\s+(.+)$/;
 
 /** Dòng lựa chọn của một câu MC: "A. …" / "**B)** …" */
-const MC_CHOICE = /^([A-J])\s*[.)]\s*(.+)$/;
+const MC_CHOICE = /^([A-L])\s*[.)]\s*(.+)$/;
 
 /** Bất kỳ kiểu ô trống nào: gạch dưới, chấm lửng, hoặc dãy dấu chấm. */
 const ANY_BLANK = /(?:_{2,}|…+|\.{4,})/;
@@ -332,7 +332,9 @@ function parseGroup(chunk, from, to, paragraphs, answerMap) {
       );
       if (bare.length === want) {
         return {
-          type, instruction, options: [],
+          // Phải trả kho đáp án đã nhặt: nhánh này dùng cho cả MATCH_*, mà các
+          // dạng đó bắt buộc có options. Trả [] là vứt mất kho vừa dựng.
+          type, instruction, options,
           items: bare.map((text, k) => ({ n: from + k, text, choices: [] })),
           from, to,
         };
@@ -347,7 +349,7 @@ function parseGroup(chunk, from, to, paragraphs, answerMap) {
 
 /* ===== phần đáp án ===== */
 
-const ANS_TOKEN = /^(TRUE|FALSE|NOT\s*GIVEN|YES|NO|[A-J]|[ivx]{1,4})\b/i;
+const ANS_TOKEN = /^(TRUE|FALSE|NOT\s*GIVEN|YES|NO|[A-L]|[ivx]{1,4})\b/i;
 
 /**
  * Cắt phần đáp án thành từng khối theo số câu, rồi lấy đáp án + lời giải.
@@ -373,12 +375,19 @@ function parseAnswers(section, lo, hi) {
     const block = lines.slice(idx, end).map(plain).filter(Boolean);
     if (out[n]) continue; // giữ lần xuất hiện đầu tiên
 
-    // đáp án: ngay sau số, hoặc sau "Answer:" / "Đáp án:" ở bất kỳ dòng nào
-    let ansText = tail.replace(/^(Answer|Đáp án)\s*:?\s*/i, "").trim();
-    if (!ansText || !ANS_TOKEN.test(ansText)) {
-      const alt = block.map((b) => b.match(/^(?:.*?)(?:Answer|Đáp án)\s*:\s*(.+)$/i)).find(Boolean);
-      if (alt) ansText = alt[1].trim();
-    }
+    /* Đáp án: LUÔN ưu tiên dòng ghi rõ "Đáp án:" / "Answer:", chỉ khi không có
+     * mới lấy phần ngay sau số câu.
+     *
+     * Thứ tự này quan trọng: rất nhiều câu Matching mở đầu bằng đúng một chữ
+     * "a" — "a reference to climate change and its effects" — và nếu đọc phần
+     * sau số câu trước thì chữ "a" đó bị hiểu thành đáp án A. Lỗi im lặng,
+     * đề vẫn hợp lệ về cấu trúc, chỉ có đáp án là sai. */
+    const explicit = block
+      .map((b) => b.match(/(?:^|\s)(?:Answer|Đáp án)\s*:\s*(.+)$/i))
+      .find(Boolean);
+    const ansText = explicit
+      ? explicit[1].trim()
+      : tail.replace(/^(Answer|Đáp án)\s*:?\s*/i, "").trim();
     if (!ansText) continue;
 
     // cắt phần chú thích trong ngoặc và mọi thứ sau dấu chấm câu đầu tiên
@@ -386,6 +395,15 @@ function parseAnswers(section, lo, hi) {
     // hai chấm là lời giải, không phải đáp án. Cắt ngay tại đó.
     let answer = ansText.replace(/\s*\(.*$/, "").split(/\s{2,}|—|–\s|:\s/)[0].trim();
     answer = answer.replace(/[.:;,]+$/, "").trim();
+
+    // Sau khi đã gọt, mới xét xem nó có GIỐNG một đáp án không. Xét trước khi
+    // gọt là sai: "tombs: Paragraph 1 states, …" trông dài nhưng đáp án thật
+    // chỉ là "tombs". Còn "a reference to climate change and its effects" thì
+    // không có gì để gọt nên vẫn dài — đó chính là mệnh đề câu hỏi bị nhầm
+    // thành đáp án A, và phải loại.
+    const plausible =
+      ANS_TOKEN.test(answer) || (answer.length <= 40 && answer.split(/\s+/).length <= 4);
+    if (!plausible) continue;
 
     // Một số file KHÔNG chép mệnh đề câu hỏi ở phần đề, chỉ ghi lại trong phần
     // chữa dưới dạng "Câu hỏi: …". Nhặt luôn để dựng lại đề bài.
@@ -408,7 +426,7 @@ function normalizeAnswer(type, rawAns) {
     const u = a.toUpperCase().replace(/\s+/g, " ");
     if (/^TRUE/.test(u)) return "TRUE";
     if (/^FALSE/.test(u)) return "FALSE";
-    if (/^NOT ?GIVEN/.test(u)) return "NOT GIVEN";
+    if (/^NOT ?GIVEN/.test(u) || /^NG\b/.test(u)) return "NOT GIVEN";
     if (/^YES/.test(u)) return "YES";
     if (/^NO\b/.test(u)) return "NO";
     return null;
@@ -418,11 +436,11 @@ function normalizeAnswer(type, rawAns) {
     return m ? m[1] : null;
   }
   if (type === "MC" || type === "MATCH_INFO" || type === "MATCH_FEATURES" || type === "MATCH_ENDINGS") {
-    const m = a.toUpperCase().match(/^([A-J])\b/);
+    const m = a.toUpperCase().match(/^([A-L])\b/);
     return m ? m[1] : null;
   }
   if (type === "MC_MULTI") {
-    const ls = [...a.toUpperCase().matchAll(/\b([A-J])\b/g)].map((m) => m[1]);
+    const ls = [...a.toUpperCase().matchAll(/\b([A-L])\b/g)].map((m) => m[1]);
     return ls.length >= 2 ? [...new Set(ls)] : null;
   }
   if (type === "GAP") {
@@ -475,7 +493,7 @@ function convert(file, raw) {
      * viên phải gõ chữ "C" vào ô điền từ — sai hẳn về sư phạm. Đổi sang
      * MATCH_FEATURES để các em chọn từ danh sách, đúng như đề gốc yêu cầu. */
     if (g.type === "GAP" && g.options.length >= 2) {
-      const letters = g.items.filter((it) => /^[A-J]\b/i.test(String(answerMap[it.n]?.answer ?? "")));
+      const letters = g.items.filter((it) => /^[A-L]\b/i.test(String(answerMap[it.n]?.answer ?? "")));
       if (letters.length >= Math.max(2, Math.ceil(g.items.length * 0.6))) {
         g.type = "MATCH_FEATURES";
         g.reuseOptions = false;
@@ -528,8 +546,10 @@ function convert(file, raw) {
     const group = { type: g.type, instruction: g.instruction, questions };
     if (["MATCH_HEADINGS", "MATCH_INFO", "MATCH_FEATURES", "MATCH_ENDINGS"].includes(g.type)) {
       let opts = g.options;
-      if (g.type === "MATCH_INFO" && opts.length < 2) {
-        // MATCH_INFO: kho đáp án chính là danh sách chữ cái đoạn văn
+      if (g.type === "MATCH_INFO") {
+        // MATCH_INFO: kho đáp án LUÔN là danh sách chữ cái đoạn văn, không phải
+        // các dòng A./B./C. nhặt được trong nhóm. Nhặt nhầm thì đáp án "G" sẽ
+        // bị coi là nằm ngoài kho chỉ vì kho dựng sai.
         opts = paragraphs.map((_, k) => String.fromCharCode(65 + k));
       }
       if (opts.length < 2) return { error: `${g.type}: thiếu kho đáp án (chỉ ${opts.length} mục)` };
