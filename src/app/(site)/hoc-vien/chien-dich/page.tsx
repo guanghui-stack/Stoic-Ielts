@@ -90,6 +90,10 @@ export default async function CampaignPage() {
           territoryOwnerCode={owner ? FACTION_TERRITORY[owner] : null}
           territoryOwnerLabel={owner ? FACTION_LABEL[owner] : null}
           seasonCode={season.code}
+          // Dùng chung bản thẻ với trang chủ. Bản bản-đồ-ba-vòng-tròn vẽ ba trụ
+          // thành ba vùng tách rời, trong khi ba trụ là ba mặt của cùng một lần
+          // học — xem ghi chú cuối StoicPillarCards.
+          showPillarCards
         />
         <CampaignTimelineMobile world={world} />
         <div id="dieu-kien">
