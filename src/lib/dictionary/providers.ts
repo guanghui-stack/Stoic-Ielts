@@ -90,7 +90,13 @@ export async function callOxford(term: string): Promise<ProviderReply> {
   // vững nếu sau này có nơi khác gọi thẳng.
   if (!appId || !appKey) return { outcome: "PROVIDER_DOWN" };
 
-  const url = `https://od-api-sandbox.oxforddictionaries.com/api/v2/entries/en-gb/${encodeURIComponent(term)}`;
+  // Oxford có hai máy chủ và khóa KHÔNG dùng chéo được: khóa thật gọi vào
+  // sandbox sẽ bị từ chối, và ngược lại. Mặc định là bản chính thức; ai đang
+  // thử bằng khóa sandbox thì đặt OXFORD_API_BASE trỏ sang đó.
+  const base =
+    process.env.OXFORD_API_BASE?.replace(/\/+$/, "") ||
+    "https://od-api.oxforddictionaries.com/api/v2";
+  const url = `${base}/entries/en-gb/${encodeURIComponent(term)}`;
   const { status, body } = await fetchJson(url, { app_id: appId, app_key: appKey });
   return definitionReply(status, parseOxford(body, term));
 }
