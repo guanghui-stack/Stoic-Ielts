@@ -2016,6 +2016,34 @@ export async function initDatabase() {
   });
 
   /**
+   * Khoa lai bo de Actual Test da lo seed thanh mien phi.
+   *
+   * `RESTRICT_READING_ALL_v1` ben tren da chay xong TRUOC khi bo de nay duoc
+   * nap, nen 60 de moi khong duoc no cham toi. Chung duoc tao voi accessLevel
+   * "PUBLIC" — mac dinh cua bo chuyen doi .md, khong phai mot quyet dinh kinh
+   * doanh — nen hoc vien lam duoc mien phi trong khi ca kho con lai deu khoa.
+   *
+   * Nguon su that la chinh file bo de: khoa dung nhung de khai RESTRICTED o do,
+   * nen nam de mau van mo. Nho vay file va co so du lieu khong bao gio lech.
+   *
+   * applyOnce: quan tri vien phai mo le duoc mot de cu the sau nay ma khong bi
+   * lan trien khai ke tiep khoa lai.
+   */
+  await applyOnce("RESTRICT_READING_ACTUAL_TEST_v1", async () => {
+    const titles = readingPackActualTest
+      .filter((ex) => ex.accessLevel === "RESTRICTED")
+      .map((ex) => ex.title);
+    if (titles.length === 0) return;
+    const res = await db.exercise.updateMany({
+      where: { title: { in: titles }, accessLevel: { not: "RESTRICTED" } },
+      data: { accessLevel: "RESTRICTED" },
+    });
+    if (res.count > 0) {
+      console.log(`[wobridges] Da khoa lai ${res.count} de Actual Test — mo le 9 xu.`);
+    }
+  });
+
+  /**
    * Tai khoan tao TRUOC ngay co xac minh email duoc coi la da xac minh.
    *
    * Khong lam buoc nay thi moi hoc vien dang hoc bong dung mat quyen nhan qua

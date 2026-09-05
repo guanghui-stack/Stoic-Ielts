@@ -80,4 +80,33 @@ it("bản vá thật sự khác bản hỏng", () => {
   }
 });
 
+console.log("\n— Mức truy cập —");
+
+it("bộ đề mặc định là hàng trả phí, không phải miễn phí", () => {
+  const restricted = pack.filter((e) => e.accessLevel === "RESTRICTED").length;
+  const free = pack.filter((e) => e.accessLevel !== "RESTRICTED").length;
+  assert.ok(
+    restricted > free,
+    `chỉ ${restricted}/${pack.length} đề bị khoá — kho Reading là hàng trả phí, ` +
+      `mặc định PUBLIC từng khiến 60 đề lọt lưới thu phí`,
+  );
+});
+
+it("số đề mẫu miễn phí nằm trong mức đã chốt", () => {
+  const free = pack.filter((e) => e.accessLevel !== "RESTRICTED");
+  assert.ok(free.length <= 5, `có ${free.length} đề miễn phí, chủ dự án chốt tối đa 5`);
+  for (const e of free) {
+    assert.equal(e.difficultyTier, "EASY", `đề mẫu phải ở mức Dễ: ${e.title}`);
+  }
+});
+
+it("mọi đề đều khai mức truy cập hợp lệ", () => {
+  for (const e of pack) {
+    assert.ok(
+      e.accessLevel === "PUBLIC" || e.accessLevel === "RESTRICTED",
+      `mức truy cập lạ ở: ${e.title}`,
+    );
+  }
+});
+
 console.log(`\n✅ ${passed} kiểm thử luật vá đề Reading đều đạt\n`);

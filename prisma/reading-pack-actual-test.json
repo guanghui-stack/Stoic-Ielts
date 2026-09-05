@@ -5,7 +5,7 @@
   "title": "Reading Practice 08 — 200 Years of Australian Landscapes at the Royal Academy in London",
   "description": "1 passage · 14 câu · TFNG + MC + MATCH_ENDINGS · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "HARD",
   "content": {
@@ -436,7 +436,7 @@
   "title": "Reading Practice 10 — The Art of Deception",
   "description": "1 passage · 14 câu · MC + MATCH_FEATURES + TFNG · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "HARD",
   "content": {
@@ -675,7 +675,7 @@
   "title": "Reading Practice 11 — Katherine Mansfield",
   "description": "1 passage · 13 câu · TFNG + GAP · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "EASY",
   "content": {
@@ -869,7 +869,7 @@
   "title": "Reading Practice 12 — What Are the 1,000 Foods to Eat Before You Die?",
   "description": "1 passage · 14 câu · TFNG + MC + GAP · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "HARD",
   "content": {
@@ -1093,7 +1093,7 @@
   "title": "Reading Practice 13 — How Deserts Are Formed",
   "description": "1 passage · 13 câu · MATCH_INFO + TFNG · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "MEDIUM",
   "content": {
@@ -1700,7 +1700,7 @@
   "title": "Reading Practice 17 — The Ant and the Mandarin",
   "description": "1 passage · 13 câu · MATCH_FEATURES + TFNG · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "EASY",
   "content": {
@@ -1918,7 +1918,7 @@
   "title": "Reading Practice 18 — Dolls Through the Ages",
   "description": "1 passage · 13 câu · GAP + TFNG · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "EASY",
   "content": {
@@ -2118,7 +2118,7 @@
   "title": "Reading Practice 19 — Let’s all be friends",
   "description": "1 passage · 14 câu · GAP + TFNG · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "HARD",
   "content": {
@@ -2319,7 +2319,7 @@
   "title": "Reading Practice 20 — The Clipper Races: an Era of Competition Between Cargo Ships",
   "description": "1 passage · 13 câu · TFNG + GAP · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "EASY",
   "content": {
@@ -2464,7 +2464,7 @@
   "title": "Reading Practice 21 — An Important Language Development",
   "description": "1 passage · 13 câu · TFNG + GAP · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "EASY",
   "content": {
@@ -2603,7 +2603,7 @@
   "title": "Reading Practice 23 — Australia's Megafauna Controversy",
   "description": "1 passage · 14 câu · TFNG + MATCH_FEATURES + MC · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "HARD",
   "content": {
@@ -2791,7 +2791,7 @@
   "title": "Reading Practice 24 — Grimms’ Fairy Tales",
   "description": "1 passage · 14 câu · TFNG + MC + MATCH_ENDINGS · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "HARD",
   "content": {
@@ -2974,7 +2974,7 @@
   "title": "Reading Practice 25 — The History of Tea",
   "description": "1 passage · 13 câu · GAP + TFNG · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "EASY",
   "content": {
@@ -3121,7 +3121,7 @@
   "title": "Reading Practice 26 — Biodiversity",
   "description": "1 passage · 13 câu · TFNG + GAP · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "MEDIUM",
   "content": {
@@ -3272,7 +3272,7 @@
   "title": "Reading Practice 28 — The Development of the Silk Industry",
   "description": "1 passage · 13 câu · GAP + TFNG · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "EASY",
   "content": {
@@ -3415,7 +3415,7 @@
   "title": "Reading Practice 29 — Ahead of its Time",
   "description": "1 passage · 13 câu · TFNG + GAP · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "EASY",
   "content": {
@@ -3605,7 +3605,7 @@
   "title": "Reading Practice 30 — Nanotechnology: its Development and Uses",
   "description": "1 passage · 13 câu · MATCH_INFO + MC + GAP · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "MEDIUM",
   "content": {
@@ -3808,7 +3808,7 @@
   "title": "Reading Practice 31 — Assessing the risk",
   "description": "1 passage · 13 câu · TFNG + GAP · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "EASY",
   "content": {
@@ -4002,7 +4002,7 @@
   "title": "Reading Practice 32 — Tasmanian Tiger",
   "description": "1 passage · 13 câu · GAP + MATCH_FEATURES + MC · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "MEDIUM",
   "content": {
@@ -4202,7 +4202,7 @@
   "title": "Reading Practice 33 — What is the secret of a long life?",
   "description": "1 passage · 13 câu · TFNG + GAP · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "EASY",
   "content": {
@@ -4401,7 +4401,7 @@
   "title": "Reading Practice 34 — Should we try to bring extinct species back to life?",
   "description": "1 passage · 13 câu · MATCH_INFO + GAP + MATCH_FEATURES · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "MEDIUM",
   "content": {
@@ -4582,7 +4582,7 @@
   "title": "Reading Practice 35 — Endangered Languages",
   "description": "1 passage · 14 câu · TFNG + MC + MATCH_ENDINGS · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "HARD",
   "content": {
@@ -4820,7 +4820,7 @@
   "title": "Reading Practice 36 — Born to Trade",
   "description": "1 passage · 13 câu · MATCH_HEADINGS + MC + MATCH_FEATURES · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "MEDIUM",
   "content": {
@@ -5025,7 +5025,7 @@
   "title": "Reading Practice 37 — New Zealand Home Textile Crafts of the 1930s to 1950s",
   "description": "1 passage · 14 câu · MC + MATCH_FEATURES + TFNG · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "HARD",
   "content": {
@@ -5268,7 +5268,7 @@
   "title": "Reading Practice 38 — Computer Games",
   "description": "1 passage · 13 câu · GAP + TFNG · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "EASY",
   "content": {
@@ -5466,7 +5466,7 @@
   "title": "Reading Practice 39 — Evolutionary Psychology in the Workplace",
   "description": "1 passage · 14 câu · MC + TFNG + MATCH_FEATURES · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "HARD",
   "content": {
@@ -5702,7 +5702,7 @@
   "title": "Reading Practice 40 — Keeping the fun in funfairs",
   "description": "1 passage · 14 câu · MATCH_HEADINGS + GAP + TFNG · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "HARD",
   "content": {
@@ -5903,7 +5903,7 @@
   "title": "Reading Practice 41 — The world's first cities",
   "description": "1 passage · 13 câu · TFNG + GAP · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "EASY",
   "content": {
@@ -6096,7 +6096,7 @@
   "title": "Reading Practice 42 — The growth of agriculture",
   "description": "1 passage · 13 câu · GAP + TFNG · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "EASY",
   "content": {
@@ -6294,7 +6294,7 @@
   "title": "Reading Practice 43 — Looking for inspiration",
   "description": "1 passage · 14 câu · MATCH_FEATURES + GAP + TFNG · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "HARD",
   "content": {
@@ -6510,7 +6510,7 @@
   "title": "Reading Practice 44 — Radiocarbon dating",
   "description": "1 passage · 13 câu · TFNG + GAP · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "EASY",
   "content": {
@@ -6706,7 +6706,7 @@
   "title": "Reading Practice 45 — Studies in the History of Art and Visual Culture",
   "description": "1 passage · 13 câu · TFNG + GAP · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "EASY",
   "content": {
@@ -6898,7 +6898,7 @@
   "title": "Reading Practice 46 — Sleep – who needs it?",
   "description": "1 passage · 13 câu · MATCH_FEATURES + GAP + MATCH_INFO · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "MEDIUM",
   "content": {
@@ -7282,7 +7282,7 @@
   "title": "Reading Practice 48 — Photography",
   "description": "1 passage · 13 câu · MATCH_INFO + GAP + TFNG · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "MEDIUM",
   "content": {
@@ -7483,7 +7483,7 @@
   "title": "Reading Practice 49 — The Power of Smell",
   "description": "1 passage · 13 câu · MATCH_INFO + MATCH_FEATURES + GAP · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "MEDIUM",
   "content": {
@@ -7671,7 +7671,7 @@
   "title": "Reading Practice 50 — The Pyramid of Cestius",
   "description": "1 passage · 13 câu · TFNG + GAP · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "EASY",
   "content": {
@@ -7868,7 +7868,7 @@
   "title": "Reading Practice 51 — The conquest of malaria in Italy",
   "description": "1 passage · 13 câu · GAP + TFNG + MATCH_INFO · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "MEDIUM",
   "content": {
@@ -8064,7 +8064,7 @@
   "title": "Reading Practice 52 — Images and Places",
   "description": "1 passage · 14 câu · MATCH_HEADINGS + MATCH_FEATURES + MC · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "HARD",
   "content": {
@@ -8273,7 +8273,7 @@
   "title": "Reading Practice 53 — Termite Mounds",
   "description": "1 passage · 14 câu · MATCH_HEADINGS + GAP + TFNG · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "HARD",
   "content": {
@@ -8476,7 +8476,7 @@
   "title": "Reading Practice 54 — The Baobabs of Madagascar",
   "description": "1 passage · 13 câu · TFNG + GAP · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "EASY",
   "content": {
@@ -8666,7 +8666,7 @@
   "title": "Reading Practice 55 — Andrew Carnegie: industrialist and philanthropist",
   "description": "1 passage · 13 câu · GAP + TFNG · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "EASY",
   "content": {
@@ -8859,7 +8859,7 @@
   "title": "Reading Practice 56 — The mystery of Easter Island",
   "description": "1 passage · 14 câu · GAP + TFNG + MC · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "HARD",
   "content": {
@@ -9089,7 +9089,7 @@
   "title": "Reading Practice 57 — The origins of tennis",
   "description": "1 passage · 13 câu · TFNG + GAP · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "EASY",
   "content": {
@@ -9283,7 +9283,7 @@
   "title": "Reading Practice 58 — Changes to the Soviet Union's working week",
   "description": "1 passage · 14 câu · MATCH_HEADINGS + MC + GAP · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "HARD",
   "content": {
@@ -9492,7 +9492,7 @@
   "title": "Reading Practice 59 — The psychology of new product adoption",
   "description": "1 passage · 14 câu · MC + MATCH_ENDINGS + TFNG · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "HARD",
   "content": {
@@ -9738,7 +9738,7 @@
   "title": "Reading Practice 60 — Voyage of Going: Beyond the Blue Line 2",
   "description": "1 passage · 13 câu · TFNG + GAP · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "EASY",
   "content": {
@@ -9895,7 +9895,7 @@
   "title": "Reading Practice 61 — Sleep Study on Modern-Day Hunter-Gatherer Dispels Popular Notions",
   "description": "1 passage · 13 câu · TFNG + GAP · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "EASY",
   "content": {
@@ -10088,7 +10088,7 @@
   "title": "Reading Practice 62 — Petrol power: an eco-revolution?",
   "description": "1 passage · 14 câu · MC + MATCH_FEATURES + TFNG · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "HARD",
   "content": {
@@ -10325,7 +10325,7 @@
   "title": "Reading Practice 63 — Public Libraries",
   "description": "1 passage · 14 câu · TFNG + GAP · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "EASY",
   "content": {
@@ -10530,7 +10530,7 @@
   "title": "Reading Practice 64 — Growing More for Less",
   "description": "1 passage · 11 câu · MATCH_INFO + GAP · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "MEDIUM",
   "content": {
@@ -10683,7 +10683,7 @@
   "title": "Reading Practice 65 — The Role of Accidents in Business",
   "description": "1 passage · 14 câu · TFNG + MATCH_ENDINGS + MC · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "HARD",
   "content": {
@@ -10875,7 +10875,7 @@
   "title": "Reading Practice 66 — Mechanisms of Linguistic Change",
   "description": "1 passage · 14 câu · GAP + TFNG + MATCH_FEATURES · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "HARD",
   "content": {
@@ -11293,7 +11293,7 @@
   "title": "Reading Practice 68 — The costs of brand loyalty",
   "description": "1 passage · 14 câu · MC + TFNG + MATCH_FEATURES · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "HARD",
   "content": {
@@ -11530,7 +11530,7 @@
   "title": "Reading Practice 69 — Rebranding art museums",
   "description": "1 passage · 14 câu · MC + TFNG + MATCH_ENDINGS · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "HARD",
   "content": {
@@ -11765,7 +11765,7 @@
   "title": "Reading Practice 70 — All in the family",
   "description": "1 passage · 14 câu · TFNG + MC + MATCH_FEATURES · 20 phút",
   "durationMinutes": 20,
-  "accessLevel": "PUBLIC",
+  "accessLevel": "RESTRICTED",
   "achievementEligible": true,
   "difficultyTier": "HARD",
   "content": {
