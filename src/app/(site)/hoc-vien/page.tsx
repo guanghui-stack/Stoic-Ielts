@@ -9,7 +9,9 @@ import {
   Coins,
   Handshake,
   MailWarning,
+  MessageCircle,
   TrendingUp,
+  UsersRound,
 } from "lucide-react";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
@@ -20,7 +22,7 @@ import { WELCOME_COINS, formatCoins } from "@/lib/payments/coins";
 import { getMeritWallet } from "@/lib/merit/merit-service";
 import { ButtonLink, NoteBox, SubmitButton } from "@/components/ui";
 import { StudentNav } from "@/components/student/student-nav";
-import { StudentAvatar } from "@/components/student/student-avatar";
+import { AvatarUploader } from "@/components/student/avatar-uploader";
 import { GoalsCard } from "@/components/student/goals-card";
 import { StudyCalendar } from "@/components/ui/study-calendar";
 import { WeeklyStats, type WeeklyRow } from "@/components/student/weekly-stats";
@@ -28,6 +30,8 @@ import { HistoryTabs, type HistoryItem } from "@/components/student/history-tabs
 import { AchievementSummaryCard } from "@/components/achievements/achievement-summary-card";
 import { RankDashboardBlock } from "@/components/ranks/rank-dashboard-block";
 import { RealtimeLogoutButton } from "@/components/realtime/realtime-logout-button";
+import { MeritSealIcon } from "@/components/merit/merit-seal-icon";
+import { studentAvatarSource } from "@/lib/avatar/source";
 
 export const metadata: Metadata = { title: "Hồ sơ học tập" };
 
@@ -66,11 +70,14 @@ export default async function StudentDashboard({
   const user = await requireUser();
   const { "xac-minh": verifyResult, "vi-sao": verifyReason } = await searchParams;
 
-  const [wallet, account, merit, arena] = await Promise.all([
+  const [wallet, account, merit, arena, friendCount] = await Promise.all([
     getCoinWallet(user.id),
     db.user.findUnique({
       where: { id: user.id },
-      select: { emailVerifiedAt: true },
+      select: {
+        emailVerifiedAt: true,
+        uploadedAvatar: { select: { updatedAt: true } },
+      },
     }),
     getMeritWallet(user.id),
     // Đọc thẳng chứ không gọi `getArenaProfile`: hàm đó TẠO hồ sơ nếu chưa có,
@@ -79,6 +86,21 @@ export default async function StudentDashboard({
     db.arenaProfile.findUnique({
       where: { userId: user.id },
       select: { chienLuc: true, wins: true, losses: true, truces: true },
+    }),
+    db.friendship.count({
+      where: {
+        status: "ACCEPTED",
+        OR: [
+          {
+            userAId: user.id,
+            userB: { active: true, role: "STUDENT", isBot: false },
+          },
+          {
+            userBId: user.id,
+            userA: { active: true, role: "STUDENT", isBot: false },
+          },
+        ],
+      },
     }),
   ]);
   const verified = Boolean(account?.emailVerifiedAt);
@@ -159,11 +181,9 @@ export default async function StudentDashboard({
   return (
     <div>
       <section className="border-b border-line bg-paper">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-end justify-between gap-6 px-6 py-12">
-          <div className="flex min-w-0 flex-1 items-start gap-4">
-            <StudentAvatar src={user.avatarUrl} name={user.name} email={user.email} />
-            <div className="min-w-0 flex-1">
-              <p className="label-caps">Nội Tâm · Hồ sơ học tập</p>
+        <div className="mx-auto grid max-w-6xl gap-8 px-6 py-12 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start">
+          <div className="min-w-0">
+            <p className="label-caps">Nội Tâm · Hồ sơ học tập</p>
             <h1 className="mt-3 font-display text-3xl font-bold text-navy-deep md:text-4xl">
               Xin chào, {user.name}
             </h1>
@@ -186,11 +206,11 @@ export default async function StudentDashboard({
               bế tắc mà đo sự nhún nhường, nên nhãn phải nói đúng điều đó.
             */}
             {arena ? (
-              <dl className="mt-4 flex flex-wrap gap-px border border-line bg-line">
-                <div className="flex-1 bg-paper px-5 py-3">
+              <dl className="mt-4 grid grid-cols-2 gap-px border border-line bg-line md:grid-cols-4">
+                <div className="bg-paper px-5 py-3">
                   <dt className="label-caps">Đức Hạnh</dt>
                   <dd className="mt-1 flex items-center gap-2">
-                    <span className="seal h-4 w-4" aria-hidden="true" />
+                    <MeritSealIcon size={19} className="text-stoic-primary" aria-hidden="true" />
                     <span className="font-display text-xl font-bold tabular-nums text-navy-deep">
                       {merit.balance}
                     </span>
@@ -199,7 +219,7 @@ export default async function StudentDashboard({
                     số dư hiện tại
                   </p>
                 </div>
-                <div className="flex-1 bg-paper px-5 py-3">
+                <div className="bg-paper px-5 py-3">
                   <dt className="label-caps">Năng lực đối chiếu</dt>
                   <dd className="mt-1 flex items-center gap-2">
                     <TrendingUp className="h-4 w-4 text-azure-ink" aria-hidden="true" />
@@ -208,13 +228,13 @@ export default async function StudentDashboard({
                     </span>
                   </dd>
                 </div>
-                <div className="flex-1 bg-paper px-5 py-3">
+                <div className="bg-paper px-5 py-3">
                   <dt className="label-caps">Kết quả đối chiếu</dt>
                   <dd className="mt-1 font-display text-xl font-bold tabular-nums text-navy-deep">
                     {arena.wins}/{arena.losses}
                   </dd>
                 </div>
-                <div className="flex-1 bg-paper px-5 py-3">
+                <div className="bg-paper px-5 py-3">
                   <dt className="label-caps">Hoà giải</dt>
                   <dd className="mt-1 flex items-center gap-2">
                     <Handshake className="h-4 w-4 text-silver-blue-ink" aria-hidden="true" />
@@ -228,25 +248,55 @@ export default async function StudentDashboard({
                 </div>
               </dl>
             ) : null}
+
+            <div className="mt-6 flex flex-wrap items-center gap-2">
+              <Link
+                href="/doi-mat-khau"
+                className="world-action motion-press flex min-h-11 items-center gap-2 border border-line px-5 font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-ink-soft transition-colors hover:border-navy hover:text-navy"
+              >
+                <KeyRound className="h-3.5 w-3.5" aria-hidden="true" />
+                Đổi mật khẩu
+              </Link>
+              <form action={logoutAction}>
+                <RealtimeLogoutButton
+                  className="world-action motion-press flex min-h-11 cursor-pointer items-center gap-2 border border-line px-5 font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-ink-soft transition-colors hover:border-danger hover:text-danger"
+                >
+                  <LogOut className="h-3.5 w-3.5" aria-hidden="true" />
+                  Đăng xuất
+                </RealtimeLogoutButton>
+              </form>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Link
-              href="/doi-mat-khau"
-              className="flex items-center gap-2 border border-line px-5 py-2.5 font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-ink-soft transition-colors hover:border-navy hover:text-navy"
-            >
-              <KeyRound className="h-3.5 w-3.5" aria-hidden="true" />
-              Đổi mật khẩu
-            </Link>
-            <form action={logoutAction}>
-              <RealtimeLogoutButton
-                className="flex cursor-pointer items-center gap-2 border border-line px-5 py-2.5 font-ui text-[0.78rem] font-semibold uppercase tracking-[0.1em] text-ink-soft transition-colors hover:border-danger hover:text-danger"
-              >
-                <LogOut className="h-3.5 w-3.5" aria-hidden="true" />
-                Đăng xuất
-              </RealtimeLogoutButton>
-            </form>
-          </div>
+
+          <aside className="relative overflow-hidden border border-line bg-canvas p-6 shadow-[0_1.2rem_3rem_-2rem_rgb(35_43_83_/_0.42)]">
+            <div aria-hidden="true" className="pointer-events-none absolute -right-14 -top-16 size-40 rounded-full bg-stoic-lavender-pale" />
+            <div className="relative">
+              <AvatarUploader
+                src={studentAvatarSource({
+                  id: user.id,
+                  avatarUrl: user.avatarUrl,
+                  uploadedAvatar: account?.uploadedAvatar ?? null,
+                })}
+                googleAvatarSrc={user.avatarUrl}
+                name={user.name}
+                email={user.email}
+              />
+              <div className="mt-5 grid grid-cols-2 gap-px border border-line bg-line text-center">
+                <div className="bg-paper px-3 py-3">
+                  <UsersRound className="mx-auto size-4 text-stoic-primary" aria-hidden="true" />
+                  <p className="mt-1 font-display text-xl font-bold tabular-nums text-navy-deep">{friendCount}</p>
+                  <p className="font-ui text-[0.67rem] uppercase tracking-[0.1em] text-muted">Bạn bè</p>
+                </div>
+                <Link
+                  href="/hoc-vien/tin-nhan"
+                  className="world-action motion-press flex min-h-20 flex-col items-center justify-center bg-paper px-3 py-3 font-ui text-xs font-semibold text-navy-deep hover:bg-stoic-lavender-pale"
+                >
+                  <MessageCircle className="size-4 text-stoic-primary" aria-hidden="true" />
+                  <span className="mt-2">Tin nhắn</span>
+                </Link>
+              </div>
+            </div>
+          </aside>
         </div>
       </section>
 

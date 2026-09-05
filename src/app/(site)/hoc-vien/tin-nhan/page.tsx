@@ -2,6 +2,7 @@ import { ChatWorkspace, type ChatConversation, type ChatInboxItem } from "@/comp
 import { StudentNav } from "@/components/student/student-nav";
 import { getConversation, listInbox, markConversationRead } from "@/lib/chat/service";
 import { isAblyChatConfigured } from "@/lib/chat/ably-server";
+import { listFriendOverview } from "@/lib/friends/service";
 import { requireUser } from "@/lib/session";
 import { redirect } from "next/navigation";
 
@@ -43,8 +44,12 @@ export default async function StudentMessagesPage({ searchParams }: Props) {
 
   // Đếm unread sau khi đánh dấu cuộc trò chuyện đang mở là đã đọc, để cùng
   // một lần render không còn hiển thị huy hiệu cũ.
-  const inboxResult = await listInbox(user.id);
+  const [inboxResult, friendOverviewResult] = await Promise.all([
+    listInbox(user.id),
+    listFriendOverview(user.id),
+  ]);
   if (!inboxResult.ok) redirect("/hoc-vien");
+  if (!friendOverviewResult.ok) redirect("/hoc-vien");
 
   const inbox: ChatInboxItem[] = inboxResult.value.map((item) => ({
     ...item,
@@ -73,6 +78,7 @@ export default async function StudentMessagesPage({ searchParams }: Props) {
         activeConversation={activeConversation}
         activeConversationId={activeConversation?.id ?? conversationId}
         realtimeEnabled={isAblyChatConfigured()}
+        friendOverview={friendOverviewResult.value}
       />
     </div>
   );

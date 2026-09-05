@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
-import { MessageCircle, Plus, RefreshCw, Search, Send, UserRound } from "lucide-react";
+import { Check, Clock3, MessageCircle, Plus, RefreshCw, Search, Send, UserRound, X } from "lucide-react";
 import { useRealtimeChat } from "@/components/chat/use-realtime-chat";
 import { useOnlineStudents } from "@/components/realtime/student-realtime-provider";
 import {
@@ -14,10 +14,20 @@ import {
   startConversationAction,
   type ChatActionState,
 } from "@/lib/actions/chat";
+import {
+  respondToFriendRequestAction,
+  sendFriendRequestAction,
+  type FriendActionState,
+} from "@/lib/actions/friends";
+import type { FriendOverview, FriendPerson } from "@/lib/friends/service";
+import type { FriendshipState } from "@/lib/friends/rules";
+import { AccountAddIcon } from "@/components/friends/account-add-icon";
+import { StudentAvatar } from "@/components/student/student-avatar";
 
 export type ChatInboxItem = {
   id: string;
-  other: { id: string; name: string };
+  friendshipState: FriendshipState;
+  other: { id: string; name: string; avatarSrc: string | null };
   lastMessage: { body: string; createdAt: string; senderId: string } | null;
   lastMessageAt: string | null;
   unread: boolean;
@@ -26,7 +36,9 @@ export type ChatInboxItem = {
 
 export type ChatConversation = {
   id: string;
-  other: { id: string; name: string };
+  friendshipState: FriendshipState;
+  canSend: boolean;
+  other: { id: string; name: string; avatarSrc: string | null };
   messages: Array<{
     id: string;
     body: string;
@@ -42,6 +54,7 @@ type Props = {
   activeConversation: ChatConversation | null;
   activeConversationId?: string;
   realtimeEnabled: boolean;
+  friendOverview: FriendOverview;
 };
 
 function formatTime(value: string | null): string {
@@ -81,17 +94,126 @@ function SearchSubmit() {
   );
 }
 
-function StartConversationButton() {
-  const { pending } = useFormStatus();
+function StartConversationButton({
+  otherUserId,
+  personName,
+  iconOnly = false,
+}: {
+  otherUserId: string;
+  personName: string;
+  iconOnly?: boolean;
+}) {
+  const [state, action, pending] = useActionState<ChatActionState, FormData>(
+    startConversationAction,
+    undefined,
+  );
   return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="world-action inline-flex min-h-10 items-center gap-2 border border-line bg-paper px-3 font-ui text-xs font-semibold text-navy-deep transition-colors hover:border-stoic-primary disabled:opacity-60"
-    >
-      <MessageCircle className="size-3.5" aria-hidden />
-      {pending ? "Đang mở…" : "Nhắn tin"}
-    </button>
+    <form action={action} className="flex min-w-0 flex-col items-end gap-1">
+      <input type="hidden" name="otherUserId" value={otherUserId} />
+      <button
+        type="submit"
+        disabled={pending}
+        className={iconOnly
+          ? "motion-press grid size-11 place-items-center border border-line text-navy-deep hover:border-stoic-primary hover:bg-stoic-lavender-pale disabled:opacity-60"
+          : "world-action inline-flex min-h-11 items-center gap-2 border border-line bg-paper px-3 font-ui text-xs font-semibold text-navy-deep transition-colors hover:border-stoic-primary disabled:opacity-60"}
+        aria-label={iconOnly ? `Nhắn tin cho ${personName}` : undefined}
+      >
+        <MessageCircle className="size-3.5" aria-hidden />
+        {iconOnly ? null : pending ? "Đang mở…" : "Nhắn tin"}
+      </button>
+      {state?.error ? (
+        <span className="max-w-48 text-right font-ui text-[11px] leading-snug text-vermilion-ink" role="alert">
+          {state.error}
+        </span>
+      ) : null}
+    </form>
+  );
+}
+
+function FriendshipButton({
+  student,
+  allowDecline = false,
+}: {
+  student: { id: string; friendshipState: FriendshipState };
+  allowDecline?: boolean;
+}) {
+  const [requestState, requestAction, requestPending] = useActionState<FriendActionState, FormData>(
+    sendFriendRequestAction,
+    undefined,
+  );
+  const [responseState, responseAction, responsePending] = useActionState<FriendActionState, FormData>(
+    respondToFriendRequestAction,
+    undefined,
+  );
+  const state = responseState?.state ?? requestState?.state ?? student.friendshipState;
+
+  if (state === "FRIENDS") {
+    return <StartConversationButton otherUserId={student.id} personName="học viên" />;
+  }
+
+  if (state === "OUTGOING_PENDING") {
+    return (
+      <span className="inline-flex min-h-11 shrink-0 items-center gap-1.5 border border-line bg-canvas px-3 font-ui text-xs font-semibold text-muted">
+        <Clock3 className="size-3.5" aria-hidden="true" />
+        Đã gửi lời mời
+      </span>
+    );
+  }
+
+  if (state === "INCOMING_PENDING") {
+    return (
+      <form action={responseAction} className="flex flex-col items-end gap-1">
+        <input type="hidden" name="otherUserId" value={student.id} />
+        <div className="flex flex-wrap gap-2">
+          {allowDecline ? (
+            <button
+              type="submit"
+              name="response"
+              value="DECLINE"
+              disabled={responsePending}
+              className="world-action inline-flex min-h-11 items-center gap-2 border border-line bg-paper px-3 font-ui text-xs font-semibold text-muted hover:border-navy disabled:opacity-60"
+            >
+              <X className="size-3.5" aria-hidden="true" />
+              Bỏ qua
+            </button>
+          ) : null}
+          <button
+            type="submit"
+            name="response"
+            value="ACCEPT"
+            disabled={responsePending}
+            className="world-action motion-press inline-flex min-h-11 shrink-0 items-center gap-2 bg-navy px-3 font-ui text-xs font-semibold text-paper hover:bg-navy-deep disabled:opacity-60"
+          >
+            <Check className="size-3.5" aria-hidden="true" />
+            {responsePending ? "Đang nhận…" : "Chấp nhận"}
+          </button>
+        </div>
+        {responseState?.error ? (
+          <span className="max-w-48 text-right font-ui text-[11px] leading-snug text-vermilion-ink" role="alert">
+            {responseState.error}
+          </span>
+        ) : null}
+      </form>
+    );
+  }
+
+  return (
+    <form action={requestAction} className="flex flex-col items-end gap-1">
+      <input type="hidden" name="otherUserId" value={student.id} />
+      <button
+        type="submit"
+        disabled={requestPending}
+        className="world-action motion-press inline-flex min-h-11 shrink-0 items-center gap-2 border border-stoic-primary bg-paper px-3 font-ui text-xs font-semibold text-stoic-primary-deep hover:bg-stoic-lavender-pale disabled:opacity-60"
+      >
+        <AccountAddIcon size={16} aria-hidden="true" />
+        {requestPending ? "Đang gửi…" : "Kết bạn"}
+      </button>
+      {requestState?.error ? (
+        <span className="max-w-48 text-right font-ui text-[11px] leading-snug text-vermilion-ink" role="alert">
+          {requestState.error}
+        </span>
+      ) : null}
+    </form>
   );
 }
 
@@ -128,14 +250,16 @@ function SearchStudents({
           <UserRound className="size-4" aria-hidden />
         </div>
         <div>
-          <p className="font-display text-base font-bold text-navy-deep">Bắt đầu đối thoại</p>
+          <p className="font-display text-base font-bold text-navy-deep">Tìm bạn học</p>
           <p className="mt-1 font-ui text-xs leading-relaxed text-muted">
-            Tìm bằng tên hoặc email. Chỉ học viên đang hoạt động mới xuất hiện trong kết quả.
+            Tìm bằng tên hoặc email. Hai người cần kết bạn trước khi nhắn tin.
           </p>
         </div>
       </div>
-      <form action={action} className="mt-4 flex flex-col gap-2 sm:flex-row">
-        <label htmlFor="student-search" className="sr-only">Tìm học viên</label>
+      <label htmlFor="student-search" className="mt-4 block font-ui text-xs font-semibold text-navy-deep">
+        Tên hoặc email học viên
+      </label>
+      <form action={action} className="mt-1.5 flex flex-col gap-2 sm:flex-row">
         <input
           id="student-search"
           name="query"
@@ -156,26 +280,197 @@ function SearchStudents({
             </p>
           ) : (
             state.students.map((student) => (
-              <form
+              <div
                 key={student.id}
-                action={startConversationAction}
                 className="flex items-center justify-between gap-3 border border-line/80 px-3 py-2.5"
               >
-                <input type="hidden" name="otherUserId" value={student.id} />
-                <span className="flex min-w-0 items-center gap-2 truncate font-ui text-sm font-medium text-ink">
-                  <OnlineMark
+                <span className="flex min-w-0 items-center gap-2.5 font-ui text-sm font-medium text-ink">
+                  <StudentAvatar
+                    src={student.avatarSrc}
+                    name={student.name}
+                    email=""
+                    size="sm"
+                    showStatus={presenceReady}
                     online={onlineUserIds.has(student.id)}
-                    ready={presenceReady}
                   />
-                  {student.name}
+                  <span className="truncate">{student.name}</span>
                 </span>
-                <StartConversationButton />
-              </form>
+                <FriendshipButton key={`${student.id}:${student.friendshipState}`} student={student} />
+              </div>
             ))
           )}
         </div>
       )}
     </div>
+  );
+}
+
+function IncomingFriendRow({
+  person,
+  online,
+  presenceReady,
+}: {
+  person: FriendPerson;
+  online: boolean;
+  presenceReady: boolean;
+}) {
+  const [state, action, pending] = useActionState<FriendActionState, FormData>(
+    respondToFriendRequestAction,
+    undefined,
+  );
+
+  if (state?.state === "NONE") return null;
+  if (state?.state === "FRIENDS") {
+    return (
+      <div className="flex items-center justify-between gap-3 border border-stoic-primary/30 bg-stoic-lavender-pale px-3 py-2.5">
+        <span className="font-ui text-sm font-semibold text-navy-deep">Đã kết bạn với {person.name}</span>
+        <StartConversationButton otherUserId={person.id} personName={person.name} />
+      </div>
+    );
+  }
+
+  return (
+    <form action={action} className="flex flex-col gap-3 border border-stoic-primary/25 bg-paper px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
+      <input type="hidden" name="otherUserId" value={person.id} />
+      <span className="flex min-w-0 items-center gap-2.5">
+        <StudentAvatar
+          src={person.avatarSrc}
+          name={person.name}
+          email=""
+          size="sm"
+          showStatus={presenceReady}
+          online={online}
+        />
+        <span className="min-w-0">
+          <span className="block truncate font-ui text-sm font-semibold text-navy-deep">{person.name}</span>
+          <span className="block font-ui text-[11px] text-muted">Muốn kết bạn với bạn</span>
+        </span>
+      </span>
+      <span className="flex shrink-0 gap-2">
+        <button
+          type="submit"
+          name="response"
+          value="DECLINE"
+          disabled={pending}
+          className="motion-press grid size-11 place-items-center border border-line text-muted hover:border-vermilion-ink hover:text-vermilion-ink disabled:opacity-50"
+          aria-label={`Bỏ qua lời mời của ${person.name}`}
+        >
+          <X className="size-4" aria-hidden="true" />
+        </button>
+        <button
+          type="submit"
+          name="response"
+          value="ACCEPT"
+          disabled={pending}
+          className="world-action motion-press inline-flex min-h-11 items-center gap-1.5 bg-navy px-3 font-ui text-xs font-semibold text-paper hover:bg-navy-deep disabled:opacity-50"
+        >
+          <Check className="size-3.5" aria-hidden="true" />
+          {pending ? "Đang lưu…" : "Chấp nhận"}
+        </button>
+      </span>
+      {state?.error ? <span className="font-ui text-xs text-vermilion-ink" role="alert">{state.error}</span> : null}
+    </form>
+  );
+}
+
+function ConnectionsPanel({
+  overview,
+  onlineUserIds,
+  presenceReady,
+}: {
+  overview: FriendOverview;
+  onlineUserIds: ReadonlySet<string>;
+  presenceReady: boolean;
+}) {
+  if (overview.incoming.length === 0 && overview.friends.length === 0 && overview.outgoing.length === 0) {
+    return null;
+  }
+
+  return (
+    <section className="border border-line bg-canvas p-5" aria-labelledby="connections-title">
+      <div className="flex flex-wrap items-end justify-between gap-2">
+        <div>
+          <p className="label-caps">KẾT NỐI</p>
+          <h2 id="connections-title" className="mt-1 font-display text-lg font-bold text-navy-deep">
+            Bạn bè học tập
+          </h2>
+        </div>
+        <p className="font-ui text-xs text-muted">
+          {overview.friends.length} bạn bè
+          {overview.outgoing.length > 0 ? ` · ${overview.outgoing.length} lời mời đã gửi` : ""}
+        </p>
+      </div>
+
+      {overview.incoming.length > 0 ? (
+        <div className="mt-4 space-y-2">
+          <p className="font-ui text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-stoic-primary-deep">
+            Lời mời mới · {overview.incoming.length}
+          </p>
+          {overview.incoming.map((person) => (
+            <IncomingFriendRow
+              key={person.id}
+              person={person}
+              online={onlineUserIds.has(person.id)}
+              presenceReady={presenceReady}
+            />
+          ))}
+        </div>
+      ) : null}
+
+      {overview.outgoing.length > 0 ? (
+        <div className="mt-4">
+          <p className="font-ui text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-muted">
+            Đang chờ phản hồi · {overview.outgoing.length}
+          </p>
+          <div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {overview.outgoing.map((person) => (
+              <div key={person.id} className="flex min-h-14 items-center gap-2.5 border border-line bg-paper px-3 py-2.5">
+                <StudentAvatar
+                  src={person.avatarSrc}
+                  name={person.name}
+                  email=""
+                  size="sm"
+                  showStatus={presenceReady}
+                  online={onlineUserIds.has(person.id)}
+                />
+                <span className="min-w-0">
+                  <span className="block truncate font-ui text-sm font-semibold text-ink">{person.name}</span>
+                  <span className="mt-0.5 flex items-center gap-1 font-ui text-[11px] text-muted">
+                    <Clock3 className="size-3" aria-hidden="true" />
+                    Đã gửi lời mời
+                  </span>
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {overview.friends.length > 0 ? (
+        <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {overview.friends.map((person) => (
+            <div key={person.id} className="flex items-center justify-between gap-3 border border-line bg-paper px-3 py-2.5">
+              <span className="flex min-w-0 items-center gap-2.5">
+                <StudentAvatar
+                  src={person.avatarSrc}
+                  name={person.name}
+                  email=""
+                  size="sm"
+                  showStatus={presenceReady}
+                  online={onlineUserIds.has(person.id)}
+                />
+                <span className="truncate font-ui text-sm font-semibold text-ink">{person.name}</span>
+              </span>
+              <StartConversationButton
+                otherUserId={person.id}
+                personName={person.name}
+                iconOnly
+              />
+            </div>
+          ))}
+        </div>
+      ) : null}
+    </section>
   );
 }
 
@@ -262,9 +557,14 @@ function ConversationPanel({
   return (
     <section className="flex min-h-[34rem] flex-1 flex-col border border-line bg-canvas" aria-label={`Cuộc trò chuyện với ${conversation.other.name}`}>
       <header className="flex items-center gap-3 border-b border-line bg-paper px-5 py-4">
-        <div className="flex size-10 items-center justify-center rounded-full bg-stoic-lavender-pale font-display font-bold text-navy-deep">
-          {conversation.other.name.slice(0, 1).toUpperCase()}
-        </div>
+        <StudentAvatar
+          src={conversation.other.avatarSrc}
+          name={conversation.other.name}
+          email=""
+          size="sm"
+          showStatus={presenceReady}
+          online={otherOnline}
+        />
         <div className="min-w-0">
           <h2 className="truncate font-display text-lg font-bold text-navy-deep">{conversation.other.name}</h2>
           <p className="flex items-center gap-1.5 font-ui text-xs text-muted">
@@ -281,7 +581,9 @@ function ConversationPanel({
         {conversation.messages.length === 0 ? (
           <div className="flex min-h-64 items-center justify-center text-center">
             <p className="max-w-xs font-ui text-sm leading-relaxed text-muted">
-              Chưa có tin nhắn. Bạn có thể bắt đầu bằng một lời chào hoặc chia sẻ một điều hữu ích.
+              {conversation.canSend
+                ? "Chưa có tin nhắn. Bạn có thể bắt đầu bằng một lời chào hoặc chia sẻ một điều hữu ích."
+                : "Chưa có tin nhắn. Hãy kết bạn trước khi bắt đầu trò chuyện."}
             </p>
           </div>
         ) : (
@@ -301,7 +603,31 @@ function ConversationPanel({
           })
         )}
       </div>
-      <MessageComposer conversationId={conversation.id} />
+      {conversation.canSend ? (
+        <MessageComposer key={conversation.id} conversationId={conversation.id} />
+      ) : (
+        <div className="border-t border-line bg-paper p-4 sm:p-5">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <p className="font-ui text-sm font-semibold text-navy-deep">Kết bạn để tiếp tục trò chuyện</p>
+              <p className="mt-1 font-ui text-xs leading-relaxed text-muted">
+                {conversation.friendshipState === "INCOMING_PENDING"
+                  ? "Lịch sử được giữ nguyên. Bạn có thể chấp nhận hoặc bỏ qua lời mời."
+                  : conversation.friendshipState === "OUTGOING_PENDING"
+                    ? "Bạn vẫn xem được lịch sử. Chờ người kia chấp nhận để nhắn tiếp."
+                    : "Bạn vẫn xem được lịch sử. Hai người cần kết bạn trước khi nhắn tiếp."}
+              </p>
+            </div>
+            <div className="shrink-0 self-start sm:self-center">
+              <FriendshipButton
+                key={`${conversation.other.id}:${conversation.friendshipState}`}
+                student={{ id: conversation.other.id, friendshipState: conversation.friendshipState }}
+                allowDecline
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
@@ -330,7 +656,8 @@ function Inbox({
 
   function focusNewChat() {
     const input = document.getElementById("student-search");
-    input?.scrollIntoView({ behavior: "smooth", block: "center" });
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    input?.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "center" });
     input?.focus();
   }
 
@@ -347,7 +674,7 @@ function Inbox({
           type="button"
           onClick={focusNewChat}
           aria-label="Bắt đầu cuộc trò chuyện mới"
-          className="world-action inline-flex size-9 shrink-0 items-center justify-center rounded-xl border border-line text-navy-deep transition-colors hover:border-stoic-primary hover:bg-stoic-lavender-pale focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/40"
+          className="world-action inline-flex size-11 shrink-0 items-center justify-center rounded-xl border border-line text-navy-deep transition-colors hover:border-stoic-primary hover:bg-stoic-lavender-pale focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/40"
         >
           <Plus className="size-4" aria-hidden="true" />
         </button>
@@ -365,7 +692,7 @@ function Inbox({
             placeholder="Tìm người hoặc tin nhắn…"
             autoComplete="off"
             spellCheck={false}
-            className="min-h-10 w-full rounded-xl border border-line bg-canvas py-2 pl-9 pr-3 font-ui text-sm text-ink outline-none transition-colors placeholder:text-muted/70 focus:border-stoic-primary"
+            className="min-h-11 w-full rounded-xl border border-line bg-canvas py-2 pl-9 pr-3 font-ui text-sm text-ink outline-none transition-colors placeholder:text-muted/70 focus:border-stoic-primary"
           />
         </div>
       </div>
@@ -389,16 +716,14 @@ function Inbox({
                     aria-current={activeId === item.id ? "page" : undefined}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="relative flex size-9 shrink-0 items-center justify-center rounded-full bg-cream-deep font-display text-sm font-bold text-navy-deep">
-                        {item.other.name.slice(0, 1).toUpperCase()}
-                        {presenceReady && onlineUserIds.has(item.other.id) && (
-                          <span
-                            className="absolute bottom-0 right-0 size-2.5 rounded-full border-2 border-paper bg-success"
-                            aria-label="Đang trực tuyến"
-                            title="Đang trực tuyến"
-                          />
-                        )}
-                      </div>
+                      <StudentAvatar
+                        src={item.other.avatarSrc}
+                        name={item.other.name}
+                        email=""
+                        size="sm"
+                        showStatus={presenceReady}
+                        online={onlineUserIds.has(item.other.id)}
+                      />
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between gap-2">
                           <p className={`truncate font-ui text-sm ${item.unread ? "font-bold text-navy-deep" : "font-semibold text-ink"}`}>{item.other.name}</p>
@@ -409,6 +734,16 @@ function Inbox({
                         <p className={`mt-1 truncate font-ui text-xs ${item.unread ? "font-medium text-ink" : "text-muted"}`}>
                           {item.lastMessage?.body ?? "Chưa có tin nhắn"}
                         </p>
+                        {item.friendshipState !== "FRIENDS" ? (
+                          <p className="mt-1 flex items-center gap-1 font-ui text-[11px] text-stoic-primary-deep">
+                            <Clock3 className="size-3 shrink-0" aria-hidden="true" />
+                            {item.friendshipState === "INCOMING_PENDING"
+                              ? "Có lời mời kết bạn"
+                              : item.friendshipState === "OUTGOING_PENDING"
+                                ? "Đang chờ kết bạn"
+                                : "Lịch sử · chưa kết bạn"}
+                          </p>
+                        ) : null}
                       </div>
                       {item.unreadCount > 0 ? (
                         <span
@@ -436,12 +771,18 @@ export function ChatWorkspace({
   activeConversation,
   activeConversationId,
   realtimeEnabled,
+  friendOverview,
 }: Props) {
   useRealtimeChat({ currentUserId, enabled: realtimeEnabled });
   const presence = useOnlineStudents(realtimeEnabled);
 
   return (
     <div className="space-y-6">
+      <ConnectionsPanel
+        overview={friendOverview}
+        onlineUserIds={presence.onlineUserIds}
+        presenceReady={presence.ready}
+      />
       <SearchStudents
         onlineUserIds={presence.onlineUserIds}
         presenceReady={presence.ready}

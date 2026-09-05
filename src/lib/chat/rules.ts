@@ -1,9 +1,20 @@
+import { FRIENDSHIP_ACCEPTED } from "../friends/rules.ts";
+
 export const MESSAGE_MAX = 2_000;
 export const MESSAGE_MIN_INTERVAL_MS = 700;
 
 export type ChatBodyResult =
   | { ok: true; value: string }
   | { ok: false; error: string };
+
+export function conversationPermissions(
+  conversation: { participantAId: string; participantBId: string },
+  viewerId: string,
+  friendshipStatus: string | null = null,
+): { canRead: boolean; canSend: boolean } {
+  const canRead = conversation.participantAId === viewerId || conversation.participantBId === viewerId;
+  return { canRead, canSend: canRead && friendshipStatus === FRIENDSHIP_ACCEPTED };
+}
 
 export function orderedParticipants(firstId: string, secondId: string): [string, string] {
   return firstId < secondId ? [firstId, secondId] : [secondId, firstId];

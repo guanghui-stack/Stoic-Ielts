@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "react-easy-crop/react-easy-crop.css";
 
 /*
   STOIC · IELTS — Nhận thức · Hành động · Ý chí
@@ -2150,6 +2151,16 @@ body {
 
 
 /* ===== STUDENT GOOGLE AVATAR — profile surface only ===== */
+.world-shell .avatar-crop-dialog {
+  width: min(calc(100% - 2rem), 38rem);
+  max-height: calc(100% - 2rem);
+}
+
+.world-shell .avatar-crop-dialog__surface {
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+}
+
 .world-shell .student-avatar {
   position: relative;
   display: grid;
@@ -2166,6 +2177,24 @@ body {
   box-shadow: 0 0.75rem 1.5rem -1rem rgb(91 95 239 / 0.62);
 }
 
+.world-shell .student-avatar[data-size="sm"] {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-width: 1px;
+}
+
+.world-shell .student-avatar[data-size="lg"] {
+  width: 6rem;
+  height: 6rem;
+}
+
+.world-shell .student-avatar[data-size="xl"] {
+  width: clamp(7.5rem, 12vw, 9rem);
+  height: clamp(7.5rem, 12vw, 9rem);
+  border-width: 3px;
+  box-shadow: 0 1.35rem 2.5rem -1.5rem rgb(91 95 239 / 0.72);
+}
+
 .world-shell .student-avatar::after {
   position: absolute;
   right: 0.2rem;
@@ -2174,8 +2203,17 @@ body {
   height: 0.72rem;
   border: 2px solid var(--color-stoic-canvas);
   border-radius: 50%;
-  background: var(--color-stoic-sage);
+  display: none;
+  background: var(--color-line-strong);
   content: "";
+}
+
+.world-shell .student-avatar[data-show-status="true"]::after {
+  display: block;
+}
+
+.world-shell .student-avatar[data-online="true"]::after {
+  background: var(--color-stoic-sage);
 }
 
 .world-shell .student-avatar__image {
@@ -2198,8 +2236,20 @@ body {
   letter-spacing: 0.04em;
 }
 
+.world-shell .student-avatar[data-size="sm"] .student-avatar__fallback {
+  font-size: 0.75rem;
+}
+
+.world-shell .student-avatar[data-size="lg"] .student-avatar__fallback {
+  font-size: 1.4rem;
+}
+
+.world-shell .student-avatar[data-size="xl"] .student-avatar__fallback {
+  font-size: 2rem;
+}
+
 @media (max-width: 639px) {
-  .world-shell .student-avatar {
+  .world-shell .student-avatar[data-size="md"] {
     width: 3.75rem;
     height: 3.75rem;
   }

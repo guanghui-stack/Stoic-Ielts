@@ -9,8 +9,74 @@ import {
   requireUser,
 } from "@/lib/session";
 import { sendVerificationEmail } from "@/lib/auth/email-verification";
+import {
+  AVATAR_MAX_BYTES,
+  AVATAR_OUTPUT_SIZE,
+  isSafeAvatarWebp,
+  webpDimensions,
+} from "@/lib/avatar/rules";
 
 export type AccountFormState = { error?: string; success?: string } | undefined;
+
+const AVATAR_PREFIX = "data:image/webp;base64,";
+/**
+ * Luu anh da cat trong MySQL. Du lieu khong ghi ra filesystem vi thu muc app
+ * tren Hostinger bi thay moi khi deploy; gioi han nho hon body 1 MB mac dinh
+ * cua Server Action va chi chap nhan dung WebP do canvas phia client tao.
+ */
+export async function saveAvatarAction(
+  _prev: AccountFormState,
+  formData: FormData,
+): Promise<AccountFormState> {
+  const user = await requireUser();
+  const avatarData = String(formData.get("avatarData") ?? "");
+  if (!avatarData.startsWith(AVATAR_PREFIX)) {
+    return { error: "Ảnh đại diện không đúng định dạng WebP." };
+  }
+
+  const encoded = avatarData.slice(AVATAR_PREFIX.length);
+  if (
+    !encoded ||
+    encoded.length % 4 !== 0 ||
+    !/^[A-Za-z0-9+/]+={0,2}$/.test(encoded) ||
+    encoded.length > Math.ceil((AVATAR_MAX_BYTES * 4) / 3) + 8
+  ) {
+    return { error: "Ảnh sau khi nén vẫn quá lớn. Hãy chọn ảnh khác." };
+  }
+
+  let image: Buffer;
+  try {
+    image = Buffer.from(encoded, "base64");
+  } catch {
+    return { error: "Không đọc được dữ liệu ảnh." };
+  }
+  const dimensions = webpDimensions(image);
+  if (
+    !isSafeAvatarWebp(image) ||
+    !dimensions ||
+    dimensions.width !== AVATAR_OUTPUT_SIZE ||
+    dimensions.height !== AVATAR_OUTPUT_SIZE ||
+    image.length > AVATAR_MAX_BYTES
+  ) {
+    return { error: "Ảnh đại diện không hợp lệ hoặc vượt quá 400 KB." };
+  }
+
+  await db.userAvatar.upsert({
+    where: { userId: user.id },
+    create: { userId: user.id, data: avatarData },
+    update: { data: avatarData },
+  });
+  revalidatePath("/hoc-vien");
+  revalidatePath("/hoc-vien/tin-nhan");
+  return { success: "Đã cập nhật ảnh đại diện." };
+}
+
+export async function removeAvatarAction(): Promise<void> {
+  const user = await requireUser();
+  await db.userAvatar.deleteMany({ where: { userId: user.id } });
+  revalidatePath("/hoc-vien");
+  revalidatePath("/hoc-vien/tin-nhan");
+}
 
 /** Đọc band điểm từ form: rỗng → null; hợp lệ 0–9, bước 0.5. */
 function parseBand(raw: FormDataEntryValue | null): number | null | "invalid" {

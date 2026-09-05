@@ -7,6 +7,7 @@ import {
 } from "@/lib/reading-band";
 import { seedRankCatalog, backfillUserRanks } from "@/lib/ranks/seeds";
 import { isDuplicateColumnMigrationError } from "@/lib/payments/payment-rules";
+import { backfillLegacyFriendships } from "@/lib/friends/legacy-migration";
 import seedData from "../../prisma/seed-data.json";
 import readingGameTheory from "../../prisma/reading-game-theory.json";
 import readingPaidPack1 from "../../prisma/reading-paid-pack-1.json";
@@ -34,6 +35,15 @@ const DDL = [
     \`examDate\` DATETIME(3) NULL,
     PRIMARY KEY (\`id\`),
     UNIQUE INDEX \`User_email_key\` (\`email\`)
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`UserAvatar\` (
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`data\` MEDIUMTEXT NOT NULL,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`updatedAt\` DATETIME(3) NOT NULL,
+    PRIMARY KEY (\`userId\`),
+    CONSTRAINT \`UserAvatar_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
   ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
 
   `CREATE TABLE IF NOT EXISTS \`Exercise\` (
@@ -1482,6 +1492,27 @@ const DDL = [
     CONSTRAINT \`DirectMessage_senderId_fkey\` FOREIGN KEY (\`senderId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
   ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
 
+  `CREATE TABLE IF NOT EXISTS \`Friendship\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`userAId\` VARCHAR(191) NOT NULL,
+    \`userBId\` VARCHAR(191) NOT NULL,
+    \`requestedById\` VARCHAR(191) NOT NULL,
+    \`status\` VARCHAR(16) NOT NULL DEFAULT 'PENDING',
+    \`requestedAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`respondedAt\` DATETIME(3) NULL,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`updatedAt\` DATETIME(3) NOT NULL,
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`Friendship_userAId_userBId_key\` (\`userAId\`, \`userBId\`),
+    INDEX \`Friendship_userAId_status_updatedAt_idx\` (\`userAId\`, \`status\`, \`updatedAt\`),
+    INDEX \`Friendship_userBId_status_updatedAt_idx\` (\`userBId\`, \`status\`, \`updatedAt\`),
+    INDEX \`Friendship_requestedById_status_idx\` (\`requestedById\`, \`status\`),
+    INDEX \`Friendship_requestedById_requestedAt_idx\` (\`requestedById\`, \`requestedAt\`),
+    CONSTRAINT \`Friendship_userAId_fkey\` FOREIGN KEY (\`userAId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`Friendship_userBId_fkey\` FOREIGN KEY (\`userBId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`Friendship_requestedById_fkey\` FOREIGN KEY (\`requestedById\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
   `CREATE TABLE IF NOT EXISTS \`FeynmanAiAttemptState\` (
     \`id\` VARCHAR(191) NOT NULL,
     \`attemptId\` VARCHAR(191) NOT NULL,
@@ -1650,6 +1681,7 @@ const MIGRATIONS = [
 
   // Lien ket den dung cau sai khi hoc vien phuc ban.
   `ALTER TABLE \`TrialReflection\` ADD COLUMN \`sourceQuestionId\` VARCHAR(191) NULL`,
+
 ];
 
 const PAYMENT_EVENT_LEASE_MIGRATION =
@@ -1676,6 +1708,45 @@ async function ensurePaymentEventLeaseMigration() {
   } catch (error) {
     if (isDuplicateColumnMigrationError(error)) return;
     throw error;
+  }
+}
+
+async function ensureFriendshipRequestedAtMigration() {
+  if (!(await hasColumn("Friendship", "requestedAt"))) {
+    try {
+      await db.$executeRawUnsafe("ALTER TABLE `Friendship` ADD COLUMN `requestedAt` DATETIME(3) NULL");
+    } catch (error) {
+      if (!isDuplicateColumnMigrationError(error)) throw error;
+    }
+  }
+
+  // Giữ ngày gửi ban đầu cho dữ liệu cũ. Kiểm tra nullable giúp chạy tiếp sau
+  // khi migration bị ngắt mà không ALTER bảng trong mỗi lần khởi động.
+  const columns = await db.$queryRaw<Array<{ isNullable: string }>>`
+    SELECT IS_NULLABLE AS isNullable FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Friendship'
+      AND COLUMN_NAME = 'requestedAt'
+  `;
+  if (columns[0]?.isNullable === "YES") {
+    await db.$executeRawUnsafe("UPDATE `Friendship` SET `requestedAt` = `createdAt` WHERE `requestedAt` IS NULL");
+    await db.$executeRawUnsafe("ALTER TABLE `Friendship` MODIFY COLUMN `requestedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3)");
+  }
+
+  const hasRequestIndex = async () => {
+    const indexes = await db.$queryRaw<Array<{ indexName: string }>>`
+      SELECT INDEX_NAME AS indexName FROM information_schema.STATISTICS
+      WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Friendship'
+        AND INDEX_NAME = 'Friendship_requestedById_requestedAt_idx'
+      LIMIT 1
+    `;
+    return indexes.length > 0;
+  };
+  if (!(await hasRequestIndex())) {
+    try {
+      await db.$executeRawUnsafe("CREATE INDEX `Friendship_requestedById_requestedAt_idx` ON `Friendship` (`requestedById`, `requestedAt`)");
+    } catch (error) {
+      if (!(await hasRequestIndex())) throw error;
+    }
   }
 }
 
@@ -1706,6 +1777,11 @@ export async function initDatabase() {
       /* cột đã tồn tại — bỏ qua */
     }
   }
+
+  await ensureFriendshipRequestedAtMigration();
+
+  const migratedFriendships = await backfillLegacyFriendships(db);
+  console.log(`[wobridges] Da chuyen ${migratedFriendships} doi thoai cu sang quan he ket ban.`);
 
   // Lease token cua PaymentEvent la migration BAT BUOC cho an toan tranh
   // stale worker ghi de. Khong duoc nuot loi permission/lock/transient nhu

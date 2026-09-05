@@ -1,6 +1,6 @@
 import type { PrismaClient } from "@prisma/client";
 
-export const BUILD_MARKER = "2026-08-24-security-hardening";
+export const BUILD_MARKER = "2026-09-05-student-profile-social";
 
 export const PRODUCTION_SECURITY_HEADERS = [
   {

@@ -27,11 +27,14 @@ export async function searchStudentsAction(
   return { students: result.value };
 }
 
-export async function startConversationAction(formData: FormData): Promise<void> {
+export async function startConversationAction(
+  _previous: ChatActionState,
+  formData: FormData,
+): Promise<ChatActionState> {
   const user = await requireUser();
   const otherUserId = String(formData.get("otherUserId") ?? "").trim();
   const result = await ensureConversation(user.id, otherUserId);
-  if (!result.ok) return;
+  if (!result.ok) return { error: result.error };
   redirect(`/hoc-vien/tin-nhan?conversation=${encodeURIComponent(result.value.conversationId)}`);
 }
 

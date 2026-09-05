@@ -1,10 +1,14 @@
 import { db } from "@/lib/db";
 import {
   MESSAGE_MIN_INTERVAL_MS,
+  conversationPermissions,
   orderedParticipants,
   validateMessageBody,
 } from "@/lib/chat/rules";
 import { publishChatMessageCreated } from "@/lib/chat/ably-server";
+import { FRIENDSHIP_ACCEPTED, friendshipStateFor, orderedFriendPair, type FriendshipState } from "@/lib/friends/rules";
+import { friendshipStatesForStudents } from "@/lib/friends/service";
+import { studentAvatarSource } from "@/lib/avatar/source";
 const INBOX_LIMIT = 50;
 const MESSAGE_PAGE_SIZE = 100;
 
@@ -22,7 +26,8 @@ export type ChatResult<T> =
 
 export type InboxItem = {
   id: string;
-  other: { id: string; name: string };
+  friendshipState: FriendshipState;
+  other: { id: string; name: string; avatarSrc: string | null };
   lastMessage: { body: string; createdAt: Date; senderId: string } | null;
   lastMessageAt: Date | null;
   unread: boolean;
@@ -31,7 +36,9 @@ export type InboxItem = {
 
 export type ConversationView = {
   id: string;
-  other: { id: string; name: string };
+  friendshipState: FriendshipState;
+  canSend: boolean;
+  other: { id: string; name: string; avatarSrc: string | null };
   messages: Array<{
     id: string;
     body: string;
@@ -41,7 +48,12 @@ export type ConversationView = {
   }>;
 };
 
-export type StudentSearchResult = { id: string; name: string };
+export type StudentSearchResult = {
+  id: string;
+  name: string;
+  avatarSrc: string | null;
+  friendshipState: FriendshipState;
+};
 
 function accountIsStudent(account: StudentAccount | null): account is StudentAccount {
   return Boolean(account && account.active && !account.isBot && account.role === "STUDENT");
@@ -50,28 +62,34 @@ function accountIsStudent(account: StudentAccount | null): account is StudentAcc
 async function studentAccount(userId: string): Promise<StudentAccount | null> {
   return db.user.findUnique({
     where: { id: userId },
-    select: { id: true, name: true, role: true, active: true, isBot: true },
+    select: {
+      id: true,
+      name: true,
+      role: true,
+      active: true,
+      isBot: true,
+    },
   });
-}
-
-function isParticipant(
-  conversation: { participantAId: string; participantBId: string },
-  userId: string,
-): boolean {
-  return conversation.participantAId === userId || conversation.participantBId === userId;
 }
 
 export async function listInbox(userId: string): Promise<ChatResult<InboxItem[]>> {
   const account = await studentAccount(userId);
   if (!accountIsStudent(account)) return { ok: false, error: "Chỉ học viên mới dùng được hộp chat." };
 
+  // Lịch sử vẫn thuộc về hai người tham gia, kể cả khi chưa kết bạn hoặc
+  // đã từ chối lời mời. Quyền gửi tin được kiểm tra riêng trên máy chủ.
   const conversations = await db.directConversation.findMany({
-    where: { OR: [{ participantAId: userId }, { participantBId: userId }] },
+    where: {
+      OR: [
+        { participantAId: userId },
+        { participantBId: userId },
+      ],
+    },
     orderBy: [{ lastMessageAt: "desc" }, { updatedAt: "desc" }],
     take: INBOX_LIMIT,
     include: {
-      participantA: { select: { id: true, name: true, role: true, active: true, isBot: true } },
-      participantB: { select: { id: true, name: true, role: true, active: true, isBot: true } },
+      participantA: { select: { id: true, name: true, role: true, active: true, isBot: true, avatarUrl: true, uploadedAvatar: { select: { updatedAt: true } } } },
+      participantB: { select: { id: true, name: true, role: true, active: true, isBot: true, avatarUrl: true, uploadedAvatar: { select: { updatedAt: true } } } },
       messages: {
         orderBy: { createdAt: "desc" },
         take: 1,
@@ -80,6 +98,12 @@ export async function listInbox(userId: string): Promise<ChatResult<InboxItem[]>
     },
   });
 
+  const states = await friendshipStatesForStudents(
+    userId,
+    conversations.map((conversation) =>
+      conversation.participantAId === userId ? conversation.participantBId : conversation.participantAId,
+    ),
+  );
   const inboxItems = await Promise.all(
     conversations.map(async (conversation): Promise<InboxItem | null> => {
       const other = conversation.participantAId === userId
@@ -100,7 +124,12 @@ export async function listInbox(userId: string): Promise<ChatResult<InboxItem[]>
 
       return {
         id: conversation.id,
-        other: { id: other.id, name: other.name },
+        friendshipState: states.get(other.id) ?? "NONE",
+        other: {
+          id: other.id,
+          name: other.name,
+          avatarSrc: studentAvatarSource(other),
+        },
         lastMessage: conversation.messages[0] ?? null,
         lastMessageAt: conversation.lastMessageAt,
         unread: unreadCount > 0,
@@ -137,10 +166,19 @@ export async function searchStudents(
     },
     orderBy: { name: "asc" },
     take: 20,
-    select: { id: true, name: true },
+    select: { id: true, name: true, avatarUrl: true, uploadedAvatar: { select: { updatedAt: true } } },
   });
 
-  return { ok: true, value: students };
+  const states = await friendshipStatesForStudents(userId, students.map((student) => student.id));
+  return {
+    ok: true,
+    value: students.map((student) => ({
+      id: student.id,
+      name: student.name,
+      avatarSrc: studentAvatarSource(student),
+      friendshipState: states.get(student.id) ?? "NONE",
+    })),
+  };
 }
 
 export async function ensureConversation(
@@ -154,6 +192,14 @@ export async function ensureConversation(
   }
 
   const [participantAId, participantBId] = orderedParticipants(userId, otherUserId);
+  const [userAId, userBId] = orderedFriendPair(userId, otherUserId);
+  const friendship = await db.friendship.findUnique({
+    where: { userAId_userBId: { userAId, userBId } },
+    select: { status: true },
+  });
+  if (friendship?.status !== FRIENDSHIP_ACCEPTED) {
+    return { ok: false, error: "Hai học viên cần kết bạn trước khi nhắn tin." };
+  }
   const conversation = await db.directConversation.upsert({
     where: { participantAId_participantBId: { participantAId, participantBId } },
     create: { participantAId, participantBId },
@@ -173,8 +219,8 @@ export async function getConversation(
   const conversation = await db.directConversation.findUnique({
     where: { id: conversationId },
     include: {
-      participantA: { select: { id: true, name: true, role: true, active: true, isBot: true } },
-      participantB: { select: { id: true, name: true, role: true, active: true, isBot: true } },
+      participantA: { select: { id: true, name: true, role: true, active: true, isBot: true, avatarUrl: true, uploadedAvatar: { select: { updatedAt: true } } } },
+      participantB: { select: { id: true, name: true, role: true, active: true, isBot: true, avatarUrl: true, uploadedAvatar: { select: { updatedAt: true } } } },
       messages: {
         orderBy: [{ createdAt: "desc" }, { id: "desc" }],
         take: MESSAGE_PAGE_SIZE,
@@ -183,19 +229,30 @@ export async function getConversation(
     },
   });
 
-  if (!conversation || !isParticipant(conversation, userId)) {
+  if (!conversation || !conversationPermissions(conversation, userId).canRead) {
     return { ok: false, error: "Không tìm thấy cuộc trò chuyện này." };
   }
   const other = conversation.participantAId === userId
     ? conversation.participantB
     : conversation.participantA;
   if (other.role !== "STUDENT" || !other.active || other.isBot) return { ok: false, error: "Học viên này không còn nhận tin nhắn." };
+  const [userAId, userBId] = orderedFriendPair(userId, other.id);
+  const friendship = await db.friendship.findUnique({
+    where: { userAId_userBId: { userAId, userBId } },
+    select: { userAId: true, userBId: true, requestedById: true, status: true },
+  });
 
   return {
     ok: true,
     value: {
       id: conversation.id,
-      other: { id: other.id, name: other.name },
+      friendshipState: friendshipStateFor(friendship, userId),
+      canSend: conversationPermissions(conversation, userId, friendship?.status).canSend,
+      other: {
+        id: other.id,
+        name: other.name,
+        avatarSrc: studentAvatarSource(other),
+      },
       messages: [...conversation.messages].reverse().map((message) => ({
         id: message.id,
         body: message.body,
@@ -211,12 +268,22 @@ export async function markConversationRead(
   userId: string,
   conversationId: string,
 ): Promise<ChatResult<null>> {
-  const conversation = await db.directConversation.findUnique({
-    where: { id: conversationId },
-    select: { id: true, participantAId: true, participantBId: true },
-  });
-  if (!conversation || !isParticipant(conversation, userId)) {
+  const [viewer, conversation] = await Promise.all([
+    studentAccount(userId),
+    db.directConversation.findUnique({
+      where: { id: conversationId },
+      select: { id: true, participantAId: true, participantBId: true },
+    }),
+  ]);
+  if (!accountIsStudent(viewer) || !conversation || !conversationPermissions(conversation, userId).canRead) {
     return { ok: false, error: "Không tìm thấy cuộc trò chuyện này." };
+  }
+
+  const otherUserId = conversation.participantAId === userId
+    ? conversation.participantBId
+    : conversation.participantAId;
+  if (!accountIsStudent(await studentAccount(otherUserId))) {
+    return { ok: false, error: "Học viên này không còn nhận tin nhắn." };
   }
 
   const now = new Date();
@@ -251,7 +318,7 @@ export async function sendMessage(
     if (!viewer || viewer.role !== "STUDENT" || !viewer.active || viewer.isBot) {
       return { ok: false as const, error: "Chỉ học viên đang hoạt động mới được gửi tin." };
     }
-    if (!conversation || !isParticipant(conversation, userId)) {
+    if (!conversation || !conversationPermissions(conversation, userId).canRead) {
       return { ok: false as const, error: "Bạn không thuộc cuộc trò chuyện này." };
     }
 
@@ -264,6 +331,15 @@ export async function sendMessage(
     });
     if (!other || other.role !== "STUDENT" || !other.active || other.isBot) {
       return { ok: false as const, error: "Học viên này không còn nhận tin nhắn." };
+    }
+
+    const [userAId, userBId] = orderedFriendPair(userId, otherUserId);
+    const friendship = await tx.friendship.findUnique({
+      where: { userAId_userBId: { userAId, userBId } },
+      select: { status: true },
+    });
+    if (!conversationPermissions(conversation, userId, friendship?.status).canSend) {
+      return { ok: false as const, error: "Hai học viên cần kết bạn trước khi nhắn tin." };
     }
 
     const recent = await tx.directMessage.findFirst({

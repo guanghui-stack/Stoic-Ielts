@@ -24,9 +24,10 @@ model User {
   createdAt    DateTime @default(now())
 
   /// "sub" cua Google. Chi dat khi tai khoan da lien ket Google.
-  googleId String? @unique @db.VarChar(191)
+  googleId       String?     @unique @db.VarChar(191)
   /// URL anh dai dien do Google tra ve, chi la du lieu hien thi tuy chon.
-  avatarUrl String? @db.VarChar(2048)
+  avatarUrl      String?     @db.VarChar(2048)
+  uploadedAvatar UserAvatar?
 
   /// Moc xac minh email. NULL = chua xac minh -> KHONG duoc tang xu chao mung.
   /// Dang nhap Google dat luon vi Google da xac minh ho (email_verified).
@@ -73,7 +74,10 @@ model User {
   /// Tin nhắn riêng 1–1. Bot không được tham gia hội thoại.
   directConversationsAsA DirectConversation[] @relation("DirectConversationParticipantA")
   directConversationsAsB DirectConversation[] @relation("DirectConversationParticipantB")
-  directMessages         DirectMessage[]     @relation("DirectMessageSender")
+  directMessages         DirectMessage[]      @relation("DirectMessageSender")
+  friendshipsAsA         Friendship[]         @relation("FriendshipUserA")
+  friendshipsAsB         Friendship[]         @relation("FriendshipUserB")
+  friendshipRequests     Friendship[]         @relation("FriendshipRequester")
 
   assemblies                ReadingAssembly[]
   competitionEntries        CompetitionEntry[]
@@ -131,6 +135,17 @@ model User {
   // Phe phai va mua giai, giai doan P6.
   factionPoints FactionPointEntry[]
   bulletins     Bulletin[]
+}
+
+/// Anh WebP 512x512 do hoc vien tu cat. Tach khoi User de moi lan xac thuc
+/// khong phai doc hang tram KB; van luu trong MySQL de khong mat khi deploy.
+model UserAvatar {
+  userId    String   @id
+  data      String   @db.MediumText
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 /// Bộ đếm chống thử mật khẩu/tạo tài khoản dồn dập. `key` là HMAC một chiều
@@ -1919,6 +1934,30 @@ model DirectMessage {
 
   @@index([conversationId, createdAt])
   @@index([senderId, createdAt])
+}
+
+/// Moi cap hoc vien chi co mot quan he. `userAId` va `userBId` luon duoc sap
+/// xep o service layer; `requestedById` cho biet ai dang cho nguoi kia phan hoi.
+model Friendship {
+  id            String    @id @default(cuid())
+  userAId       String
+  userBId       String
+  requestedById String
+  status        String    @default("PENDING") @db.VarChar(16)
+  requestedAt   DateTime  @default(now())
+  respondedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  userA       User @relation("FriendshipUserA", fields: [userAId], references: [id], onDelete: Cascade)
+  userB       User @relation("FriendshipUserB", fields: [userBId], references: [id], onDelete: Cascade)
+  requestedBy User @relation("FriendshipRequester", fields: [requestedById], references: [id], onDelete: Cascade)
+
+  @@unique([userAId, userBId])
+  @@index([userAId, status, updatedAt])
+  @@index([userBId, status, updatedAt])
+  @@index([requestedById, status])
+  @@index([requestedById, requestedAt])
 }
 
 /// ===== Đấu trường, giai đoạn P1 =====
