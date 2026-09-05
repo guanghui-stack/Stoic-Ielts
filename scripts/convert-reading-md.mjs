@@ -517,7 +517,13 @@ function convert(file, raw) {
       if (g.type === "MATCH_HEADINGS") {
         q.paragraph = String.fromCharCode(64 + (item.n - g.from + 1));
       } else {
-        q.prompt = g.type === "GAP" ? item.text.replace(/_{2,}|\.{3,}|…+/g, "______") : item.text;
+        q.prompt = item.text;
+        if (g.type === "GAP" && !q.prompt.includes("______")) {
+          // Chỉ chuẩn hoá khi gapItems chưa đặt được ô điền. KHÔNG đụng vào
+          // dấu "…" — đó là ô trống CỦA CÂU KHÁC trong cùng đoạn tóm tắt, đổi
+          // nó thành ______ sẽ khiến hai câu có đề bài y hệt nhau.
+          q.prompt = item.text.replace(/_{2,}|\.{3,}|…+/g, "______");
+        }
         if (g.type === "GAP" && !q.prompt.includes("______")) q.prompt += " ______";
       }
       if (g.type === "TFNG") {

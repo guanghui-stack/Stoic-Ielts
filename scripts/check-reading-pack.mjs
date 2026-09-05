@@ -66,7 +66,7 @@ function check(ex) {
           if (!Array.isArray(q.answer) || q.answer.length < 2) errs.push(`${q.id}: MC_MULTI đáp án không phải mảng ≥2`);
         } else if (g.type === "MC") {
           if (!Array.isArray(q.options) || q.options.length < 2) errs.push(`${q.id}: MC dưới 2 lựa chọn`);
-          if (!/^[A-J]$/.test(String(q.answer))) errs.push(`${q.id}: đáp án MC "${q.answer}" không phải chữ cái`);
+          if (!/^[A-L]$/.test(String(q.answer))) errs.push(`${q.id}: đáp án MC "${q.answer}" không phải chữ cái`);
           else if (q.answer.charCodeAt(0) - 65 >= q.options.length) errs.push(`${q.id}: đáp án MC ngoài số lựa chọn`);
         } else if (!q.answer) {
           errs.push(`${q.id}: thiếu answer`);
@@ -82,12 +82,12 @@ function check(ex) {
           if (words > max) errs.push(`${q.id}: đáp án "${q.answer}" dài ${words} từ, vượt giới hạn ${max}`);
         }
         if (["MATCH_INFO", "MATCH_FEATURES", "MATCH_ENDINGS"].includes(g.type)) {
-          if (!/^[A-J]$/.test(String(q.answer))) errs.push(`${q.id}: đáp án "${q.answer}" không phải chữ cái`);
+          if (!/^[A-L]$/.test(String(q.answer))) errs.push(`${q.id}: đáp án "${q.answer}" không phải chữ cái`);
           else if (q.answer.charCodeAt(0) - 65 >= g.options.length) {
             errs.push(`${q.id}: đáp án ${q.answer} ngoài kho ${g.options.length} mục`);
           }
         }
-        if (g.type === "MATCH_INFO" && /^[A-J]$/.test(String(q.answer))) {
+        if (g.type === "MATCH_INFO" && /^[A-L]$/.test(String(q.answer))) {
           if (q.answer.charCodeAt(0) - 65 >= nPara) errs.push(`${q.id}: trỏ tới đoạn ${q.answer} nhưng bài chỉ có ${nPara} đoạn`);
         }
       }
