@@ -600,7 +600,10 @@ function convert(file, raw) {
       title,
       description: `1 passage · ${total} câu · ${typeNames} · 20 phút`,
       durationMinutes: 20,
-      accessLevel: "PUBLIC",
+      // Kho Reading la hang tra phi: mo le 9 xu moi de (xem RESTRICT_READING_
+      // ALL_v1 trong init-db). Mac dinh PUBLIC o day tung khien 60 de lot luoi
+      // thu phi, nen dung doi lai neu khong co quyet dinh cua chu du an.
+      accessLevel: "RESTRICTED",
       achievementEligible: true,
       difficultyTier: tier,
       content: { parts: [{ passage: { title, paragraphs, labelParagraphs: true }, questionGroups }] },

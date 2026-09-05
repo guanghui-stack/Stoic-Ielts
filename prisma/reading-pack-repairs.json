@@ -1,0 +1,67 @@
+{
+  "note": "Ban da seed len may chu o dot dau bi loi. init-db chi TAO MOI chu khong cap nhat, nen phai va rieng. Chi va khi ma bam noi dung tren may chu con khop brokenSha256 — tuc quan tri vien chua sua tay bai do.",
+  "repair": [
+    {
+      "title": "Reading Practice 10 — The Art of Deception",
+      "brokenSha256": "570158050ca0129e38ddf5634984db1100306ac0e6974c2fc48eea09d194ab27"
+    },
+    {
+      "title": "Reading Practice 12 — What Are the 1,000 Foods to Eat Before You Die?",
+      "brokenSha256": "760d57fb72791d7db777a215018db220368a8dbc1ee2332b1fef353473d3b27b"
+    },
+    {
+      "title": "Reading Practice 23 — Australia's Megafauna Controversy",
+      "brokenSha256": "98530caabc0375a7894035dfe53c7f8ae271d8133cf41845c2d47a81706a2112"
+    },
+    {
+      "title": "Reading Practice 26 — Biodiversity",
+      "brokenSha256": "4e763436085a29b7ffa75e45cb168d88344c02e7076860f59e892b1fbfc1543b"
+    },
+    {
+      "title": "Reading Practice 31 — Assessing the risk",
+      "brokenSha256": "ddbdf1c0c29914c1680e277ff8979569378c1968745652381e63c325358b8fbd"
+    },
+    {
+      "title": "Reading Practice 34 — Should we try to bring extinct species back to life?",
+      "brokenSha256": "e5e39ae68030ad52bba3736a232f6ba81d8ae85c9f127b34992f67310e3ea48c"
+    },
+    {
+      "title": "Reading Practice 36 — Born to Trade",
+      "brokenSha256": "cef2861306ae905693fd3a4baf00d27f262ca0b3089718b0920a3accf5a5a364"
+    },
+    {
+      "title": "Reading Practice 37 — New Zealand Home Textile Crafts of the 1930s to 1950s",
+      "brokenSha256": "7d290cf8ac4b2e200e1ec3fdc419b038ee9c53b7fc23a8192bf47754b913a70b"
+    },
+    {
+      "title": "Reading Practice 39 — Evolutionary Psychology in the Workplace",
+      "brokenSha256": "39db46d0c77f8f2a09ea2f8fbec0882996ac72aa76abbf37e2fe03ac48b66e62"
+    },
+    {
+      "title": "Reading Practice 42 — The growth of agriculture",
+      "brokenSha256": "174d9e4028821d41e23845d02ee5e701bac18138241ccc81ea6a17875e2e6003"
+    },
+    {
+      "title": "Reading Practice 48 — Photography",
+      "brokenSha256": "337406978d05f13c715c01dc5d749fafc1db2684f5fd35b1c10366d223ddac6a"
+    },
+    {
+      "title": "Reading Practice 53 — Termite Mounds",
+      "brokenSha256": "ce6eae28c69cc3faf5b93ecb46a7b280e84dc88bb43add3b5a078776c85f569a"
+    }
+  ],
+  "unpublish": [
+    {
+      "title": "Reading Practice 16 — Seaweeds of New Zealand",
+      "brokenSha256": "4117cb41a975a803c8f86f86866e51e9d3a559ac28e9d5387a95689487bf61f0"
+    },
+    {
+      "title": "Reading Practice 22 — A New Voyage Round the World",
+      "brokenSha256": "3c8ca5a1a022e53232f193c47d7a1ee51734fd6d13cb70e57b0ec4218e59325c"
+    },
+    {
+      "title": "Reading Practice 27 — Thinking Small: Globalization and the Choice of Technology",
+      "brokenSha256": "3566a3a6f59b8adfc04e29bb73ab1b31e7e3006d08fa3e047ad23e14c13232f4"
+    }
+  ]
+}
