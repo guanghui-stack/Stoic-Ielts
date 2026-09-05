@@ -52,7 +52,12 @@ assert.equal(activeStudentShortcut("/"), undefined);
 for (const pathname of ["/", "/hoc-vien", "/nghi-su-duong", "/luyen-tap/reading", "/hoc-vien/dau-truong"]) {
   assert.equal(showStudentQuickAccess(pathname), true);
 }
-for (const pathname of ["/lam-bai/one", "/hoc-vien/thi-but/READING/one", "/hoc-vien/thi-luyen/one", "/hoc-vien/bai-lam/one/feynman", "/thanh-toan/one", "/quan-tri", "/dang-nhap"]) {
+// Trang xem lại bài PHẢI có thanh lối tắt: mục tra từ nằm trên đó, và đây là
+// lúc học viên cần tra nhất. Đổi lại, phòng thi vẫn phải kín.
+for (const pathname of ["/hoc-vien/bai-lam/one", "/hoc-vien/bai-lam/one/feynman"]) {
+  assert.equal(showStudentQuickAccess(pathname), true, `xem lại bài phải hiện lối tắt: ${pathname}`);
+}
+for (const pathname of ["/lam-bai/one", "/hoc-vien/thi-but/READING/one", "/hoc-vien/thi-luyen/one", "/thanh-toan/one", "/quan-tri", "/dang-nhap"]) {
   assert.equal(showStudentQuickAccess(pathname), false);
 }
 console.log("✓ Tín hiệu tin chưa đọc: phân quyền, mốc đã đọc, tin của chính mình, trạng thái tài khoản và SQL tham số đều đạt.");

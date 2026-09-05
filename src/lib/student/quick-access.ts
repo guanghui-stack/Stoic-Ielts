@@ -9,8 +9,17 @@ export const STUDENT_SHORTCUTS = [
 
 export const INBOX_UPDATED_EVENT = "stoic:inbox-updated";
 
+/**
+ * Những nơi thanh lối tắt phải biến mất: đang thi, đang trả tiền, đang xác thực.
+ *
+ * `/hoc-vien/bai-lam` CỐ Ý không nằm ở đây dù nó cũng là bề mặt tĩnh. Đó là
+ * trang xem lại bài — chính là lúc học viên cần tra từ nhất, và tra từ là một
+ * mục trên thanh này. Ranh giới phòng thi không bị nới ra vì việc đó: `/lam-bai`
+ * vẫn bị chặn, và route tra từ còn từ chối ở tầng máy chủ khi tài khoản còn một
+ * lượt làm bài chưa nộp.
+ */
 const FOCUSED_ROUTES = [
-  "/lam-bai", "/hoc-vien/thi-but", "/hoc-vien/thi-luyen", "/hoc-vien/bai-lam",
+  "/lam-bai", "/hoc-vien/thi-but", "/hoc-vien/thi-luyen",
   "/quan-tri", "/thanh-toan", "/dang-nhap", "/dang-ky", "/doi-mat-khau", "/xem-thu-cbt",
 ];
 
