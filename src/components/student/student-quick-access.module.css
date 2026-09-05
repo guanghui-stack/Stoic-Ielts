@@ -34,7 +34,11 @@
     height: calc(96px + env(safe-area-inset-bottom, 0px));
   }
 
-  :global(body):has(input:focus, textarea:focus, [contenteditable="true"]:focus) .dock {
+  /* Ẩn thanh lối tắt khi bàn phím điện thoại bật lên — TRỪ khi ô nhập đang
+     focus chính là ô tra từ nằm trong thanh này. Không có ngoại lệ đó thì học
+     viên vừa gõ từ là cả bảng tra biến mất. */
+  :global(body):has(input:focus, textarea:focus, [contenteditable="true"]:focus)
+    .dock:not([data-dictionary-open="true"]) {
     display: none;
   }
 }
