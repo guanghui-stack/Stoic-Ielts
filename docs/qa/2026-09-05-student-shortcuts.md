@@ -7,7 +7,10 @@ một lần bấm; mục hiện tại có `aria-current="page"`.
 ## Giao diện
 
 - Tái sử dụng token Stoic hiện tại: nền trắng, tím primary, chữ slate, bo pill.
-- Desktop mở rộng nhãn khi trỏ chuột hoặc focus. Điện thoại luôn hiện cả bốn nhãn.
+- Desktop từ 1024px dùng cột biểu tượng ở góc dưới bên phải, nhãn nổi sang trái
+  khi trỏ chuột hoặc focus; cột không đổi vị trí. Cửa sổ nhỏ hơn dùng thanh ngang
+  ở góc dưới bên phải. Điện thoại/màn hình chạm giữ thanh ngang sát đáy và luôn
+  hiện cả bốn nhãn.
 - Vùng chạm tối thiểu 48px; có focus ring, nhãn cho screen reader và reduced motion.
 - Thanh nằm ngoài vùng chuyển cảnh để không cuộn theo trang hoặc bị transform giữ lại.
 - Chừa khoảng cuối trang và safe area. Ẩn khi nhập liệu trên màn hình nhỏ/chạm.
@@ -29,6 +32,9 @@ Khi tab bị ẩn không gọi API. Có đồng bộ dự phòng 60 giây khi m�
 ## Kiểm chứng
 
 - Xem và thao tác bản desktop và iframe rộng 375px bằng trình duyệt thật.
+- Sau điều chỉnh vị trí: đo cột desktop 64 × 220px, cách mép phải/dưới 20px;
+  các nút 48 × 48px giữ nguyên tọa độ khi hiện nhãn sang trái. Đã kiểm tra
+  chuyển từ hover sang Tab: nhãn đi theo đúng liên kết đang focus.
 - Đã xác nhận nhãn mobile, mục đang mở, bật/tắt chấm báo và ẩn trong chế độ làm bài.
 - Bấm Tin nhắn ở bản xem thử chuyển khách tới trang đăng nhập, không còn thanh học viên.
 - Gọi endpoint khi chưa đăng nhập trả `401`, body rỗng, `Cache-Control: private, no-store`.

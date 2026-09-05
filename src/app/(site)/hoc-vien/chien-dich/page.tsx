@@ -14,7 +14,7 @@ import { ensureUserRank, syncTrialEligibility } from "@/lib/ranks/engine";
 import { loadRankFacts } from "@/lib/ranks/facts";
 import { rankByLevel, RANK_ERAS } from "@/lib/ranks/catalog";
 import { currentSeason, territoryOwner } from "@/lib/arena/season-service";
-import { FACTION_LABEL } from "@/lib/arena/season.ts";
+import { FACTION_LABEL, FACTION_TERRITORY } from "@/lib/arena/season.ts";
 
 export const metadata = { title: "Hành Trình — Bản đồ tiến bộ" };
 export const dynamic = "force-dynamic";
@@ -87,6 +87,7 @@ export default async function CampaignPage() {
         <CampaignMapStack
           world={world}
           variant="student"
+          territoryOwnerCode={owner ? FACTION_TERRITORY[owner] : null}
           territoryOwnerLabel={owner ? FACTION_LABEL[owner] : null}
           seasonCode={season.code}
         />

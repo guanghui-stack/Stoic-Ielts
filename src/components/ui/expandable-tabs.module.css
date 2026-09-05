@@ -86,6 +86,50 @@
   }
 }
 
+/* Cột biểu tượng đứng yên ở mép phải; chỉ nhãn nổi ra trái khi cần đọc. */
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+  .tabs[data-orientation="vertical"] {
+    flex-direction: column;
+    width: 64px;
+  }
+
+  .tabs[data-orientation="vertical"] .tab {
+    position: relative;
+    width: 48px;
+  }
+
+  .tabs[data-orientation="vertical"] .label {
+    position: absolute;
+    top: 50%;
+    right: calc(100% + 16px);
+    max-width: none;
+    margin-left: 0;
+    padding: 9px 14px;
+    border: 1px solid var(--color-stoic-line);
+    border-radius: var(--radius-stoic-pill);
+    background: var(--color-stoic-canvas);
+    color: var(--color-stoic-ink-secondary);
+    box-shadow: var(--shadow-stoic-1);
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(4px, -50%);
+    transition: opacity 150ms ease, transform 150ms var(--ease-out), visibility 150ms;
+  }
+
+  .tabs[data-orientation="vertical"] .tab[data-expanded="true"]:is(:hover, :focus-visible) .label {
+    visibility: visible;
+    opacity: 1;
+    transform: translate(0, -50%);
+  }
+
+  .tabs[data-orientation="vertical"] .tab[aria-current="page"] .label {
+    border-color: var(--color-stoic-primary);
+    background: var(--color-stoic-primary);
+    color: var(--color-stoic-canvas);
+  }
+}
+
 /* Trên màn hình chạm, luôn có nhãn và vị trí ổn định cho cả bốn lối tắt. */
 @media (max-width: 639px), (pointer: coarse) {
   .tabs {
@@ -118,13 +162,16 @@
 .tabs[data-motion="false"] .tab,
 .tabs[data-motion="false"] .label {
   transition: none;
-  transform: none;
 }
+
+.tabs[data-motion="false"] .tab { transform: none; }
 
 @media (prefers-reduced-motion: reduce) {
   .tab,
   .label {
     transition: none;
-    transform: none;
   }
+
+  .tab { transform: none; }
+
 }

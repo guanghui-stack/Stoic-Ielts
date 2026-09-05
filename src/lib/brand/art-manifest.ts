@@ -134,6 +134,43 @@ export const ART_ASSETS = {
     version: 1,
   },
 
+  territoryBase: {
+    src: "/art/stoic/three-virtues.svg",
+    alt: "",
+    ratio: "16:9",
+    focal: { x: 50, y: 50 },
+    accent: "INK",
+    containsText: false,
+    version: 1,
+  },
+  territoryWei: {
+    src: "/art/stoic/three-virtues.svg",
+    alt: "",
+    ratio: "16:9",
+    focal: { x: 50, y: 50 },
+    accent: "SILVER_BLUE",
+    containsText: false,
+    version: 1,
+  },
+  territoryShu: {
+    src: "/art/stoic/three-virtues.svg",
+    alt: "",
+    ratio: "16:9",
+    focal: { x: 50, y: 50 },
+    accent: "GOLD",
+    containsText: false,
+    version: 1,
+  },
+  territoryWu: {
+    src: "/art/stoic/three-virtues.svg",
+    alt: "",
+    ratio: "16:9",
+    focal: { x: 50, y: 50 },
+    accent: "JADE",
+    containsText: false,
+    version: 1,
+  },
+
   /* ===== Bản đồ Chiến Dịch ===== */
   campaignMap: {
     src: "/art/stoic/three-virtues.svg",

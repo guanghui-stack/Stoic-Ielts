@@ -17,6 +17,7 @@ type Props = {
   activeHref?: string;
   label?: string;
   motion?: boolean;
+  orientation?: "horizontal" | "vertical";
 };
 
 /** Các mục dẫn sang trang khác nên dùng liên kết thật, không dùng role="tab". */
@@ -25,6 +26,7 @@ export function ExpandableTabs({
   activeHref,
   label = "Truy cập nhanh",
   motion = true,
+  orientation = "horizontal",
 }: Props) {
   const [hovered, setHovered] = useState<string | null>(null);
   const [focused, setFocused] = useState<string | null>(null);
@@ -34,6 +36,7 @@ export function ExpandableTabs({
     <nav
       aria-label={label}
       className={styles.tabs}
+      data-orientation={orientation}
       data-motion={motion && !focused ? "true" : "false"}
       onPointerLeave={() => setHovered(null)}
     >
@@ -50,7 +53,10 @@ export function ExpandableTabs({
           onPointerEnter={(event) => {
             if (event.pointerType === "mouse") setHovered(href);
           }}
-          onFocus={() => setFocused(href)}
+          onFocus={() => {
+            setHovered(null);
+            setFocused(href);
+          }}
           onBlur={() => setFocused(null)}
           onClick={() => setHovered(null)}
         >

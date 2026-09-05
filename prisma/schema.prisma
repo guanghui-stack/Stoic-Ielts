@@ -2477,28 +2477,3 @@ model Bulletin {
   @@index([visible, createdAt])
   @@index([kind, createdAt])
 }
-
-/// Cache tra từ điển.
-///
-/// Tra ngoài MỘT LẦN cho mỗi từ rồi giữ lại: vốn từ học thuật trong kho
-/// Reading lặp lại rất nhiều, nên sau vài tuần phần lớn lượt tra không còn
-/// chạm mạng. Quan trọng hơn, khi nhà cung cấp sập thì học viên vẫn tra được
-/// những từ đã có.
-///
-/// CHỈ cache nguồn CC BY-SA (Wiktionary). Dữ liệu thương mại như Oxford bị
-/// hợp đồng cấm lưu lâu dài — xem mayCachePermanently() trong lookup-rules.
-model DictionaryEntry {
-  /// Từ đã chuẩn hoá (thường, bỏ dấu câu) — cũng là khoá cache.
-  term      String   @id @db.VarChar(64)
-  /// Nhà đã trả kết quả này, để biết được phép giữ bao lâu và ghi công ai.
-  provider  String   @db.VarChar(24)
-  /// Ghi nhận cả lần KHÔNG tìm thấy: từ gõ sai hay lặp lại rất nhiều, cache
-  /// lại thì lần sau khỏi gọi mạng.
-  found     Boolean  @default(true)
-  /// JSON đã chuẩn hoá về một dạng chung cho mọi nhà.
-  payload   String   @db.Text
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([provider])
-}
