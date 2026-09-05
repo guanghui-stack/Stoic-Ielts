@@ -38,10 +38,12 @@ export async function saveAvatarAction(
   if (
     !encoded ||
     encoded.length % 4 !== 0 ||
-    !/^[A-Za-z0-9+/]+={0,2}$/.test(encoded) ||
-    encoded.length > Math.ceil((AVATAR_MAX_BYTES * 4) / 3) + 8
+    !/^[A-Za-z0-9+/]+={0,2}$/.test(encoded)
   ) {
-    return { error: "Ảnh sau khi nén vẫn quá lớn. Hãy chọn ảnh khác." };
+    return { error: "Không đọc được dữ liệu ảnh. Hãy chọn lại ảnh rồi thử lưu." };
+  }
+  if (encoded.length > Math.ceil((AVATAR_MAX_BYTES * 4) / 3) + 8) {
+    return { error: "Ảnh sau khi nén vượt quá 400 KB. Hãy chọn ảnh khác." };
   }
 
   let image: Buffer;
@@ -50,15 +52,19 @@ export async function saveAvatarAction(
   } catch {
     return { error: "Không đọc được dữ liệu ảnh." };
   }
+  if (image.length > AVATAR_MAX_BYTES) {
+    return { error: "Ảnh sau khi nén vượt quá 400 KB. Hãy chọn ảnh khác." };
+  }
+  if (!isSafeAvatarWebp(image)) {
+    return { error: "Định dạng ảnh không hợp lệ. Hãy chọn lại ảnh rồi thử lưu." };
+  }
   const dimensions = webpDimensions(image);
   if (
-    !isSafeAvatarWebp(image) ||
     !dimensions ||
     dimensions.width !== AVATAR_OUTPUT_SIZE ||
-    dimensions.height !== AVATAR_OUTPUT_SIZE ||
-    image.length > AVATAR_MAX_BYTES
+    dimensions.height !== AVATAR_OUTPUT_SIZE
   ) {
-    return { error: "Ảnh đại diện không hợp lệ hoặc vượt quá 400 KB." };
+    return { error: "Ảnh sau khi cắt chưa đúng kích thước. Hãy căn ảnh rồi lưu lại." };
   }
 
   await db.userAvatar.upsert({
