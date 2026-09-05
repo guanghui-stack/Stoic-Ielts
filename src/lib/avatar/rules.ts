@@ -19,8 +19,8 @@ function uint32le(bytes: Uint8Array, offset: number): number {
 }
 
 /**
- * Canvas chi tao WebP tinh, khong can metadata hay animation. Gioi han dung
- * cac chunk anh toi thieu nay de file gia/RIFF hong khong lot vao database.
+ * Canvas tao WebP tinh va co the kem ICCP de giu dung mau anh. Chi nhan
+ * cac chunk anh/mau theo dung thu tu, khong nhan animation hay metadata khac.
  */
 export function isSafeAvatarWebp(bytes: Uint8Array): boolean {
   if (
@@ -35,7 +35,7 @@ export function isSafeAvatarWebp(bytes: Uint8Array): boolean {
   const chunks: Array<{ type: string; size: number }> = [];
   let offset = 12;
   while (offset < bytes.length) {
-    if (offset + 8 > bytes.length || chunks.length >= 3) return false;
+    if (offset + 8 > bytes.length || chunks.length >= 4) return false;
     const type = ascii(bytes, offset, offset + 4);
     const size = uint32le(bytes, offset + 4);
     const next = offset + 8 + size + (size % 2);
@@ -45,17 +45,27 @@ export function isSafeAvatarWebp(bytes: Uint8Array): boolean {
   }
   if (offset !== bytes.length) return false;
 
-  const allowed = new Set(["VP8X", "ALPH", "VP8 ", "VP8L"]);
-  if (chunks.some((chunk) => !allowed.has(chunk.type))) return false;
-  const imageChunks = chunks.filter(
-    (chunk) => chunk.type === "VP8 " || chunk.type === "VP8L",
-  );
-  if (imageChunks.length !== 1) return false;
-
-  const extended = chunks[0]?.type === "VP8X";
-  if (!extended) return chunks.length === 1;
+  const isImage = (type: string | undefined) => type === "VP8 " || type === "VP8L";
+  if (chunks[0]?.type !== "VP8X") {
+    return chunks.length === 1 && isImage(chunks[0]?.type);
+  }
   if (chunks[0].size !== 10) return false;
-  return chunks.slice(1).every((chunk) => chunk.type !== "VP8X");
+
+  // VP8X flags: ICC=0x20, alpha=0x10; EXIF/XMP/animation are not avatar data.
+  const flags = bytes[20];
+  if ((flags & 0x0e) !== 0) return false;
+  let index = 1;
+  const hasColorProfile = chunks[index]?.type === "ICCP";
+  if (hasColorProfile !== Boolean(flags & 0x20)) return false;
+  if (hasColorProfile) index += 1;
+  const hasAlphaChunk = chunks[index]?.type === "ALPH";
+  if (hasAlphaChunk) index += 1;
+
+  const image = chunks[index];
+  if (!isImage(image?.type) || index !== chunks.length - 1) return false;
+  // Lossless VP8L stores alpha in its own bitstream, without an ALPH chunk.
+  if (image.type === "VP8L") return !hasAlphaChunk;
+  return hasAlphaChunk === Boolean(flags & 0x10);
 }
 
 /** Doc kich thuoc tu ba dang container WebP thong dung, khong giai nen anh. */

@@ -1,12 +1,20 @@
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { WorldShell } from "@/components/world/world-shell";
+import { StudentQuickAccess } from "@/components/student/student-quick-access";
+import { getCurrentUser } from "@/lib/session";
+import { canUseChatRealtime } from "@/lib/chat/realtime-rules";
 
-export default function SiteLayout({
+export default async function SiteLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const user = await getCurrentUser();
   return (
-    <WorldShell header={<SiteHeader />} footer={<SiteFooter />}>
+    <WorldShell
+      header={<SiteHeader />}
+      footer={<SiteFooter />}
+      quickAccess={user && canUseChatRealtime(user) ? <StudentQuickAccess key={user.id} userId={user.id} /> : null}
+    >
       {/*
         Vân giấy gạo chỉ phủ khu vực trang thường. Nhóm route (exam) có
         layout riêng và cố ý không nhận lớp này: phòng thi Reading giữ nền
