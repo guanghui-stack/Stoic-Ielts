@@ -1,15 +1,26 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, type PointerEvent as ReactPointerEvent } from "react";
 import type { LucideIcon } from "lucide-react";
 import styles from "./expandable-tabs.module.css";
 
 export type ExpandableTab = {
+  /** Cũng dùng làm khóa React và khóa trạng thái mở rộng, kể cả với mục hành động. */
   href: string;
   title: string;
   icon: LucideIcon;
   notification?: string;
+  /**
+   * Có `onSelect` thì mục này là NÚT, không phải liên kết.
+   *
+   * Cần cho những việc phải làm ngay tại trang đang đọc — tra từ chẳng hạn:
+   * chuyển sang trang khác để tra rồi quay lại là mất chỗ đang đọc, tức là
+   * hỏng đúng mục đích của nó.
+   */
+  onSelect?: () => void;
+  /** Chỉ dùng cho mục hành động: bảng của nó đang mở hay không. */
+  expanded?: boolean;
 };
 
 type Props = {
@@ -40,33 +51,60 @@ export function ExpandableTabs({
       data-motion={motion && !focused ? "true" : "false"}
       onPointerLeave={() => setHovered(null)}
     >
-      {tabs.map(({ href, title, icon: Icon, notification }) => (
-        <Link
-          key={href}
-          href={href}
-          prefetch={false}
-          aria-label={notification ? `${title} — ${notification}` : title}
-          aria-current={href === activeHref ? "page" : undefined}
-          title={notification ? `${title} — ${notification}` : title}
-          className={styles.tab}
-          data-expanded={href === expandedHref}
-          onPointerEnter={(event) => {
+      {tabs.map(({ href, title, icon: Icon, notification, onSelect, expanded }) => {
+        const label = notification ? `${title} — ${notification}` : title;
+        const shared = {
+          "aria-label": label,
+          title: label,
+          className: styles.tab,
+          "data-expanded": href === expandedHref,
+          onPointerEnter: (event: ReactPointerEvent) => {
             if (event.pointerType === "mouse") setHovered(href);
-          }}
-          onFocus={() => {
+          },
+          onFocus: () => {
             setHovered(null);
             setFocused(href);
-          }}
-          onBlur={() => setFocused(null)}
-          onClick={() => setHovered(null)}
-        >
-          <span className={styles.icon} aria-hidden="true">
-            <Icon size={21} strokeWidth={1.8} />
-            {notification && <span className={styles.dot} />}
-          </span>
-          <span className={styles.label} aria-hidden="true">{title}</span>
-        </Link>
-      ))}
+          },
+          onBlur: () => setFocused(null),
+        };
+        const inner = (
+          <>
+            <span className={styles.icon} aria-hidden="true">
+              <Icon size={21} strokeWidth={1.8} />
+              {notification && <span className={styles.dot} />}
+            </span>
+            <span className={styles.label} aria-hidden="true">{title}</span>
+          </>
+        );
+
+        // Mục hành động: nút thật, có aria-expanded để trình đọc màn hình biết
+        // nó mở ra một bảng chứ không dẫn đi đâu.
+        return onSelect ? (
+          <button
+            key={href}
+            type="button"
+            {...shared}
+            aria-expanded={expanded ?? false}
+            onClick={() => {
+              setHovered(null);
+              onSelect();
+            }}
+          >
+            {inner}
+          </button>
+        ) : (
+          <Link
+            key={href}
+            href={href}
+            prefetch={false}
+            aria-current={href === activeHref ? "page" : undefined}
+            {...shared}
+            onClick={() => setHovered(null)}
+          >
+            {inner}
+          </Link>
+        );
+      })}
     </nav>
   );
 }

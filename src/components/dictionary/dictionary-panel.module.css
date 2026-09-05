@@ -1,0 +1,244 @@
+/* Bảng tra từ — neo cạnh thanh lối tắt, dùng token Stoic như mọi khối khác. */
+
+.panel {
+  /* Thanh lối tắt là cột dọc neo ở góc dưới phải, và .dock ôm sát nội dung
+     (position: fixed kèm right/bottom) nên nó dùng làm gốc định vị được. Đặt
+     bảng sang TRÁI thanh nút chứ không phía trên: bảng cao tới 30rem mà xếp
+     trên một cột dọc thì tràn hết chiều cao màn hình. */
+  position: absolute;
+  right: calc(100% + 12px);
+  bottom: 0;
+  pointer-events: auto;
+  width: min(22rem, calc(100vw - 2rem));
+  max-height: min(30rem, calc(100vh - 6rem));
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-stoic-line);
+  border-radius: var(--radius-stoic-lg, 14px);
+  background: var(--color-stoic-canvas);
+  box-shadow: var(--shadow-stoic-3, var(--shadow-stoic-2));
+  font-family: var(--font-stoic);
+  overflow: hidden;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--color-stoic-line);
+}
+
+.title {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-stoic-ink-secondary);
+}
+
+.close {
+  appearance: none;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Vùng chạm tối thiểu 44px theo quy ước giao diện của dự án. */
+  min-width: 44px;
+  min-height: 44px;
+  margin: -12px -10px -12px 0;
+  color: var(--color-stoic-ink-secondary);
+  border-radius: var(--radius-stoic-pill);
+}
+
+.close:hover { color: var(--color-stoic-ink); }
+.close:focus-visible {
+  outline: 3px solid var(--color-stoic-primary-deep);
+  outline-offset: 2px;
+}
+
+.form {
+  display: flex;
+  gap: 8px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--color-stoic-line);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--color-stoic-line-strong, var(--color-stoic-line));
+  border-radius: var(--radius-stoic-sm, 8px);
+  background: var(--color-stoic-canvas-soft, var(--color-stoic-canvas));
+  color: var(--color-stoic-ink);
+  font: inherit;
+  font-size: 15px;
+}
+
+.input:focus-visible {
+  outline: 3px solid var(--color-stoic-primary-deep);
+  outline-offset: 1px;
+}
+
+.submit {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: var(--radius-stoic-sm, 8px);
+  background: var(--color-stoic-primary);
+  color: var(--color-stoic-canvas);
+}
+
+.submit:disabled { opacity: 0.45; cursor: default; }
+.submit:focus-visible {
+  outline: 3px solid var(--color-stoic-primary-deep);
+  outline-offset: 2px;
+}
+
+.spin { animation: dictionary-spin 900ms linear infinite; }
+
+@keyframes dictionary-spin {
+  to { transform: rotate(360deg); }
+}
+
+.body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-stoic-ink);
+}
+
+.hint,
+.message {
+  margin: 0;
+  color: var(--color-stoic-ink-secondary);
+}
+
+.result { margin: 0; }
+
+.resultHead {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.word {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-stoic-ink);
+}
+
+.phonetic {
+  color: var(--color-stoic-ink-muted, var(--color-stoic-ink-secondary));
+  font-size: 13px;
+}
+
+.audio {
+  appearance: none;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  min-height: 32px;
+  border-radius: var(--radius-stoic-pill);
+  color: var(--color-stoic-primary-deep);
+}
+
+.audio:focus-visible {
+  outline: 3px solid var(--color-stoic-primary-deep);
+  outline-offset: 2px;
+}
+
+.senses {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 10px;
+}
+
+.sense { margin: 0; }
+
+.pos {
+  display: inline-block;
+  margin-bottom: 2px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-stoic-primary-deep);
+}
+
+.definition { margin: 0; }
+
+.example {
+  margin: 4px 0 0;
+  color: var(--color-stoic-ink-secondary);
+  font-style: italic;
+}
+
+.related {
+  margin: 12px 0 0;
+  font-size: 13px;
+  color: var(--color-stoic-ink-secondary);
+}
+
+.relatedLabel {
+  font-weight: 700;
+  color: var(--color-stoic-ink);
+}
+
+.credit {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-stoic-line);
+  font-size: 11px;
+  color: var(--color-stoic-ink-muted, var(--color-stoic-ink-secondary));
+}
+
+.credit a { color: inherit; }
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Màn hình hẹp: dock trải ngang và canh giữa, nên trả bảng về dòng chảy tự
+   nhiên, nằm ngay trên thanh nút. */
+@media (max-width: 639px), (pointer: coarse) {
+  .panel {
+    position: static;
+    width: min(20rem, calc(100vw - 2rem));
+    max-height: min(24rem, calc(100vh - 10rem));
+    margin-bottom: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spin { animation-duration: 2s; }
+}

@@ -21,6 +21,19 @@ import { shouldOverwrite } from "@/lib/reading/pack-repair-rules";
  * khai báo ngay trong CREATE TABLE nên chạy lại vô hại (IF NOT EXISTS).
  */
 const DDL = [
+  // Cache tra từ điển. Production KHÔNG chạy `prisma db push`, nên mỗi bảng
+  // phải khai ở CẢ HAI nơi: prisma/schema.prisma và mảng này.
+  `CREATE TABLE IF NOT EXISTS \`DictionaryEntry\` (
+    \`term\` VARCHAR(64) NOT NULL,
+    \`provider\` VARCHAR(24) NOT NULL,
+    \`found\` BOOLEAN NOT NULL DEFAULT true,
+    \`payload\` TEXT NOT NULL,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`updatedAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (\`term\`),
+    INDEX \`DictionaryEntry_provider_idx\` (\`provider\`)
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
   `CREATE TABLE IF NOT EXISTS \`User\` (
     \`id\` VARCHAR(191) NOT NULL,
     \`email\` VARCHAR(191) NOT NULL,
