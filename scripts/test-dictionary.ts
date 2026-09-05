@@ -24,6 +24,12 @@ import {
   type Provider,
   type ProviderId,
 } from "../src/lib/dictionary/lookup-rules.ts";
+import {
+  parseDictionaryApi,
+  parseOxford,
+  parseStands4,
+  parseWiktionary,
+} from "../src/lib/dictionary/parsers.ts";
 
 let passed = 0;
 function it(name: string, fn: () => void) {
@@ -179,6 +185,117 @@ it("dòng ghi công của nguồn CC nêu đúng giấy phép", () => {
   for (const p of providers) {
     assert.match(PROVIDER_ATTRIBUTION[p.id], /CC BY-SA/);
   }
+});
+
+console.log("\n— Bóc tách: dữ liệu THẬT chụp từ API sống —");
+
+/**
+ * Hai mẫu dưới đây cắt từ phản hồi thật ngày 05/09/2026, giữ nguyên cấu trúc
+ * và cả phần HTML lộn xộn. Test bằng dữ liệu tự bịa sẽ chỉ chứng minh bộ bóc
+ * khớp với trí tưởng tượng của người viết nó.
+ */
+const WIKTIONARY_MITIGATE = {
+  en: [
+    {
+      partOfSpeech: "Verb",
+      language: "English",
+      definitions: [
+        {
+          definition:
+            '<span class="usage-label-sense" about="#mwt22" typeof="mw:Transclusion"></span> To <a rel="mw:WikiLink" href="/wiki/reduce" title="reduce">reduce</a>, <a rel="mw:WikiLink" href="/wiki/lessen" title="lessen">lessen</a>, or <a rel="mw:WikiLink" href="/wiki/decrease" title="decrease">decrease</a> and thereby to make less <a rel="mw:WikiLink" href="/wiki/severe" title="severe">severe</a> or easier to <a rel="mw:WikiLink" href="/wiki/bear" title="bear">bear</a>.',
+          examples: ["<i>to <b>mitigate</b> a punishment</i>"],
+        },
+        {
+          definition:
+            '<span class="usage-label-sense" about="#mwt30" typeof="mw:Transclusion"></span> To <a rel="mw:WikiLink" href="/wiki/downplay" title="downplay">downplay</a>.',
+        },
+      ],
+    },
+    { partOfSpeech: "Noun", language: "Latin", definitions: [{ definition: "khong phai tieng Anh" }] },
+  ],
+};
+
+const DICTIONARYAPI_MITIGATE = [
+  {
+    word: "mitigate",
+    phonetic: "/ˈmɪt.ɪ.ɡeɪt/",
+    phonetics: [
+      { text: "/ˈmɪt.ɪ.ɡeɪt/", audio: "" },
+      {
+        text: "/ˈmɪt.ɪ.ɡeɪt/",
+        audio: "https://api.dictionaryapi.dev/media/pronunciations/en/mitigate-au.mp3",
+      },
+    ],
+    meanings: [
+      {
+        partOfSpeech: "verb",
+        definitions: [
+          { definition: "To reduce, lessen, or decrease; to make less severe or easier to bear." },
+          { definition: "To downplay." },
+        ],
+        synonyms: ["alleviate", "check", "diminish", "ease"],
+        antonyms: ["aggravate", "exacerbate", "worsen"],
+      },
+    ],
+    sourceUrls: ["https://en.wiktionary.org/wiki/mitigate"],
+  },
+];
+
+it("Wiktionary: gỡ sạch thẻ HTML khỏi định nghĩa", () => {
+  const r = parseWiktionary(WIKTIONARY_MITIGATE, "mitigate")!;
+  assert.ok(r, "phải bóc được");
+  assert.equal(
+    r.senses[0].definition,
+    "To reduce, lessen, or decrease and thereby to make less severe or easier to bear.",
+  );
+  assert.ok(!r.senses[0].definition.includes("<"), "còn sót thẻ HTML");
+});
+
+it("Wiktionary: chỉ lấy mục tiếng Anh, bỏ ngôn ngữ khác", () => {
+  const r = parseWiktionary(WIKTIONARY_MITIGATE, "mitigate")!;
+  assert.ok(!r.senses.some((s) => s.definition.includes("khong phai tieng Anh")));
+});
+
+it("Wiktionary: lấy được ví dụ và bỏ mục ngữ vực rỗng", () => {
+  const r = parseWiktionary(WIKTIONARY_MITIGATE, "mitigate")!;
+  assert.equal(r.senses[0].example, "to mitigate a punishment");
+  assert.equal(r.senses[1].definition, "To downplay.");
+});
+
+it("dictionaryapi.dev: bỏ qua phiên âm không có file tiếng", () => {
+  const r = parseDictionaryApi(DICTIONARYAPI_MITIGATE, "mitigate")!;
+  assert.match(r.audioUrl ?? "", /mitigate-au\.mp3$/);
+  assert.equal(r.phonetic, "/ˈmɪt.ɪ.ɡeɪt/");
+});
+
+it("dictionaryapi.dev: gom được synonyms và antonyms", () => {
+  const r = parseDictionaryApi(DICTIONARYAPI_MITIGATE, "mitigate")!;
+  assert.ok(r.synonyms.includes("alleviate"));
+  assert.ok(r.antonyms.includes("exacerbate"));
+});
+
+it("bóc không ra thì trả null, KHÔNG trả thẻ rỗng", () => {
+  assert.equal(parseWiktionary({ en: [] }, "x"), null);
+  assert.equal(parseWiktionary(null, "x"), null);
+  assert.equal(parseWiktionary({ la: [{ definitions: [{ definition: "y" }] }] }, "x"), null);
+  assert.equal(parseDictionaryApi([], "x"), null);
+  assert.equal(parseDictionaryApi({ title: "No Definitions Found" }, "x"), null);
+  assert.equal(parseOxford({ results: [] }, "x"), null);
+  assert.equal(parseStands4({ result: [] }, "x"), null);
+});
+
+it("mỗi kết quả đều mang sẵn dòng ghi công", () => {
+  const w = parseWiktionary(WIKTIONARY_MITIGATE, "mitigate")!;
+  const d = parseDictionaryApi(DICTIONARYAPI_MITIGATE, "mitigate")!;
+  assert.match(w.attribution, /Wiktionary/);
+  assert.match(d.attribution, /CC BY-SA/);
+});
+
+it("STANDS4: chịu được cả chuỗi ngăn phẩy lẫn mảng", () => {
+  const a = parseStands4({ result: [{ synonyms: "calm, soothe", antonyms: "anger" }] }, "pacify")!;
+  assert.deepEqual([...a.synonyms], ["calm", "soothe"]);
+  const b = parseStands4({ result: { synonyms: ["calm", "soothe"] } }, "pacify")!;
+  assert.deepEqual([...b.synonyms], ["calm", "soothe"]);
 });
 
 console.log(`\n✅ ${passed} kiểm thử luật tra từ điển đều đạt\n`);
