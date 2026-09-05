@@ -12,6 +12,8 @@ import seedData from "../../prisma/seed-data.json";
 import readingGameTheory from "../../prisma/reading-game-theory.json";
 import readingPaidPack1 from "../../prisma/reading-paid-pack-1.json";
 import readingPackActualTest from "../../prisma/reading-pack-actual-test.json";
+import readingPackRepairs from "../../prisma/reading-pack-repairs.json";
+import { shouldOverwrite } from "@/lib/reading/pack-repair-rules";
 
 /**
  * Tạo bảng trực tiếp bằng SQL MySQL (tương đương `prisma db push` cho schema
@@ -1849,6 +1851,67 @@ export async function initDatabase() {
       });
       console.log(`[wobridges] Đã tạo bài tập: ${ex.title}`);
     }
+  }
+
+  /**
+   * Vá những đề đã seed nhầm bản hỏng.
+   *
+   * Vòng lặp bên trên CHỈ TẠO MỚI, nên một đề đã lên máy chủ thì sửa file
+   * không còn tác dụng — bản hỏng nằm lại trong cơ sở dữ liệu vĩnh viễn.
+   * Đây là đường duy nhất để chữa mà không phải xoá tay từng bài (xoá bài là
+   * xoá luôn bài làm của học viên đã nộp).
+   *
+   * An toàn nhờ so mã băm: chỉ ghi đè khi nội dung trên máy chủ CÒN ĐÚNG y
+   * như bản hỏng ta từng đẩy lên. Quản trị viên đã sửa tay bài nào thì mã băm
+   * lệch, và bài đó được giữ nguyên.
+   */
+  try {
+    const packByTitle = new Map(
+      readingPackActualTest.map((ex) => [ex.title, JSON.stringify(ex.content)])
+    );
+    let repaired = 0;
+    let hidden = 0;
+    let skipped = 0;
+
+    for (const entry of readingPackRepairs.repair) {
+      const current = await db.exercise.findFirst({
+        where: { title: entry.title },
+        select: { id: true, content: true },
+      });
+      if (!current) continue;
+      if (!shouldOverwrite(current.content, entry)) {
+        skipped++;
+        continue;
+      }
+      const fixed = packByTitle.get(entry.title);
+      if (!fixed) continue;
+      await db.exercise.update({ where: { id: current.id }, data: { content: fixed } });
+      repaired++;
+    }
+
+    // Đề chưa dựng lại được thì ẨN đi chứ không xoá: học viên thôi nhìn thấy
+    // đề hỏng, mà bài đã nộp vẫn còn nguyên để đối chiếu sau này.
+    for (const entry of readingPackRepairs.unpublish) {
+      const current = await db.exercise.findFirst({
+        where: { title: entry.title },
+        select: { id: true, content: true, published: true },
+      });
+      if (!current || !current.published) continue;
+      if (!shouldOverwrite(current.content, entry)) {
+        skipped++;
+        continue;
+      }
+      await db.exercise.update({ where: { id: current.id }, data: { published: false } });
+      hidden++;
+    }
+
+    if (repaired || hidden || skipped) {
+      console.log(
+        `[wobridges] Va de Reading: sua ${repaired}, an ${hidden}, bo qua ${skipped} (da bi sua tay).`
+      );
+    }
+  } catch (err) {
+    console.error("[wobridges] Khong va duoc de Reading:", err);
   }
 
   // Bổ sung lời giải mẫu Feynman (question.learning) cho các bài đã tồn tại.
