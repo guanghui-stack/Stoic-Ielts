@@ -1,0 +1,54 @@
+.dock {
+  position: fixed;
+  z-index: 30;
+  right: 0;
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  pointer-events: none;
+}
+
+.dock nav {
+  pointer-events: auto;
+}
+
+.caption {
+  margin: 0;
+  padding: 3px 10px;
+  border: 1px solid var(--color-stoic-line);
+  border-radius: var(--radius-stoic-pill);
+  background: var(--color-stoic-canvas);
+  color: var(--color-stoic-ink-muted);
+  font-family: var(--font-stoic);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.clearance {
+  flex: none;
+  height: calc(120px + env(safe-area-inset-bottom, 0px));
+}
+
+/* Bàn phím điện thoại không nên bị một thanh nổi chiếm mất vùng soạn tin. */
+@media (max-width: 639px), (pointer: coarse) {
+  .dock {
+    bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .caption {
+    display: none;
+  }
+
+  .clearance {
+    height: calc(96px + env(safe-area-inset-bottom, 0px));
+  }
+
+  :global(body):has(input:focus, textarea:focus, [contenteditable="true"]:focus) .dock {
+    display: none;
+  }
+}

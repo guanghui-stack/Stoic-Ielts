@@ -23,6 +23,7 @@ import type { FriendOverview, FriendPerson } from "@/lib/friends/service";
 import type { FriendshipState } from "@/lib/friends/rules";
 import { AccountAddIcon } from "@/components/friends/account-add-icon";
 import { StudentAvatar } from "@/components/student/student-avatar";
+import { INBOX_UPDATED_EVENT } from "@/lib/student/quick-access";
 
 export type ChatInboxItem = {
   id: string;
@@ -775,6 +776,11 @@ export function ChatWorkspace({
 }: Props) {
   useRealtimeChat({ currentUserId, enabled: realtimeEnabled });
   const presence = useOnlineStudents(realtimeEnabled);
+
+  useEffect(() => {
+    // Hộp thư đã render sau bước đánh dấu đã đọc trên server: đồng bộ chấm báo.
+    window.dispatchEvent(new Event(INBOX_UPDATED_EVENT));
+  }, [inbox]);
 
   return (
     <div className="space-y-6">
