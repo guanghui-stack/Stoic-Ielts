@@ -1,6 +1,7 @@
 import Link from "next/link";
 import {
   ArrowRight,
+  Brain,
   Check,
   CheckCircle2,
   Feather,
@@ -31,6 +32,24 @@ export type ReadingMeritGateView = {
   hasLiveAttempt: boolean;
 };
 
+/**
+ * Tình trạng lớp chữa bài Feynman của MỘT đề.
+ *
+ * Điểm dễ hiểu sai nhất của cột này: Feynman bán theo **lượt làm bài**
+ * (`scope: "ATTEMPT"` trong `payments/catalog.ts`), không bán theo đề. Nên câu
+ * "đề này đã mua Feynman chưa" chỉ có nghĩa khi đã có một lượt làm đã chấm để
+ * gắn vào — chưa làm bài thì chưa có gì để mua, và cột phải nói đúng như vậy
+ * thay vì mời mua một thứ không tồn tại.
+ */
+export type ReadingFeynmanView = {
+  /** Lượt đã chấm gần nhất của đề này. `null` khi học viên chưa làm lần nào. */
+  attemptId: string | null;
+  /** Lượt đó đã có quyền chữa bài chưa. */
+  owned: boolean;
+  offerCode: "FEYNMAN_ATTEMPT_FULL" | "FEYNMAN_ATTEMPT_SINGLE";
+  priceCoins: number;
+};
+
 export type ReadingExerciseTableRow = {
   id: string;
   title: string;
@@ -47,6 +66,8 @@ export type ReadingExerciseTableRow = {
   coinCost: number;
   coinBalance: number | null;
   merit: ReadingMeritGateView | null;
+  /** `null` khi chưa đăng nhập — khách không có lượt làm bài nào để nói tới. */
+  feynman: ReadingFeynmanView | null;
 };
 
 /**
@@ -66,10 +87,10 @@ export function ReadingExerciseTable({
         aria-label="Danh sách passage Reading và lựa chọn mở bài"
         tabIndex={0}
       >
-        <table className="w-full min-w-[43rem] border-collapse text-left font-stoic text-sm">
+        <table className="w-full min-w-[52rem] border-collapse text-left font-stoic text-sm">
           <caption className="sr-only">
-            Kho Reading gồm tên passage, số câu hỏi và lựa chọn mở bằng Xu hoặc
-            Đức Hạnh.
+            Kho Reading gồm tên passage, số câu hỏi, lựa chọn mở bằng Xu hoặc
+            Đức Hạnh, và tình trạng lớp chữa bài Feynman.
           </caption>
           <thead>
             <tr className="border-b border-stoic-line bg-stoic-canvas-soft">
@@ -96,6 +117,12 @@ export function ReadingExerciseTable({
                 className="h-14 min-w-32 px-4 text-center text-xs font-semibold uppercase tracking-[0.07em] text-stoic-ink-muted"
               >
                 Đức Hạnh
+              </th>
+              <th
+                scope="col"
+                className="h-14 min-w-32 px-4 text-center text-xs font-semibold uppercase tracking-[0.07em] text-stoic-ink-muted"
+              >
+                Feynman
               </th>
             </tr>
           </thead>
@@ -131,6 +158,10 @@ export function ReadingExerciseTable({
                     </span>
                   </td>
                 )}
+
+                <td className="px-4 py-3 text-center align-middle">
+                  <FeynmanCell row={row} />
+                </td>
               </tr>
             ))}
           </tbody>
@@ -239,6 +270,102 @@ function DetailFact({ label, value }: { label: string; value: string }) {
       <dd className="mt-1.5 text-sm font-semibold leading-snug text-stoic-ink-secondary">
         {value}
       </dd>
+    </div>
+  );
+}
+
+/**
+ * Cột Feynman: bốn trạng thái, và mỗi trạng thái nói đúng một việc.
+ *
+ *   khách        → gạch ngang, vì chưa có tài khoản thì chưa có lượt làm nào
+ *   chưa làm bài → nhắc làm bài trước, KHÔNG mời mua (xem `ReadingFeynmanView`)
+ *   đã mở        → dẫn thẳng vào bản chữa bài
+ *   chưa mở      → hộp thoại mua bằng xu cho ĐÚNG lượt làm gần nhất
+ */
+function FeynmanCell({ row }: { row: ReadingExerciseTableRow }) {
+  const feynman = row.feynman;
+
+  if (!feynman) {
+    return (
+      <span className="text-xs text-stoic-ink-muted" aria-label="Cần đăng nhập">
+        —
+      </span>
+    );
+  }
+
+  if (!feynman.attemptId) {
+    return (
+      <span className="text-xs leading-snug text-stoic-ink-muted">
+        Làm bài trước
+      </span>
+    );
+  }
+
+  if (feynman.owned) {
+    return (
+      <Link
+        href={`/hoc-vien/bai-lam/${feynman.attemptId}/feynman`}
+        className="inline-flex min-h-8 items-center gap-1.5 rounded-stoic-pill border border-stoic-sage/20 bg-jade-pale px-3 py-1 text-xs font-semibold text-jade-ink transition-colors hover:bg-jade-pale/70"
+      >
+        <Brain className="h-3.5 w-3.5" aria-hidden="true" />
+        Đã mở
+      </Link>
+    );
+  }
+
+  const balance = row.coinBalance;
+  const canAfford = balance !== null && balance >= feynman.priceCoins;
+
+  return (
+    <div className="inline-flex flex-col items-center gap-1.5">
+      <ReadingCatalogDialog
+        triggerAriaLabel={`Mở lớp chữa bài Feynman cho ${row.title} bằng ${formatCoins(feynman.priceCoins)}`}
+        triggerClassName="inline-flex h-11 w-11 items-center justify-center rounded-stoic-md border border-stoic-primary bg-stoic-canvas text-stoic-primary-deep shadow-stoic-1 transition-[background-color,border-color,transform] hover:bg-stoic-primary-soft/55 active:translate-y-px focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/35"
+        trigger={<Brain className="h-5 w-5" strokeWidth={2.2} aria-hidden="true" />}
+        title={`Chữa sâu “${row.title}” bằng Feynman?`}
+        description="Mở cho lượt làm bài gần nhất của bạn. Lời giải mẫu từng câu, luyện lại không giới hạn."
+      >
+        <div className="grid grid-cols-2 gap-px overflow-hidden rounded-stoic-md border border-stoic-line bg-stoic-line sm:grid-cols-3">
+          <DialogStat label="Giá" value={formatCoins(feynman.priceCoins)} />
+          <DialogStat
+            label="Bạn có"
+            value={balance === null ? "—" : formatCoins(balance)}
+          />
+          <DialogStat
+            label="Sau khi mở"
+            value={
+              canAfford && balance !== null
+                ? formatCoins(balance - feynman.priceCoins)
+                : "—"
+            }
+            className="col-span-2 sm:col-span-1"
+          />
+        </div>
+
+        {canAfford ? (
+          <form action={buyWithCoinsAction} className="mt-6">
+            <input type="hidden" name="offerCode" value={feynman.offerCode} />
+            <input type="hidden" name="exerciseId" value={row.id} />
+            <input type="hidden" name="attemptId" value={feynman.attemptId} />
+            <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <ReadingDialogClose />
+              <ReadingCatalogSubmit pendingLabel="Đang mở…">
+                Xác nhận · {formatCoins(feynman.priceCoins)}
+              </ReadingCatalogSubmit>
+            </div>
+          </form>
+        ) : (
+          <>
+            <p className="mt-4 rounded-stoic-sm bg-stoic-canvas-soft px-4 py-3 text-sm leading-relaxed text-stoic-ink-muted">
+              Bạn còn thiếu {formatCoins(feynman.priceCoins - (balance ?? 0))}.
+            </p>
+            <DialogLinkActions href="/thanh-toan" label="Nạp Xu" />
+          </>
+        )}
+      </ReadingCatalogDialog>
+      <span className="text-xs font-semibold tabular-nums text-stoic-ink-muted">
+        {feynman.priceCoins}
+      </span>
     </div>
   );
 }

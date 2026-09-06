@@ -152,6 +152,15 @@ export async function revealBasicAnswersAction(attemptId: string) {
       data: { answersRevealedAt: new Date() },
     });
   }
+  // KHÔNG `redirect()` về chính trang này kèm `#chi-tiet`.
+  //
+  // Đường dẫn đích chỉ khác trang hiện tại ở phần neo, mà điều hướng chỉ-khác-neo
+  // thì router chỉ cuộn chứ không tải lại RSC. Kết quả: trang trượt xuống mục
+  // "Chi tiết từng câu" nhưng đáp án vẫn khoá, phải tự bấm tải lại mới thấy —
+  // đúng triệu chứng người dùng báo.
+  //
+  // Bỏ redirect đi thì Server Action tự dựng lại trang bằng dữ liệu mới sau khi
+  // `revalidatePath` chạy, nên đáp án hiện ngay trong cùng một lần bấm.
   revalidatePath(`/hoc-vien/bai-lam/${attempt.id}`);
-  redirect(`/hoc-vien/bai-lam/${attempt.id}#chi-tiet`);
+  revalidatePath(`/hoc-vien/bai-lam/${attempt.id}/doi-chieu`);
 }
