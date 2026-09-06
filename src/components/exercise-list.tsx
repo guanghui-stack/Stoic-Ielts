@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/session";
 import { readingAccessOf, isAdminRole } from "@/lib/exercise-access";
 import { getCoinWallet } from "@/lib/payments/coin-service";
+import { getAccessSnapshot } from "@/lib/access-grants";
 import { OFFERS } from "@/lib/payments/catalog";
 import { thiButGate } from "@/lib/thibut/thibut-service.ts";
 import { buildReadingCatalogMetadata } from "@/lib/reading/catalog";
@@ -50,7 +51,7 @@ export async function ExerciseList({
   }
 
   const exerciseIds = exercises.map((exercise) => exercise.id);
-  const [attempts, access, wallet, liveThiButAttempts] = user
+  const [attempts, access, wallet, liveThiButAttempts, feynmanAccess] = user
     ? await Promise.all([
         db.attempt.findMany({
           where: {
@@ -71,12 +72,15 @@ export async function ExerciseList({
           },
           select: { targetId: true },
         }),
+        // Một truy vấn cho cả bảng thay vì hỏi quyền Feynman theo từng dòng.
+        getAccessSnapshot(user.id, "FEYNMAN"),
       ])
     : [
         [],
         { hasAll: false, exerciseIds: new Set<string>(), allExpiresAt: null },
         null,
         [],
+        null,
       ];
 
   const canOpen = (exercise: { id: string; accessLevel: string }) =>
@@ -132,6 +136,21 @@ export async function ExerciseList({
     const owned = canOpen(exercise);
     const gate = meritGateByExercise.get(exercise.id);
 
+    /*
+     * Feynman bán theo LƯỢT làm bài, nên cột này phải bám vào một lượt cụ thể:
+     * lượt ĐÃ CHẤM gần nhất. `attempts` đã sắp xếp `startedAt` giảm dần từ truy
+     * vấn trên, nên `find` đầu tiên chính là lượt gần nhất.
+     *
+     * Chưa có lượt nào đã chấm thì `attemptId` là `null` — và cột sẽ nhắc làm
+     * bài trước chứ không mời mua. Mời mua lúc đó là bán một thứ chưa gắn được
+     * vào đâu.
+     */
+    const latestGraded = mine.find((attempt) => attempt.status === "GRADED") ?? null;
+    const feynmanOffer =
+      exercise.taskType === "READING_FULL"
+        ? ("FEYNMAN_ATTEMPT_FULL" as const)
+        : ("FEYNMAN_ATTEMPT_SINGLE" as const);
+
     return {
       id: exercise.id,
       title: metadata.displayTitle,
@@ -155,6 +174,21 @@ export async function ExerciseList({
           : null,
       coinCost,
       coinBalance: wallet?.balance ?? null,
+      feynman: user
+        ? {
+            attemptId: latestGraded?.id ?? null,
+            owned: Boolean(
+              latestGraded &&
+                feynmanAccess &&
+                (feynmanAccess.hasAll ||
+                  feynmanAccess.attemptIds.has(latestGraded.id) ||
+                  // Quyền theo đề là mô hình cũ; đơn cũ vẫn phải đọc được.
+                  feynmanAccess.exerciseIds.has(exercise.id)),
+            ),
+            offerCode: feynmanOffer,
+            priceCoins: OFFERS[feynmanOffer].priceCoins ?? 0,
+          }
+        : null,
       merit: gate
         ? {
             balance: gate.balance,

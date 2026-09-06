@@ -6,6 +6,7 @@ import {
   ArrowLeft,
   TimerOff,
   Brain,
+  ListChecks,
   Lock,
   Sparkles,
 } from "lucide-react";
@@ -403,6 +404,32 @@ function ReadingResult({
           </p>
         </div>
       </div>
+
+      {/*
+        Lối vào màn đối chiếu. Danh sách bên dưới trả lời "câu nào sai", nhưng
+        không trả lời được "sai ở chỗ nào trong bài" — muốn vậy phải có passage
+        nằm cạnh câu hỏi, và đó là việc của trang kia.
+      */}
+      <Link
+        href={`/hoc-vien/bai-lam/${attempt.id}/doi-chieu`}
+        className="mt-8 flex flex-wrap items-center justify-between gap-4 border border-navy bg-paper px-6 py-5 transition-colors hover:bg-cream-deep"
+      >
+        <span className="flex items-start gap-3">
+          <ListChecks className="mt-0.5 h-5 w-5 shrink-0 text-navy" aria-hidden="true" />
+          <span>
+            <span className="block font-display text-lg font-bold text-navy-deep">
+              Xem đề kèm đáp án
+            </span>
+            <span className="mt-1 block font-ui text-sm leading-relaxed text-ink-soft">
+              Mở lại passage và câu hỏi cạnh nhau, mỗi câu hiện đáp án bạn chọn
+              bên cạnh đáp án đúng. Chỉ để đọc lại, không tính điểm.
+            </span>
+          </span>
+        </span>
+        <span className="font-ui text-[0.75rem] font-semibold uppercase tracking-[0.1em] text-navy">
+          Mở đối chiếu
+        </span>
+      </Link>
 
       <h2 id="chi-tiet" className="mt-12 font-display text-2xl font-bold text-navy-deep">
         Chi tiết từng câu
