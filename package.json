@@ -9,7 +9,7 @@
     "lint": "eslint",
     "test:admin": "node --experimental-strip-types scripts/test-admin-account.ts",
     "test:access": "node --experimental-strip-types scripts/test-access-rules.ts",
-    "test": "npm run test:motion-route && npm run test:student-shortcuts && npm run test:ceremony && npm run test:no-han && npm run test:assets && npm run test:avatar && npm run test:chat && npm run test:friends && npm run test:chat-realtime && npm run test:forum-realtime && npm run test:forum-tags && npm run test:no-secrets && npm run test:protected-surfaces && npm run test:production-hardening && npm run test:auth-security && npm run test:reading-grading && npm run test:attempt-review && npm run test:reading-catalog && npm run test:reading-repair && npm run test:dictionary && npm run test:admin && npm run test:access && npm run test:feynman && npm run test:feynman-ai && npm run test:payments && npm run test:coins && npm run test:merit && npm run test:experience && npm run test:economy && npm run test:thibut && npm run test:duel && npm run test:rating && npm run test:forum && npm run test:forum-discussions && npm run test:achievements && npm run test:assembly && npm run test:titles && npm run test:competition && npm run test:explain && npm run test:integrity && npm run test:indexes && npm run test:attestation && npm run test:ranks && npm run test:rank-rules && npm run test:campaign && npm run test:campaign-world && npm run test:weakness && npm run test:data-rights && npm run test:qualification && npm run test:arena-titles && npm run test:season",
+    "test": "npm run test:motion-route && npm run test:student-shortcuts && npm run test:ceremony && npm run test:no-han && npm run test:assets && npm run test:avatar && npm run test:chat && npm run test:chat-dock && npm run test:friends && npm run test:chat-realtime && npm run test:forum-realtime && npm run test:forum-tags && npm run test:no-secrets && npm run test:protected-surfaces && npm run test:production-hardening && npm run test:auth-security && npm run test:reading-grading && npm run test:attempt-review && npm run test:reading-catalog && npm run test:reading-repair && npm run test:dictionary && npm run test:admin && npm run test:access && npm run test:feynman && npm run test:feynman-ai && npm run test:payments && npm run test:coins && npm run test:merit && npm run test:experience && npm run test:economy && npm run test:thibut && npm run test:duel && npm run test:rating && npm run test:forum && npm run test:forum-discussions && npm run test:achievements && npm run test:assembly && npm run test:titles && npm run test:competition && npm run test:explain && npm run test:integrity && npm run test:indexes && npm run test:attestation && npm run test:ranks && npm run test:rank-rules && npm run test:campaign && npm run test:campaign-world && npm run test:weakness && npm run test:data-rights && npm run test:qualification && npm run test:arena-titles && npm run test:season",
     "test:production-hardening": "node --experimental-strip-types --import ./scripts/alias-loader.mjs scripts/test-production-hardening.ts",
     "test:auth-security": "node --experimental-strip-types scripts/test-auth-security.ts",
     "test:reading-grading": "node --experimental-strip-types scripts/test-reading-grading.ts",
@@ -73,12 +73,20 @@
     "test:season-db": "node --experimental-strip-types --import ./scripts/alias-loader.mjs scripts/test-season-db.ts",
     "test:reading-repair": "node --experimental-strip-types scripts/test-reading-repair.ts",
     "test:dictionary": "node --experimental-strip-types scripts/test-dictionary.ts",
-    "test:forum-discussions": "node --experimental-strip-types scripts/test-forum-discussions.ts && node --experimental-strip-types --import ./scripts/alias-loader.mjs scripts/test-forum-discussion-service.mjs"
+    "test:forum-discussions": "node --experimental-strip-types scripts/test-forum-discussions.ts && node --experimental-strip-types --import ./scripts/alias-loader.mjs scripts/test-forum-discussion-service.mjs",
+    "test:chat-dock": "node --experimental-strip-types scripts/test-chat-dock.ts && node --experimental-strip-types --import ./scripts/alias-loader.mjs scripts/test-chat-dock-service.mjs"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
+    "@radix-ui/react-avatar": "^1.2.6",
+    "@radix-ui/react-dropdown-menu": "^2.1.24",
+    "@radix-ui/react-scroll-area": "^1.2.18",
+    "@radix-ui/react-separator": "^1.1.15",
+    "@radix-ui/react-slot": "^1.3.3",
     "ably": "^2.28.0",
     "bcryptjs": "^3.0.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "jose": "^6.2.3",
     "lucide-react": "^1.23.0",
     "next": "16.3.2",
@@ -89,6 +97,7 @@
     "react-easy-crop": "^6.2.3",
     "sepay-pg-node": "^1.0.0",
     "server-only": "^0.0.1",
+    "tailwind-merge": "^3.6.0",
     "three": "^0.185.0"
   },
   "devDependencies": {

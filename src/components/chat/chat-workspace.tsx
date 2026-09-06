@@ -11,7 +11,6 @@ import { useOnlineStudents } from "@/components/realtime/student-realtime-provid
 import {
   searchStudentsAction,
   sendMessageAction,
-  startConversationAction,
   type ChatActionState,
 } from "@/lib/actions/chat";
 import {
@@ -24,6 +23,8 @@ import type { FriendshipState } from "@/lib/friends/rules";
 import { AccountAddIcon } from "@/components/friends/account-add-icon";
 import { StudentAvatar } from "@/components/student/student-avatar";
 import { INBOX_UPDATED_EVENT } from "@/lib/student/quick-access";
+import { openChatAction } from "@/lib/actions/chat-dock";
+import { requestChatWindow } from "@/components/chat/chat-dock";
 
 export type ChatInboxItem = {
   id: string;
@@ -105,7 +106,16 @@ function StartConversationButton({
   iconOnly?: boolean;
 }) {
   const [state, action, pending] = useActionState<ChatActionState, FormData>(
-    startConversationAction,
+    async (_previous, formData) => {
+      try {
+        const result = await openChatAction(String(formData.get("otherUserId") ?? ""));
+        if (result.error) return { error: result.error };
+        if ("conversationId" in result && result.conversationId) requestChatWindow(result.conversationId);
+        return undefined;
+      } catch {
+        return { error: "Chưa mở được chat. Vui lòng thử lại." };
+      }
+    },
     undefined,
   );
   return (
@@ -713,6 +723,10 @@ function Inbox({
                 <li key={item.id}>
                   <Link
                     href={`/hoc-vien/tin-nhan?conversation=${encodeURIComponent(item.id)}`}
+                    onClick={(event) => {
+                      if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+                      event.preventDefault(); requestChatWindow(item.id);
+                    }}
                     className={`world-action block border-t border-line/70 px-4 py-3 transition-colors hover:bg-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-stoic-primary/50 ${activeId === item.id ? "bg-stoic-lavender-pale" : ""}`}
                     aria-current={activeId === item.id ? "page" : undefined}
                   >
