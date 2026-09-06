@@ -3,7 +3,6 @@ import {
   buildCampaignWorld,
   LOCKED_TERRITORIES,
   WORLD_COMPETITIONS,
-  WORLD_LANDMARKS,
 } from "../src/lib/campaign/world.ts";
 
 let failures = 0;
@@ -29,37 +28,6 @@ const availableNodes = campaignView(1, {
 });
 const lockedCurrentNodes = campaignView(1, {});
 const completedNodes = campaignView(9, {});
-
-check(
-  "exactly three public landmarks",
-  WORLD_LANDMARKS,
-  [
-    {
-      code: "LANDMARK_COUNCIL",
-      kind: "LANDMARK",
-      title: "Diễn Đàn",
-      functionalLabel: "Cộng đồng học tập",
-      href: "/nghi-su-duong",
-      lockedMessage: null,
-    },
-    {
-      code: "LANDMARK_HONORS",
-      kind: "LANDMARK",
-      title: "Dấu Mốc Cộng Đồng",
-      functionalLabel: "Tiến bộ đã kiểm chứng",
-      href: "/dien-danh-vong",
-      lockedMessage: null,
-    },
-    {
-      code: "LANDMARK_RESULTS",
-      kind: "LANDMARK",
-      title: "Thành Quả",
-      functionalLabel: "Kết quả và dấu mốc",
-      href: "/bang-vang",
-      lockedMessage: null,
-    },
-  ],
-);
 
 check(
   "competitions keep monthly, quarterly, annual order",
@@ -136,7 +104,7 @@ check(
   buildCampaignWorld({ audience: "STUDENT", nodes: availableNodes }).nextStep,
   {
     eyebrow: "Bước tiếp theo của bạn",
-    title: "Bước vào Chủ động bắt đầu",
+    title: "Bước vào Chủ động",
     body: "Chặng đã mở. Xem điều kiện và chủ động bắt đầu khi sẵn sàng.",
     href: "/hoc-vien/thi-luyen/TRIAL_01_DAO_VIEN",
     actionLabel: "Xem điều kiện",
@@ -149,7 +117,7 @@ check(
   buildCampaignWorld({ audience: "STUDENT", nodes: lockedCurrentNodes }).nextStep,
   {
     eyebrow: "Bước tiếp theo của bạn",
-    title: "Chuẩn bị cho Chủ động bắt đầu",
+    title: "Chuẩn bị cho Chủ động",
     body: "Hoàn thành điều kiện còn thiếu để mở chặng kế tiếp.",
     href: "/hoc-vien/chien-dich#dieu-kien",
     actionLabel: "Xem điều kiện",
@@ -179,7 +147,7 @@ check(
   buildCampaignWorld({ audience: "STUDENT", nodes: activeAndAvailable }).nextStep,
   {
     eyebrow: "Bước tiếp theo của bạn",
-    title: "Tiếp tục Chủ động bắt đầu",
+    title: "Tiếp tục Chủ động",
     body: "Chặng đang dở được giữ nguyên. Tiếp tục từ đúng tiến độ hiện tại.",
     href: "/hoc-vien/thi-luyen/TRIAL_01_DAO_VIEN",
     actionLabel: "Tiếp tục chặng",

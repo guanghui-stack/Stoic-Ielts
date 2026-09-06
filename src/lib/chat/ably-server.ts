@@ -1,6 +1,11 @@
 import "server-only";
 import { Rest, type TokenRequest } from "ably";
 import {
+  ARENA_INVITE_EVENT,
+  arenaUserChannel,
+  buildArenaInviteCreatedPayload,
+} from "@/lib/arena/realtime-rules";
+import {
   CHAT_REALTIME_EVENT,
   CHAT_REALTIME_PUBLISH_TIMEOUT_MS,
   buildChatMessageCreatedPayload,
@@ -76,6 +81,40 @@ export async function publishChatMessageCreated(input: {
   if (!published) {
     // Không log payload hay lỗi gốc: chúng có thể mang chi tiết từ nhà cung cấp.
     console.error("[wobridges] Khong phat duoc thong bao realtime chat.");
+  }
+  return published;
+}
+
+/**
+ * Báo cho người bị thách rằng có chiến thư mới.
+ *
+ * Đi trên đúng kênh riêng của học viên mà chat đang dùng — xem ghi chú trong
+ * `arena/realtime-rules.ts`. Thất bại thì im lặng: chiến thư đã nằm trong
+ * database rồi, nhịp hỏi định kỳ của thanh lối tắt vẫn bắt được, chỉ là chậm
+ * hơn. Không được để lỗi phát tin làm hỏng lượt thách đấu.
+ */
+export async function publishArenaInviteCreated(input: {
+  recipientUserId: string;
+  inviteId: string;
+}): Promise<boolean> {
+  if (!isAblyChatConfigured()) return false;
+
+  const published = await settlesWithin(
+    () => {
+      const client = ablyRest();
+      if (!client) throw new Error("Ably chưa được cấu hình.");
+      return client.channels
+        .get(arenaUserChannel(input.recipientUserId))
+        .publish(
+          ARENA_INVITE_EVENT,
+          buildArenaInviteCreatedPayload(input.inviteId),
+        );
+    },
+    CHAT_REALTIME_PUBLISH_TIMEOUT_MS,
+  );
+
+  if (!published) {
+    console.error("[wobridges] Khong phat duoc thong bao chien thu.");
   }
   return published;
 }

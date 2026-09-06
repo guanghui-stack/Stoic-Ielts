@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Check, Flag, Lock, Play } from "lucide-react";
 import type { CSSProperties } from "react";
-import { WorldLandmarkRail } from "@/components/campaign/world-landmark-rail";
+import { WorldCompetitionRail } from "@/components/campaign/world-competition-rail";
 import { STATE_LABELS, type CampaignNodeView } from "@/lib/campaign/view";
 import { stoicTrialLabel, stoicTrialTitle, type CampaignWorld } from "@/lib/campaign/world";
 
@@ -47,10 +47,12 @@ function GateMarkerContent({ node }: { node: CampaignNodeView }) {
           Đang ở đây
         </span>
       ) : null}
-      <span className="font-display text-sm font-semibold text-navy-deep">
+      {/* Hai dòng này bị khoá một dòng bằng CSS (`world-gate-title`,
+          `world-gate-label`) để tám ô trên bản đồ cao bằng nhau. */}
+      <span className="world-gate-title font-display font-semibold text-navy-deep">
         {stoicTrialTitle(node)}
       </span>
-      <span className="font-ui text-[11px] leading-tight text-muted">
+      <span className="world-gate-label font-ui leading-tight text-muted">
         {stoicTrialLabel(node)}
       </span>
     </>
@@ -123,10 +125,7 @@ export function CampaignMap({
         </div>
       </section>
 
-      <WorldLandmarkRail
-        landmarks={world.landmarks}
-        competitions={world.competitions}
-      />
+      <WorldCompetitionRail competitions={world.competitions} />
     </div>
   );
 }

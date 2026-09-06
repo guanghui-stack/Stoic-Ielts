@@ -2484,6 +2484,40 @@ body {
   box-shadow: 0 0.9rem 2rem -1.3rem rgb(23 32 51 / 0.44);
 }
 
+/*
+ * Tám ô chặng phải cao bằng nhau, nên hai dòng chữ trong ô bị khoá một dòng.
+ * Cỡ chữ đặt theo bề rộng ô (8.5rem trừ đệm): tên chặng tối đa ~14 ký tự và
+ * nhãn tối đa ~19 ký tự thì vừa. Nội dung dài hơn thì cắt bằng dấu ba chấm chứ
+ * KHÔNG được xuống dòng — xuống dòng là thứ vừa được sửa ở đây.
+ */
+.world-shell .world-gate-title {
+  font-size: 0.875rem;
+}
+
+.world-shell .world-gate-label {
+  font-size: 0.6875rem;
+}
+
+.world-shell .world-linear-gate .world-map-marker {
+  padding: 0.5rem 0.35rem;
+}
+
+.world-shell .world-linear-gate .world-gate-title,
+.world-shell .world-linear-gate .world-gate-label {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.world-shell .world-linear-gate .world-gate-title {
+  font-size: 0.78rem;
+}
+
+.world-shell .world-linear-gate .world-gate-label {
+  font-size: 0.63rem;
+}
+
 .world-shell .world-linear-gate .world-map-marker-seal {
   width: 2rem;
   height: 2rem;

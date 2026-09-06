@@ -2,7 +2,7 @@
  * Kiểm thử xếp hạng và điều kiện dự Nguyệt Thí.
  * Chạy: node --experimental-strip-types scripts/test-competition.ts
  *
- * Đây là phần quyết định ai nhận 999.000đ tiền mặt. Phủ T12, T13 của đặc tả.
+ * Đây là phần quyết định ai nhận giải của kỳ. Phủ T12, T13 của đặc tả.
  */
 import {
   checkEligibility,
@@ -151,9 +151,12 @@ check("đủ ba giải khi có đủ người đạt chuẩn", full.map((w) => w
   "nhi",
   "ba",
 ]);
-check("giải Nhất đúng 999.000đ", full[0].amount, 999_000);
-check("giải Nhì đúng 499.000đ", full[1].amount, 499_000);
-check("giải Ba đúng 199.000đ", full[2].amount, 199_000);
+check("giải Nhất đúng 199.000đ", full[0].amount, 199_000);
+check("giải Nhì đúng 99.000đ", full[1].amount, 99_000);
+check("giải Ba đúng 49.000đ", full[2].amount, 49_000);
+check("giải Nhất kèm 150 xu", full[0].coins, 150);
+check("giải Nhì kèm 100 xu", full[1].coins, 100);
+check("giải Ba kèm 50 xu", full[2].coins, 50);
 check("huy hiệu Nhất là vương miện", full[0].badge, "MONTHLY_CROWN");
 
 const noFirst = selectPrizeWinners(

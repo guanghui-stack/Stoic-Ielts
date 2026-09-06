@@ -61,8 +61,8 @@ export default async function HomePage() {
 
       <NarrativeSection
         id="thu-thach"
-        eyebrow="Thử thách định kỳ"
-        title="Đo tiến bộ mà không chạy theo một lần bùng nổ"
+        eyebrow="Giải thưởng Thử thách tháng"
+        title="Ba mức giải cho một kỳ bảy ngày"
         tone="ink"
       >
         <CompetitionPath />
@@ -159,28 +159,30 @@ function LearningPath() {
 }
 
 function CompetitionPath() {
-  const stageNames = ["Thử thách tháng", "Thử thách quý", "Thử thách năm"];
-
   return (
     <>
       <p className="max-w-2xl text-[1.02rem] leading-relaxed text-paper/80">
-        Thử thách định kỳ không thay thế việc học hằng ngày. Nó chỉ tạo một mốc
-        để bạn kiểm tra năng lực dưới áp lực thời gian, rồi quay lại với dữ liệu
-        rõ hơn về điều cần rèn.
+        Thử thách tháng không thay thế việc học hằng ngày. Nó chỉ tạo một mốc để
+        bạn kiểm tra năng lực dưới áp lực thời gian. Ba mức giải dưới đây là của
+        cùng MỘT kỳ tháng: đạt chuẩn nào thì nhận giải của chuẩn đó, và không
+        ai đạt chuẩn thì giải để trống.
       </p>
 
       <div className="mt-12 grid gap-6 sm:grid-cols-3">
-        {BADGE_INFO.map(({ code, Badge, prizeLabel, requirement }, index) => (
+        {BADGE_INFO.map(({ code, Badge, title, prizeLabel, prizeCoins, requirement }) => (
           <article
             key={code}
             className="flex flex-col items-center rounded-stoic-md border border-line bg-cream p-7 text-center"
           >
             <Badge className="h-20 w-20" />
             <h3 className="mt-4 font-display text-lg font-medium leading-snug text-navy-deep">
-              {stageNames[index] ?? "Thử thách"}
+              {title}
             </h3>
             <p className="mt-2 font-display text-2xl font-medium text-navy">
               {prizeLabel}
+            </p>
+            <p className="mt-1 font-ui text-sm font-semibold text-navy">
+              + {prizeCoins} xu
             </p>
             <p className="mt-2 font-ui text-xs leading-relaxed text-ink-soft">
               {requirement}
@@ -189,10 +191,13 @@ function CompetitionPath() {
         ))}
       </div>
 
-      <div className="mt-10">
+      <div className="mt-10 flex flex-wrap gap-3">
         <ButtonLink href="/nguyet-thi" variant="gold">
           <Trophy className="h-4 w-4" aria-hidden="true" />
           Xem thử thách tháng
+        </ButtonLink>
+        <ButtonLink href="/huong-dan" variant="outline">
+          Hướng dẫn dùng website
         </ButtonLink>
       </div>
     </>

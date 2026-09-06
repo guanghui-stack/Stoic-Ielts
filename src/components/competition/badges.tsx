@@ -75,13 +75,21 @@ export function GeneralBadge({ className = "h-16 w-16" }: BadgeProps) {
   );
 }
 
+/**
+ * Ba mức giải của MỘT kỳ Thử Thách Tháng — không phải ba kỳ tháng/quý/năm.
+ *
+ * Giải gồm hai phần tách bạch: tiền mặt do trung tâm tự chuyển tay, và xu cộng
+ * thẳng vào ví. Để riêng hai con số chứ không gộp thành một chuỗi vì chúng đi
+ * hai đường khác nhau: một đường ngoài hệ thống, một đường trong sổ cái xu.
+ */
 export const BADGE_INFO = [
   {
     code: "MONTHLY_CROWN",
     rank: 1,
     Badge: CrownBadge,
     title: "Rõ Ràng",
-    prizeLabel: "999.000đ",
+    prizeLabel: "199.000đ",
+    prizeCoins: 150,
     requirement: "Cả ba đề đạt từ band 8.5",
     note: "Huy hiệu Nhận thức, hiệu lực 30 ngày",
   },
@@ -90,7 +98,8 @@ export const BADGE_INFO = [
     rank: 2,
     Badge: ChancellorBadge,
     title: "Vững Vàng",
-    prizeLabel: "499.000đ",
+    prizeLabel: "99.000đ",
+    prizeCoins: 100,
     requirement: "Cả ba đề đạt từ band 8.0",
     note: "Huy hiệu Hành động, hiệu lực 30 ngày",
   },
@@ -99,7 +108,8 @@ export const BADGE_INFO = [
     rank: 3,
     Badge: GeneralBadge,
     title: "Bền Bỉ",
-    prizeLabel: "199.000đ",
+    prizeLabel: "49.000đ",
+    prizeCoins: 50,
     requirement: "Cả ba đề đạt từ band 7.5",
     note: "Huy hiệu Ý chí, hiệu lực 30 ngày",
   },

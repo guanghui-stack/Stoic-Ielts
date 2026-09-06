@@ -10,6 +10,12 @@
  * từ hư không, và cả hai đều không có thông báo lỗi nào.
  */
 import {
+  ARENA_INVITE_EVENT,
+  arenaUserChannel,
+  buildArenaInviteCreatedPayload,
+  isArenaInviteCreatedPayload,
+} from "../src/lib/arena/realtime-rules.ts";
+import {
   ALLOWED_TRANSITIONS,
   DUEL_STATUSES,
   DUEL_XP,
@@ -359,6 +365,39 @@ check(
   Math.round(DUEL_XP.WIN * FREE_TIER_XP_RATIO),
 );
 check("giảng hoà không sinh kinh nghiệm, đây là luật chứ không phải số", truceExperience(), 0);
+
+/* ===================== Báo chiến thư sang thanh lối tắt ===================== */
+
+// Chiến thư chỉ sống 90 giây, ngắn hơn nhịp hỏi của thanh lối tắt, nên tín hiệu
+// realtime là đường chính chứ không phải đường dự phòng. Ba điều phải đúng:
+// đúng kênh riêng của người BỊ thách, đúng hình dạng payload, và mọi thứ khác
+// hình dạng đó đều bị từ chối.
+check(
+  "chiến thư đi trên kênh riêng của người bị thách",
+  arenaUserChannel("nguoi-bi-thach"),
+  "chat:user:nguoi-bi-thach",
+);
+check(
+  "payload chỉ mang mã chiến thư",
+  buildArenaInviteCreatedPayload("invite-1"),
+  { inviteId: "invite-1" },
+);
+check(
+  "payload đúng hình dạng thì nhận",
+  isArenaInviteCreatedPayload(buildArenaInviteCreatedPayload("invite-1")),
+  true,
+);
+for (const bad of [null, undefined, "invite-1", 7, {}, { inviteId: 7 }, { id: "invite-1" }]) {
+  check(
+    `payload lạ bị từ chối: ${JSON.stringify(bad) ?? "undefined"}`,
+    isArenaInviteCreatedPayload(bad),
+    false,
+  );
+}
+// Tên sự kiện phải KHÁC sự kiện chat, nếu không hai chấm báo sẽ cùng sáng cho
+// một việc. TypeScript đã chốt được điều này ở mức kiểu (hai literal khác nhau),
+// nên ở đây chỉ neo lại đúng chuỗi để không ai đổi nhầm sang tên của chat.
+check("tên sự kiện chiến thư được neo cố định", ARENA_INVITE_EVENT, "arena.invite.created");
 
 console.log(
   failures === 0

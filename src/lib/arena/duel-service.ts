@@ -19,6 +19,7 @@ import "server-only";
 import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { meritBalance } from "@/lib/merit/merit.ts";
+import { publishArenaInviteCreated } from "@/lib/chat/ably-server";
 import {
   DUEL_RULE_VERSION,
   INVITE_TTL_SECONDS,
@@ -111,7 +112,33 @@ export async function sendInvite(input: {
     },
     select: { id: true },
   });
+
+  // Chấm báo trên thanh lối tắt phải sáng NGAY, vì chiến thư chỉ sống 90 giây.
+  // Phát tin là việc phụ: hỏng thì lượt thách đấu vẫn thành công như thường.
+  await publishArenaInviteCreated({
+    recipientUserId: input.toUserId,
+    inviteId: invite.id,
+  }).catch(() => undefined);
+
   return { ok: true, inviteId: invite.id, expiresAt };
+}
+
+/**
+ * Có chiến thư nào đang chờ mình trả lời không.
+ *
+ * Chỉ trả đúng một câu có/không cho chấm báo trên thanh lối tắt: nội dung
+ * chiến thư (ai thách, cược bao nhiêu) chỉ hiện trong đấu trường, nên không có
+ * lý do gì để mọi trang trên website đều tải về danh sách đó.
+ */
+export async function hasPendingInvite(
+  userId: string,
+  now = new Date(),
+): Promise<boolean> {
+  const row = await db.duelInvite.findFirst({
+    where: { toUserId: userId, status: "PENDING", expiresAt: { gt: now } },
+    select: { id: true },
+  });
+  return row !== null;
 }
 
 export type AcceptResult =
