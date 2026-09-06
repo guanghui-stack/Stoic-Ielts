@@ -1,0 +1,42 @@
+.dock { position: fixed; z-index: 45; right: calc(104px + env(safe-area-inset-right, 0px)); bottom: calc(20px + env(safe-area-inset-bottom, 0px)); display: flex; align-items: flex-end; gap: 12px; max-width: calc(100vw - 128px); font-family: var(--font-ui); color: var(--color-stoic-ink); pointer-events: none; }
+.windows { display: flex; flex-direction: row-reverse; align-items: flex-end; gap: 12px; min-width: 0; }
+.conversation { pointer-events: auto; display: flex; flex-direction: column; width: 344px; height: min(492px, calc(100dvh - 104px)); min-height: 260px; overflow: hidden; border: 1px solid var(--color-stoic-line); border-radius: 16px; background: var(--color-stoic-canvas); box-shadow: 0 10px 44px rgb(17 24 44 / 16%), 0 2px 8px rgb(17 24 44 / 8%); }
+.header { display: flex; flex-direction: row; align-items: center; gap: 8px; padding: 10px 10px 10px 12px; border-bottom: 1px solid var(--color-stoic-line); background: var(--color-stoic-canvas); }
+.header > * { margin-block: 0; }
+.iconButton { width: 28px; height: 36px; flex-shrink: 0; border-radius: 8px; color: var(--color-stoic-primary); }
+.bubble { border-radius: 16px; padding: 9px 12px; font-size: 13px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
+.mine { background: var(--color-stoic-primary); color: white; border-bottom-right-radius: 4px; }
+.theirs { background: var(--color-stoic-canvas-soft); color: var(--color-stoic-ink); border-bottom-left-radius: 4px; }
+.messageMenu { width: 28px; height: 24px; border-radius: 6px; color: var(--color-stoic-muted); }
+.composer { padding: 10px 12px 8px; border-top: 1px solid var(--color-stoic-line); }
+.input { width: 100%; min-height: 44px; max-height: 112px; resize: vertical; border: 1px solid transparent; border-radius: 14px; background: var(--color-stoic-canvas-soft); padding: 10px 12px; font-size: 13px; line-height: 1.5; outline: none; }
+.input:focus { border-color: var(--color-stoic-primary); box-shadow: 0 0 0 2px var(--color-stoic-lavender-pale); }
+.input:disabled { opacity: .65; }
+.rail { display: flex; flex-direction: column; gap: 10px; align-items: center; pointer-events: auto; }
+.launcher, .head { position: relative; display: grid; width: 48px; height: 48px; place-items: center; border-radius: 50%; box-shadow: 0 3px 18px rgb(17 24 44 / 16%); }
+.launcher { background: var(--color-stoic-primary); color: white; border: 1px solid var(--color-stoic-primary); }
+.head { background: var(--color-stoic-canvas); border: 2px solid var(--color-stoic-canvas); }
+.head :global(.student-avatar) { width: 42px; height: 42px; }
+.count { position: absolute; right: -4px; top: -5px; min-width: 20px; padding: 2px 4px; border: 2px solid white; border-radius: 12px; background: var(--color-danger); color: white; font-size: 10px; font-weight: 700; }
+.unreadDot { position: absolute; right: 0; top: 0; width: 10px; height: 10px; border: 2px solid white; border-radius: 50%; background: var(--color-stoic-primary); }
+.tray { position: absolute; right: 0; bottom: 60px; width: 310px; overflow: hidden; border: 1px solid var(--color-stoic-line); border-radius: 16px; background: var(--color-stoic-canvas); box-shadow: 0 8px 40px rgb(17 24 44 / 18%); }
+.inboxRow { display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px 16px; font-size: 13px; }
+.inboxRow:hover { background: var(--color-stoic-canvas-soft); }
+.loading { position: relative; pointer-events: auto; display: grid; align-content: center; justify-items: center; gap: 12px; width: 344px; height: 220px; padding: 28px; border: 1px solid var(--color-stoic-line); border-radius: 16px; background: var(--color-stoic-canvas); font-size: 13px; text-align: center; box-shadow: 0 8px 40px rgb(17 24 44 / 16%); }
+.closeLoading { position: absolute; right: 8px; top: 8px; display: grid; width: 36px; height: 36px; place-items: center; }
+.dock button { cursor: pointer; }
+.dock button:disabled { cursor: default; }
+.dock button:focus-visible, .dock a:focus-visible { outline: 2px solid var(--color-stoic-primary); outline-offset: 3px; }
+@media (max-width: 639px) {
+  .dock { right: 12px; left: 12px; bottom: calc(90px + env(safe-area-inset-bottom, 0px)); max-width: none; justify-content: flex-end; gap: 8px; }
+  .windows { flex: 1; }
+  .conversation, .loading { width: 100%; height: min(520px, calc(100dvh - 180px)); }
+  .dock[data-chat-expanded="true"] .rail { display: none; }
+  .dock:has(textarea:focus) { bottom: max(8px, env(safe-area-inset-bottom, 0px)); }
+  .dock:has(textarea:focus) .conversation { height: min(520px, calc(100dvh - 100px)); }
+  .input { font-size: 16px; }
+  .rail { flex-direction: row; }
+  .iconButton { min-width: 44px; min-height: 44px; }
+  .tray { max-width: calc(100vw - 24px); }
+}
+@media (prefers-reduced-motion: reduce) { .dock *, .dock *::before, .dock *::after { animation: none !important; scroll-behavior: auto !important; } }

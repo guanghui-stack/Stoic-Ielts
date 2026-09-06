@@ -4,12 +4,15 @@ import { WorldShell } from "@/components/world/world-shell";
 import { StudentQuickAccess } from "@/components/student/student-quick-access";
 import { getCurrentUser } from "@/lib/session";
 import { canUseChatRealtime } from "@/lib/chat/realtime-rules";
+import { Suspense } from "react";
+import { ChatDock } from "@/components/chat/chat-dock";
 
 export default async function SiteLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const user = await getCurrentUser();
   return (
+    <>
     <WorldShell
       header={<SiteHeader />}
       footer={<SiteFooter />}
@@ -22,5 +25,7 @@ export default async function SiteLayout({
       */}
       <main className="paper-grain flex-1">{children}</main>
     </WorldShell>
+    {user && canUseChatRealtime(user) ? <Suspense fallback={null}><ChatDock key={user.id} userId={user.id} /></Suspense> : null}
+    </>
   );
 }

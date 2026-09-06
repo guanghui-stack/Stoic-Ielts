@@ -267,6 +267,7 @@ export async function getConversation(
 export async function markConversationRead(
   userId: string,
   conversationId: string,
+  throughMessageId?: string,
 ): Promise<ChatResult<null>> {
   const [viewer, conversation] = await Promise.all([
     studentAccount(userId),
@@ -286,12 +287,18 @@ export async function markConversationRead(
     return { ok: false, error: "Học viên này không còn nhận tin nhắn." };
   }
 
-  const now = new Date();
-  await db.directConversation.update({
-    where: { id: conversationId },
-    data: conversation.participantAId === userId
-      ? { participantAReadAt: now }
-      : { participantBReadAt: now },
+  // A floating window acknowledges only what it actually displayed. A reply
+  // arriving between fetching and focusing must remain unread.
+  const message = throughMessageId ? await db.directMessage.findFirst({
+    where: { id: throughMessageId, conversationId, senderId: { not: userId } },
+    select: { createdAt: true },
+  }) : null;
+  if (throughMessageId && !message) return { ok: false, error: "Không tìm thấy tin nhắn này." };
+  const readAt = message?.createdAt ?? new Date();
+  const field = conversation.participantAId === userId ? "participantAReadAt" : "participantBReadAt";
+  await db.directConversation.updateMany({
+    where: { id: conversationId, OR: [{ [field]: null }, { [field]: { lt: readAt } }] },
+    data: { [field]: readAt },
   });
   return { ok: true, value: null };
 }
