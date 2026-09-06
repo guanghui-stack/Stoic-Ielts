@@ -17,8 +17,10 @@ import {
  */
 export async function ExerciseList({
   readingType,
+  exerciseId,
 }: {
   readingType: "ACADEMIC" | "GENERAL";
+  exerciseId?: string;
 }) {
   const [user, exercises] = await Promise.all([
     getCurrentUser(),
@@ -27,7 +29,7 @@ export async function ExerciseList({
       where: {
         skill: "READING",
         readingType,
-        taskType: "READING_PASSAGE",
+        ...(exerciseId ? {id: exerciseId, taskType: {in: ["READING_PASSAGE", "READING_FULL"]}} : {taskType: "READING_PASSAGE"}),
         published: true,
         competitionOnly: false,
         arenaOnly: false,
@@ -39,9 +41,9 @@ export async function ExerciseList({
   if (exercises.length === 0) {
     return (
       <div className="rounded-stoic-lg border border-stoic-line bg-stoic-canvas px-6 py-14 text-center shadow-stoic-1">
-        <p className="font-semibold text-stoic-ink">Kho bài đọc đang được chuẩn bị.</p>
+        <p className="font-semibold text-stoic-ink">{exerciseId ? "Bài đọc này hiện không còn được mở." : "Kho bài đọc đang được chuẩn bị."}</p>
         <p className="mt-2 text-sm text-stoic-ink-muted">
-          Vui lòng quay lại sau để xem các passage mới.
+          {exerciseId ? "Bạn có thể chọn xem toàn bộ kho để tìm bài đọc khác." : "Vui lòng quay lại sau để xem các passage mới."}
         </p>
       </div>
     );
@@ -53,6 +55,7 @@ export async function ExerciseList({
         db.attempt.findMany({
           where: {
             userId: user.id,
+            exerciseId: {in: exerciseIds},
             exercise: { skill: "READING", readingType },
           },
           orderBy: { startedAt: "desc" },

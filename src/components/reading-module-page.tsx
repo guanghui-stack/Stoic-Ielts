@@ -6,8 +6,10 @@ import { ExerciseList } from "@/components/exercise-list";
 /** Khung chung cho hai kho Reading, dùng cùng design system Stoic hiện hành. */
 export function ReadingModulePage({
   module,
+  exerciseId,
 }: {
   module: "ACADEMIC" | "GENERAL";
+  exerciseId?: string;
 }) {
   const info = READING_NAV.find((item) => item.module === module)!;
   const other = READING_NAV.find((item) => item.module !== module)!;
@@ -103,7 +105,8 @@ export function ReadingModulePage({
             </p>
           </div>
 
-          <ExerciseList readingType={module} />
+          <ExerciseList readingType={module} exerciseId={exerciseId} />
+          {exerciseId && <Link href={info.href} className="mt-5 inline-flex min-h-11 items-center text-sm font-medium text-stoic-primary-deep underline">Xem toàn bộ kho Reading {info.label}</Link>}
 
           <aside className="mt-8 flex gap-3 rounded-stoic-md border border-stoic-line bg-stoic-canvas px-5 py-4 text-sm leading-relaxed text-stoic-ink-muted shadow-stoic-1">
             <BookOpen

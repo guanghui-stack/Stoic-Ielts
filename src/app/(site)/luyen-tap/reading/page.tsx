@@ -7,6 +7,7 @@ export const metadata: Metadata = {
     "Kho luyện IELTS Reading Academic theo tinh thần học có chủ đích: passage học thuật, format rõ ràng và quy đổi band sau khi nộp.",
 };
 
-export default function ReadingAcademicPage() {
-  return <ReadingModulePage module="ACADEMIC" />;
+export default async function ReadingAcademicPage({searchParams}: {searchParams: Promise<{bai?: string}>}) {
+  const {bai} = await searchParams;
+  return <ReadingModulePage module="ACADEMIC" exerciseId={typeof bai === "string" && bai.length <= 191 ? bai : undefined} />;
 }

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Lock } from "lucide-react";
+import { ArrowLeft, Bell, Lock } from "lucide-react";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
 import {
@@ -30,6 +30,15 @@ import { ForumAuthorStatus } from "@/components/forum/forum-author-status";
 import { ForumRealtimeBridge } from "@/components/forum/use-realtime-forum";
 import { extractTagsFromBody } from "@/lib/forum/tags";
 import { NoteBox } from "@/components/ui";
+import { getThreadEngagement, countUnreadForumNotifications } from "@/lib/forum/engagement";
+import { questionReferenceForPost } from "@/lib/forum/question-context";
+import { QuestionReferenceCard } from "@/components/forum/question-reference-card";
+import {
+  FollowThreadButton,
+  HelpfulReplyButton,
+  UnderstoodBadge,
+} from "@/components/forum/thread-engagement";
+import styles from "@/components/forum/forum-discussions.module.css";
 
 export const dynamic = "force-dynamic";
 
@@ -138,13 +147,16 @@ export default async function PostPage({
     }));
 
   const tree = pruneDeletedLeaves(buildCommentTree(comments));
-  const [postVotes, commentVotes] = await Promise.all([
+  const [postVotes, commentVotes, engagement, questionReference, unreadCount] = await Promise.all([
     myVotes(viewer.id, "POST", [post.id]),
     myVotes(
       viewer.id,
       "COMMENT",
       comments.map((c) => c.id)
     ),
+    getThreadEngagement(viewer, post.id),
+    questionReferenceForPost(user, post.id),
+    countUnreadForumNotifications(viewer),
   ]);
 
   const basePath = `/nghi-su-duong/${channel.key}/${post.id}`;
@@ -158,20 +170,28 @@ export default async function PostPage({
   return (
     <section className="mx-auto max-w-3xl px-6 py-12 md:py-16">
       <ForumRealtimeBridge levels={[channel.level]} />
-      <Link
-        href={`/nghi-su-duong?bac=${channel.level}`}
-        className="inline-flex items-center gap-2 font-ui text-sm font-semibold text-navy hover:text-gold"
-      >
-        <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-        Trở lại diễn đàn · Bậc {channel.level}
-      </Link>
+      <div className={styles.headerRow}>
+        <Link
+          href={`/nghi-su-duong?bac=${channel.level}`}
+          className="inline-flex min-h-11 items-center gap-2 font-ui text-sm font-semibold text-navy hover:text-gold"
+        >
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          Trở lại diễn đàn · Bậc {channel.level}
+        </Link>
+        <Link href="/nghi-su-duong/theo-doi" className={styles.inboxLink}>
+          <Bell size={16} aria-hidden="true" />
+          Theo dõi
+          {unreadCount > 0 && <span className={styles.unreadCount}>{unreadCount}<span className="sr-only"> thông báo chưa đọc</span></span>}
+        </Link>
+      </div>
 
-      <article className="mt-6 border border-line bg-paper p-7 shadow-card">
+      <article className={`${styles.threadArticle} mt-6 border border-line bg-paper p-7 shadow-card`}>
         <div className="mb-3 flex flex-wrap items-center gap-2">
           <span className="border border-gold bg-gold-pale px-2 py-0.5 font-ui text-[0.68rem] font-bold uppercase tracking-wide text-gold">
             Bậc {channel.level}
           </span>
           <span className="font-ui text-xs text-muted">{channel.name}</span>
+          {engagement?.helpfulCommentId && <UnderstoodBadge />}
         </div>
         <h1 className="font-display text-2xl font-bold leading-tight text-navy-deep md:text-3xl">
           {post.title}
@@ -183,6 +203,8 @@ export default async function PostPage({
         <ForumTags tags={postContent.tags} />
         <div className="rule-gold mt-4" />
 
+        {questionReference && <QuestionReferenceCard reference={questionReference} />}
+
         {/*
           `RichText` dựng ra các phần tử React từ dấu quy ước — KHÔNG bao giờ
           dựng HTML từ chuỗi người dùng. Xem chú thích đầu `lib/forum/markup.ts`
@@ -192,6 +214,16 @@ export default async function PostPage({
           text={postContent.content}
           className="mt-5 text-[0.98rem] leading-relaxed text-ink"
         />
+
+        {engagement?.helpfulCommentId && (
+          <div className={styles.acceptedSummary}>
+            <a href={`#phan-hoi-${engagement.helpfulCommentId}`} className={styles.textLink}>
+              <UnderstoodBadge />
+              Xem phản hồi
+            </a>
+            <p>Người hỏi đánh dấu phản hồi đã giúp mình hiểu; đây không phải xác nhận đáp án của giáo viên.</p>
+          </div>
+        )}
 
         {/*
           Một hàng flex-wrap chứa: cắm cờ · hạ cờ · Luận bàn · Báo cáo.
@@ -210,6 +242,9 @@ export default async function PostPage({
           />
           {canWrite && (
             <CommentForm postId={post.id} channelKey={channel.key} />
+          )}
+          {engagement && (
+            <FollowThreadButton postId={post.id} following={engagement.following} />
           )}
           <span className="ml-auto">
             <ReportForm targetType="POST" targetId={post.id} />
@@ -235,6 +270,11 @@ export default async function PostPage({
       <h2 className="mt-10 font-display text-lg font-bold text-navy-deep">
         {renderedCommentCount} phản hồi
       </h2>
+      {engagement?.canMarkHelpful && (
+        <p className="mt-2 font-ui text-xs leading-relaxed text-muted">
+          Chọn “Đã giúp mình hiểu” ở một phản hồi hữu ích. Bạn có thể đổi hoặc bỏ dấu này bất cứ lúc nào.
+        </p>
+      )}
 
       <div className="mt-4 space-y-4">
         {tree.map((node) => (
@@ -247,6 +287,9 @@ export default async function PostPage({
             votes={commentVotes}
             viewer={viewer}
             canWrite={canWrite}
+            helpfulCommentId={engagement?.helpfulCommentId ?? null}
+            canMarkHelpful={engagement?.canMarkHelpful ?? false}
+            postAuthorId={post.author.id}
           />
         ))}
       </div>
@@ -269,6 +312,9 @@ function CommentBranch({
   votes,
   viewer,
   canWrite,
+  helpfulCommentId,
+  canMarkHelpful,
+  postAuthorId,
 }: {
   node: CommentNode<CommentData>;
   postId: string;
@@ -277,16 +323,17 @@ function CommentBranch({
   votes: Map<string, 1 | -1 | 0>;
   viewer: Viewer;
   canWrite: boolean;
+  helpfulCommentId: string | null;
+  canMarkHelpful: boolean;
+  postAuthorId: string;
 }) {
   const atMaxDepth = node.depth >= MAX_DEPTH;
+  const helpful = node.status === "VISIBLE" && helpfulCommentId === node.id;
 
   return (
     <div
-      className={
-        node.depth === 0
-          ? "border-l-2 border-line pl-4"
-          : "mt-3 border-l-2 border-line pl-4"
-      }
+      id={`phan-hoi-${node.id}`}
+      className={`${styles.commentAnchor} ${helpful ? styles.acceptedComment : ""} ${node.depth === 0 ? "border-l-2 border-line pl-4" : "mt-3 border-l-2 border-line pl-4"}`}
     >
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-ui text-xs text-muted">
         {node.deleted ? (
@@ -299,6 +346,7 @@ function CommentBranch({
           />
         )}
         <span>{fmt(node.createdAt)}</span>
+        {helpful && <UnderstoodBadge />}
         {node.status === "HIDDEN" && (
           <span className="inline-flex items-center gap-1 font-semibold text-danger">
             <Lock className="h-3 w-3" aria-hidden="true" />
@@ -354,6 +402,9 @@ function CommentBranch({
               minutesLeft={node.deleteMinutes}
             />
           )}
+          {canMarkHelpful && node.status === "VISIBLE" && node.authorId !== postAuthorId && (
+            <HelpfulReplyButton postId={postId} commentId={node.id} selected={helpful} />
+          )}
           <span className="ml-auto">
             <ReportForm targetType="COMMENT" targetId={node.id} />
           </span>
@@ -372,6 +423,9 @@ function CommentBranch({
               votes={votes}
               viewer={viewer}
               canWrite={canWrite}
+              helpfulCommentId={helpfulCommentId}
+              canMarkHelpful={canMarkHelpful}
+              postAuthorId={postAuthorId}
             />
           ))}
         </div>

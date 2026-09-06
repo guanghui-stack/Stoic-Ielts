@@ -1,5 +1,6 @@
 import Link from "next/link";
 import {
+  Bell,
   Lock,
   MessageSquare,
   Pin,
@@ -26,6 +27,9 @@ import { ForumRealtimeBridge } from "@/components/forum/use-realtime-forum";
 import { VoteButtons } from "@/components/forum/vote-buttons";
 import { extractTagsFromBody } from "@/lib/forum/tags";
 import { NoteBox } from "@/components/ui";
+import { countUnreadForumNotifications } from "@/lib/forum/engagement";
+import { UnderstoodBadge } from "@/components/forum/thread-engagement";
+import styles from "@/components/forum/forum-discussions.module.css";
 
 export const metadata = {
   title: "Diễn Đàn",
@@ -106,7 +110,7 @@ export default async function ForumHome({
     channelId: { in: visibleChannelIds },
     status: "VISIBLE",
   } as const;
-  const [posts, total] = await Promise.all([
+  const [posts, total, unreadCount] = await Promise.all([
     db.forumPost.findMany({
       where,
       orderBy: [
@@ -127,6 +131,8 @@ export default async function ForumHome({
         pinnedAt: true,
         lockedAt: true,
         createdAt: true,
+        helpfulReply: {select: {comment: {select: {status: true, postId: true}}}},
+        questionReference: {select: {passageTitle: true, questionNumber: true}},
         author: { select: { id: true, name: true } },
         channel: {
           select: { key: true, level: true, name: true, locked: true },
@@ -134,6 +140,7 @@ export default async function ForumHome({
       },
     }),
     db.forumPost.count({ where }),
+    countUnreadForumNotifications(viewer),
   ]);
   const votes = await myVotes(
     viewer.id,
@@ -173,6 +180,15 @@ export default async function ForumHome({
       <section className="mx-auto max-w-4xl px-6 py-12 md:py-16">
         <ForumRealtimeBridge levels={channels.map((channel) => channel.level)} />
         <NextStepGuide step={FORUM_NEXT_STEP} />
+
+        <div className={`${styles.headerRow} mt-8`}>
+          <p className="font-ui text-sm font-medium text-ink">Dòng thảo luận chung</p>
+          <Link href="/nghi-su-duong/theo-doi" className={styles.inboxLink}>
+            <Bell size={16} aria-hidden="true" />
+            Theo dõi
+            {unreadCount > 0 && <span className={styles.unreadCount}>{unreadCount}<span className="sr-only"> thông báo chưa đọc</span></span>}
+          </Link>
+        </div>
 
         {myRank && (
           <p className="mt-8 font-ui text-sm text-muted">
@@ -287,6 +303,7 @@ export default async function ForumHome({
                       <span className="font-ui text-xs text-muted">
                         {post.channel.name}
                       </span>
+                      {post.helpfulReply?.comment.status === "VISIBLE" && post.helpfulReply.comment.postId === post.id && <UnderstoodBadge />}
                     </div>
                     <Link
                       href={detailPath}
@@ -295,6 +312,7 @@ export default async function ForumHome({
                       {post.title}
                     </Link>
                     <ForumTags tags={post.tags} />
+                    {post.questionReference && <p className="mt-2 font-ui text-xs text-muted">{post.questionReference.passageTitle} · Câu {post.questionReference.questionNumber}</p>}
                     <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 font-ui text-xs text-muted">
                       <ForumAuthorStatus
                         userId={post.author.id}

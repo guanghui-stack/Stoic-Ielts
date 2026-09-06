@@ -7,6 +7,7 @@ export const metadata: Metadata = {
     "Kho luyện IELTS General Training Reading theo tinh thần học có chủ đích, tách rõ với Academic để bạn luyện đúng kỳ thi mình sắp dự.",
 };
 
-export default function ReadingGeneralPage() {
-  return <ReadingModulePage module="GENERAL" />;
+export default async function ReadingGeneralPage({searchParams}: {searchParams: Promise<{bai?: string}>}) {
+  const {bai} = await searchParams;
+  return <ReadingModulePage module="GENERAL" exerciseId={typeof bai === "string" && bai.length <= 191 ? bai : undefined} />;
 }

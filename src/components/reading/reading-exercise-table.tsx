@@ -104,7 +104,8 @@ export function ReadingExerciseTable({
             {rows.map((row) => (
               <tr
                 key={row.id}
-                className="border-b border-stoic-line/80 transition-colors last:border-b-0 hover:bg-stoic-primary-soft/20"
+                id={`exercise-${row.id}`}
+                className="scroll-mt-48 border-b border-stoic-line/80 transition-colors last:border-b-0 hover:bg-stoic-primary-soft/20 target:bg-stoic-primary-soft/30"
               >
                 <td className="px-5 py-4 align-middle sm:px-6">
                   <ReadingDetailDialog row={row} />
