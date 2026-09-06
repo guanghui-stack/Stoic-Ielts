@@ -1,6 +1,6 @@
 import type { CampaignNodeView } from "./view.ts";
 
-export type WorldPlaceKind = "LANDMARK" | "COMPETITION" | "TERRITORY";
+export type WorldPlaceKind = "TERRITORY";
 
 export type WorldPlace = {
   code: string;
@@ -38,37 +38,9 @@ export type NextStepModel = {
 export type CampaignWorld = {
   audience: "GUEST" | "STUDENT";
   gates: CampaignNodeView[];
-  competitions: readonly WorldPlace[];
   territories: readonly TerritoryPlace[];
   nextStep: NextStepModel;
 };
-
-export const WORLD_COMPETITIONS = [
-  {
-    code: "COMP_MONTHLY",
-    kind: "COMPETITION",
-    title: "Thử Thách Tháng",
-    functionalLabel: "Đối chiếu hàng tháng",
-    href: "/nguyet-thi",
-    lockedMessage: null,
-  },
-  {
-    code: "COMP_QUARTERLY",
-    kind: "COMPETITION",
-    title: "Thử Thách Quý",
-    functionalLabel: "Đối chiếu hàng quý",
-    href: "/duong-thi",
-    lockedMessage: null,
-  },
-  {
-    code: "COMP_ANNUAL",
-    kind: "COMPETITION",
-    title: "Thử Thách Năm",
-    functionalLabel: "Đối chiếu hàng năm",
-    href: "/thien-thi",
-    lockedMessage: null,
-  },
-] as const satisfies readonly WorldPlace[];
 
 export const LOCKED_TERRITORIES = [
   {
@@ -203,7 +175,6 @@ export function buildCampaignWorld({
   return {
     audience,
     gates: nodes,
-    competitions: WORLD_COMPETITIONS,
     territories: LOCKED_TERRITORIES,
     nextStep,
   };
