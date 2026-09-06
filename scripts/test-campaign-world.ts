@@ -2,7 +2,6 @@ import { campaignView } from "../src/lib/campaign/view.ts";
 import {
   buildCampaignWorld,
   LOCKED_TERRITORIES,
-  WORLD_COMPETITIONS,
 } from "../src/lib/campaign/world.ts";
 
 let failures = 0;
@@ -28,12 +27,6 @@ const availableNodes = campaignView(1, {
 });
 const lockedCurrentNodes = campaignView(1, {});
 const completedNodes = campaignView(9, {});
-
-check(
-  "competitions keep monthly, quarterly, annual order",
-  WORLD_COMPETITIONS.map((item) => item.title),
-  ["Thử Thách Tháng", "Thử Thách Quý", "Thử Thách Năm"],
-);
 
 check(
   "exactly three locked territories",

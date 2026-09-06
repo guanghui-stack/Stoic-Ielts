@@ -988,20 +988,6 @@ body {
   line-height: 1.1;
 }
 
-.world-shell .world-landmark-rail {
-  display: grid;
-  gap: 1.25rem;
-  margin-top: 1rem;
-  border: 1px solid var(--color-line);
-  background: rgb(255 253 249 / 0.72);
-  padding: 1.25rem;
-}
-
-.world-shell .world-landmark-rail .world-action:hover {
-  border-color: var(--color-line-strong);
-  box-shadow: var(--shadow-card);
-}
-
 .world-shell .world-next-step {
   margin-top: 2rem;
   border-left: 3px solid var(--color-gold);
@@ -1013,12 +999,6 @@ body {
 .world-shell .world-next-step .world-action:hover {
   background: var(--color-navy-deep);
   box-shadow: var(--shadow-card);
-}
-
-@media (min-width: 1280px) {
-  .world-shell .world-landmark-rail {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }
 
 @keyframes world-utility-enter {

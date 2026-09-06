@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Check, Flag, Lock, Play } from "lucide-react";
 import type { CSSProperties } from "react";
-import { WorldCompetitionRail } from "@/components/campaign/world-competition-rail";
 import { STATE_LABELS, type CampaignNodeView } from "@/lib/campaign/view";
 import { stoicTrialLabel, stoicTrialTitle, type CampaignWorld } from "@/lib/campaign/world";
 
@@ -124,8 +123,6 @@ export function CampaignMap({
           </ol>
         </div>
       </section>
-
-      <WorldCompetitionRail competitions={world.competitions} />
     </div>
   );
 }
