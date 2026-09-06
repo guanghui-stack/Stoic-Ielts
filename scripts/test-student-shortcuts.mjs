@@ -3,6 +3,7 @@ import { DatabaseSync } from "node:sqlite";
 import { db } from "../src/lib/db.ts";
 import { hasUnreadMessages } from "../src/lib/chat/unread.ts";
 import { activeStudentShortcut, showStudentQuickAccess } from "../src/lib/student/quick-access.ts";
+import { NAV_NAME_MAX_CHARS, navDisplayName } from "../src/lib/student/display-name.ts";
 
 // Chạy nguyên truy vấn SQL với dữ liệu giả trong bộ nhớ, không kết nối MySQL thật.
 const fixture = new DatabaseSync(":memory:");
@@ -60,5 +61,30 @@ for (const pathname of ["/hoc-vien/bai-lam/one", "/hoc-vien/bai-lam/one/feynman"
 for (const pathname of ["/lam-bai/one", "/hoc-vien/thi-but/READING/one", "/hoc-vien/thi-luyen/one", "/thanh-toan/one", "/quan-tri", "/dang-nhap"]) {
   assert.equal(showStudentQuickAccess(pathname), false);
 }
+// Tên trên nút tài khoản: tối đa ba chữ, tối đa NAV_NAME_MAX_CHARS ký tự, và
+// giữ phần TÊN GỌI (đứng cuối trong tiếng Việt) chứ không giữ phần họ.
+assert.equal(navDisplayName("Đặng Quang Huy"), "Đặng Quang Huy", "tên ba chữ giữ nguyên");
+assert.equal(navDisplayName("Nguyễn Thị Thu Hà"), "Thị Thu Hà", "chỉ giữ ba chữ cuối");
+assert.equal(navDisplayName("Huy"), "Huy", "tên một chữ giữ nguyên");
+assert.equal(navDisplayName("  Trần   Văn   An  "), "Trần Văn An", "gộp khoảng trắng thừa");
+assert.equal(navDisplayName(null), "Học viên", "thiếu tên thì dùng nhãn mặc định");
+assert.equal(navDisplayName("   "), "Học viên", "tên toàn khoảng trắng cũng là thiếu tên");
+assert.equal(navDisplayName("", "Khách"), "Khách", "nhãn mặc định thay được");
+for (const name of ["Nguyễn Hoàng Phương Khanh", "Bartholomewmontgomery", "Nguyễn Thị Khánh Phương"]) {
+  assert.ok(
+    navDisplayName(name).length <= NAV_NAME_MAX_CHARS,
+    `không vượt trần ký tự: ${name}`,
+  );
+  assert.ok(
+    navDisplayName(name).split(" ").length <= 3,
+    `không vượt trần số chữ: ${name}`,
+  );
+}
+assert.ok(
+  navDisplayName("Bartholomewmontgomery").endsWith("…"),
+  "một chữ quá dài thì cắt và báo bằng dấu ba chấm",
+);
+
 console.log("✓ Tín hiệu tin chưa đọc: phân quyền, mốc đã đọc, tin của chính mình, trạng thái tài khoản và SQL tham số đều đạt.");
+console.log("✓ Tên trên nút tài khoản: trần ba chữ, trần ký tự và phần tên gọi đều đạt.");
 console.log("✓ Lối tắt: mục đang mở và ranh giới phòng thi/thanh toán đều đạt.");

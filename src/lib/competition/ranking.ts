@@ -1,7 +1,7 @@
 /**
  * Xếp hạng Nguyệt Thí — HÀM THUẦN, không chạm database.
  *
- * Đây là chỗ quyết định ai nhận 999.000đ tiền mặt. Sai ở đây không phải là một
+ * Đây là chỗ quyết định ai nhận giải cao nhất của kỳ (tiền mặt và xu). Sai ở đây không phải là một
  * lỗi giao diện: nó là trao giải cho nhầm người, và không có cách nào sửa mà
  * không làm tổn thương ai đó. Vì vậy mọi thứ ở file này phải:
  *
@@ -12,11 +12,17 @@
  *     người kém hơn lên cho đủ mâm.
  */
 
-/** Ngưỡng band tối thiểu cho từng giải, áp cho CẢ BA đề. */
+/**
+ * Ngưỡng band tối thiểu cho từng giải, áp cho CẢ BA đề.
+ *
+ * `coins` là phần thưởng xu, `amount` là phần tiền mặt. Hai con số phải khớp
+ * với `BADGE_INFO` trong `components/competition/badges.tsx` — chỗ đó là bản
+ * hiển thị, chỗ này là bản dùng để tính.
+ */
 export const PRIZE_TIERS = [
-  { rank: 1, minBand: 8.5, amount: 999_000, badge: "MONTHLY_CROWN" },
-  { rank: 2, minBand: 8.0, amount: 499_000, badge: "MONTHLY_CHANCELLOR" },
-  { rank: 3, minBand: 7.5, amount: 199_000, badge: "MONTHLY_GENERAL" },
+  { rank: 1, minBand: 8.5, amount: 199_000, coins: 150, badge: "MONTHLY_CROWN" },
+  { rank: 2, minBand: 8.0, amount: 99_000, coins: 100, badge: "MONTHLY_CHANCELLOR" },
+  { rank: 3, minBand: 7.5, amount: 49_000, coins: 50, badge: "MONTHLY_GENERAL" },
 ] as const;
 
 /** Không đạt mức này ở cả ba đề thì không lên Bảng Vàng. */
@@ -79,6 +85,7 @@ export function rankEntries(rows: RankedInput[]): RankedEntry[] {
 export type PrizeWinner = {
   rank: number;
   amount: number;
+  coins: number;
   badge: string;
   entry: RankedEntry;
 };
@@ -103,6 +110,7 @@ export function selectPrizeWinners(ranked: RankedEntry[]): PrizeWinner[] {
     winners.push({
       rank: tier.rank,
       amount: tier.amount,
+      coins: tier.coins,
       badge: tier.badge,
       entry,
     });

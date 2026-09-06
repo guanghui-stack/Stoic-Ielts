@@ -1,13 +1,18 @@
 import Link from "next/link";
 import type { CampaignWorld, WorldPlace } from "@/lib/campaign/world";
 
-export function WorldLandmarkRail({
-  landmarks,
+/**
+ * Dải liên kết dưới bản đồ.
+ *
+ * Từng có thêm nhóm "Địa điểm" (Diễn Đàn · Dấu Mốc Cộng Đồng · Thành Quả). Đã
+ * gỡ: cả ba nằm sẵn trên thanh menu chính, nên nhắc lại ngay dưới bản đồ chỉ
+ * làm loãng đúng thứ dải này còn lý do tồn tại — ba kỳ đối chiếu định kỳ.
+ */
+export function WorldCompetitionRail({
   competitions,
-}: Pick<CampaignWorld, "landmarks" | "competitions">) {
+}: Pick<CampaignWorld, "competitions">) {
   return (
-    <nav aria-label="Các địa điểm trên bản đồ" className="world-landmark-rail">
-      <PlaceGroup label="Địa điểm" items={landmarks} />
+    <nav aria-label="Các kỳ thử thách trên bản đồ" className="world-landmark-rail">
       <PlaceGroup label="Đại thí" items={competitions} />
     </nav>
   );

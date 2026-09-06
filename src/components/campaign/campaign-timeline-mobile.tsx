@@ -98,7 +98,6 @@ export function CampaignTimelineMobile({ world }: { world: CampaignWorld }) {
         })}
       </ol>
 
-      <MobilePlaceList label="Địa điểm" items={world.landmarks} />
       <MobilePlaceList label="Đại thí" items={world.competitions} />
     </div>
   );

@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useState } from "react";
-import { BookOpen, Library, Menu, X, UserRound } from "lucide-react";
-import { READING_NAV, mainNavItems } from "@/lib/nav";
+import { useState, type FocusEvent as ReactFocusEvent } from "react";
+import { BookOpen, ChevronDown, Library, Menu, X, UserRound } from "lucide-react";
+import { READING_NAV, mainNavItems, type NavItem } from "@/lib/nav";
 
 const READING_ICONS = {
   ACADEMIC: BookOpen,
@@ -22,6 +22,14 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(href + "/");
 }
 
+/** Nhóm menu sáng đèn khi đang ở BẤT KỲ trang con nào của nó. */
+function isItemActive(pathname: string, item: NavItem) {
+  if (item.children) {
+    return item.children.some((child) => isActive(pathname, child.href));
+  }
+  return isActive(pathname, item.href);
+}
+
 function isReadingActive(
   pathname: string,
   href: string,
@@ -36,6 +44,105 @@ function isReadingActive(
   return isActive(pathname, href);
 }
 
+const TOP_LINK_CLASS =
+  "relative flex min-h-12 items-center gap-1 whitespace-nowrap px-3 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.07em] transition-colors xl:px-4 xl:text-[0.76rem]";
+
+function topLinkTone(active: boolean) {
+  return active
+    ? "text-stoic-primary-deep"
+    : "text-stoic-ink-secondary hover:text-stoic-primary-deep";
+}
+
+function ActiveUnderline({ active }: { active: boolean }) {
+  return (
+    <span
+      className={`absolute inset-x-4 bottom-0 h-0.5 rounded-full transition-opacity ${
+        active ? "bg-stoic-primary opacity-100" : "opacity-0"
+      }`}
+    />
+  );
+}
+
+/**
+ * Mục menu có danh sách con.
+ *
+ * Mở bằng rê chuột VÀ bằng bàn phím. Mục cha vẫn là liên kết thật tới thử thách
+ * tháng: người dùng bàn phím hay màn hình cảm ứng bấm thẳng vào là tới nơi,
+ * không bị kẹt ở một cái nút chỉ dùng để mở menu.
+ */
+function DesktopNavGroup({
+  item,
+  active,
+  pathname,
+}: {
+  item: NavItem;
+  active: boolean;
+  pathname: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const children = item.children ?? [];
+
+  // Rời khỏi cả cụm mới đóng: đi từ mục cha xuống mục con cũng là một lần
+  // `blur`, đóng ngay ở đó thì không ai bấm được vào menu con.
+  const onBlur = (event: ReactFocusEvent<HTMLLIElement>) => {
+    if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+      setOpen(false);
+    }
+  };
+
+  return (
+    <li
+      className="relative flex"
+      onPointerEnter={() => setOpen(true)}
+      onPointerLeave={() => setOpen(false)}
+      onFocus={() => setOpen(true)}
+      onBlur={onBlur}
+      onKeyDown={(event) => {
+        if (event.key === "Escape") setOpen(false);
+      }}
+    >
+      <Link
+        href={item.href}
+        aria-current={active ? "page" : undefined}
+        aria-expanded={open}
+        className={`${TOP_LINK_CLASS} ${topLinkTone(active)}`}
+      >
+        {item.label}
+        <ChevronDown
+          className={`h-3 w-3 transition-transform ${open ? "rotate-180" : ""}`}
+          aria-hidden="true"
+        />
+        <ActiveUnderline active={active} />
+      </Link>
+
+      <ul
+        hidden={!open}
+        className="absolute left-1/2 top-full z-50 min-w-56 -translate-x-1/2 rounded-stoic-md border border-stoic-line bg-stoic-canvas p-1.5 shadow-stoic-2"
+      >
+        {children.map((child) => {
+          const childActive = isActive(pathname, child.href);
+          return (
+            <li key={child.href}>
+              <Link
+                href={child.href}
+                aria-current={childActive ? "page" : undefined}
+                onClick={() => setOpen(false)}
+                className={`block min-h-11 rounded-stoic-pill px-4 py-2.5 text-[0.78rem] font-semibold tracking-wide transition-colors ${
+                  childActive
+                    ? "bg-stoic-primary-soft/45 text-stoic-primary-deep"
+                    : "text-stoic-ink-secondary hover:bg-stoic-canvas-soft hover:text-stoic-primary-deep"
+                }`}
+              >
+                {child.label}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </li>
+  );
+}
+
 export function DesktopNav({ showTiers }: { showTiers: boolean }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -43,31 +150,31 @@ export function DesktopNav({ showTiers }: { showTiers: boolean }) {
     searchParams.get("dang") === "GENERAL" ? "GENERAL" : "ACADEMIC";
   const mainNav = mainNavItems(showTiers);
   return (
-    <div
-      className={`hidden bg-stoic-canvas font-stoic ${showTiers ? "xl:block" : "lg:block"}`}
-    >
+    <div className="hidden bg-stoic-canvas font-stoic lg:block">
       {/* Tầng 1: menu chính nằm ngang */}
       <nav aria-label="Điều hướng chính" className="border-t border-stoic-line">
         <ul className="mx-auto flex max-w-6xl items-stretch justify-center gap-1 px-3">
           {mainNav.map((item) => {
-            const active = isActive(pathname, item.href);
+            const active = isItemActive(pathname, item);
+            if (item.children) {
+              return (
+                <DesktopNavGroup
+                  key={item.href}
+                  item={item}
+                  active={active}
+                  pathname={pathname}
+                />
+              );
+            }
             return (
               <li key={item.href} className="flex">
                 <Link
                   href={item.href}
                   aria-current={active ? "page" : undefined}
-                  className={`relative flex min-h-12 items-center whitespace-nowrap px-3 py-3 text-[0.72rem] font-semibold uppercase tracking-[0.07em] transition-colors xl:px-4 xl:text-[0.76rem] ${
-                    active
-                      ? "text-stoic-primary-deep"
-                      : "text-stoic-ink-secondary hover:text-stoic-primary-deep"
-                  }`}
+                  className={`${TOP_LINK_CLASS} ${topLinkTone(active)}`}
                 >
                   {item.label}
-                  <span
-                    className={`absolute inset-x-4 bottom-0 h-0.5 rounded-full transition-opacity ${
-                      active ? "bg-stoic-primary opacity-100" : "opacity-0"
-                    }`}
-                  />
+                  <ActiveUnderline active={active} />
                 </Link>
               </li>
             );
@@ -127,7 +234,7 @@ export function MobileNav({
   const mainNav = mainNavItems(showTiers);
 
   return (
-    <div className={showTiers ? "xl:hidden" : "lg:hidden"}>
+    <div className="lg:hidden">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -144,17 +251,47 @@ export function MobileNav({
             <ul className="divide-y divide-stoic-line">
               {mainNav.map((item) => (
                 <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    onClick={() => setOpen(false)}
-                    className={`block min-h-11 py-3 text-sm font-semibold uppercase tracking-[0.08em] ${
-                      isActive(pathname, item.href)
-                        ? "text-stoic-primary-deep"
-                        : "text-stoic-ink"
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
+                  {/*
+                    Trên màn hình hẹp không có "rê chuột": nhóm được trải phẳng
+                    thành nhãn nhóm + các mục con, thay vì một menu phải bấm hai
+                    lần mới tới nơi.
+                  */}
+                  {item.children ? (
+                    <div className="py-3">
+                      <p className="text-[0.68rem] font-semibold uppercase tracking-[0.1em] text-stoic-ink-muted">
+                        {item.label}
+                      </p>
+                      <ul className="mt-1">
+                        {item.children.map((child) => (
+                          <li key={child.href}>
+                            <Link
+                              href={child.href}
+                              onClick={() => setOpen(false)}
+                              className={`block min-h-11 py-2.5 text-sm font-semibold uppercase tracking-[0.08em] ${
+                                isActive(pathname, child.href)
+                                  ? "text-stoic-primary-deep"
+                                  : "text-stoic-ink"
+                              }`}
+                            >
+                              {child.label}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : (
+                    <Link
+                      href={item.href}
+                      onClick={() => setOpen(false)}
+                      className={`block min-h-11 py-3 text-sm font-semibold uppercase tracking-[0.08em] ${
+                        isActive(pathname, item.href)
+                          ? "text-stoic-primary-deep"
+                          : "text-stoic-ink"
+                      }`}
+                    >
+                      {item.label}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>

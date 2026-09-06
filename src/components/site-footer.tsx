@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
-import { MAIN_NAV, READING_NAV } from "@/lib/nav";
+import { footerNavItems, READING_NAV } from "@/lib/nav";
+import { features } from "@/lib/features";
 import { StoicMark } from "@/components/brand";
 
 export function SiteFooter() {
@@ -35,13 +36,18 @@ export function SiteFooter() {
             </li>
             <li className="flex items-center gap-2.5">
               <Phone className="h-4 w-4 shrink-0 text-stoic-lavender" aria-hidden="true" />
-              <a href="tel:+84866868701" className="transition-colors hover:text-white">
-                0866 868 701
+              <a href="tel:+84917920345" className="transition-colors hover:text-white">
+                0917 920 345
               </a>
             </li>
             <li className="flex items-center gap-2.5">
               <Mail className="h-4 w-4 shrink-0 text-stoic-lavender" aria-hidden="true" />
-              hello@wobridges.vn
+              <a
+                href="mailto:info@stoic-ielts.online"
+                className="transition-colors hover:text-white"
+              >
+                info@stoic-ielts.online
+              </a>
             </li>
           </ul>
         </div>
@@ -51,7 +57,7 @@ export function SiteFooter() {
             Khám phá
           </p>
           <ul className="mt-4 space-y-2.5">
-            {MAIN_NAV.filter((item) => item.href !== "/").map((item) => (
+            {footerNavItems(features.competitionTiers).map((item) => (
               <li key={item.href}>
                 <Link
                   href={item.href}

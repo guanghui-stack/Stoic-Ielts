@@ -87,7 +87,8 @@ export function LoginForm() {
 
       <div className="flex justify-end">
         <p className="font-ui text-xs text-muted">
-          Quên mật khẩu? Liên hệ trung tâm qua hotline 0901 234 567.
+          Quên mật khẩu? Liên hệ trung tâm qua hotline 0917 920 345 hoặc
+          info@stoic-ielts.online.
         </p>
       </div>
 

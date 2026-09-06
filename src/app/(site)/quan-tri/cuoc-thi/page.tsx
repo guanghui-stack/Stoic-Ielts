@@ -67,8 +67,9 @@ export default async function AdminCompetitionPage() {
     <AdminPageShell eyebrow="Đối chiếu" title="Thử Thách Tháng">
       <p className="mt-5 max-w-3xl text-[0.95rem] leading-relaxed text-ink-soft">
         Mỗi kỳ 7 ngày, 3 đề Reading, mở dần vào ngày 1 · 3 · 5. Giải thưởng
-        999.000đ · 499.000đ · 199.000đ. Kết quả <strong>không</strong> tự công
-        bố: bạn phải rà soát rồi bấm chốt, và tiền phải tự chuyển tay.
+        199.000đ + 150 xu · 99.000đ + 100 xu · 49.000đ + 50 xu. Kết quả{" "}
+        <strong>không</strong> tự công bố: bạn phải rà soát rồi bấm chốt, và
+        tiền phải tự chuyển tay.
       </p>
 
       <p className="mt-5 border-l-4 border-gold bg-cream-deep px-5 py-4 font-ui text-sm leading-relaxed text-ink-soft">

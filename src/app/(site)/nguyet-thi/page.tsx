@@ -148,7 +148,7 @@ export default async function CompetitionPage({
         </p>
 
         <div className="mt-8 grid gap-6 sm:grid-cols-3">
-          {BADGE_INFO.map(({ code, Badge, title, prizeLabel, requirement, note }) => (
+          {BADGE_INFO.map(({ code, Badge, title, prizeLabel, prizeCoins, requirement, note }) => (
             <article
               key={code}
               className="flex flex-col items-center border border-line bg-paper p-7 text-center shadow-card"
@@ -159,6 +159,9 @@ export default async function CompetitionPage({
               </h3>
               <p className="mt-2 font-display text-2xl font-bold text-gold">
                 {prizeLabel}
+              </p>
+              <p className="mt-1 font-ui text-sm font-semibold text-navy">
+                + {prizeCoins} xu
               </p>
               <p className="mt-2.5 font-ui text-xs leading-relaxed text-ink-soft">
                 {requirement}

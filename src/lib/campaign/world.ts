@@ -38,38 +38,10 @@ export type NextStepModel = {
 export type CampaignWorld = {
   audience: "GUEST" | "STUDENT";
   gates: CampaignNodeView[];
-  landmarks: readonly WorldPlace[];
   competitions: readonly WorldPlace[];
   territories: readonly TerritoryPlace[];
   nextStep: NextStepModel;
 };
-
-export const WORLD_LANDMARKS = [
-  {
-    code: "LANDMARK_COUNCIL",
-    kind: "LANDMARK",
-    title: "Diễn Đàn",
-    functionalLabel: "Cộng đồng học tập",
-    href: "/nghi-su-duong",
-    lockedMessage: null,
-  },
-  {
-    code: "LANDMARK_HONORS",
-    kind: "LANDMARK",
-    title: "Dấu Mốc Cộng Đồng",
-    functionalLabel: "Tiến bộ đã kiểm chứng",
-    href: "/dien-danh-vong",
-    lockedMessage: null,
-  },
-  {
-    code: "LANDMARK_RESULTS",
-    kind: "LANDMARK",
-    title: "Thành Quả",
-    functionalLabel: "Kết quả và dấu mốc",
-    href: "/bang-vang",
-    lockedMessage: null,
-  },
-] as const satisfies readonly WorldPlace[];
 
 export const WORLD_COMPETITIONS = [
   {
@@ -128,26 +100,37 @@ export const LOCKED_TERRITORIES = [
   },
 ] as const satisfies readonly TerritoryPlace[];
 
+/**
+ * Tên tám chặng.
+ *
+ * Mỗi tên là MỘT phẩm chất, không phải một câu mô tả. Lý do là chỗ hiển thị:
+ * trên bản đồ, tám chặng nằm cạnh nhau trong tám ô hẹp bằng nhau, nên tên dài
+ * ngắn khác nhau sẽ xuống dòng khác nhau và tám ô cao thấp so le. Dòng nhãn
+ * ngay bên dưới mới là chỗ nói chặng đó rèn điều gì.
+ *
+ * Giữ mỗi tên trong khoảng 14 ký tự và mỗi nhãn trong khoảng 19 ký tự thì cả
+ * hai dòng còn nằm gọn một dòng ở bề rộng ô hiện tại.
+ */
 export const STOIC_TRIAL_TITLES: Record<string, string> = {
-  TRIAL_01_DAO_VIEN: "Chủ động bắt đầu",
-  TRIAL_02_HOANG_CAN: "Giữ nhịp đều đặn",
-  TRIAL_03_HOA_HUNG: "Quản trị sự chú ý",
-  TRIAL_04_NGU_QUAN: "Ổn định qua biến động",
-  TRIAL_05_TRUONG_BAN: "Không bỏ rơi phần khó",
-  TRIAL_06_LAO_TUONG: "Phản tư có chiều sâu",
-  TRIAL_07_TAY_LUONG: "Tích hợp ba trụ",
-  TRIAL_08_HO_LAO: "Tự chủ trước điểm yếu",
+  TRIAL_01_DAO_VIEN: "Chủ động",
+  TRIAL_02_HOANG_CAN: "Giữ nhịp",
+  TRIAL_03_HOA_HUNG: "Quản trị chú ý",
+  TRIAL_04_NGU_QUAN: "Ổn định",
+  TRIAL_05_TRUONG_BAN: "Bám phần khó",
+  TRIAL_06_LAO_TUONG: "Phản tư sâu",
+  TRIAL_07_TAY_LUONG: "Hợp ba trụ",
+  TRIAL_08_HO_LAO: "Tự chủ",
 };
 
 export const STOIC_TRIAL_LABELS: Record<string, string> = {
   TRIAL_01_DAO_VIEN: "Bắt đầu có chủ đích",
   TRIAL_02_HOANG_CAN: "Kỷ luật quay lại",
-  TRIAL_03_HOA_HUNG: "Tập trung vào bước kế tiếp",
-  TRIAL_04_NGU_QUAN: "Bình thản trước kết quả",
-  TRIAL_05_TRUONG_BAN: "Can đảm nhìn vào phần yếu",
-  TRIAL_06_LAO_TUONG: "Học từ điều đã xảy ra",
-  TRIAL_07_TAY_LUONG: "Nhận thức · Hành động · Ý chí",
-  TRIAL_08_HO_LAO: "Tự chủ trước điều có thể sửa",
+  TRIAL_03_HOA_HUNG: "Làm đúng bước kế",
+  TRIAL_04_NGU_QUAN: "Giữ bình thản",
+  TRIAL_05_TRUONG_BAN: "Nhìn thẳng chỗ yếu",
+  TRIAL_06_LAO_TUONG: "Học từ điều đã làm",
+  TRIAL_07_TAY_LUONG: "Ba trụ cùng lúc",
+  TRIAL_08_HO_LAO: "Sửa điều sửa được",
 };
 
 export function stoicTrialTitle(node: Pick<CampaignNodeView, "trialCode" | "shortTitle">): string {
@@ -220,7 +203,6 @@ export function buildCampaignWorld({
   return {
     audience,
     gates: nodes,
-    landmarks: WORLD_LANDMARKS,
     competitions: WORLD_COMPETITIONS,
     territories: LOCKED_TERRITORIES,
     nextStep,
