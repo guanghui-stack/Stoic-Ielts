@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
-import { Check, Clock3, MessageCircle, Plus, RefreshCw, Search, Send, UserRound, X } from "lucide-react";
+import { Check, Clock3, MessageCircle, Plus, RefreshCw, Search, Send, UserPlus, UserRound, X } from "lucide-react";
 import { useRealtimeChat } from "@/components/chat/use-realtime-chat";
 import { useOnlineStudents } from "@/components/realtime/student-realtime-provider";
 import {
@@ -20,6 +20,7 @@ import {
 } from "@/lib/actions/friends";
 import type { FriendOverview, FriendPerson } from "@/lib/friends/service";
 import type { FriendshipState } from "@/lib/friends/rules";
+import { STRANGER_MESSAGE_LIMIT } from "@/lib/chat/rules";
 import { AccountAddIcon } from "@/components/friends/account-add-icon";
 import { StudentAvatar } from "@/components/student/student-avatar";
 import { INBOX_UPDATED_EVENT } from "@/lib/student/quick-access";
@@ -40,6 +41,8 @@ export type ChatConversation = {
   id: string;
   friendshipState: FriendshipState;
   canSend: boolean;
+  /** Khác `null` khi đang bị đếm hạn mức tin nhắn cho người chưa kết bạn. */
+  sendLimit: { remaining: number; total: number } | null;
   other: { id: string; name: string; avatarSrc: string | null };
   messages: Array<{
     id: string;
@@ -57,6 +60,8 @@ type Props = {
   activeConversationId?: string;
   realtimeEnabled: boolean;
   friendOverview: FriendOverview;
+  /** Mã UID của chính học viên, để họ đưa cho bạn học. `null` nếu chưa cấp được. */
+  myUid: string | null;
 };
 
 function formatTime(value: string | null): string {
@@ -263,12 +268,12 @@ function SearchStudents({
         <div>
           <p className="font-display text-base font-bold text-navy-deep">Tìm bạn học</p>
           <p className="mt-1 font-ui text-xs leading-relaxed text-muted">
-            Tìm bằng tên hoặc email. Hai người cần kết bạn trước khi nhắn tin.
+            Tìm bằng tên, email hoặc mã UID. Chưa kết bạn vẫn nhắn được tối đa {STRANGER_MESSAGE_LIMIT} tin.
           </p>
         </div>
       </div>
       <label htmlFor="student-search" className="mt-4 block font-ui text-xs font-semibold text-navy-deep">
-        Tên hoặc email học viên
+        Tên, email hoặc mã UID
       </label>
       <form action={action} className="mt-1.5 flex flex-col gap-2 sm:flex-row">
         <input
@@ -277,7 +282,7 @@ function SearchStudents({
           type="search"
           minLength={2}
           maxLength={120}
-          placeholder="Nhập ít nhất 2 ký tự…"
+          placeholder="Nhập tên, email hoặc mã UID…"
           className="min-h-11 min-w-0 flex-1 border border-line bg-canvas px-3 font-ui text-sm text-ink outline-none transition-colors placeholder:text-muted/70 focus:border-stoic-primary"
         />
         <SearchSubmit />
@@ -304,7 +309,14 @@ function SearchStudents({
                     showStatus={presenceReady}
                     online={onlineUserIds.has(student.id)}
                   />
-                  <span className="truncate">{student.name}</span>
+                  <span className="min-w-0">
+                    <span className="block truncate">{student.name}</span>
+                    {student.uid && (
+                      <span className="block font-mono text-[11px] tracking-[0.1em] text-muted">
+                        {student.uid}
+                      </span>
+                    )}
+                  </span>
                 </span>
                 <FriendshipButton key={`${student.id}:${student.friendshipState}`} student={student} />
               </div>
@@ -594,7 +606,7 @@ function ConversationPanel({
             <p className="max-w-xs font-ui text-sm leading-relaxed text-muted">
               {conversation.canSend
                 ? "Chưa có tin nhắn. Bạn có thể bắt đầu bằng một lời chào hoặc chia sẻ một điều hữu ích."
-                : "Chưa có tin nhắn. Hãy kết bạn trước khi bắt đầu trò chuyện."}
+                : "Chưa có tin nhắn. Hãy chờ người kia trả lời, hoặc kết bạn để nhắn tiếp."}
             </p>
           </div>
         ) : (
@@ -615,18 +627,28 @@ function ConversationPanel({
         )}
       </div>
       {conversation.canSend ? (
-        <MessageComposer key={conversation.id} conversationId={conversation.id} />
+        <>
+          {conversation.sendLimit && (
+            <StrangerQuotaStrip
+              remaining={conversation.sendLimit.remaining}
+              total={conversation.sendLimit.total}
+              other={conversation.other}
+              friendshipState={conversation.friendshipState}
+            />
+          )}
+          <MessageComposer key={conversation.id} conversationId={conversation.id} />
+        </>
       ) : (
         <div className="border-t border-line bg-paper p-4 sm:p-5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="min-w-0">
-              <p className="font-ui text-sm font-semibold text-navy-deep">Kết bạn để tiếp tục trò chuyện</p>
+              <p className="font-ui text-sm font-semibold text-navy-deep">Đã dùng hết lượt nhắn cho người chưa kết bạn</p>
               <p className="mt-1 font-ui text-xs leading-relaxed text-muted">
                 {conversation.friendshipState === "INCOMING_PENDING"
                   ? "Lịch sử được giữ nguyên. Bạn có thể chấp nhận hoặc bỏ qua lời mời."
                   : conversation.friendshipState === "OUTGOING_PENDING"
                     ? "Bạn vẫn xem được lịch sử. Chờ người kia chấp nhận để nhắn tiếp."
-                    : "Bạn vẫn xem được lịch sử. Hai người cần kết bạn trước khi nhắn tiếp."}
+                    : "Bạn vẫn xem được lịch sử. Chờ người kia trả lời, hoặc kết bạn để nhắn không giới hạn."}
               </p>
             </div>
             <div className="shrink-0 self-start sm:self-center">
@@ -639,6 +661,103 @@ function ConversationPanel({
           </div>
         </div>
       )}
+    </section>
+  );
+}
+
+/**
+ * Dải nhắc hạn mức, chỉ hiện khi hai người CHƯA kết bạn.
+ *
+ * Đặt ngay trên ô soạn tin chứ không phải trong một hộp thoại: người ta cần
+ * biết mình còn mấy lượt vào đúng lúc đang gõ, không phải sau khi đã gõ xong.
+ */
+function StrangerQuotaStrip({
+  remaining,
+  total,
+  other,
+  friendshipState,
+}: {
+  remaining: number;
+  total: number;
+  other: { id: string; name: string };
+  friendshipState: FriendshipState;
+}) {
+  const last = remaining === 1;
+  return (
+    <div
+      className={`flex flex-wrap items-center justify-between gap-3 border-t px-4 py-3 sm:px-5 ${
+        last ? "border-line bg-gold-pale" : "border-line bg-cream-deep"
+      }`}
+    >
+      <p className="min-w-0 font-ui text-xs leading-relaxed text-ink-soft">
+        <strong className="text-navy-deep">
+          Còn {remaining}/{total} tin nhắn
+        </strong>{" "}
+        vì hai bạn chưa kết bạn.{" "}
+        {last
+          ? "Đây là tin cuối trước khi cần chờ trả lời."
+          : "Hạn mức được gỡ ngay khi người kia trả lời."}
+      </p>
+      <div className="shrink-0">
+        <FriendshipButton
+          key={`${other.id}:${friendshipState}`}
+          student={{ id: other.id, friendshipState }}
+        />
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Hộp mời kết bạn.
+ *
+ * Kho tin nhắn chỉ có ích khi có người để nhắn, mà phần lớn học viên không tự
+ * nghĩ tới việc đi kết bạn trước. Hộp này nói thẳng ba cách tìm nhau và đặt
+ * ngay trên hộp thư, chỗ họ chắc chắn nhìn thấy.
+ */
+function FriendInviteIntro({ myUid }: { myUid: string | null }) {
+  return (
+    <section className="border border-stoic-primary/35 bg-stoic-lavender-pale/40 p-5">
+      <div className="flex items-start gap-3">
+        <div className="mt-0.5 flex size-9 shrink-0 items-center justify-center bg-paper text-stoic-primary">
+          <UserPlus className="size-5" aria-hidden />
+        </div>
+        <div className="min-w-0 flex-1">
+          <h2 className="font-display text-lg font-bold text-navy-deep">
+            Rủ bạn học cùng
+          </h2>
+          <p className="mt-1.5 font-ui text-sm leading-relaxed text-ink-soft">
+            Học một mình dễ bỏ cuộc hơn học cùng người khác. Bạn có thể nhắn cho
+            người chưa kết bạn tối đa {STRANGER_MESSAGE_LIMIT} tin để làm quen —
+            kết bạn rồi thì nhắn không giới hạn.
+          </p>
+
+          <ul className="mt-3 grid gap-2 font-ui text-xs leading-relaxed text-ink-soft sm:grid-cols-3">
+            <li className="border border-line bg-paper px-3 py-2.5">
+              <strong className="block text-navy-deep">1. Tìm theo mã UID</strong>
+              Xin mã của bạn học rồi dán vào ô tìm kiếm.
+            </li>
+            <li className="border border-line bg-paper px-3 py-2.5">
+              <strong className="block text-navy-deep">2. Tìm theo tên hoặc email</strong>
+              Gõ ít nhất 2 ký tự ở ô ngay bên dưới.
+            </li>
+            <li className="border border-line bg-paper px-3 py-2.5">
+              <strong className="block text-navy-deep">3. Gặp nhau ở Diễn đàn</strong>
+              Trả lời bài của người khác rồi kết bạn từ đó.
+            </li>
+          </ul>
+
+          {myUid && (
+            <p className="mt-3 flex flex-wrap items-center gap-2 font-ui text-xs text-ink-soft">
+              Mã UID của bạn:
+              <code className="border border-line bg-paper px-2 py-1 font-mono text-sm font-semibold tracking-[0.12em] text-navy-deep">
+                {myUid}
+              </code>
+              <span className="text-muted">Đưa mã này cho người khác để họ tìm ra bạn.</span>
+            </p>
+          )}
+        </div>
+      </div>
     </section>
   );
 }
@@ -787,6 +906,7 @@ export function ChatWorkspace({
   activeConversationId,
   realtimeEnabled,
   friendOverview,
+  myUid,
 }: Props) {
   useRealtimeChat({ currentUserId, enabled: realtimeEnabled });
   const presence = useOnlineStudents(realtimeEnabled);
@@ -803,6 +923,7 @@ export function ChatWorkspace({
         onlineUserIds={presence.onlineUserIds}
         presenceReady={presence.ready}
       />
+      <FriendInviteIntro myUid={myUid} />
       <SearchStudents
         onlineUserIds={presence.onlineUserIds}
         presenceReady={presence.ready}

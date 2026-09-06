@@ -1747,6 +1747,15 @@ const MIGRATIONS = [
   // Lien ket den dung cau sai khi hoc vien phuc ban.
   `ALTER TABLE \`TrialReflection\` ADD COLUMN \`sourceQuestionId\` VARCHAR(191) NULL`,
 
+  // Ma UID cong khai de hoc vien tim nhau ma khong phai dua email cho nguoi la.
+  // Cot NULL duoc: tai khoan cu duoc cap ma lan dau ho mo trang can toi no.
+  `ALTER TABLE \`User\` ADD COLUMN \`publicUid\` VARCHAR(16) NULL`,
+  `CREATE UNIQUE INDEX \`User_publicUid_key\` ON \`User\` (\`publicUid\`)`,
+
+  // Tong uy vong da quy doi sang Duc Hanh. Uy vong dang co = tong kiem duoc
+  // (tinh tu phieu bau) TRU cot nay, nen khong co so dem nao troi khoi su that.
+  `ALTER TABLE \`User\` ADD COLUMN \`reputationConverted\` INTEGER NOT NULL DEFAULT 0`,
+
 ];
 
 const PAYMENT_EVENT_LEASE_MIGRATION =

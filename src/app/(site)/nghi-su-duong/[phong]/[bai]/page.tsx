@@ -235,7 +235,6 @@ export default async function PostPage({
             targetType="POST"
             targetId={post.id}
             upCount={post.upCount}
-            downCount={post.downCount}
             myValue={postVotes.get(post.id) ?? 0}
             path={basePath}
             disabled={viewer.banned}
@@ -379,11 +378,9 @@ function CommentBranch({
             targetType="COMMENT"
             targetId={node.id}
             upCount={node.upCount}
-            downCount={node.downCount}
             myValue={votes.get(node.id) ?? 0}
             path={basePath}
             disabled={viewer.banned}
-            compact
           />
           {canWrite && (
             <CommentForm

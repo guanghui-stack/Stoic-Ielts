@@ -17,9 +17,15 @@
  */
 
 /** Tên hai nút. Đổi ở đây là đổi cả website. */
+/**
+ * Đổi từ "Cắm cờ / Hạ cờ" sang "Like / Dislike" ngày 2026-09-06.
+ *
+ * Số Dislike KHÔNG được hiện ở bất cứ giao diện nào — chỉ nút, không con số.
+ * Phiếu dislike vẫn trừ vào uy vọng như cũ. Xem `components/forum/vote-buttons.tsx`.
+ */
 export const VOTE_LABELS = {
-  UP: "Cắm cờ",
-  DOWN: "Hạ cờ",
+  UP: "Like",
+  DOWN: "Dislike",
 } as const;
 
 /**

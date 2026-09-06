@@ -13,6 +13,7 @@ function previewTransport() {
   const unseen = new Set<string>();
   const messages = (name: string, id: string): ChatConversation => ({
     id, friendshipState: "FRIENDS", canSend: true,
+  sendLimit: null,
     other: { id: `student-${id}`, name, avatarSrc: null },
     messages: [
       { id: `${id}-1`, senderId: `student-${id}`, senderName: name, body: "Chào bạn! Mình vừa làm xong bài Reading hôm nay 👋", createdAt: "2026-09-06T09:00:00.000Z" },

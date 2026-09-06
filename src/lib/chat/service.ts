@@ -1,9 +1,12 @@
 import { db } from "@/lib/db";
+import { formatUid, normalizeUid } from "@/lib/students/uid";
 import {
   MESSAGE_MIN_INTERVAL_MS,
   conversationPermissions,
+  conversationSendGate,
   orderedParticipants,
   validateMessageBody,
+  STRANGER_MESSAGE_LIMIT,
 } from "@/lib/chat/rules";
 import { publishChatMessageCreated } from "@/lib/chat/ably-server";
 import { FRIENDSHIP_ACCEPTED, friendshipStateFor, orderedFriendPair, type FriendshipState } from "@/lib/friends/rules";
@@ -38,6 +41,8 @@ export type ConversationView = {
   id: string;
   friendshipState: FriendshipState;
   canSend: boolean;
+  /** Chỉ khác `null` khi đang bị đếm hạn mức người lạ. */
+  sendLimit: { remaining: number; total: number } | null;
   other: { id: string; name: string; avatarSrc: string | null };
   messages: Array<{
     id: string;
@@ -51,6 +56,8 @@ export type ConversationView = {
 export type StudentSearchResult = {
   id: string;
   name: string;
+  /** Dạng hiển thị `K3M9-7QX2`. Rỗng nếu tài khoản chưa được cấp mã. */
+  uid: string;
   avatarSrc: string | null;
   friendshipState: FriendshipState;
 };
@@ -153,20 +160,31 @@ export async function searchStudents(
   const term = query.trim();
   if (term.length < 2) return { ok: true, value: [] };
 
+  /*
+   * Mã UID được tra CHÍNH XÁC, không tra kiểu "chứa".
+   *
+   * Mã chỉ có tám ký tự nên tra kiểu chứa sẽ khiến một mảnh mã trùng vào giữa
+   * mã của người khác. Và vì mã được gõ lại bằng tay, chuẩn hoá trước để
+   * `k3m9-7qx2` với `K3M97QX2` là cùng một người.
+   */
+  const uid = normalizeUid(term);
+
   const students = await db.user.findMany({
     where: {
       id: { not: userId },
       role: "STUDENT",
       active: true,
       isBot: false,
-      OR: [
-        { name: { contains: term } },
-        { email: { contains: term } },
-      ],
+      OR: uid
+        ? [{ publicUid: uid }]
+        : [
+            { name: { contains: term } },
+            { email: { contains: term } },
+          ],
     },
     orderBy: { name: "asc" },
     take: 20,
-    select: { id: true, name: true, avatarUrl: true, uploadedAvatar: { select: { updatedAt: true } } },
+    select: { id: true, name: true, publicUid: true, avatarUrl: true, uploadedAvatar: { select: { updatedAt: true } } },
   });
 
   const states = await friendshipStatesForStudents(userId, students.map((student) => student.id));
@@ -175,6 +193,7 @@ export async function searchStudents(
     value: students.map((student) => ({
       id: student.id,
       name: student.name,
+      uid: formatUid(student.publicUid),
       avatarSrc: studentAvatarSource(student),
       friendshipState: states.get(student.id) ?? "NONE",
     })),
@@ -237,9 +256,29 @@ export async function getConversation(
     : conversation.participantA;
   if (other.role !== "STUDENT" || !other.active || other.isBot) return { ok: false, error: "Học viên này không còn nhận tin nhắn." };
   const [userAId, userBId] = orderedFriendPair(userId, other.id);
-  const friendship = await db.friendship.findUnique({
-    where: { userAId_userBId: { userAId, userBId } },
-    select: { userAId: true, userBId: true, requestedById: true, status: true },
+  const [friendship, senderTallies] = await Promise.all([
+    db.friendship.findUnique({
+      where: { userAId_userBId: { userAId, userBId } },
+      select: { userAId: true, userBId: true, requestedById: true, status: true },
+    }),
+    // Một truy vấn cho cả hai con số cần cho hạn mức người lạ: mình đã gửi mấy
+    // tin, và người kia đã trả lời chưa.
+    db.directMessage.groupBy({
+      by: ["senderId"],
+      where: { conversationId: conversation.id },
+      _count: { _all: true },
+    }),
+  ]);
+  const sentByViewer =
+    senderTallies.find((row) => row.senderId === userId)?._count._all ?? 0;
+  const otherHasReplied = senderTallies.some(
+    (row) => row.senderId !== userId && row._count._all > 0,
+  );
+  const gate = conversationSendGate({
+    isParticipant: true,
+    friendshipStatus: friendship?.status ?? null,
+    sentByViewer,
+    otherHasReplied,
   });
 
   return {
@@ -247,7 +286,10 @@ export async function getConversation(
     value: {
       id: conversation.id,
       friendshipState: friendshipStateFor(friendship, userId),
-      canSend: conversationPermissions(conversation, userId, friendship?.status).canSend,
+      canSend: gate.canSend,
+      sendLimit: gate.limited
+        ? { remaining: gate.remaining, total: STRANGER_MESSAGE_LIMIT }
+        : null,
       other: {
         id: other.id,
         name: other.name,
@@ -341,12 +383,33 @@ export async function sendMessage(
     }
 
     const [userAId, userBId] = orderedFriendPair(userId, otherUserId);
-    const friendship = await tx.friendship.findUnique({
-      where: { userAId_userBId: { userAId, userBId } },
-      select: { status: true },
+    const [friendship, senderTallies] = await Promise.all([
+      tx.friendship.findUnique({
+        where: { userAId_userBId: { userAId, userBId } },
+        select: { status: true },
+      }),
+      tx.directMessage.groupBy({
+        by: ["senderId"],
+        where: { conversationId },
+        _count: { _all: true },
+      }),
+    ]);
+    // Hạn mức phải được đếm TRONG transaction này. Đếm ở ngoài rồi mới ghi thì
+    // hai tab gửi cùng lúc đều thấy "còn 1 lượt" và cùng ghi, thành 4 tin.
+    const gate = conversationSendGate({
+      isParticipant: true,
+      friendshipStatus: friendship?.status ?? null,
+      sentByViewer:
+        senderTallies.find((row) => row.senderId === userId)?._count._all ?? 0,
+      otherHasReplied: senderTallies.some(
+        (row) => row.senderId !== userId && row._count._all > 0,
+      ),
     });
-    if (!conversationPermissions(conversation, userId, friendship?.status).canSend) {
-      return { ok: false as const, error: "Hai học viên cần kết bạn trước khi nhắn tin." };
+    if (!gate.canSend) {
+      return {
+        ok: false as const,
+        error: `Bạn đã dùng hết ${STRANGER_MESSAGE_LIMIT} tin nhắn dành cho người chưa kết bạn. Hãy chờ họ trả lời hoặc chấp nhận lời mời kết bạn.`,
+      };
     }
 
     const recent = await tx.directMessage.findFirst({

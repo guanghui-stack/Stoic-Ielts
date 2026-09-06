@@ -288,7 +288,6 @@ export default async function ForumHome({
                       targetType="POST"
                       targetId={post.id}
                       upCount={post.upCount}
-                      downCount={post.downCount}
                       myValue={votes.get(post.id) ?? 0}
                       path="/nghi-su-duong"
                       disabled={viewer.banned}
