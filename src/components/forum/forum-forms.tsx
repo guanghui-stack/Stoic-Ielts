@@ -123,6 +123,7 @@ export function NewPostForm({
         placeholder="Nội dung. Bôi đen chữ rồi bấm nút định dạng ở trên."
       />
       <Feedback state={state} />
+      <p className="font-ui text-xs text-muted">Chủ đề bạn mở được theo dõi tự động. Bạn có thể bỏ theo dõi trong bài đăng.</p>
       <div className="flex items-center gap-2">
         <button
           type="submit"

@@ -29,6 +29,8 @@ import {
 } from "@/lib/payments/catalog";
 import { CoinPurchaseButton } from "@/components/payments/purchase-button";
 import { assemblyTitle, readingContentForAttempt } from "@/lib/attempt-content";
+import { getAttemptDiscussionLinks, type QuestionDiscussionLink } from "@/lib/forum/question-context";
+import { QuestionDiscussionLinks } from "@/components/forum/question-discussion-links";
 
 export const metadata = { title: "Kết quả bài làm" };
 
@@ -49,6 +51,7 @@ export default async function AttemptResultPage({
     where: { id: attemptId },
     include: {
       exercise: true,
+      competitionAttempt: { select: { id: true } },
       // Phiên luyện mới nhất. Trang này chỉ cần biết tình trạng hiện tại, còn
       // các phiên cũ thuộc về lịch sử.
       feynmanReviews: {
@@ -153,6 +156,7 @@ export default async function AttemptResultPage({
         content={await readingContentForAttempt(attempt)}
         answersUnlocked={answersUnlocked}
         canReveal={isOwner && attempt.status === "GRADED"}
+        discussions={await getAttemptDiscussionLinks(user, attempt)}
       />
     </section>
   );
@@ -351,7 +355,9 @@ function ReadingResult({
   content,
   answersUnlocked,
   canReveal,
+  discussions,
 }: {
+  discussions: Record<string, QuestionDiscussionLink>;
   answersUnlocked: boolean;
   canReveal: boolean;
   content: ReadingContent;
@@ -424,7 +430,7 @@ function ReadingResult({
       )}
       <ol className="mt-6 divide-y divide-line border-y border-line">
         {detail.map((q) => (
-          <li key={q.id} className="flex gap-4 py-4">
+          <li key={q.id} id={`cau-${q.id}`} className="flex scroll-mt-24 gap-4 py-4">
             {q.correct ? (
               <CheckCircle2 className="mt-1 h-5 w-5 shrink-0 text-success" aria-hidden="true" />
             ) : (
@@ -454,6 +460,7 @@ function ReadingResult({
                     </span>
                   ))}
               </p>
+              {discussions[q.id] && <QuestionDiscussionLinks discussion={discussions[q.id]} />}
             </div>
           </li>
         ))}

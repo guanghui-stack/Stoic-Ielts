@@ -1123,6 +1123,56 @@ const DDL = [
     CONSTRAINT \`ForumComment_parentId_fkey\` FOREIGN KEY (\`parentId\`) REFERENCES \`ForumComment\` (\`id\`) ON DELETE SET NULL ON UPDATE CASCADE
   ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
 
+  `CREATE TABLE IF NOT EXISTS \`ForumQuestionReference\` (
+    \`postId\` VARCHAR(191) NOT NULL,
+    \`exerciseId\` VARCHAR(191) NOT NULL,
+    \`questionId\` VARCHAR(191) NOT NULL,
+    \`partIndex\` INTEGER NOT NULL,
+    \`questionNumber\` VARCHAR(32) NOT NULL,
+    \`passageTitle\` VARCHAR(200) NOT NULL,
+    \`questionType\` VARCHAR(32) NOT NULL,
+    \`sourceHash\` VARCHAR(64) NOT NULL,
+    PRIMARY KEY (\`postId\`),
+    INDEX \`ForumQuestionReference_exerciseId_questionId_idx\` (\`exerciseId\`, \`questionId\`),
+    CONSTRAINT \`ForumQuestionReference_postId_fkey\` FOREIGN KEY (\`postId\`) REFERENCES \`ForumPost\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`ForumQuestionReference_exerciseId_fkey\` FOREIGN KEY (\`exerciseId\`) REFERENCES \`Exercise\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+  `CREATE TABLE IF NOT EXISTS \`ForumHelpfulReply\` (
+    \`postId\` VARCHAR(191) NOT NULL,
+    \`commentId\` VARCHAR(191) NOT NULL,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (\`postId\`),
+    UNIQUE INDEX \`ForumHelpfulReply_commentId_key\` (\`commentId\`),
+    CONSTRAINT \`ForumHelpfulReply_postId_fkey\` FOREIGN KEY (\`postId\`) REFERENCES \`ForumPost\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`ForumHelpfulReply_commentId_fkey\` FOREIGN KEY (\`commentId\`) REFERENCES \`ForumComment\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+  `CREATE TABLE IF NOT EXISTS \`ForumThreadFollow\` (
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`postId\` VARCHAR(191) NOT NULL,
+    \`following\` BOOLEAN NOT NULL DEFAULT true,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (\`userId\`, \`postId\`),
+    INDEX \`ForumThreadFollow_postId_following_idx\` (\`postId\`, \`following\`),
+    CONSTRAINT \`ForumThreadFollow_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`ForumThreadFollow_postId_fkey\` FOREIGN KEY (\`postId\`) REFERENCES \`ForumPost\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+  `CREATE TABLE IF NOT EXISTS \`ForumNotification\` (
+    \`id\` VARCHAR(191) NOT NULL,
+    \`userId\` VARCHAR(191) NOT NULL,
+    \`postId\` VARCHAR(191) NOT NULL,
+    \`commentId\` VARCHAR(191) NOT NULL,
+    \`kind\` VARCHAR(24) NOT NULL,
+    \`readAt\` DATETIME(3) NULL,
+    \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    \`updatedAt\` DATETIME(3) NOT NULL,
+    PRIMARY KEY (\`id\`),
+    UNIQUE INDEX \`ForumNotification_userId_postId_key\` (\`userId\`, \`postId\`),
+    INDEX \`ForumNotification_userId_readAt_updatedAt_idx\` (\`userId\`, \`readAt\`, \`updatedAt\`),
+    CONSTRAINT \`ForumNotification_userId_fkey\` FOREIGN KEY (\`userId\`) REFERENCES \`User\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`ForumNotification_postId_fkey\` FOREIGN KEY (\`postId\`) REFERENCES \`ForumPost\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT \`ForumNotification_commentId_fkey\` FOREIGN KEY (\`commentId\`) REFERENCES \`ForumComment\` (\`id\`) ON DELETE CASCADE ON UPDATE CASCADE
+  ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
+
   `CREATE TABLE IF NOT EXISTS \`ForumVote\` (
     \`id\` VARCHAR(191) NOT NULL,
     \`userId\` VARCHAR(191) NOT NULL,

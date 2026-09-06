@@ -1,6 +1,8 @@
 import "server-only";
 import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
+import { enqueueForumReplyNotifications } from "@/lib/forum/engagement";
+import type { QuestionReferenceInput } from "@/lib/forum/question-rules";
 import {
   publishForumCommentCreated,
   publishForumPostCreated,
@@ -170,6 +172,7 @@ export async function createPost(input: {
   channelKey: string;
   title: string;
   body: string;
+  questionReference?: QuestionReferenceInput;
 }): Promise<ActionResult<{ postId: string }>> {
   const live = await competitionLive();
   const channel = await channelFor(input.channelKey, input.viewer, live);
@@ -202,6 +205,8 @@ export async function createPost(input: {
       authorId: input.viewer.id,
       title: title.value,
       body: body.value,
+      follows: { create: { userId: input.viewer.id, following: true } },
+      ...(input.questionReference ? {questionReference: {create: input.questionReference}} : {}),
     },
     select: { id: true },
   });
@@ -261,21 +266,32 @@ export async function createComment(input: {
     };
   }
 
-  // Cha phải thuộc ĐÚNG bài này. Thiếu phép kiểm này thì gửi tay một parentId
-  // của bài khác sẽ ghép hai cuộc thảo luận vào nhau.
-  let parentDepth: number | null = null;
-  if (input.parentId) {
-    const parent = await db.forumComment.findUnique({
-      where: { id: input.parentId },
-      select: { depth: true, postId: true, status: true },
+  const result = await db.$transaction(async (tx): Promise<ActionResult<{commentId: string; channelKey: string; level: number}>> => {
+    // Cùng khóa bài trước bình luận như đánh dấu hữu ích/gỡ/ẩn. Nếu chèn
+    // bình luận trước, khóa ngoại có thể gây kẹt khi hai người gửi cùng lúc.
+    await tx.$queryRaw`SELECT id FROM ForumPost WHERE id = ${post.id} FOR UPDATE`;
+    const currentPost = await tx.forumPost.findUnique({
+      where: {id: post.id},
+      select: {status: true, lockedAt: true, channel: {select: {key: true, level: true, locked: true}}},
     });
-    if (!parent || parent.postId !== post.id || parent.status !== "VISIBLE") {
-      return { ok: false, error: "Không tìm thấy bình luận bạn đang trả lời." };
+    if (!currentPost || currentPost.status !== "VISIBLE" || currentPost.lockedAt) {
+      return {ok: false, error: "Chủ đề vừa đóng hoặc không còn hiển thị. Chưa gửi bình luận."};
     }
-    parentDepth = parent.depth;
-  }
+    const currentAccess = decideForumAccess({userLevel: input.viewer.level, channelLevel: currentPost.channel.level,
+      competitionLive: live, channelLocked: currentPost.channel.locked, banned: input.viewer.banned, isAdmin: input.viewer.isAdmin});
+    if (!currentAccess.canWrite) return {ok: false, error: blockMessage(currentAccess)};
 
-  const comment = await db.$transaction(async (tx) => {
+    // Kiểm lại cha sau khi giữ khóa, không trả lời vào phản hồi vừa bị gỡ/ẩn.
+    let parentDepth: number | null = null;
+    if (input.parentId) {
+      const parent = await tx.forumComment.findUnique({
+        where: {id: input.parentId}, select: {depth: true, postId: true, status: true},
+      });
+      if (!parent || parent.postId !== post.id || parent.status !== "VISIBLE") {
+        return {ok: false, error: "Không tìm thấy bình luận bạn đang trả lời."};
+      }
+      parentDepth = parent.depth;
+    }
     const created = await tx.forumComment.create({
       data: {
         postId: post.id,
@@ -297,18 +313,23 @@ export async function createComment(input: {
       },
     });
 
-    return created;
+    await enqueueForumReplyNotifications(tx, {
+      postId: post.id, commentId: created.id, actorId: input.viewer.id,
+      parentId: input.parentId, level: currentPost.channel.level,
+    });
+    return {ok: true, value: {commentId: created.id, channelKey: currentPost.channel.key, level: currentPost.channel.level}};
   });
+  if (!result.ok) return result;
 
   await publishForumCommentCreated({
-    level: post.channel.level,
+    level: result.value.level,
     postId: post.id,
-    commentId: comment.id,
+    commentId: result.value.commentId,
   });
 
   return {
     ok: true,
-    value: { commentId: comment.id, channelKey: post.channel.key },
+    value: { commentId: result.value.commentId, channelKey: result.value.channelKey },
   };
 }
 
@@ -459,7 +480,7 @@ export async function deleteOwnComment(input: {
       post: { select: { channel: { select: { key: true } } } },
     },
   });
-  if (!comment) return { ok: false, error: "Không tìm thấy lời bàn này." };
+  if (!comment || comment.authorId !== input.viewer.id) return { ok: false, error: "Không tìm thấy lời bàn của bạn." };
   if (comment.status !== "VISIBLE") {
     return { ok: true, value: { postId: comment.postId, channelKey: comment.post.channel.key } };
   }
@@ -478,6 +499,7 @@ export async function deleteOwnComment(input: {
   }
 
   await db.$transaction(async (tx) => {
+    await tx.$queryRaw`SELECT id FROM ForumPost WHERE id = ${comment.postId} FOR UPDATE`;
     // updateMany + lọc theo status: hai tab cùng bấm gỡ thì cái thứ hai khớp 0
     // hàng và KHÔNG trừ `commentCount` lần nữa.
     const changed = await tx.forumComment.updateMany({
@@ -485,6 +507,7 @@ export async function deleteOwnComment(input: {
       data: { status: "DELETED" },
     });
     if (changed.count > 0) {
+      await tx.forumHelpfulReply.deleteMany({where: {commentId: comment.id}});
       await tx.forumPost.update({
         where: { id: comment.postId },
         data: { commentCount: { decrement: 1 } },

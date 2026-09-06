@@ -3,7 +3,7 @@ d57d46c24e709794b99db3780031654869cca198b0fd7bfc719039ddf5262b8a  prisma/reading
 c9d2750c5ddbba5a49945f97be8ff6f92a378ff8e93d6b85209befb5894d0e74  src/app/(exam)/lam-bai/[attemptId]/page.tsx
 5adfae600c6a9484918a8e1ccb14e00509494c5d2e892eb7b9217f883bfbfa8a  src/app/(exam)/layout.tsx
 253c75c2a763d05daf5315b8c097a4c1210e9b473329e1bb7671089d506cff3e  src/app/(exam)/xem-thu-cbt/page.tsx
-8283195d30dbe28bd86ea4c47a1e119f055d505a062eca38150483a14b862742  src/app/(site)/hoc-vien/bai-lam/[attemptId]/page.tsx
+c361af8c49676a07382ed5f070d4f170a7d3b393c3eaf4a9d349fe2ae98c729e  src/app/(site)/hoc-vien/bai-lam/[attemptId]/page.tsx
 da4794e3d25dbbc00cdcba7baa3a699e6676641b138275c4d82b7ee92803bfd6  src/app/(site)/hoc-vien/thi-but/[targetKind]/[targetId]/page.tsx
 9bc38496f3025a80259e5a49f5200763bd6fc3cba678c2777f896ffaf41196b7  src/app/api/study/heartbeat/route.ts
 fa18b9ad7e36c4c6cf7abdd244be1eee45ec8493cad647c241f07e8e392bc08d  src/components/thibut/thi-but-start.tsx

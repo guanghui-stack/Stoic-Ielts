@@ -70,6 +70,8 @@ model User {
   forumComments ForumComment[]
   forumVotes    ForumVote[]
   forumReports  ForumReport[]
+  forumFollows ForumThreadFollow[]
+  forumNotifications ForumNotification[]
 
   /// Tin nhắn riêng 1–1. Bot không được tham gia hội thoại.
   directConversationsAsA DirectConversation[] @relation("DirectConversationParticipantA")
@@ -197,6 +199,7 @@ model Exercise {
   access           ExerciseAccess[]
   paymentOrders    PaymentOrder[]
   accessGrants     AccessGrant[]
+  forumReferences ForumQuestionReference[]
 }
 
 /// Quyền truy cập bài tập RESTRICTED được cấp cho từng học viên.
@@ -1830,6 +1833,10 @@ model ForumPost {
   channel  ForumChannel   @relation(fields: [channelId], references: [id], onDelete: Cascade)
   author   User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
   comments ForumComment[]
+  questionReference ForumQuestionReference?
+  helpfulReply ForumHelpfulReply?
+  follows ForumThreadFollow[]
+  notifications ForumNotification[]
 
   @@index([channelId, status, lastActivityAt])
   @@index([authorId, createdAt])
@@ -1857,8 +1864,62 @@ model ForumComment {
   author  User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
   parent  ForumComment?  @relation("ForumCommentThread", fields: [parentId], references: [id], onDelete: SetNull)
   replies ForumComment[] @relation("ForumCommentThread")
+  helpfulFor ForumHelpfulReply?
+  notifications ForumNotification[]
 
   @@index([postId, createdAt])
+}
+
+/// Chỉ tham chiếu đề gốc; không lưu lượt làm, đáp án hay lời giải trả phí.
+model ForumQuestionReference {
+  postId String @id
+  exerciseId String
+  questionId String @db.VarChar(191)
+  partIndex Int
+  questionNumber String @db.VarChar(32)
+  passageTitle String @db.VarChar(200)
+  questionType String @db.VarChar(32)
+  sourceHash String @db.VarChar(64)
+  post ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  exercise Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  @@index([exerciseId, questionId])
+}
+
+model ForumHelpfulReply {
+  postId String @id
+  commentId String @unique
+  createdAt DateTime @default(now())
+  post ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  comment ForumComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+}
+
+/// Giữ hàng following=false để bình luận sau không tự bật lại thông báo.
+model ForumThreadFollow {
+  userId String
+  postId String
+  following Boolean @default(true)
+  createdAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  @@id([userId, postId])
+  @@index([postId, following])
+}
+
+/// Gom thông báo theo chủ đề; chỉ lưu mã, nội dung được kiểm quyền khi đọc.
+model ForumNotification {
+  id String @id @default(cuid())
+  userId String
+  postId String
+  commentId String
+  kind String @db.VarChar(24)
+  readAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post ForumPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  comment ForumComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  @@unique([userId, postId])
+  @@index([userId, readAt, updatedAt])
 }
 
 /// Mot nguoi mot phieu cho mot muc tieu. Rang buoc unique O DAY la thu chan

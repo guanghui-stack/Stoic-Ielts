@@ -10,6 +10,7 @@ const FORUM_PATH = "/nghi-su-duong";
 
 function revalidatePost(channelKey: string, postId: string) {
   revalidatePath(FORUM_PATH);
+  revalidatePath(`${FORUM_PATH}/theo-doi`);
   revalidatePath(`${FORUM_PATH}/${channelKey}/${postId}`);
 }
 
@@ -48,7 +49,11 @@ export async function togglePostVisibilityAction(postId: string) {
 /** Ẩn hoặc hiện lại một bình luận. */
 export async function toggleCommentVisibilityAction(commentId: string) {
   await requireAdmin();
+  const target = await db.forumComment.findUnique({where: {id: commentId}, select: {postId: true}});
+  if (!target) return;
   const changed = await db.$transaction(async (tx) => {
+    // Cùng thứ tự khóa với gửi/gỡ/đánh dấu hữu ích để không chờ chéo nhau.
+    await tx.$queryRaw`SELECT id FROM ForumPost WHERE id = ${target.postId} FOR UPDATE`;
     const comment = await tx.forumComment.findUnique({
       where: { id: commentId },
       select: {
@@ -77,6 +82,7 @@ export async function toggleCommentVisibilityAction(commentId: string) {
       data: { status: nextStatus },
     });
     if (updated.count === 0) return null;
+    if (nextStatus === "HIDDEN") await tx.forumHelpfulReply.deleteMany({where: {commentId: comment.id}});
 
     const visibleCount = await tx.forumComment.count({
       where: { postId: comment.postId, status: "VISIBLE" },
