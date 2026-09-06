@@ -4,6 +4,8 @@ import { getConversation, listInbox, markConversationRead } from "@/lib/chat/ser
 import { isAblyChatConfigured } from "@/lib/chat/ably-server";
 import { listFriendOverview } from "@/lib/friends/service";
 import { requireUser } from "@/lib/session";
+import { ensurePublicUid } from "@/lib/students/uid-service";
+import { formatUid } from "@/lib/students/uid";
 import { redirect } from "next/navigation";
 
 export const metadata = {
@@ -44,9 +46,10 @@ export default async function StudentMessagesPage({ searchParams }: Props) {
 
   // Đếm unread sau khi đánh dấu cuộc trò chuyện đang mở là đã đọc, để cùng
   // một lần render không còn hiển thị huy hiệu cũ.
-  const [inboxResult, friendOverviewResult] = await Promise.all([
+  const [inboxResult, friendOverviewResult, publicUid] = await Promise.all([
     listInbox(user.id),
     listFriendOverview(user.id),
+    ensurePublicUid(user.id),
   ]);
   if (!inboxResult.ok) redirect("/hoc-vien");
   if (!friendOverviewResult.ok) redirect("/hoc-vien");
@@ -79,6 +82,7 @@ export default async function StudentMessagesPage({ searchParams }: Props) {
         activeConversationId={activeConversation?.id ?? conversationId}
         realtimeEnabled={isAblyChatConfigured()}
         friendOverview={friendOverviewResult.value}
+        myUid={formatUid(publicUid) || null}
       />
     </div>
   );

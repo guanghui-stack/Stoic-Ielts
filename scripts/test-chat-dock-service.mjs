@@ -31,6 +31,9 @@ db.directConversation.findMany = async ({ where, select, take }) => {
 db.directMessage.findFirst = async ({ where }) => where.id === "incoming" && where.conversationId === "chat" && where.senderId.not === "viewer" ? { createdAt: time } : null;
 db.directConversation.updateMany = async (args) => { updates.push(args); return { count: 1 }; };
 db.friendship.findUnique = async () => ({ status: "ACCEPTED", userAId: "friend", userBId: "viewer", requestedById: "viewer" });
+// Hạn mức tin nhắn cho người chưa kết bạn đếm bằng groupBy — xem `chat/rules.ts`.
+// Luật hạn mức được kiểm riêng ở `test:chat`; ở đây chỉ cần truy vấn đúng hình dạng.
+db.directMessage.groupBy = async ({ where }) => { assert.equal(where.conversationId, "chat"); return []; };
 const request = (query = "") => new Request(`http://localhost/api/students/chat${query}`);
 
 context.user = null;
@@ -62,4 +65,5 @@ assert.equal((await readDockMessageAction("chat", "incoming")).success, true);
 assert.deepEqual(updates[0].data, { participantAReadAt: time });
 assert.deepEqual(updates[0].where.OR, [{ participantAReadAt: null }, { participantAReadAt: { lt: time } }], "late acknowledgements cannot move read time backwards");
 assert.equal((await sendDockMessageAction("chat", {})).error, "Nội dung tin nhắn không hợp lệ.");
+
 console.log("Chat dock service: auth, exam suspension, privacy, membership and bounded read acknowledgements passed.");

@@ -2026,7 +2026,13 @@ body {
   width: 4.5rem;
   height: 4.5rem;
   place-items: center;
-  overflow: hidden;
+  /*
+   * KHÔNG cắt ở lớp ngoài này. Chấm trạng thái là `::after` của chính lớp này,
+   * nên `overflow: hidden` kèm `border-radius: 50%` sẽ xén mất nó — cái chấm
+   * hiện ra thành một mẩu bị cắt lệch ở góc dưới phải. Việc bo tròn ảnh nay do
+   * chính ảnh và ô chữ tắt bên trong tự lo.
+   */
+  overflow: visible;
   border: 2px solid color-mix(in srgb, var(--color-stoic-primary) 58%, white);
   border-radius: 50%;
   background:
@@ -2053,17 +2059,37 @@ body {
   box-shadow: 0 1.35rem 2.5rem -1.5rem rgb(91 95 239 / 0.72);
 }
 
+/*
+ * Chấm trạng thái nằm trên viền vòng tròn và co giãn theo cỡ avatar. Trước đây
+ * nó cố định 0.72rem cho mọi cỡ, nên trên avatar `sm` (2.25rem) nó chiếm gần
+ * một phần ba đường kính và tràn khỏi mép.
+ */
 .world-shell .student-avatar::after {
+  --avatar-status-size: 0.72rem;
   position: absolute;
-  right: 0.2rem;
-  bottom: 0.2rem;
-  width: 0.72rem;
-  height: 0.72rem;
+  right: 4%;
+  bottom: 4%;
+  width: var(--avatar-status-size);
+  height: var(--avatar-status-size);
   border: 2px solid var(--color-stoic-canvas);
   border-radius: 50%;
   display: none;
   background: var(--color-line-strong);
   content: "";
+}
+
+.world-shell .student-avatar[data-size="sm"]::after {
+  --avatar-status-size: 0.6rem;
+  border-width: 1.5px;
+}
+
+.world-shell .student-avatar[data-size="lg"]::after {
+  --avatar-status-size: 0.95rem;
+}
+
+.world-shell .student-avatar[data-size="xl"]::after {
+  --avatar-status-size: 1.25rem;
+  border-width: 3px;
 }
 
 .world-shell .student-avatar[data-show-status="true"]::after {
@@ -2074,10 +2100,13 @@ body {
   background: var(--color-stoic-sage);
 }
 
+/* Bo tròn chuyển xuống đây vì lớp ngoài đã thôi cắt — xem chú thích ở trên. */
 .world-shell .student-avatar__image {
   display: block;
   width: 100%;
   height: 100%;
+  overflow: hidden;
+  border-radius: 50%;
   object-fit: cover;
   object-position: center;
 }
@@ -2577,5 +2606,159 @@ body {
     animation: none;
     transform: none;
     transition: none;
+  }
+}
+
+/* ===== NÚT LIKE DIỄN ĐÀN =====
+ *
+ * Dựng lại hiệu ứng chủ dự án đặt hàng: tim tô đỏ và phình nhẹ khi bấm, con số
+ * trượt lên thay cho số cũ.
+ *
+ * KHÔNG dùng `styled-components` như bản mẫu. Dự án chạy Tailwind 4 với một tệp
+ * CSS thường; thêm một thư viện CSS-in-JS chạy lúc render kéo theo cả registry
+ * cho SSR, chỉ để tô một cái nút. Hiệu ứng giữ nguyên, chi phí thì không.
+ *
+ * Bản mẫu cũng dùng `id="heart"` cố định. Diễn đàn hiện hàng chục bài trên cùng
+ * một trang, nên mọi nút sẽ dùng chung một ô đánh dấu và bấm bài này sẽ sáng
+ * đèn ở bài khác. Ở đây trạng thái nằm trên `data-liked` của từng nút.
+ */
+.world-shell .like-button {
+  position: relative;
+  display: inline-flex;
+  height: 2.25rem;
+  align-items: stretch;
+  overflow: hidden;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  background: var(--color-paper);
+  transition: border-color 180ms var(--ease-out);
+}
+
+.world-shell .like-button[data-liked="true"] {
+  border-color: var(--color-vermilion);
+  background: var(--color-vermilion-pale);
+}
+
+.world-shell .like-button__form {
+  display: flex;
+}
+
+.world-shell .like-button__trigger {
+  display: inline-flex;
+  cursor: pointer;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0 0.75rem;
+  border: 0;
+  background: none;
+  color: var(--color-muted);
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.world-shell .like-button[data-liked="true"] .like-button__trigger {
+  color: var(--color-vermilion-ink);
+}
+
+.world-shell .like-button__icon {
+  width: 1.05rem;
+  height: 1.05rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  transition: fill 200ms var(--ease-out);
+}
+
+.world-shell .like-button[data-liked="true"] .like-button__icon {
+  fill: var(--color-vermilion);
+  stroke: var(--color-vermilion);
+  animation: like-enlarge 220ms var(--ease-out) 1;
+}
+
+/* Cột số: hai con số chồng lên nhau, cái nào đang đúng thì nằm ở giữa khung. */
+.world-shell .like-button__counts {
+  position: relative;
+  display: grid;
+  min-width: 2.5rem;
+  overflow: hidden;
+  border-left: 1px solid var(--color-line);
+  font-family: var(--font-ui);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.world-shell .like-button[data-liked="true"] .like-button__counts {
+  border-left-color: color-mix(in srgb, var(--color-vermilion) 40%, transparent);
+}
+
+.world-shell .like-button__count {
+  grid-area: 1 / 1;
+  display: grid;
+  place-items: center;
+  padding: 0 0.6rem;
+  color: var(--color-muted);
+  transition: transform 380ms var(--ease-out), color 380ms var(--ease-out);
+}
+
+.world-shell .like-button__count--liked {
+  transform: translateY(100%);
+}
+
+.world-shell .like-button[data-liked="true"] .like-button__count--idle {
+  transform: translateY(-100%);
+}
+
+.world-shell .like-button[data-liked="true"] .like-button__count--liked {
+  transform: translateY(0);
+  color: var(--color-vermilion-ink);
+  font-weight: 700;
+}
+
+@keyframes like-enlarge {
+  0% { transform: scale(0.5); }
+  100% { transform: scale(1.2); }
+}
+
+/* Nút Dislike: chỉ biểu tượng, KHÔNG con số — chủ dự án chốt ẩn số dislike để
+ * không ai thấy mình đang bị dìm bao nhiêu. Phiếu vẫn trừ vào uy vọng. */
+.world-shell .dislike-button {
+  display: inline-flex;
+  height: 2.25rem;
+  width: 2.25rem;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-line);
+  border-radius: 999px;
+  background: var(--color-paper);
+  color: var(--color-muted);
+  transition: color 180ms var(--ease-out), border-color 180ms var(--ease-out);
+}
+
+.world-shell .dislike-button[data-voted="true"] {
+  border-color: var(--color-navy);
+  color: var(--color-navy-deep);
+}
+
+.world-shell .dislike-button__icon {
+  width: 1rem;
+  height: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+}
+
+.world-shell .dislike-button[data-voted="true"] .dislike-button__icon {
+  fill: currentColor;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .world-shell .like-button__count,
+  .world-shell .like-button__icon {
+    transition: none;
+  }
+  .world-shell .like-button[data-liked="true"] .like-button__icon {
+    animation: none;
   }
 }

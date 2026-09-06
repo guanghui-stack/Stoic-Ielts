@@ -1,95 +1,115 @@
-import { Flag } from "lucide-react";
+"use client";
+
+import { useState } from "react";
 import { voteAction } from "@/lib/actions/forum";
 import { SCORE_LABEL, VOTE_LABELS } from "@/lib/forum/rules";
 
 /**
- * Cắm cờ / Hạ cờ.
+ * Like và Dislike.
  *
- * Hai biểu mẫu riêng chứ không phải một nút đổi trạng thái ở trình duyệt: như
- * vậy nó chạy cả khi JavaScript chưa tải xong, và máy chủ vẫn là nơi quyết
- * định. Bấm lại nút đang sáng là RÚT phiếu — đường duy nhất để sửa một cú bấm
- * nhầm.
+ * Đổi từ "Cắm cờ / Hạ cờ" ngày 2026-09-06 theo yêu cầu chủ dự án. Ba điều đã
+ * chốt và đừng tự đổi lại:
+ *
+ * 1. **Chỉ Like có con số.** Số dislike KHÔNG hiện ở bất cứ đâu — không ai cần
+ *    biết mình đang bị dìm bao nhiêu để học tốt hơn. Phiếu dislike vẫn trừ vào
+ *    uy vọng như cũ, nó chỉ thôi được đem ra trưng.
+ * 2. **1 Like = 1 uy vọng** cho tác giả. Xem `forum/reputation.ts`.
+ * 3. **Vẫn là biểu mẫu gửi lên máy chủ**, không phải nút bật/tắt ở trình duyệt.
+ *    Máy chủ là nơi quyết định phiếu, và nút vẫn chạy khi JavaScript chưa tải
+ *    xong. Trạng thái ở đây chỉ để CHẠY HIỆU ỨNG ngay lúc bấm; một nhịp sau,
+ *    máy chủ dựng lại và con số thật thay vào.
+ *
+ * Bấm lại nút đang sáng là RÚT phiếu — đường duy nhất để sửa một cú bấm nhầm.
  */
 export function VoteButtons({
   targetType,
   targetId,
   upCount,
-  downCount,
   myValue,
   path,
   disabled,
-  compact = false,
 }: {
   targetType: "POST" | "COMMENT";
   targetId: string;
-  /** Số cờ đã cắm. Hiện RIÊNG với số cờ đã hạ — xem chú thích đầu file. */
+  /** Số lượt Like. Số Dislike cố ý KHÔNG nhận vào đây — xem chú thích trên. */
   upCount: number;
-  downCount: number;
   myValue: 1 | -1 | 0;
   /** Đường dẫn để dựng lại sau khi bầu. Máy chủ chỉ nhận đường nội bộ. */
   path: string;
   disabled: boolean;
-  compact?: boolean;
 }) {
-  const size = compact ? "h-3.5 w-3.5" : "h-4 w-4";
-  const pad = compact ? "px-1.5 py-1" : "px-2 py-1.5";
-  const num = compact ? "text-xs" : "text-sm";
-
-  /**
-   * Cờ được TÔ RUỘT khi mình đã bầu — lục ngọc cho cắm cờ, chu sa cho hạ cờ.
+  /*
+   * Trạng thái lạc quan: đổi ngay lúc bấm để hiệu ứng chạy, rồi nhường lại cho
+   * máy chủ.
    *
-   * Hai màu lấy thẳng từ bảng màu Tam Quốc chứ không bịa màu mới: lục ngọc là
-   * màu của "chính đạo", chu sa là màu của con dấu phê. Đúng nghĩa hai việc
-   * này đang làm, và không phá vỡ hệ màu chung của website.
-   *
-   * Tô ruột (`fill`) chứ không chỉ đổi màu viền: viền mảnh 1px không đủ để
-   * nhận ra mình đã bầu hay chưa — chính chỗ đó khiến chủ dự án tưởng số cờ
-   * biến mất khi bấm sang phía bên kia.
+   * Cách hết hạn KHÔNG dùng `useEffect` để gọi `setState` — quy tắc
+   * `react-hooks/set-state-in-effect` chặn đúng việc đó, và chặn có lý: nó gây
+   * thêm một lượt dựng lại thừa. Thay vào đó, trạng thái lạc quan mang theo
+   * ẢNH CHỤP của con số máy chủ lúc bấm. Máy chủ trả về số mới thì ảnh chụp
+   * không còn khớp và giá trị lạc quan tự bị bỏ qua ngay trong lúc dựng.
    */
-  const upFill = myValue === 1 ? "fill-[var(--color-jade)]" : "fill-none";
-  const downFill =
-    myValue === -1 ? "fill-[var(--color-vermilion)]" : "fill-none";
+  const serverSnapshot = `${myValue}:${upCount}`;
+  const [optimistic, setOptimistic] = useState<{
+    snapshot: string;
+    value: 1 | -1 | 0;
+  } | null>(null);
+  const guess =
+    optimistic && optimistic.snapshot === serverSnapshot ? optimistic.value : null;
+
+  const value = guess ?? myValue;
+  const liked = value === 1;
+  const disliked = value === -1;
+
+  // Hai con số cho hiệu ứng trượt: một cho trạng thái chưa Like, một cho đã
+  // Like. Cột chỉ trượt giữa hai số này nên không bao giờ nhảy sai một nhịp.
+  const idleCount = myValue === 1 ? upCount - 1 : upCount;
+  const likedCount = idleCount + 1;
 
   if (disabled) {
     return (
       <span
-        className="inline-flex items-center gap-2 font-ui text-xs text-muted tabular-nums"
-        title={`${upCount - downCount} ${SCORE_LABEL}`}
+        className="inline-flex items-center gap-1.5 font-ui text-xs tabular-nums text-muted"
+        title={`${upCount} ${SCORE_LABEL}`}
       >
-        <span className="inline-flex items-center gap-1">
-          <Flag className={`${size} ${upFill}`} aria-hidden="true" />
-          {upCount}
-        </span>
-        <span className="inline-flex items-center gap-1">
-          <Flag className={`${size} ${downFill} -scale-x-100`} aria-hidden="true" />
-          {downCount}
-        </span>
+        <HeartIcon className="size-3.5" filled={liked} />
+        {upCount}
       </span>
     );
   }
 
   return (
-    <div className="inline-flex items-center gap-1">
-      <form action={voteAction}>
-        <input type="hidden" name="targetType" value={targetType} />
-        <input type="hidden" name="targetId" value={targetId} />
-        <input type="hidden" name="clicked" value="1" />
-        <input type="hidden" name="path" value={path} />
-        <button
-          type="submit"
-          title={`${VOTE_LABELS.UP} — ${upCount} cờ đã cắm`}
-          aria-label={VOTE_LABELS.UP}
-          aria-pressed={myValue === 1}
-          className={`inline-flex cursor-pointer items-center gap-1.5 border transition-colors ${pad} ${num} font-semibold tabular-nums ${
-            myValue === 1
-              ? "border-[var(--color-jade)] bg-[var(--color-jade-pale)] text-[var(--color-jade-ink)]"
-              : "border-line text-muted hover:border-[var(--color-jade)] hover:text-[var(--color-jade-ink)]"
-          }`}
-        >
-          <Flag className={`${size} ${upFill}`} aria-hidden="true" />
-          {upCount}
-        </button>
-      </form>
+    <div className="inline-flex items-center gap-2">
+      <div className="like-button" data-liked={liked ? "true" : "false"}>
+        <form action={voteAction} className="like-button__form">
+          <input type="hidden" name="targetType" value={targetType} />
+          <input type="hidden" name="targetId" value={targetId} />
+          <input type="hidden" name="clicked" value="1" />
+          <input type="hidden" name="path" value={path} />
+          <button
+            type="submit"
+            className="like-button__trigger"
+            title={`${VOTE_LABELS.UP} — ${upCount} lượt`}
+            aria-label={VOTE_LABELS.UP}
+            aria-pressed={liked}
+            onClick={() => setOptimistic({ snapshot: serverSnapshot, value: liked ? 0 : 1 })}
+          >
+            <HeartIcon className="like-button__icon" filled={liked} />
+            {VOTE_LABELS.UP}
+          </button>
+        </form>
+
+        <span className="like-button__counts" aria-hidden="true">
+          <span className="like-button__count like-button__count--idle">
+            {idleCount}
+          </span>
+          <span className="like-button__count like-button__count--liked">
+            {likedCount}
+          </span>
+        </span>
+        {/* Con số cho trình đọc màn hình: hai số trượt ở trên là hiệu ứng, và
+            trình đọc màn hình sẽ đọc cả hai thành một chuỗi vô nghĩa. */}
+        <span className="sr-only">{liked ? likedCount : idleCount} lượt Like</span>
+      </div>
 
       <form action={voteAction}>
         <input type="hidden" name="targetType" value={targetType} />
@@ -98,25 +118,53 @@ export function VoteButtons({
         <input type="hidden" name="path" value={path} />
         <button
           type="submit"
-          title={`${VOTE_LABELS.DOWN} — ${downCount} cờ đã hạ`}
+          className="dislike-button"
+          title={VOTE_LABELS.DOWN}
           aria-label={VOTE_LABELS.DOWN}
-          aria-pressed={myValue === -1}
-          className={`inline-flex cursor-pointer items-center gap-1.5 border transition-colors ${pad} ${num} font-semibold tabular-nums ${
-            myValue === -1
-              ? "border-[var(--color-vermilion)] bg-[var(--color-vermilion-pale)] text-[var(--color-vermilion-ink)]"
-              : "border-line text-muted hover:border-[var(--color-vermilion)] hover:text-[var(--color-vermilion-ink)]"
-          }`}
+          aria-pressed={disliked}
+          data-voted={disliked ? "true" : "false"}
+          onClick={() => setOptimistic({ snapshot: serverSnapshot, value: disliked ? 0 : -1 })}
         >
-          {/* Cùng một lá cờ nhưng lật ngang: cắm cờ hướng tới, hạ cờ quay lại.
-              Dùng hai biểu tượng khác nhau sẽ đọc thành hai việc khác nhau,
-              trong khi đây là hai chiều của cùng một hành động. */}
-          <Flag
-            className={`${size} ${downFill} -scale-x-100`}
-            aria-hidden="true"
-          />
-          {downCount}
+          <HeartIcon className="dislike-button__icon" filled={disliked} broken />
         </button>
       </form>
     </div>
+  );
+}
+
+/**
+ * Trái tim, và trái tim vỡ cho Dislike.
+ *
+ * Vẽ tay chứ không lấy từ `lucide-react`: nút này cần tô ruột theo trạng thái
+ * và chạy keyframe phình to, mà hai việc đó dễ nhất khi chính mình giữ `path`.
+ */
+function HeartIcon({
+  className,
+  filled,
+  broken = false,
+}: {
+  className?: string;
+  filled: boolean;
+  broken?: boolean;
+}) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+      style={filled ? undefined : { fill: "none" }}
+    >
+      <path d="m11.645 20.91-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.219l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z" />
+      {broken && (
+        <path
+          d="M13.2 6.4 10.4 10.6l3.1 1.9-2.6 4.4"
+          fill="none"
+          stroke="var(--color-paper)"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+        />
+      )}
+    </svg>
   );
 }

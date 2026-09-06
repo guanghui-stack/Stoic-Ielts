@@ -28,6 +28,10 @@ import { StudyCalendar } from "@/components/ui/study-calendar";
 import { WeeklyStats, type WeeklyRow } from "@/components/student/weekly-stats";
 import { HistoryTabs, type HistoryItem } from "@/components/student/history-tabs";
 import { AchievementSummaryCard } from "@/components/achievements/achievement-summary-card";
+import { ReputationCard } from "@/components/student/reputation-card";
+import { reputationOf } from "@/lib/forum/reputation-service";
+import { ensurePublicUid } from "@/lib/students/uid-service";
+import { formatUid } from "@/lib/students/uid";
 import { RankDashboardBlock } from "@/components/ranks/rank-dashboard-block";
 import { RealtimeLogoutButton } from "@/components/realtime/realtime-logout-button";
 import { MeritSealIcon } from "@/components/merit/merit-seal-icon";
@@ -70,7 +74,7 @@ export default async function StudentDashboard({
   const user = await requireUser();
   const { "xac-minh": verifyResult, "vi-sao": verifyReason } = await searchParams;
 
-  const [wallet, account, merit, arena, friendCount] = await Promise.all([
+  const [wallet, account, merit, arena, friendCount, reputation, publicUid] = await Promise.all([
     getCoinWallet(user.id),
     db.user.findUnique({
       where: { id: user.id },
@@ -102,6 +106,9 @@ export default async function StudentDashboard({
         ],
       },
     }),
+    reputationOf(user.id),
+    // Cấp mã UID ngay lần đầu học viên mở trang cá nhân — xem `uid-service.ts`.
+    ensurePublicUid(user.id),
   ]);
   const verified = Boolean(account?.emailVerifiedAt);
 
@@ -372,6 +379,14 @@ export default async function StudentDashboard({
           />
           <WeeklyStats rows={weeklyRows} />
         </div>
+
+        {/* Uy vọng và mã UID — hai thứ người khác nhìn thấy về mình */}
+        <ReputationCard
+          balance={reputation.balance}
+          convertible={reputation.convertible}
+          converted={reputation.converted}
+          uid={formatUid(publicUid)}
+        />
 
         {/* Danh hiệu: chỉ tóm tắt, KHÔNG truy vấn cả danh mục ở trang này */}
         <AchievementSummaryCard userId={user.id} />
