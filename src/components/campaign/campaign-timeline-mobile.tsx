@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Check, Flag, Lock, Play } from "lucide-react";
 import { STATE_LABELS, type CampaignNodeView } from "@/lib/campaign/view";
-import { stoicTrialLabel, stoicTrialTitle, type CampaignWorld, type WorldPlace } from "@/lib/campaign/world";
+import { stoicTrialLabel, stoicTrialTitle, type CampaignWorld } from "@/lib/campaign/world";
 
 const NODE_STYLE: Record<
   CampaignNodeView["state"],
@@ -34,32 +34,9 @@ function GateDetails({ node }: { node: CampaignNodeView }) {
   );
 }
 
-function MobilePlaceList({ label, items }: { label: string; items: readonly WorldPlace[] }) {
-  return (
-    <section aria-label={label}>
-      <p className="label-caps">{label}</p>
-      <ul className="mt-3 space-y-2">
-        {items.map((item) =>
-          item.href ? (
-            <li key={item.code}>
-              <Link
-                href={item.href}
-                className="world-action block min-h-11 border border-line bg-paper px-4 py-3"
-              >
-                <span className="block font-display font-semibold text-navy-deep">{item.title}</span>
-                <span className="block font-ui text-xs text-muted">{item.functionalLabel}</span>
-              </Link>
-            </li>
-          ) : null,
-        )}
-      </ul>
-    </section>
-  );
-}
-
 export function CampaignTimelineMobile({ world }: { world: CampaignWorld }) {
   return (
-    <div className="world-mobile-map space-y-8 lg:hidden">
+    <div className="world-mobile-map lg:hidden">
       <ol className="m-0 list-none space-y-3 p-0">
         {world.gates.map((node, index) => {
           const style = NODE_STYLE[node.state];
@@ -97,8 +74,6 @@ export function CampaignTimelineMobile({ world }: { world: CampaignWorld }) {
           );
         })}
       </ol>
-
-      <MobilePlaceList label="Đại thí" items={world.competitions} />
     </div>
   );
 }
