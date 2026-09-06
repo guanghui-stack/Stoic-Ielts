@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { gradeReading, sanitizeReadingParts, type ReadingContent } from "@/lib/exercise-content";
 import { buildReviewModel } from "@/lib/attempts/review";
 import { ReadingReviewSheet } from "@/components/exam/reading-review";
+import { PassageReference } from "@/components/feynman/passage-reference";
 import {
   ReadingExerciseTable,
   type ReadingExerciseTableRow,
@@ -190,6 +191,41 @@ export default function ReviewPreviewPage() {
       </h2>
       <div className="mt-4">
         <ReadingReviewSheet parts={parts} review={buildReviewModel(detail, false)} />
+      </div>
+
+      <h2 className="mt-14 font-display text-lg font-bold text-navy-deep">
+        Bài đọc đối chiếu trong trang chữa bài Feynman
+      </h2>
+      <p className="mt-2 max-w-3xl text-sm leading-relaxed text-ink-soft">
+        Trên màn rộng khối này nằm ở cột trái và dính theo màn hình; dưới 1280px
+        nó xếp lên trên khung chữa bài và thu gọn được. Chỉ có bài đọc, không có
+        đáp án — trang chữa bài ở trạng thái nháp không được phép mang đáp án.
+      </p>
+      {/*
+        Dựng đúng khung hai cột của trang chữa bài để soi được cách bài đọc dính
+        theo màn hình. Cột phải là khối giả cao, thay cho biểu mẫu Feynman thật
+        (biểu mẫu đó cần một phiên chữa bài có thật trong database).
+      */}
+      <div
+        id="khung-feynman"
+        className="mt-4 grid gap-6 xl:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] xl:items-start xl:gap-8"
+      >
+        <div className="xl:sticky xl:top-6">
+          <PassageReference parts={parts} />
+        </div>
+        <div className="min-w-0 space-y-4">
+          {[1, 2, 3, 4, 5].map((n) => (
+            <div
+              key={n}
+              className="rounded-stoic-lg border border-stoic-line bg-stoic-canvas p-6"
+            >
+              <p className="font-ui text-sm font-semibold text-navy-deep">
+                Khối giả {n} — chỗ của biểu mẫu tự giảng
+              </p>
+              <div className="mt-3 h-40 rounded-stoic-md bg-stoic-canvas-soft" />
+            </div>
+          ))}
+        </div>
       </div>
 
       <h2 className="mt-14 font-display text-lg font-bold text-navy-deep">

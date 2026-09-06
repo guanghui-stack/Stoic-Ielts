@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowLeft, CheckCircle2, Trophy } from "lucide-react";
+import { ArrowLeft, CheckCircle2, ListChecks, Trophy } from "lucide-react";
 import { db } from "@/lib/db";
 import { requireUser } from "@/lib/session";
 import {
@@ -21,6 +21,9 @@ import type { ChatTurn } from "@/components/feynman/feynman-ai-chat";
 import { readFeynmanAiConfig } from "@/lib/feynman-ai/config";
 import { walletRemaining } from "@/lib/feynman-ai/rules";
 import { readingDisplayTitle } from "@/lib/reading/catalog";
+import { sanitizeReadingParts } from "@/lib/exercise-content";
+import { readingContentForAttempt } from "@/lib/attempt-content";
+import { PassageReference } from "@/components/feynman/passage-reference";
 
 export const metadata = { title: "Chữa bài theo phương pháp Feynman" };
 
@@ -38,7 +41,12 @@ export default async function FeynmanPage({
     where: { attemptId },
     orderBy: { runNumber: "desc" },
     include: {
-      attempt: { include: { exercise: { select: { title: true } } } },
+      // `assemblyId` và `content` để dựng lại BÀI ĐỌC của chính đề vừa làm —
+      // xem `components/feynman/passage-reference.tsx`. Đề ghép thì bài đọc nằm
+      // ở các đề thành phần, nên phải đi qua `readingContentForAttempt`.
+      attempt: {
+        include: { exercise: { select: { title: true, content: true } } },
+      },
       mistakes: { orderBy: { sortOrder: "asc" } },
     },
   });
@@ -92,6 +100,22 @@ export default async function FeynmanPage({
   });
 
   const isCompleted = review.status === "COMPLETED";
+
+  /*
+   * Bài đọc để đối chiếu.
+   *
+   * `sanitizeReadingParts()` là hàm phòng thi vẫn dùng: nó bóc sạch đáp án và
+   * lời giải mẫu, chỉ để lại passage và phần chữ câu hỏi. Nhờ vậy khối này an
+   * toàn ngay cả ở trạng thái DRAFT, nơi đáp án đúng chưa được phép rời máy chủ.
+   *
+   * Mở sẵn đúng part chứa câu đầu tiên đang chữa: `partNumber` đếm từ 1, còn
+   * chỉ số mảng đếm từ 0.
+   */
+  const passageParts = sanitizeReadingParts(
+    await readingContentForAttempt(review.attempt),
+  );
+  const firstPartNumber = review.mistakes[0]?.partNumber ?? 1;
+
   const aiPanel = await loadAiPanel({
     userId: user.id,
     reviewId: review.id,
@@ -100,16 +124,32 @@ export default async function FeynmanPage({
   });
 
   return (
-    <section className="feynman-surface mx-auto max-w-5xl px-4 py-10 sm:px-6 md:py-14">
+    <section className="feynman-surface mx-auto max-w-5xl px-4 py-10 sm:px-6 md:py-14 xl:max-w-[86rem]">
       {/* Chữa bài là học thật — thời gian ở đây được tính vào danh hiệu kỷ luật */}
       <StudyHeartbeat kind="FEYNMAN" />
-      <Link
-        href={`/hoc-vien/bai-lam/${attemptId}`}
-        className="inline-flex min-h-11 items-center gap-2 rounded-stoic-pill px-3 py-2 text-sm font-semibold text-stoic-primary-deep transition-colors hover:bg-stoic-primary-soft/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/35"
-      >
-        <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-        Kết quả bài làm
-      </Link>
+      <div className="flex flex-wrap items-center gap-2">
+        <Link
+          href={`/hoc-vien/bai-lam/${attemptId}`}
+          className="inline-flex min-h-11 items-center gap-2 rounded-stoic-pill px-3 py-2 text-sm font-semibold text-stoic-primary-deep transition-colors hover:bg-stoic-primary-soft/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/35"
+        >
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          Kết quả bài làm
+        </Link>
+        {/*
+          Bài đọc nằm ngay bên cạnh rồi, nhưng màn đối chiếu còn cho xem TOÀN BỘ
+          câu hỏi — kể cả những câu không nằm trong phiên chữa này. Mở ở tab mới
+          để không mất phần đang gõ dở.
+        */}
+        <Link
+          href={`/hoc-vien/bai-lam/${attemptId}/doi-chieu`}
+          target="_blank"
+          rel="noopener"
+          className="inline-flex min-h-11 items-center gap-2 rounded-stoic-pill px-3 py-2 text-sm font-semibold text-stoic-ink-secondary transition-colors hover:bg-stoic-canvas-soft hover:text-stoic-primary-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stoic-primary/35"
+        >
+          <ListChecks className="h-4 w-4" aria-hidden="true" />
+          Mở đối chiếu toàn đề
+        </Link>
+      </div>
 
       <div className="mt-5 rounded-stoic-lg border border-stoic-line bg-stoic-canvas p-6 shadow-stoic-1 sm:p-8">
         <p className="text-[0.68rem] font-semibold uppercase tracking-[0.1em] text-stoic-primary-deep">
@@ -129,34 +169,50 @@ export default async function FeynmanPage({
         </p>
       </div>
 
-      <div className="mt-6">
-        <FeynmanStepper current={isCompleted ? 4 : revealed ? 3 : 1} />
-      </div>
+      {/*
+        Hai cột từ `xl` trở lên: bài đọc bên trái, khung chữa bài bên phải.
+        Bài đọc DÍNH theo màn hình vì học viên phải vừa đọc vừa gõ — cuộn lên
+        cuộn xuống giữa hai thứ là đúng thứ khiến người ta bỏ bước tìm bằng
+        chứng và viết đại theo trí nhớ.
 
-      <div className="mt-8">
-        {isCompleted ? (
-          <CompletedSummary review={review} mistakes={mistakes} attemptId={attemptId} />
-        ) : revealed ? (
-          <FeynmanRevealedForm reviewId={review.id} mistakes={mistakes} />
-        ) : (
-          <FeynmanDraftForm reviewId={review.id} mistakes={mistakes} />
-        )}
-      </div>
+        Dưới `xl` thì xếp dọc, bài đọc lên trước và thu gọn được, vì màn hẹp
+        không đủ chỗ cho hai cột mà vẫn đọc nổi.
+      */}
+      <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] xl:items-start xl:gap-8">
+        <div className="xl:sticky xl:top-6">
+          <PassageReference parts={passageParts} initialPart={firstPartNumber - 1} />
+        </div>
 
-      {/* Khối AI nằm SAU phần tự giảng, không nằm trước: học viên phải tự viết
-          xong đã. Đặt trước thì cái nút sẽ trở thành lối tắt bỏ qua việc học. */}
-      {aiPanel && (
-        <FeynmanAiPanel
-          reviewId={review.id}
-          evaluation={aiPanel.evaluation}
-          turns={aiPanel.turns}
-          questionLimit={aiPanel.questionLimit}
-          questionUsed={aiPanel.questionUsed}
-          walletRemaining={aiPanel.walletRemaining}
-          reviewCompleted={isCompleted}
-          topUpHref={aiPanel.topUpHref}
-        />
-      )}
+        <div className="min-w-0">
+          <FeynmanStepper current={isCompleted ? 4 : revealed ? 3 : 1} />
+
+          <div className="mt-8">
+            {isCompleted ? (
+              <CompletedSummary review={review} mistakes={mistakes} attemptId={attemptId} />
+            ) : revealed ? (
+              <FeynmanRevealedForm reviewId={review.id} mistakes={mistakes} />
+            ) : (
+              <FeynmanDraftForm reviewId={review.id} mistakes={mistakes} />
+            )}
+          </div>
+
+          {/* Khối AI nằm SAU phần tự giảng, không nằm trước: học viên phải tự
+              viết xong đã. Đặt trước thì cái nút sẽ trở thành lối tắt bỏ qua
+              việc học. */}
+          {aiPanel && (
+            <FeynmanAiPanel
+              reviewId={review.id}
+              evaluation={aiPanel.evaluation}
+              turns={aiPanel.turns}
+              questionLimit={aiPanel.questionLimit}
+              questionUsed={aiPanel.questionUsed}
+              walletRemaining={aiPanel.walletRemaining}
+              reviewCompleted={isCompleted}
+              topUpHref={aiPanel.topUpHref}
+            />
+          )}
+        </div>
+      </div>
     </section>
   );
 }
